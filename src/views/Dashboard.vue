@@ -1,10 +1,8 @@
 <script setup>
-import sidebar from "@/constants/sidebar.js";
-import PanelMenu from 'primevue/panelmenu';
 // import as component
 import Badge from 'primevue/badge';
 import OverlayBadge from 'primevue/overlaybadge';
-
+import Sidebar from "@/components/Sidebar.vue";
 </script>
 
 <template>
@@ -80,31 +78,8 @@ import OverlayBadge from 'primevue/overlaybadge';
       </div>
     </div>
   </nav>
+<Sidebar />
 
-  <aside id="logo-sidebar"
-         style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-         aria-label="Sidebar">
-    <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-      <PanelMenu :model="sidebar" class="w-full">
-        <template #item="{ item }">
-          <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-            <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 px-4 py-2"
-               :href="href" @click="navigate">
-              <span :class="item.icon"/>
-              <span class="ml-2">{{ item.label }}</span>
-            </a>
-          </router-link>
-          <a v-else v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 px-4 py-2"
-             :href="item.url" :target="item.target">
-            <span :class="item.icon"/>
-            <span class="ml-2">{{ item.label }}</span>
-            <span v-if="item.items" class="pi pi-angle-down text-primary ml-auto"/>
-          </a>
-        </template>
-      </PanelMenu>
-    </div>
-  </aside>
   <div class="p-4 sm:ml-64">
     <div class="p-4 rounded-lg  dark:border-gray-700 mt-[28px]">
       <div class=" gap-4 mb-4">
@@ -121,4 +96,6 @@ import OverlayBadge from 'primevue/overlaybadge';
   font-size: 11px !important;
   line-height: 11px;
 }
+
+
 </style>
