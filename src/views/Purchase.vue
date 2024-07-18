@@ -52,8 +52,6 @@ onMounted(() => {
     </Button>
     <Button severity="success" icon="pi pi-plus" class="col-span-1" label="Создать"></Button>
   </div>
-
-
   <div class="card mt-4">
     <DataTable v-model:selection="selectedProduct"
                :value="products"
