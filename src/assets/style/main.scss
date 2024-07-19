@@ -3,7 +3,11 @@
 @tailwind utilities;
 @import "@/assets/style/components/colors";
 @import "@/assets/style/components/button";
+@import "@/assets/style/components/chackbox";
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 body{
   background: #ECF1FB;
+}
+*{
+  font-family: Manrope,sans-serif;
 }
