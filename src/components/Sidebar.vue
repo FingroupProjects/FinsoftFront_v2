@@ -27,7 +27,6 @@ import PanelMenu from 'primevue/panelmenu';
               ></span>
             </a>
             </template>
-            <template>
               <div class="page-data">
                 <div class="sub-item">
                   {{item.title}}
@@ -54,7 +53,7 @@ import PanelMenu from 'primevue/panelmenu';
                   </a>
                 </router-link>
               </div>
-            </template>
+
           </div>
         </template>
       </PanelMenu>
@@ -117,7 +116,6 @@ import PanelMenu from 'primevue/panelmenu';
   margin-left: 18px !important;
   font-family: Manrope;
   font-weight: bold;
-  padding-top: 10px;
 }
 .page-data{
   border: 1px;
@@ -125,7 +123,6 @@ import PanelMenu from 'primevue/panelmenu';
   background: #f5f5f5;
   margin-top: 6px ;
   margin-left: -15px;
-  margin-bottom: 10px ;
 }
 
 .page-data a{
