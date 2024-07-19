@@ -83,11 +83,11 @@ import PanelMenu from 'primevue/panelmenu';
 }
 
 .p-panelmenu-header-active:hover {
-  background: #3935E7 ;
+  background: #3935E7 !important;
 }
 
 .p-panelmenu-panel {
-  border-width: 0px !important;
+  border-width: 0 !important;
   border-radius: 10px !important;
   margin-bottom: -10px !important;
 }

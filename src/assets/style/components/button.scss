@@ -28,7 +28,13 @@
     background-color: var(--background-neutral) !important;
     border: none !important;
   }
-
+  &-icon-sm{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width:46px !important;
+    height: 46px !important;
+  }
   &-md {
     min-width: 108px !important;
     height: 40px !important;
@@ -38,7 +44,7 @@
 
   &-lg {
     min-width: 122px !important;
-    height: 44px !important;
+    height: 46px !important;
     font-size: 16px !important;
     line-height: 24px !important;
   }
@@ -166,14 +172,14 @@
   }
 
   &-warning {
-    border: 1px solid var(--border) !important;
-    background-color: var(--border) !important;
-    color: var(--text) !important;
+    border: 1px solid #DCDFE3 !important;
+    background-color: #fff !important;
+    color: #3935E7 !important;
 
     &:hover {
       color: var(--text) !important;
-      border: 1px solid var(--border) !important;
-      background: var(--background-neutral-hovered) !important;
+      border: 1px solid #3935E7 !important;
+      background: #fff !important;
     }
 
     &:active {
@@ -186,15 +192,15 @@
     }
   }
   &-secondary {
-    color: var(--text) !important;
-    border-color: var(--background-neutral) !important;
-    background-color: var(--background-neutral) !important;
+    color: #17A825 !important;
+    border-color: #17A825 !important;
+    background-color: #fff !important;
   }
   &-text {
-    color: var(--background-danger-hovered) !important;
+    color: #17A825 !important;
     &:hover {
-      color: var(--background-danger-hovered) !important;
-      background-color: #d531620e !important;
+      color: #17A825 !important;
+      background-color: #fff !important;
       border: none !important;
     }
   }
