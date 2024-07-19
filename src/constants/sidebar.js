@@ -20,12 +20,12 @@ export default [
                     {
                         label: 'Заявка товаров',
                         icon: 'pi pi-eraser',
-                        route: '/www'
+                        route: '/client'
                     },
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/eee'
+                        route: '/www'
                     }
                 ]
             },
