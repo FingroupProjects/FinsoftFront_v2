@@ -89,6 +89,7 @@ import PanelMenu from 'primevue/panelmenu';
 .p-panelmenu-panel {
   border-width: 0 !important;
   border-radius: 10px !important;
+  margin-bottom: -10px !important;
 }
 
 .p-panelmenu-header-content:hover {
