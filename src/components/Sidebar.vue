@@ -1,51 +1,60 @@
 <script setup>
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
-import { ref, onMounted } from 'vue';
-
-const isOpen = ref({});
-
-// Initialize isOpen for each sidebar item
-onMounted(() => {
-  sidebar.forEach((item, index) => {
-    isOpen.value[index] = false;
-  });
-});
-
-// Function to toggle isOpen for a specific index
-const toggleItem = (index) => {
-  isOpen.value[index] = !isOpen.value[index];
-};
 </script>
 
 <template>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-64 h-screen pt-12 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+         class="fixed top-0 left-0 z-40 w-[280px] h-screen pt-[66px]  transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
-    <div class="h-full px-3 pb-4 overflow-auto bg-white dark:bg-gray-800 ">
-      <PanelMenu :model="sidebar" class="w-full ">
-        <template #item="{ item, index }">
-          <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom >
-            <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[14px] font-semibold"
+    <div class="h-full px-3 pb-4 overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
+      <PanelMenu :model="sidebar" class="w-full">
+        <template #item="{ item, index }" >
+          <div>
+            <template v-if="item.label">
+            <a v-ripple
+               class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[46px] w-[250px]"
                :class="{
-                 'text-[#3935E7]': $route.path === item.route,
-                 'text-surface-700 dark:text-surface-0': $route.path !== item.route
+                  'active-item': $route.path === item.route,
                }"
-               :href="href" @click="navigate">
-              <span class="ml-2">{{ item.label }}</span>
+            >
+              <span class="opened" :class="item.icon"></span>
+              <span class="ml-2 opened sub-title">{{ item.label }}</span>
+              <span
+                  v-if="item.items"
+                  class="pi pi-chevron-right text-primary ml-auto some-color"
+              ></span>
             </a>
-          </router-link>
-          <a v-else v-ripple class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-4 py-0 hover:text-[#ffffff] text-[#141C30] h-[46px]"
-             :href="item.url"
-             :target="item.target"
-             @click="toggleItem(index)"
-          >
-            <span class="opened" :class="item.icon"></span>
-            <span class="ml-2 opened">{{ item.label }}</span>
-            <span v-if="item.items && !isOpen[index]" class="pi pi-chevron-right text-primary ml-auto some-color"></span>
-            <span v-if="item.items && isOpen[index]" class="pi pi-chevron-down text-primary ml-auto some-color"></span>
-          </a>
+            </template>
+              <div class="page-data">
+                <div class="sub-item">
+                  {{item.title}}
+                </div>
+                <router-link
+                    v-for="subItem in item.data"
+                    :key="subItem.title"
+                    :to="subItem.route"
+                    v-slot="{ href, navigate }"
+                    custom
+                  >
+
+                  <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[15px] font-semibold"
+                      :class="{
+                          'text-[#3935E7]': $route.path === subItem.route,
+                          'text-[#808BA0]': $route.path !== subItem.route,
+                          'active-item': $route.path === subItem.route,
+                          'text-surface-700 dark:text-surface-0': $route.path !== subItem.route
+                        }"
+                      :href="href"
+                      @click="navigate"
+                    >
+                    <span class="ml-2">{{ subItem.label }}</span>
+                  </a>
+                </router-link>
+              </div>
+
+          </div>
         </template>
       </PanelMenu>
     </div>
@@ -66,6 +75,7 @@ const toggleItem = (index) => {
   background: #3935E7 !important;
   border-width: 1px !important;
   border-radius: 10px !important;
+  width: 250px !important;
 }
 
 .p-panelmenu-header-active .opened {
@@ -84,17 +94,40 @@ const toggleItem = (index) => {
 .p-panelmenu-header-content:hover {
   background: #3935E7 !important;
   color: #ffffff !important;
-}
-
-.p-panelmenu-submenu {
-  border: 1px;
   border-radius: 10px !important;
-  background: #f5f5f5;
-  margin-top: 6px !important;
+  width: 248px !important;
 }
 
 .some-color {
   color: #B7C3D4;
 }
+
+::-webkit-scrollbar {
+ width: 1px;
+}
+
+.active-item{
+  border-right: 3px solid #3935E7;
+  border-radius: 2px !important;
+}
+.sub-item{
+  color: #141C30;
+  font-size: 13px;
+  margin-left: 18px !important;
+  font-family: Manrope;
+  font-weight: bold;
+}
+.page-data{
+  border: 1px;
+  border-radius: 10px !important;
+  background: #f5f5f5;
+  margin-top: 6px ;
+  margin-left: -15px;
+}
+
+.page-data a{
+  margin-left: 10px !important;
+}
+
 
 </style>
