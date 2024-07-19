@@ -14,7 +14,7 @@ import PanelMenu from 'primevue/panelmenu';
           <div>
             <template v-if="item.label">
             <a v-ripple
-               class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[46px] w-[250px]"
+               class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
                :class="{
                   'active-item': $route.path === item.route,
                }"
@@ -53,7 +53,6 @@ import PanelMenu from 'primevue/panelmenu';
                   </a>
                 </router-link>
               </div>
-
           </div>
         </template>
       </PanelMenu>
@@ -76,20 +75,20 @@ import PanelMenu from 'primevue/panelmenu';
   border-width: 1px !important;
   border-radius: 10px !important;
   width: 250px !important;
+  height: 42px !important;
 }
+
+
 
 .p-panelmenu-header-active .opened {
   color: #ffffff !important;
-}
-
-.p-panelmenu-header-active:hover {
-  background: #3935E7 !important;
 }
 
 .p-panelmenu-panel {
   border-width: 0 !important;
   border-radius: 10px !important;
   margin-bottom: -10px !important;
+
 }
 
 .p-panelmenu-header-content:hover {
@@ -110,6 +109,9 @@ import PanelMenu from 'primevue/panelmenu';
 .active-item{
   border-right: 3px solid #3935E7;
   border-radius: 2px !important;
+  height: 20px;
+  margin-top: 10px;
+  margin-bottom: 8px;
 }
 .sub-item{
   color: #141C30;
@@ -117,6 +119,7 @@ import PanelMenu from 'primevue/panelmenu';
   margin-left: 18px !important;
   font-family: Manrope;
   font-weight: bold;
+  //padding-top: 10px;
 }
 .page-data{
   border: 1px;
@@ -128,6 +131,7 @@ import PanelMenu from 'primevue/panelmenu';
 
 .page-data a{
   margin-left: 10px !important;
+
 }
 
 
