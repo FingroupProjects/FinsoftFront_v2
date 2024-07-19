@@ -1,4 +1,4 @@
-import {createMemoryHistory, createRouter} from 'vue-router'
+import { createRouter, createWebHashHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
 
 const routes = [
@@ -16,7 +16,7 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHashHistory(),
     routes,
 })
 export default router

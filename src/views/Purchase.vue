@@ -8,11 +8,16 @@ import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import Button from "primevue/button";
 import Tag from 'primevue/tag';
+import Sidebar from "primevue/sidebar";
+import CreatePurchase from "@/components/CreatePurchase.vue";
+import FilterPurchase from "@/components/FilterPurchase.vue";
 
+const visibleRight = ref(false);
 const products = ref();
 const selectedProduct = ref();
 const value1 = ref('')
 const selectedCity = ref();
+const visibleFilter = ref(false)
 const cities = ref([
   {name: 'New York', code: 'NY'},
   {name: 'Rome', code: 'RM'},
@@ -47,14 +52,16 @@ onMounted(() => {
               class="w-full  col-span-2"/>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
               class="w-full col-span-2"/>
-    <Button severity="primary" class="col-span-1">
+    <Button @click="visibleFilter = true" severity="primary" class="col-span-1">
       <img src="@/assets/img/menu.svg" alt="">
     </Button>
-    <Button severity="success" icon="pi pi-plus" class="col-span-1" label="Создать"></Button>
+    <Button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="col-span-1"
+            label="Создать"></Button>
   </div>
   <div class="card mt-4">
     <DataTable v-model:selection="selectedProduct"
                :value="products"
+               :rows="5"
                :rowsPerPageOptions="[5, 10, 25]"
                :paginator="true"
                currentPageReportTemplate="Элементов на странице:"
@@ -62,24 +69,34 @@ onMounted(() => {
                dataKey="id"
                tableStyle="min-width:100%">
       <Column selectionMode="multiple"></Column>
-      <Column field="code" header="№"></Column>
-      <Column field="name" header="Дата"></Column>
-      <Column field="category" header="Поставщик"></Column>
-      <Column field="quantity" header="Организация"></Column>
-      <Column field="code" header="Сумма"></Column>
-      <Column field="name" header="Склад"></Column>
-      <Column field="category" header="Статус">
+      <Column field="code" :sortable="true" header="№"></Column>
+      <Column field="name" :sortable="true" header="Дата"></Column>
+      <Column field="category" :sortable="true" header="Поставщик"></Column>
+      <Column field="quantity" :sortable="true" header="Организация"></Column>
+      <Column field="code" :sortable="true" header="Сумма"></Column>
+      <Column field="name" :sortable="true" header="Склад"></Column>
+      <Column field="category" :sortable="true" header="Статус">
         <template #body>
           <Tag value="Проведен" severity="success"/>
           <Tag value="Не проведен" severity="warn"/>
         </template>
       </Column>
-      <Column field="quantity" header="Автор"></Column>
-      <Column field="quantity" header="Валюта"></Column>
+      <Column field="quantity" :sortable="true" header="Автор"></Column>
+      <Column field="quantity" :sortable="true" header="Валюта"></Column>
     </DataTable>
   </div>
+  <Sidebar v-model:visible="visibleRight" :show-close-icon="false" position="right">
+    <CreatePurchase/>
+  </Sidebar>
+  <Sidebar v-model:visible="visibleFilter" :show-close-icon="false" position="right">
+    <filter-purchase/>
+  </Sidebar>
 </template>
 <style lang="scss">
+.p-drawer-right .p-drawer {
+  width: 1154px !important;
+  border-top-left-radius: 30px;
+}
 .p-inputtext {
   border-color: white !important;
   border-radius: 10px !important;
@@ -151,6 +168,10 @@ onMounted(() => {
 }
 .p-datatable-header-cell:nth-child(10){
   border-top-right-radius: 10px !important;
+}
+
+.p-paginator {
+  justify-content: end !important;
 }
 </style>
 
