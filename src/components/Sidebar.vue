@@ -1,7 +1,19 @@
 <script setup>
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
+import {ref} from "vue";
+
+
+const isOpen = ref(false);
+
+const toggleOpen = () =>{
+  isOpen.value = !isOpen.value;
+}
+
+
 </script>
+
+
 
 <template>
   <aside id="logo-sidebar"
@@ -15,20 +27,18 @@ import PanelMenu from 'primevue/panelmenu';
             <template v-if="item.label">
             <a v-ripple
                class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
-               :class="{
-                  'active-item': $route.path === item.route,
-               }"
+               :class="{'active-item': $route.path === item.route,}"
+               @click="toggleOpen"
             >
               <span class="opened" :class="item.icon"></span>
               <span class="ml-2 opened sub-title">{{ item.label }}</span>
-              <span
-                  v-if="item.items"
-                  class="pi pi-chevron-right text-primary ml-auto some-color"
-              ></span>
+              <span v-if="item.items" class="ml-auto">
+                <i class="some-color" :class="isOpen ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+              </span>
             </a>
             </template>
-              <div class="page-data">
-                <div class="sub-item">
+              <div v-if="item.title" class="page-data">
+                <div  class="sub-item uppercase">
                   {{item.title}}
                 </div>
                 <router-link
@@ -52,7 +62,31 @@ import PanelMenu from 'primevue/panelmenu';
                     <span class="ml-2">{{ subItem.label }}</span>
                   </a>
                 </router-link>
+
               </div>
+            <div class="page-datas hover:bg-white ">
+              <router-link
+                  v-for="subItem in item.datas"
+                  :key="subItem.title"
+                  :to="subItem.route"
+                  v-slot="{ href, navigate }"
+                  custom
+              >
+                <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[15px] font-semibold"
+                   :class="{
+                          'text-[#3935E7]': $route.path === subItem.route,
+                          'text-[#808BA0]': $route.path !== subItem.route,
+                          'active-data': $route.path === subItem.route,
+                          'text-surface-700 dark:text-surface-0': $route.path !== subItem.route
+                        }"
+                   :href="href"
+                   @click="navigate"
+                >
+                  <span class="ml-2">{{ subItem.label }}</span>
+                </a>
+              </router-link>
+            </div>
+
           </div>
         </template>
       </PanelMenu>
@@ -75,10 +109,8 @@ import PanelMenu from 'primevue/panelmenu';
   border-width: 1px !important;
   border-radius: 10px !important;
   width: 250px !important;
-  height: 42px !important;
+  height: 44px !important;
 }
-
-
 
 .p-panelmenu-header-active .opened {
   color: #ffffff !important;
@@ -113,26 +145,38 @@ import PanelMenu from 'primevue/panelmenu';
   margin-top: 10px;
   margin-bottom: 8px;
 }
+.active-data{
+  border-right: 3px solid #3935E7;
+  border-radius: 2px !important;
+  height: 20px;
+  margin-right: -16px !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+}
+
 .sub-item{
   color: #141C30;
-  font-size: 13px;
+  font-size: 11px;
   margin-left: 18px !important;
   font-family: Manrope;
   font-weight: bold;
-  //padding-top: 10px;
+  padding-top: 10px;
 }
 .page-data{
   border: 1px;
   border-radius: 10px !important;
   background: #f5f5f5;
-  margin-top: 6px ;
+  margin-top: 8px ;
   margin-left: -15px;
+  padding-bottom: 3px;
 }
 
+.page-datas:not(hover){
+  background-color: #ffffff;
+}
 .page-data a{
   margin-left: 10px !important;
 
 }
-
 
 </style>

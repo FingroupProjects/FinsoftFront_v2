@@ -20,12 +20,12 @@ export default [
                     {
                         label: 'Заявка товаров',
                         icon: 'pi pi-eraser',
-                        route: '/client'
+                        route: '/w'
                     },
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/www'
+                        route: '/'
                     }
                 ]
             },
@@ -187,14 +187,14 @@ export default [
         icon: 'pi pi-link',
         items: [
             {
-                data:[
+                datas:[
                     {
                         label: 'Единицы измериния',
-                        route: '/client'
+                        route: '/purchase'
                     },
                     {
                         label: 'Пользователи',
-                        route: '/client'
+                        route: '/22'
                     },
                     {
                         label: 'Контрагенты',
@@ -221,7 +221,7 @@ export default [
         icon: 'pi pi-link',
         items: [
             {
-                data: [
+                datas: [
                     {
                         label: 'Товар',
                         route: '/client'
@@ -243,7 +243,7 @@ export default [
         icon: 'pi pi-link',
         items: [
             {
-                data:[
+                datas:[
                     {
                         label: 'Взаиморасчет с поставщиками',
                         route: '/client'
@@ -281,7 +281,7 @@ export default [
         icon: 'pi pi-link',
         items: [
             {
-                data:[
+                datas:[
                     {
                         label: 'Сотрудники',
                         route: '/client'
@@ -331,11 +331,11 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники',
-                        route: '/purchase'
+                        route: '/ee'
                     },
                     {
                         label: 'Должности',
-                        route: '/purchase'
+                        route: '/ee'
                     },
                     {
                         label: 'Прием на работу',
@@ -348,15 +348,15 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники1',
-                        route: '/purchase'
+                        route: '/w'
                     },
                     {
                         label: 'Должности',
-                        route: '/purchase'
+                        route: '/d'
                     },
                     {
                         label: 'Прием на работу',
-                        route: '/purchase'
+                        route: '/d'
                     },
                 ]
             },
@@ -365,15 +365,15 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники2',
-                        route: '/purchase'
+                        route: '/d'
                     },
                     {
                         label: 'Должности',
-                        route: '/purchase'
+                        route: '/d'
                     },
                     {
                         label: 'Прием на работу',
-                        route: '/purchase'
+                        route: '/d'
                     },
                 ]
             }
@@ -385,7 +385,7 @@ export default [
         icon: 'pi pi-link',
         items: [
             {
-                data:[
+                datas:[
                     {
                         label: 'Настройка',
                         route: '/client'
