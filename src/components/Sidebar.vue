@@ -1,6 +1,8 @@
+
 <script setup>
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
+
 import {ref} from "vue";
 const isOpen = ref(false);
 const dataOpened = ref(null)
@@ -94,18 +96,11 @@ const toggleOpen = (item) => {
   </aside>
 </template>
 
-<style>
-.indicator {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 2px; /* Adjust the width as needed */
-  background-color: #3182ce; /* Adjust the color as needed */
-}
+<style lang="scss">
+@import "@/assets/style/colors.scss";
 
 .p-panelmenu-header-active {
-  background: #3935E7 !important;
+  background: $primary-color !important;
   border-width: 1px !important;
   border-radius: 10px !important;
   width: 250px !important;
@@ -113,25 +108,24 @@ const toggleOpen = (item) => {
 }
 
 .p-panelmenu-header-active .opened {
-  color: #ffffff !important;
+  color: white !important;
 }
 
 .p-panelmenu-panel {
   border-width: 0 !important;
   border-radius: 10px !important;
   margin-bottom: -10px !important;
-
 }
 
 .p-panelmenu-header-content:hover {
-  background: #3935E7 !important;
-  color: #ffffff !important;
+  background: $primary-color !important;
+  color: white !important;
   border-radius: 10px !important;
   width: 248px !important;
 }
 
 .some-color {
-  color: #B7C3D4;
+  color: $pi-chevron-color;
 }
 
 ::-webkit-scrollbar {
@@ -139,14 +133,14 @@ const toggleOpen = (item) => {
 }
 
 .active-item{
-  border-right: 3px solid #3935E7;
+  border-right: 3px solid $primary-color;
   border-radius: 2px !important;
   height: 20px;
   margin-top: 10px;
   margin-bottom: 8px;
 }
 .active-data{
-  border-right: 3px solid #3935E7;
+  border-right: 3px solid $primary-color !important;
   border-radius: 2px !important;
   height: 20px;
   margin-right: -16px !important;
@@ -155,7 +149,7 @@ const toggleOpen = (item) => {
 }
 
 .sub-item{
-  color: #141C30;
+  color: $data-label-color;
   font-size: 11px;
   margin-left: 18px !important;
   font-family: Manrope;
@@ -165,14 +159,14 @@ const toggleOpen = (item) => {
 .page-data{
   border: 1px;
   border-radius: 10px !important;
-  background: #f5f5f5;
+  background: $secondary-color;
   margin-top: 8px ;
   margin-left: -15px;
   padding-bottom: 3px;
 }
 
 .page-datas:not(hover){
-  background-color: #ffffff;
+  background-color: white;
 }
 .page-data a{
   margin-left: 10px !important;

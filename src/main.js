@@ -1,5 +1,6 @@
 import {createApp} from 'vue'
 import './assets/style/main.scss'
+import '@/assets/style/colors.scss'
 import App from './App.vue'
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
@@ -8,6 +9,7 @@ import 'primeicons/primeicons.css'
 import Ripple from 'primevue/ripple';
 import inputs from '@/components/ui/Inputs.vue'
 import Button from "primevue/button";
+
 
 const app = createApp(App)
 
