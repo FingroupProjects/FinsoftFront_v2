@@ -198,7 +198,7 @@ export default [
                     },
                     {
                         label: 'Контрагенты',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Мои организации',

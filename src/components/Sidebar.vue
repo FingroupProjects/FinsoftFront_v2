@@ -2,19 +2,18 @@
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
 import {ref} from "vue";
-
-
 const isOpen = ref(false);
+const dataOpened = ref(null)
 
-const toggleOpen = () =>{
+const toggleOpen = (item) => {
   isOpen.value = !isOpen.value;
-}
-
-
+  if (isOpen.value) {
+    dataOpened.value = item;
+  } else {
+    dataOpened.value = null;
+  }
+};
 </script>
-
-
-
 <template>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
@@ -26,14 +25,17 @@ const toggleOpen = () =>{
           <div>
             <template v-if="item.label">
             <a v-ripple
-               class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-surface-0 px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
+               class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
                :class="{'active-item': $route.path === item.route,}"
-               @click="toggleOpen"
+               @click="toggleOpen(item.label)"
             >
               <span class="opened" :class="item.icon"></span>
               <span class="ml-2 opened sub-title">{{ item.label }}</span>
-              <span v-if="item.items" class="ml-auto">
-                <i class="some-color" :class="isOpen ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+              <span v-if="item.items && isOpen && dataOpened === item.label" class="ml-auto">
+                <i class="some-color" :class="'pi pi-chevron-down'"></i>
+              </span>
+              <span v-if="item.items && dataOpened !== item.label" class="ml-auto">
+                <i class="some-color" :class="'pi pi-chevron-right'"></i>
               </span>
             </a>
             </template>
@@ -48,7 +50,6 @@ const toggleOpen = () =>{
                     v-slot="{ href, navigate }"
                     custom
                   >
-
                   <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[15px] font-semibold"
                       :class="{
                           'text-[#3935E7]': $route.path === subItem.route,
@@ -62,8 +63,8 @@ const toggleOpen = () =>{
                     <span class="ml-2">{{ subItem.label }}</span>
                   </a>
                 </router-link>
-
               </div>
+
             <div class="page-datas hover:bg-white ">
               <router-link
                   v-for="subItem in item.datas"
@@ -86,7 +87,6 @@ const toggleOpen = () =>{
                 </a>
               </router-link>
             </div>
-
           </div>
         </template>
       </PanelMenu>
@@ -176,7 +176,6 @@ const toggleOpen = () =>{
 }
 .page-data a{
   margin-left: 10px !important;
-
 }
 
 </style>
