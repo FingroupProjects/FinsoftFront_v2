@@ -8,7 +8,7 @@
   const dataOpened = ref(null)
 
   const toggleOpen = (item) => {
-    isOpen.value = !isOpen.value;
+   isOpen.value = !isOpen.value;
     if (isOpen.value) {
       dataOpened.value = item;
     } else {
@@ -27,20 +27,20 @@
           <template #item="{ item, index }" >
             <div>
               <template v-if="item.label">
-              <a v-ripple
-                 class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
-                 :class="{'active-item': $route.path === item.route,}"
-                 @click="toggleOpen(item.label)"
-              >
-                <span class="opened" :class="item.icon"></span>
-                <span class="ml-2 opened sub-title">{{ item.label }}</span>
-                <span v-if="item.items && isOpen && dataOpened === item.label" class="ml-auto">
-                  <i class="some-color" :class="'pi pi-chevron-down'"></i>
-                </span>
-                <span v-if="item.items && dataOpened !== item.label" class="ml-auto">
-                  <i class="some-color" :class="'pi pi-chevron-right'"></i>
-                </span>
-              </a>
+                <a v-ripple
+                   class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
+                   :class="{'active-item': $route.path === item.route,}"
+                   @click="toggleOpen(item.label)"
+                >
+                  <span class="opened item-size" :class="item.icon" ></span>
+                  <span class="ml-2 opened sub-title">{{ item.label }}</span>
+                  <span v-if="item.items && isOpen && dataOpened === item.label" class="ml-auto">
+                    <i class="some-color" :class="'pi pi-chevron-down'"></i>
+                  </span>
+                  <span v-if="item.items && dataOpened !== item.label" class="ml-auto">
+                    <i class="some-color" :class="'pi pi-chevron-right'"></i>
+                  </span>
+                </a>
               </template>
                 <div v-if="item.title" class="page-data">
                   <div  class="sub-item uppercase">
@@ -67,7 +67,6 @@
                     </a>
                   </router-link>
                 </div>
-
               <div class="page-datas hover:bg-white ">
                 <router-link
                     v-for="subItem in item.datas"
@@ -108,10 +107,13 @@
     width: 250px !important;
     height: 44px !important;
   }
-
+.item-size{
+  font-size: 20px !important;
+}
   .p-panelmenu-header-active .opened {
     color: white !important;
   }
+
 
   .p-panelmenu-panel {
     border-width: 0 !important;

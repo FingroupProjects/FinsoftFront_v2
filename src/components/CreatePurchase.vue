@@ -2,11 +2,12 @@
 import {ref} from 'vue'
 import Calendar from 'primevue/calendar';
 import Dropdown from "primevue/dropdown";
+import FinSelect from "@/components/ui/Selects.vue";
 
 const icondisplay = ref();
 const selectedCity = ref();
 const cities = ref([
-  {name: 'New York', code: 'NY'},
+  {name: 'None', code: ''},
   {name: 'Rome', code: 'RM'},
   {name: 'London', code: 'LDN'},
   {name: 'Istanbul', code: 'IST'},
@@ -33,13 +34,14 @@ const cities = ref([
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
       <Calendar v-model="icondisplay" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
                 class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
+      <fin-select v-model="selectedValue" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+
       <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
     </div>
     <div class="flex items-center mt-[30px] gap-[21px]">
@@ -129,5 +131,27 @@ const cities = ref([
     height: 46px;
     align-items: center;
   }
+
+
 }
+.p-select-option{
+  width: 90% !important;
+  margin: 0 15px !important;
+  border-radius: 10px !important;
+  font-weight: bold !important;
+}
+.p-focus{
+  background-color: #3935E7 !important;
+  color: #fff !important;
+
+}
+.p-select-label{
+  font-weight: bold !important;
+}
+
+.p-select-list-container{
+  width: 100% !important;
+}
+
+
 </style>

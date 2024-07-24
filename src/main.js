@@ -9,7 +9,7 @@ import 'primeicons/primeicons.css'
 import Ripple from 'primevue/ripple';
 import inputs from '@/components/ui/Inputs.vue'
 import Button from "primevue/button";
-
+import selects from "@/components/ui/Selects.vue"
 
 const app = createApp(App)
 
@@ -22,5 +22,6 @@ app.use(PrimeVue, {
 app.use(router)
 app.component('fin-input', inputs)
 app.component('fin-button',Button)
+app.component('fin-select', selects)
 app.directive('ripple', Ripple);
 app.mount('#app')
