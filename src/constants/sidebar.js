@@ -3,7 +3,7 @@ export default [
 
     {
         label: 'Дашборд',
-        icon: 'pi pi-link',
+        icon: 'pi pi-chart-pie',
     },
     {
         label: 'Закупка',
@@ -43,7 +43,7 @@ export default [
     },
     {
         label: 'Продажа',
-        icon: 'pi pi-shopping-bag',
+        icon: 'pi pi-shopping-cart',
         items: [
             {
                 title: 'Документы',
@@ -66,19 +66,19 @@ export default [
     },
     {
         label: 'Товары',
-        icon: 'pi pi-link',
+        icon: 'pi pi-shield',
         route: '/rrr'
     },
     {
         label: 'Финансы',
-        icon: 'pi pi-link',
+        icon: 'pi pi-building-columns',
         items: [
             {
                 title: 'Документы',
                 data:[
                     {
                         label: 'Приход средств',
-                        route: '/client'
+                        route: '/purchase'
                     },
                     {
                         label: 'Расход средств',
@@ -112,7 +112,7 @@ export default [
                 data:[
                     {
                         label:'Банковские счета',
-                        route: '/mmm'
+                        route: '/'
                     },
                     {
                         label:'Кассы',
@@ -132,7 +132,7 @@ export default [
     },
     {
         label: 'Склады',
-        icon: 'pi pi-link',
+        icon: 'pi pi-inbox',
         items: [
             {
                 title: 'Документы',
@@ -185,7 +185,7 @@ export default [
     },
     {
         label: 'Справочники',
-        icon: 'pi pi-link',
+        icon: 'pi pi-align-center',
         items: [
             {
                 datas:[
@@ -220,7 +220,7 @@ export default [
     },
     {
         label: 'Планирование',
-        icon: 'pi pi-link',
+        icon: 'pi pi-calendar-minus',
         items: [
             {
                 datas: [
@@ -242,7 +242,7 @@ export default [
     },
     {
         label: 'Отчёты',
-        icon: 'pi pi-link',
+        icon: 'pi pi-upload',
         items: [
             {
                 datas:[
@@ -280,7 +280,7 @@ export default [
     },
     {
         label: 'Кадры',
-        icon: 'pi pi-link',
+        icon: 'pi pi-user',
         items: [
             {
                 datas:[
@@ -326,7 +326,7 @@ export default [
     },
     {
         label: 'CRM',
-        icon: 'pi pi-link',
+        icon: 'pi pi-objects-column',
         items: [
             {
                 title:'Документы',
@@ -384,7 +384,7 @@ export default [
     },
     {
         label: 'Настройки',
-        icon: 'pi pi-link',
+        icon: 'pi pi-cog',
         items: [
             {
                 datas:[
