@@ -1,6 +1,6 @@
 
-
 export default [
+
     {
         label: 'Дашборд',
         icon: 'pi pi-link',
@@ -20,7 +20,8 @@ export default [
                     {
                         label: 'Заявка товаров',
                         icon: 'pi pi-eraser',
-                        route: '/w'
+                        route: '/ppp',
+
                     },
                     {
                         label: 'Возврат товаров',
@@ -210,7 +211,8 @@ export default [
                     },
                     {
                         label: 'Волюты',
-                        route: '/client'
+                        route: '/shopping',
+                        component: () => import('@/components/ShoppingMovement.vue'),
                     }
                 ]
             }
