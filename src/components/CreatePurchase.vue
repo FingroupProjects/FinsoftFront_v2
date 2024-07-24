@@ -55,7 +55,7 @@ const cities = ref([
         <fin-input placeholder="Кол-во"/>
         <fin-input placeholder="Цена"/>
         <fin-input placeholder="Сумма"/>
-        <fin-button icon="pi pi-trash" severity="warning" class="p-button-icon-sm"/>
+        <fin-button icon="pi pi-trash" severity="warning" class="p-button-icon-xl"/>
         <fin-button icon="pi pi-save" label="Сохранить" severity="success" class="p-button-lg"/>
       </div>
 
