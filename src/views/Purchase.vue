@@ -6,18 +6,25 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
-import Button from "primevue/button";
 import Tag from 'primevue/tag';
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
+import Paginator from 'primevue/paginator';
+import Toolbar from 'primevue/toolbar';
+import Dialog from 'primevue/dialog';
 
 const visibleRight = ref(false);
 const products = ref();
 const selectedProduct = ref();
 const value1 = ref('')
 const selectedCity = ref();
+const selectPage = ref(50)
 const visibleFilter = ref(false)
+const metaKey = ref(true);
+const deleteProductDialog = ref(false);
+const deleteProductsDialog = ref(false);
+const product = ref({});
 const cities = ref([
   {name: 'New York', code: 'NY'},
   {name: 'Rome', code: 'RM'},
@@ -25,6 +32,32 @@ const cities = ref([
   {name: 'Istanbul', code: 'IST'},
   {name: 'Paris', code: 'PRS'}
 ]);
+const pageCounts = ref([
+  {
+    count: 5
+  },
+
+  {
+    count: 10
+  },
+
+  {
+    count: 15
+  },
+
+  {
+    count: 20
+  }
+])
+
+const deleteProduct = () => {
+  products.value = products.value.filter(val => val.id !== products.value.id);
+  deleteProductDialog.value = false;
+  product.value = {};
+};
+const confirmDeleteSelected = () => {
+  deleteProductsDialog.value = true;
+};
 
 onMounted(() => {
   products.value = [{
@@ -52,24 +85,49 @@ onMounted(() => {
               class="w-full  col-span-2"/>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
               class="w-full col-span-2"/>
-    <Button @click="visibleFilter = true" severity="primary" class="col-span-1">
+    <fin-button @click="visibleFilter = true" severity="primary" class="col-span-1">
       <img src="@/assets/img/menu.svg" alt="">
-    </Button>
-    <Button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="col-span-1"
-            label="Создать"></Button>
+    </fin-button>
+    <fin-button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="col-span-1"
+                label="Создать"></fin-button>
   </div>
   <div class="card mt-4">
+    <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+      <div class="flex items-center gap-4">
+        <i class="pi pi-exclamation-triangle !text-3xl"/>
+        <span v-if="product">
+          Are you sure you want to delete <b>{{ product.name }}</b>?
+        </span>
+      </div>
+      <template #footer>
+        <fin-button label="No" icon="pi pi-times" text @click="deleteProductDialog = false"/>
+        <fin-button label="Yes" icon="pi pi-check" @click="deleteProduct"/>
+      </template>
+    </Dialog>
+    <Toolbar v-if="!(!selectedProduct || !selectedProduct.length)">
+      <template #start>
+        <div class="flex gap-3 items-center">
+          <div class="text-[15px] leading-4 font-semibold font-[Manrope] text-[#3935E7]">
+            Выбран: {{ selectedProduct.length }}
+          </div>
+          <fin-button label="Провести" icon="pi pi-trash" class="p-button-sm" severity="warning" @click="confirmDeleteSelected"
+                      :disabled="!selectedProduct || !selectedProduct.length"/>
+          <fin-button label="Удалить" icon="pi pi-trash" severity="warning" class="p-button-sm" @click="confirmDeleteSelected"
+                      :disabled="!selectedProduct || !selectedProduct.length"/>
+          <fin-button label="Дублировать" icon="pi pi-copy" severity="warning" class="p-button-sm" @click="confirmDeleteSelected"
+                      :disabled="!selectedProduct || !selectedProduct.length"/>
+        </div>
+      </template>
+    </Toolbar>
     <DataTable v-model:selection="selectedProduct"
                :value="products"
-               :rows="5"
-               :rowsPerPageOptions="[5, 10, 25]"
-               :paginator="true"
-               currentPageReportTemplate="Элементов на странице:"
-               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                dataKey="id"
-               tableStyle="min-width:100%">
+               tableStyle="min-width:100%"
+               selectionMode="multiple"
+               :metaKeySelection="metaKey">
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№"></Column>
+
       <Column field="name" :sortable="true" header="Дата"></Column>
       <Column field="category" :sortable="true" header="Поставщик"></Column>
       <Column field="quantity" :sortable="true" header="Организация"></Column>
@@ -84,6 +142,24 @@ onMounted(() => {
       <Column field="quantity" :sortable="true" header="Автор"></Column>
       <Column field="quantity" :sortable="true" header="Валюта"></Column>
     </DataTable>
+    <div class="paginator-dropdown w-full bg-white">
+      <span class="paginator-text">
+        Элементов на странице:
+      </span>
+      <Dropdown
+          v-model="selectPage"
+          :options="pageCounts"
+      >
+        <template #value="slotProps">{{ slotProps.value.count }}</template>
+
+        <template #option="slotProps">
+          {{ slotProps.option.count }}
+        </template>
+      </Dropdown>
+      <Paginator :rows="1" :totalRecords="120" :rowsPerPageOptions="[10, 20, 30]"
+                 template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                 currentPageReportTemplate="{first} / {totalRecords}"/>
+    </div>
   </div>
   <Sidebar v-model:visible="visibleRight" :show-close-icon="false" position="right">
     <CreatePurchase/>
@@ -93,6 +169,45 @@ onMounted(() => {
   </Sidebar>
 </template>
 <style lang="scss">
+.paginator-dropdown {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+
+  &-text {
+    font-family: Manrope, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 15px;
+    text-align: left;
+    color: #141C30;
+
+  }
+
+  .p-select {
+    border-color: #E9E9E9 !important;
+    border-radius: 10px !important;
+    height: 29px;
+    width: 65px;
+    justify-content: center;
+    align-items: center;
+    margin-left: 9px;
+  }
+
+  .p-placeholder {
+    font-family: Manrope, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 15px;
+    text-align: left;
+  }
+
+  .p-select-dropdown {
+    width: 10px;
+    height: 5px;
+    margin-right: 10px;
+  }
+}
 .p-drawer-right .p-drawer {
   width: 1154px !important;
   border-top-left-radius: 30px;
