@@ -49,6 +49,7 @@ const pageCounts = ref([
     count: 20
   }
 ])
+const openUp = ref(true)
 
 const deleteProduct = () => {
   products.value = products.value.filter(val => val.id !== products.value.id);
@@ -62,15 +63,15 @@ const confirmDeleteSelected = () => {
 onMounted(() => {
   products.value = [{
     id: '1000',
-    code: 'f230fh0g3',
-    name: 'Bamboo Watch',
-    description: 'Product Description',
-    image: 'bamboo-watch.jpg',
-    price: 65,
-    category: 'Accessories',
+    code: '322',
+    name: '11.07.2024 12:11:00',
+    description: 'Ultra Holding SLL',
+    image: 'Miss Alysa Lockman III',
+    price: 45,
+    category: 'Serena Price',
     quantity: 24,
-    inventoryStatus: 'INSTOCK',
-    rating: 5
+    inventoryStatus: 'Admin',
+    rating: 'Сомони'
   }]
 });
 </script>
@@ -85,11 +86,14 @@ onMounted(() => {
               class="w-full  col-span-2"/>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
               class="w-full col-span-2"/>
-    <fin-button @click="visibleFilter = true" severity="primary" class="col-span-1">
-      <img src="@/assets/img/menu.svg" alt="">
-    </fin-button>
-    <fin-button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="col-span-1"
-                label="Создать"></fin-button>
+    <div class="flex gap-4 col-span-2">
+      <fin-button @click="visibleFilter = true" severity="primary" class="w-[46px]">
+        <img src="@/assets/img/menu.svg" alt="">
+      </fin-button>
+      <fin-button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="w-[80%]"
+                  label="Создать"/>
+    </div>
+
   </div>
   <div class="card mt-4">
     <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
@@ -126,21 +130,65 @@ onMounted(() => {
                selectionMode="multiple"
                :metaKeySelection="metaKey">
       <Column selectionMode="multiple"></Column>
-      <Column field="code" :sortable="true" header="№"></Column>
-
-      <Column field="name" :sortable="true" header="Дата"></Column>
-      <Column field="category" :sortable="true" header="Поставщик"></Column>
-      <Column field="quantity" :sortable="true" header="Организация"></Column>
-      <Column field="code" :sortable="true" header="Сумма"></Column>
-      <Column field="name" :sortable="true" header="Склад"></Column>
-      <Column field="category" :sortable="true" header="Статус">
-        <template #body>
-          <Tag value="Проведен" severity="success"/>
-          <Tag value="Не проведен" severity="warn"/>
+      <Column field="code" :sortable="true" header="№">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
         </template>
       </Column>
-      <Column field="quantity" :sortable="true" header="Автор"></Column>
-      <Column field="quantity" :sortable="true" header="Валюта"></Column>
+
+      <Column field="name" :sortable="true" header="Дата">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="category" :sortable="true" header="Поставщик">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="image" :sortable="true" header="Организация">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="price" :sortable="true" header="Сумма">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="category" :sortable="true" header="Склад">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="category" :sortable="true" header="Статус">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+        <template #body>
+          <Tag value="Проведен" severity="success"/>
+<!--          <Tag value="Не проведен" severity="warn"/>-->
+        </template>
+      </Column>
+      <Column field="inventoryStatus" :sortable="true" header="Автор">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
+      <Column field="rating" :sortable="true" header="Валюта">
+        <template #sorticon>
+          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
+          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+        </template>
+      </Column>
     </DataTable>
     <div class="paginator-dropdown w-full bg-white">
       <span class="paginator-text">
