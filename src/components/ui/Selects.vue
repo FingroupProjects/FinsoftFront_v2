@@ -12,7 +12,7 @@
         :filter="filter"
         :filter-placeholder="filterPlaceholder"
         :scroll-height="scrollHeight"
-        :class="['block w-full border text-secondary bg-transparent rounded-lg border-1 border-border appearance-none focus:outline-none focus:ring-0 focus:border-primary', inputClass]"
+        :class="['block w-full border text-secondary bg-transparent rounded-2xl border-1 border-border appearance-none focus:outline-none focus:ring-0 focus:border-primary', inputClass]"
         :style="inputStyle"
         :show-clear="showClear"
         :append-to="appendTo"
@@ -53,7 +53,7 @@ const props = defineProps({
   optionDisabled: [String, Function],
   placeholder: {
     type: String,
-    default: 'Select an option'
+    default: ''
   },
   disabled: Boolean,
   filter: Boolean,
@@ -104,9 +104,5 @@ const clearSelection = () => {
 </script>
 
 <style scoped>
-/* Use ::v-deep to target deep child components */
-::v-deep .p-dropdown-item.p-highlight {
-  background-color: #3935E7 !important; /* Change this to your desired blue color */
-  color: white !important; /* Optional: change the text color for better contrast */
-}
+
 </style>

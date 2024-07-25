@@ -11,6 +11,8 @@ import Tag from 'primevue/tag';
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
+import PurchasingTable from "@/components/PurchasingTable.vue";
+import FinSelect from "@/components/ui/Selects.vue";
 
 const visibleRight = ref(false);
 const products = ref();
@@ -48,10 +50,13 @@ onMounted(() => {
       <InputIcon class="pi pi-search"/>
       <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
     </IconField>
-    <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
-              class="w-full  col-span-2"/>
-    <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
-              class="w-full col-span-2"/>
+
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
+                  class="w-full  col-span-2"/>
+      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
+                  class="w-full col-span-2"/>
+
+
     <Button @click="visibleFilter = true" severity="primary" class="col-span-1">
       <img src="@/assets/img/menu.svg" alt="">
     </Button>
@@ -89,7 +94,7 @@ onMounted(() => {
     <CreatePurchase/>
   </Sidebar>
   <Sidebar v-model:visible="visibleFilter" :show-close-icon="false" position="right">
-    <filter-purchase/>
+    <purchasing-table/>
   </Sidebar>
 </template>
 <style lang="scss">
@@ -111,11 +116,10 @@ onMounted(() => {
   line-height: 15px;
 }
 
-.p-select {
+.p-focus {
   border-color: white !important;
   border-radius: 10px !important;
   box-shadow: none !important;
-
 }
 
 .p-placeholder {
@@ -124,6 +128,13 @@ onMounted(() => {
   font-weight: 600;
   font-family: Manrope, sans-serif;
 
+}
+
+.p-select{
+  border-radius: 10px !important;
+}
+.p-select-open{
+  border-color: #3935E7 !important;
 }
 
 .p-datatable-column-title {

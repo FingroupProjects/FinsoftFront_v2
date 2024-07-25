@@ -93,6 +93,9 @@ const cities = ref([
 </template>
 
 <style scoped lang="scss">
+
+
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -109,6 +112,7 @@ const cities = ref([
     }
   }
 }
+
 
 .filter-form {
   border-top: 1px dashed #DCDFE3;
@@ -131,22 +135,23 @@ const cities = ref([
     height: 46px;
     align-items: center;
   }
-
-
 }
 .p-select-option{
-  width: 90% !important;
-  margin: 0 15px !important;
+  width: 100% !important;
   border-radius: 10px !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
 }
 .p-focus{
   background-color: #3935E7 !important;
   color: #fff !important;
-
 }
 .p-select-label{
-  font-weight: bold !important;
+  font-weight: 600 !important;
+}
+
+
+.relative{
+  border-color: #3935E7 !important;
 }
 
 .p-select-list-container{

@@ -25,10 +25,9 @@
       <div class="h-full px-3 pb-4 overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
         <PanelMenu :model="sidebar" class="w-full">
           <template #item="{ item, index }" >
-            <div>
               <template v-if="item.label">
                 <a v-ripple
-                   class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
+                   class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] hover:h-[38px] text-[#141C30] h-[38px] w-[250px] "
                    :class="{'active-item': $route.path === item.route,}"
                    @click="toggleOpen(item.label)"
                 >
@@ -53,7 +52,7 @@
                       v-slot="{ href, navigate }"
                       custom
                     >
-                    <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[15px] font-semibold"
+                    <a v-ripple class="flex items-center cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-[#3935E7] text-[15px] font-semibold "
                         :class="{
                             'text-[#3935E7]': $route.path === subItem.route,
                             'text-[#808BA0]': $route.path !== subItem.route,
@@ -89,7 +88,7 @@
                   </a>
                 </router-link>
               </div>
-            </div>
+
           </template>
         </PanelMenu>
       </div>
@@ -105,20 +104,25 @@
     border-width: 1px !important;
     border-radius: 10px !important;
     width: 250px !important;
-    height: 44px !important;
+    height: 40px !important;
   }
+
+
 .item-size{
   font-size: 20px !important;
+  margin-right: 10px;
 }
   .p-panelmenu-header-active .opened {
     color: white !important;
   }
 
-
   .p-panelmenu-panel {
     border-width: 0 !important;
     border-radius: 10px !important;
     margin-bottom: -10px !important;
+  }
+  .p-panelmenu-header {
+    height: 40px !important;
   }
 
   .p-panelmenu-header-content:hover {
@@ -127,7 +131,6 @@
     border-radius: 10px !important;
     width: 248px !important;
   }
-
   .some-color {
     color: $pi-chevron-color;
   }
@@ -145,7 +148,7 @@
   }
   .active-data{
     border-right: 3px solid $primary-color !important;
-    border-radius: 2px !important;
+    border-radius: 1px !important;
     height: 20px;
     margin-right: -16px !important;
     margin-top: 10px !important;
@@ -159,15 +162,22 @@
     font-family: Manrope;
     font-weight: bold;
     padding-top: 10px;
+
   }
   .page-data{
-    border: 1px;
-    border-radius: 10px !important;
-    background: $secondary-color;
+    border-radius: 10px;
+    background-color: $secondary-color;
     margin-top: 8px ;
     margin-left: -15px;
     padding-bottom: 3px;
   }
+  .p-panelmenu-item-content{
+    border-radius: 20px !important;
+  }
+  .p-panelmenu-item {
+    border-radius: 20px !important;
+  }
+
 
   .page-datas:not(hover){
     background-color: white;
