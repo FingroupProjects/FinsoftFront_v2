@@ -11,7 +11,6 @@ import Tag from 'primevue/tag';
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
-import PurchasingTable from "@/components/PurchasingTable.vue";
 import FinSelect from "@/components/ui/Selects.vue";
 
 const visibleRight = ref(false);
@@ -51,9 +50,9 @@ onMounted(() => {
       <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
     </IconField>
 
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
+      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
                   class="w-full  col-span-2"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
+      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
                   class="w-full col-span-2"/>
 
 
@@ -94,7 +93,7 @@ onMounted(() => {
     <CreatePurchase/>
   </Sidebar>
   <Sidebar v-model:visible="visibleFilter" :show-close-icon="false" position="right">
-    <purchasing-table/>
+    <filter-purchase/>
   </Sidebar>
 </template>
 <style lang="scss">
