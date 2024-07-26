@@ -1,6 +1,6 @@
 <template>
   <div class="relative rounded-lg">
-    <Dropdown
+    <Select
         :id="selectId"
         v-model="selectedValue"
         :options="options"
@@ -36,14 +36,21 @@
         tabindex="tabindex"
         aria-label="ariaLabel"
         aria-labelledby="ariaLabelledby"
-    />
+    >
+      <template #option="slotProps">
+        <slot name="option" v-bind="slotProps"></slot>
+      </template>
+      <template #selectedItem="slotProps">
+        <slot name="selectedItem" v-bind="slotProps"></slot>
+      </template>
+    </Select>
     <i v-if="showClear && selectedValue" class="fas fa-times cursor-pointer absolute right-2 top-3 text-secondary" @click="clearSelection"></i>
   </div>
 </template>
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
-import Dropdown from 'primevue/dropdown';
+import Select from "primevue/select";
 
 const props = defineProps({
   modelValue: [String, Number],

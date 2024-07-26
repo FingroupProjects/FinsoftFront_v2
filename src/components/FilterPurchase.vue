@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 import Calendar from 'primevue/calendar';
 import Dropdown from "primevue/dropdown";
-
+import PurchasingTable from "@/components/PurchasingTable.vue";
 const icondisplay = ref();
 const selectedCity = ref();
 const cities = ref([
@@ -56,6 +56,7 @@ const cities = ref([
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
     </div>
   </div>
+  <purchasing-table/>
   <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]">
     <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
       Итого:
@@ -82,7 +83,6 @@ const cities = ref([
     </div>
 
   </div>
-
 
 </template>
 

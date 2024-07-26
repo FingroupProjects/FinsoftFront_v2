@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Dropdown from 'primevue/dropdown';
+import FinSelect from "@/components/ui/Selects.vue";
 
 const products = ref([
   { select: null, name: 'Маслины без косточки Colossal 121-140 850мл Греция', price: '10.00', quantity: 50, summ: '500.00', deleteIcon: 'pi pi-trash' },
@@ -13,7 +13,7 @@ const products = ref([
 const options = [
   { label: 'option1', value: 1, color: '#ff0000' },
   { label: 'option2', value: 2, color: '#00ff00' },
-  { label: 'option3', value: 3, color: '#0000ff' }
+  { label: 'option3', value: 3, color: '#ffff00' }
 ];
 
 const deleteItem = (rowData) => {
@@ -24,13 +24,12 @@ const deleteItem = (rowData) => {
 };
 </script>
 
-
 <template>
-  <div class="card">
+  <div class="card-sidebar">
     <DataTable :value="products" tableStyle="min-width: 50rem">
       <Column field="select" header="Наименование">
         <template #body="rowData">
-          <Dropdown :options="options" v-model="rowData.data.select" optionLabel="label">
+          <fin-select :options="options" v-model="rowData.data.select" optionLabel="label" >
             <template #option="{ option }">
               <div class="flex items-center">
                 <span :style="{ backgroundColor: option.color }" class="color-circle"></span>
@@ -42,7 +41,7 @@ const deleteItem = (rowData) => {
                 <span :style="{ backgroundColor: value ? value.color : 'transparent' }" class="color-circle"></span>
               </div>
             </template>
-          </Dropdown>
+          </fin-select>
         </template>
       </Column>
       <Column field="name" header=""></Column>
@@ -58,33 +57,44 @@ const deleteItem = (rowData) => {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import "@/assets/style/colors";
-::v-deep .p-datatable-header-cell{
-  background-color: $table-bg-color !important;
-}
-.p-select-open{
- background-color: white !important;
-}
-.p-focus{
+
+.card-sidebar {
+  .p-datatable-header-cell{
+    background-color: $table-bg-color !important;
+  }
+  .p-select-open{
     background-color: white !important;
-}
-::v-deep .p-select-option{
-  border-radius: 10px !important;
-  padding: 8px 16px !important;
-  margin: 4px 0 !important;
-  color: black !important;
-}
+    width: 20px !important;
+  }
+  .relative{
+    width: 170px !important;
+  }
+  .p-focus{
+    background-color: white !important;
+    border: 1px solid $pi-chevron-color !important;
+  }
+  .p-select-option{
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    margin: 4px 0 !important;
+    color: black !important;
+  }
 
-.pi-trash{
-  color:$text-color !important;
-}
-.color-circle {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
+  .pi-trash{
+    color:$text-color !important;
+  }
 
+  .p-datatable-table-container{
+    border-top-right-radius: 10px !important;
+  }
+  .color-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+}
 
 </style>
