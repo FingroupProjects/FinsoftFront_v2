@@ -82,6 +82,7 @@ onMounted(() => {
       <InputIcon class="pi pi-search"/>
       <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
     </IconField>
+   label="Создать"></Button>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
               class="w-full  col-span-2"/>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
@@ -93,7 +94,6 @@ onMounted(() => {
       <fin-button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="w-[80%]"
                   label="Создать"/>
     </div>
-
   </div>
   <div class="card mt-4">
     <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
@@ -274,11 +274,10 @@ onMounted(() => {
   line-height: 15px;
 }
 
-.p-select {
+.p-focus {
   border-color: white !important;
   border-radius: 10px !important;
   box-shadow: none !important;
-
 }
 
 .p-placeholder {
@@ -287,6 +286,13 @@ onMounted(() => {
   font-weight: 600;
   font-family: Manrope, sans-serif;
 
+}
+
+.p-select{
+  border-radius: 10px !important;
+}
+.p-select-open{
+  border-color: #3935E7 !important;
 }
 
 .p-datatable-column-title {
