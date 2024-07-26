@@ -171,11 +171,11 @@
     margin-left: -15px;
     padding-bottom: 3px;
   }
-  .p-panelmenu-item-content{
-    border-radius: 20px !important;
+  .p-panelmenu-item-content:hover{
+    border-radius: 30px !important;
   }
-  .p-panelmenu-item {
-    border-radius: 20px !important;
+  .p-panelmenu-item:hover {
+    border-radius: 30px !important;
   }
 
 
