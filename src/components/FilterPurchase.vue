@@ -12,6 +12,9 @@ const cities = ref([
   {name: 'Istanbul', code: 'IST'},
   {name: 'Paris', code: 'PRS'}
 ]);
+
+const isOpen = ref(false);
+
 </script>
 
 <template>
@@ -34,21 +37,26 @@ const cities = ref([
         <fin-button icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
       </div>
     </div>
-    <div class="form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
-      <Calendar v-model="icondisplay" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
-                class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
-      <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
-      <div class="col-span-12">
-        <button class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class="pi pi-angle-up"></i>
-        </button>
-      </div>
+    <div v-if="isOpen" class="form grid grid-cols-12 gap-[16px] mt-[30px] border-t pt-[30px] pb-[20px]">
+        <Calendar v-model="icondisplay" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
+                  class="col-span-4"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
+        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+        <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
     </div>
+    <div v-if="isOpen" class="border-b pb-4">
+      <button  @click="isOpen = false"  class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class=" mt-0.5 ml-1 pi pi-angle-up"></i>
+      </button>
+    </div>
+    <div v-if="isOpen === false" class=" border-t border-b pb-3 pt-3 mt-5 " >
+      <button  @click="isOpen = true"  class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть <i class=" mt-0.5 ml-1 pi pi-angle-down"></i>
+      </button>
+    </div>
+
     <div class="flex items-center mt-[30px] gap-[21px]">
       <div class="header-title">
         Товары

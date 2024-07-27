@@ -82,6 +82,7 @@ const deleteItem = (rowData) => {
     color: black !important;
   }
 
+
   .pi-trash{
     color:$text-color !important;
   }
@@ -89,12 +90,14 @@ const deleteItem = (rowData) => {
   .p-datatable-table-container{
     border-top-right-radius: 10px !important;
   }
-  .color-circle {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
+
+}
+
+.color-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
 </style>

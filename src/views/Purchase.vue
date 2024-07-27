@@ -82,7 +82,7 @@ onMounted(() => {
       <InputIcon class="pi pi-search"/>
       <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
     </IconField>
-   label="Создать"></Button>
+   <Button label="Создать"></Button>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
               class="w-full  col-span-2"/>
     <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
