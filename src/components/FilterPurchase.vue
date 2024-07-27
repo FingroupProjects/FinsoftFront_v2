@@ -3,6 +3,7 @@ import {ref} from 'vue'
 import Calendar from 'primevue/calendar';
 import Dropdown from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
+import FinSelect from "@/components/ui/Selects.vue";
 const icondisplay = ref();
 const selectedCity = ref();
 const cities = ref([
@@ -13,7 +14,7 @@ const cities = ref([
   {name: 'Paris', code: 'PRS'}
 ]);
 
-const isOpen = ref(false);
+const isOpen = ref(true);
 
 </script>
 
@@ -39,13 +40,13 @@ const isOpen = ref(false);
     </div>
     <div v-if="isOpen" class="form grid grid-cols-12 gap-[16px] mt-[30px] border-t pt-[30px] pb-[20px]">
         <Calendar v-model="icondisplay" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
                   class="col-span-4"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
         <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
     </div>
     <div v-if="isOpen" class="border-b pb-4">
