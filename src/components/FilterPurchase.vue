@@ -13,7 +13,6 @@ const cities = ref([
   {name: 'Istanbul', code: 'IST'},
   {name: 'Paris', code: 'PRS'}
 ]);
-
 const isOpen = ref(true);
 
 </script>
@@ -31,7 +30,7 @@ const isOpen = ref(true);
           </div>
         </div>
 
-        <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Статус" class="col-span-4"/>
+        <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Статус" class="col-span-4"/>
         <fin-button icon="pi pi-arrow-right" label="Провести" severity="secondary" class="p-button-lg"/>
       </div>
       <div class="flex gap-[16px]">
@@ -58,7 +57,7 @@ const isOpen = ref(true);
       </button>
     </div>
 
-    <div class="flex items-center mt-[30px] gap-[21px]">
+    <div class="flex items-center mt-[30px] mb-[15px] gap-[21px]">
       <div class="header-title">
         Товары
       </div>
@@ -95,7 +94,14 @@ const isOpen = ref(true);
 
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
+.p-datepicker {
+  border: 1px solid #DCDFE3 !important;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -117,14 +123,6 @@ const isOpen = ref(true);
   border-top: 1px dashed #DCDFE3;
   border-bottom: 1px dashed #DCDFE3;
 }
-</style>
-<style lang="scss">
-.p-datepicker {
-  border: 1px solid #DCDFE3 !important;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-}
 
 .create-purchase {
   .p-select {
@@ -134,5 +132,14 @@ const isOpen = ref(true);
     height: 46px;
     align-items: center;
   }
+
 }
+.p-select-option:hover{
+  background-color: #EDEDED !important;
+}
+.p-focus:hover{
+  background-color: #3935E7 !important;
+}
+
+
 </style>
