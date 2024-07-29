@@ -107,9 +107,9 @@
     width: 250px !important;
     height: 44px !important;
   }
-.item-size{
-  font-size: 20px !important;
-}
+  .item-size{
+    font-size: 20px !important;
+  }
   .p-panelmenu-header-active .opened {
     color: white !important;
   }
@@ -156,7 +156,7 @@
     color: $data-label-color;
     font-size: 11px;
     margin-left: 18px !important;
-    font-family: Manrope;
+    font-family: Manrope, sans-serif;
     font-weight: bold;
     padding-top: 10px;
   }
@@ -169,7 +169,7 @@
     padding-bottom: 3px;
   }
 
-  .page-datas:not(hover){
+  .page-datas:not(:hover) {
     background-color: white;
   }
   .page-data a{

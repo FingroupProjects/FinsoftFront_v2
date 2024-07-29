@@ -1,18 +1,97 @@
 <script setup>
-import {ref} from 'vue'
+import {reactive, ref} from 'vue';
 import Calendar from 'primevue/calendar';
+import {useStaticApi} from "@/composable/useStaticApi.js";
+import {useAxios} from "@/composable/useAxios.js";
+import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
-import FinSelect from "@/components/ui/Selects.vue";
+import moment from "moment";
+import {useVuelidate} from '@vuelidate/core';
+import {required} from '@vuelidate/validators';
 
-const icondisplay = ref();
-const selectedCity = ref();
-const cities = ref([
-  {name: 'None', code: ''},
-  {name: 'Rome', code: 'RM'},
-  {name: 'London', code: 'LDN'},
-  {name: 'Istanbul', code: 'IST'},
-  {name: 'Paris', code: 'PRS'}
-]);
+const emit = defineEmits(['closeDialog'])
+
+const {
+  findCurrency,
+  currency,
+  loading,
+  findStorage,
+  storage,
+  loadingStorage,
+  findOrganization,
+  organization,
+  findCounterparty,
+  counterparty
+} = useStaticApi()
+
+const agreementList = ref([]);
+const loadingAgreement = ref(false);
+const createValues = reactive({
+  datetime24h: '',
+  selectCurrency: '',
+  selectedStorage: '',
+  selectedAgreement: '',
+  comments: '',
+  selectedOrganization: '',
+  selectedCounterparty: ''
+});
+const rules = reactive({
+  datetime24h: {required},
+  selectCurrency: {required},
+  selectedStorage: {required},
+  comments: {required},
+  selectedOrganization: {required},
+  selectedCounterparty: {required},
+  selectedAgreement: {required},
+})
+const v$ = useVuelidate(rules, createValues)
+
+async function getAgreement() {
+  try {
+    loadingAgreement.value = true
+    const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/1`)
+    return agreementList.value = res.result.data.map(el => {
+      return {
+        name: el.name,
+        code: el.id
+      }
+    })
+
+  } catch (e) {
+    console.log(e)
+  } finally {
+    loadingAgreement.value = false
+  }
+}
+
+async function saveFn() {
+  const result = await v$.value.$validate()
+  if (result) {
+    try {
+      const res = await useAxios(`/document/provider/purchase`, {
+        method: 'POST',
+        data: {
+          "date": moment(createValues.datetime24h).format('YYYY-MM-DD HH:mm:ss'),
+          "organization_id": createValues.selectedOrganization.code,
+          "counterparty_id": createValues.selectedCounterparty.code,
+          "counterparty_agreement_id": createValues.selectedAgreement.code,
+          "storage_id": createValues.selectedStorage.code,
+          "currency_id": createValues.selectCurrency.code,
+          "goods": [
+            {
+              "good_id": 4,
+              "amount": 1,
+              "price": 123
+            }
+          ]
+        }
+      })
+      console.log(res)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
 </script>
 
 <template>
@@ -28,71 +107,90 @@ const cities = ref([
         </div>
       </div>
       <div class="flex gap-[16px]">
-        <fin-button icon="pi pi-save" label="Сохранить" severity="success" class="p-button-lg"/>
-        <fin-button icon="pi pi-times" label="Отменить" severity="warning" class="p-button-lg"/>
+        <fin-button icon="pi pi-save" @click="saveFn" label="Сохранить" severity="success" class="p-button-lg"/>
+        <fin-button icon="pi pi-times" @click="emit('closeDialog')" label="Отменить" severity="warning"
+                    class="p-button-lg"/>
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <Calendar v-model="icondisplay" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Организация"
-                class="col-span-4"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Договор" class="col-span-3"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад" class="col-span-3"/>
-      <fin-select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Автор" class="col-span-3"/>
-      <fin-select v-model="selectedValue" :options="cities" optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+      <Calendar showIcon placeholder="Дата" v-model="createValues.datetime24h"
+                :class="{'p-invalid':v$.datetime24h.$error}" showTime hourFormat="24" fluid
+                iconDisplay="input" class="col-span-4"/>
+      <Dropdown v-model="createValues.selectedOrganization" :options="organization"
+                :class="{'p-invalid':v$.selectedOrganization.$error}"
+                @click="findOrganization"
+                optionLabel="name" placeholder="Организация" class="col-span-4"/>
+      <Dropdown v-model="createValues.selectedCounterparty" :class="{'p-invalid':v$.selectedCounterparty.$error}"
+                @click="findCounterparty" :options="counterparty"
+                optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
+      <Dropdown v-model="createValues.selectedAgreement" :class="{'p-invalid':v$.selectedAgreement.$error}"
+                @click="getAgreement" :loading="loadingAgreement"
+                :options="agreementList" optionLabel="name" placeholder="Договор" class="col-span-3"/>
+      <Dropdown v-model="createValues.selectedStorage" :class="{'p-invalid':v$.selectedStorage.$error}"
+                @click="findStorage" :loading="loadingStorage" :options="storage"
+                optionLabel="name" placeholder="Склад" class="col-span-3"/>
+      <Dropdown optionLabel="name" disabled placeholder="Автор" class="col-span-3"/>
+      <Dropdown v-model="createValues.selectCurrency" :class="{'p-invalid':v$.selectCurrency.$error}"
+                @click="findCurrency" :loading="loading" :options="currency"
+                optionLabel="name" placeholder="Валюта" class="col-span-3"/>
+      <fin-input v-model="createValues.comments" :error="v$.comments.$error" placeholder="Комментарий"
+                 class="col-span-12 mt-[10px]"/>
+    </div>
 
-      <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
-    </div>
-    <div class="flex items-center mt-[30px] gap-[21px]">
-      <div class="header-title">
-        Товары
-      </div>
-      <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
-    </div>
-    <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
-      <Dropdown v-model="selectedCity" :options="cities" optionLabel="name"
-                placeholder="Поиск по Id, наименованию, штрих коду" class="col-span-6"/>
-      <div class="col-span-6 flex gap-[16px]">
-        <fin-input placeholder="Кол-во"/>
-        <fin-input placeholder="Цена"/>
-        <fin-input placeholder="Сумма"/>
-        <fin-button icon="pi pi-trash" severity="warning" class="p-button-icon-xl"/>
-        <fin-button icon="pi pi-save" label="Сохранить" severity="success" class="p-button-lg"/>
-      </div>
-
-    </div>
   </div>
-  <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]">
-    <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-      Итого:
-    </div>
-    <div class="flex gap-[49px]">
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-          Кол-во
-        </div>
-        780
-      </div>
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-          Товаров
-        </div>
-        4
-      </div>
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-          Сумма
-        </div>
-        28 190
-      </div>
-    </div>
-  </div>
-
-
+  <CreateProduct/>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
+.create-purchase {
+  .p-select {
+    border-color: #DCDFE3;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    height: 46px;
+    align-items: center;
+  }
+
+  .p-invalid {
+    border: 1px solid #F2376F !important;
+  }
+
+  .p-select-option {
+    width: 90% !important;
+    margin: 0 15px !important;
+    border-radius: 10px !important;
+    font-weight: bold !important;
+  }
+
+  .p-focus {
+    color: #fff !important;
+
+  }
+
+  .p-select-label {
+    font-weight: bold !important;
+  }
+
+  .p-select-list-container {
+    width: 100% !important;
+  }
+
+  .p-datepicker {
+    border: 1px solid #DCDFE3 ;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+
+    &-input-icon-container {
+      top: 15px !important;
+    }
+  }
+  .p-inputtext {
+    border-color: white;
+    border-radius: 10px;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -109,49 +207,5 @@ const cities = ref([
     }
   }
 }
-
-.filter-form {
-  border-top: 1px dashed #DCDFE3;
-  border-bottom: 1px dashed #DCDFE3;
-}
-</style>
-<style lang="scss">
-.p-datepicker {
-  border: 1px solid #DCDFE3 !important;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-}
-
-.create-purchase {
-  .p-select {
-    border-color: #DCDFE3 !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    height: 46px;
-    align-items: center;
-  }
-
-
-}
-.p-select-option{
-  width: 90% !important;
-  margin: 0 15px !important;
-  border-radius: 10px !important;
-  font-weight: bold !important;
-}
-.p-focus{
-  background-color: #3935E7 !important;
-  color: #fff !important;
-
-}
-.p-select-label{
-  font-weight: bold !important;
-}
-
-.p-select-list-container{
-  width: 100% !important;
-}
-
 
 </style>

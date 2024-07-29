@@ -82,8 +82,6 @@ const cities = ref([
     </div>
 
   </div>
-
-
 </template>
 
 <style scoped lang="scss">
@@ -119,7 +117,7 @@ const cities = ref([
 
 .create-purchase {
   .p-select {
-    border-color: #DCDFE3 !important;
+    border-color: #DCDFE3;
     border-radius: 10px !important;
     box-shadow: none !important;
     height: 46px;

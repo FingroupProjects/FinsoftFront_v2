@@ -65,14 +65,12 @@ const products = ref([
   color: $data-label-color;
 }
 
-::v-deep .p-tablist-active-bar {
+.p-tablist-active-bar {
   background: $primary-color !important;
   height: 3px !important;
 }
 
-::v-deep .p-datatable-header-cell{
+.p-datatable-header-cell{
   background-color: $table-bg-color !important;
 }
-
-
 </style>

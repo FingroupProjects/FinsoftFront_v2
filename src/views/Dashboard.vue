@@ -1,11 +1,6 @@
 <script setup>
-import sidebar from "@/constants/sidebar.js";
-import PanelMenu from 'primevue/panelmenu';
 import Sidebar from "@/components/Sidebar.vue"
-// import as component
-import Badge from 'primevue/badge';
 import OverlayBadge from 'primevue/overlaybadge';
-
 </script>
 
 <template>
@@ -30,7 +25,7 @@ import OverlayBadge from 'primevue/overlaybadge';
         </div>
         <div class="flex items-center">
           <div class="flex items-center gap-[21px]">
-            <OverlayBadge value="2">
+            <OverlayBadge value="12">
               <img src="@/assets/img/ring.svg" alt="">
             </OverlayBadge>
             <div>
@@ -94,10 +89,17 @@ import OverlayBadge from 'primevue/overlaybadge';
 
 </template>
 
-<style>
-.p-badge{
-  background: #E73535 !important;
-  font-size: 11px !important;
+<style lang="scss">
+.p-overlaybadge .p-badge {
+  background: #E73535;
+  width: 16px !important;
+  padding: 11px !important;
+  height: 16px !important;
+  font-size: 11px;
   line-height: 11px;
+  font-weight: 700;
+  font-family: Manrope,sans-serif;
+  border-radius: 100%;
+  outline-style:none !important;
 }
 </style>

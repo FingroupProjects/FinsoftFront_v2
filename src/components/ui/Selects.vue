@@ -1,7 +1,6 @@
 <template>
   <div class="relative rounded-lg">
     <Dropdown
-        :id="selectId"
         v-model="selectedValue"
         :options="options"
         :option-label="optionLabel"
@@ -42,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import {defineEmits, defineProps, ref} from 'vue'
 import Dropdown from 'primevue/dropdown';
 
 const props = defineProps({
@@ -93,7 +92,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'clear'])
-
 const selectedValue = ref(props.modelValue)
 
 const clearSelection = () => {
@@ -103,10 +101,9 @@ const clearSelection = () => {
 }
 </script>
 
-<style scoped>
-/* Use ::v-deep to target deep child components */
-::v-deep .p-dropdown-item.p-highlight {
-  background-color: #3935E7 !important; /* Change this to your desired blue color */
-  color: white !important; /* Optional: change the text color for better contrast */
+<style lang="scss">
+.p-dropdown-item.p-highlight {
+  background-color: #3935E7 !important;
+  color: white !important;
 }
 </style>
