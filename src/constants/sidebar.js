@@ -26,7 +26,7 @@ export default [
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/'
+                        route: '/333'
                     }
                 ]
             },
@@ -35,7 +35,7 @@ export default [
                 data: [
                     {
                         label: 'Конрагенты',
-                        route: '/eeee'
+                        route: '/'
                     }
                 ]
             }
@@ -195,11 +195,11 @@ export default [
                     },
                     {
                         label: 'Пользователи',
-                        route: '/22'
+                        route: '/'
                     },
                     {
                         label: 'Контрагенты',
-                        route: '/'
+                        route: '/2'
                     },
                     {
                         label: 'Мои организации',
