@@ -37,7 +37,7 @@
 
       <i v-if="props.email" class="fas fa-envelope text-lg absolute text-secondary left-3 top-[10px] z-40"></i>
       <i v-if="props.error && props.errorIcon"
-         class="fas fa-exclamation-circle cursor-pointer mr-3 absolute right-0 top-4 text-error"></i>
+         class="pi pi-exclamation-circle cursor-pointer mr-3 absolute right-0 top-4 text-[#F2376F]"></i>
 
       <div v-if="props.error === false ? props.showValue : false" class="absolute right-0 top-3">
         <i v-if="show" class="fas fa-eye-low-vision mr-3 cursor-pointer text-secondary" @click="hideValue"></i>
@@ -179,6 +179,9 @@
   /* Firefox */
   input[type=number] {
     -moz-appearance: textfield;
+  }
+  .border-error{
+    border-color:#F2376F!important;
   }
 
   </style>

@@ -13,6 +13,7 @@ import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
+import {useAxios} from "@/composable/useAxios.js";
 
 const visibleRight = ref(false);
 const products = ref();
@@ -60,6 +61,11 @@ const confirmDeleteSelected = () => {
   deleteProductsDialog.value = true;
 };
 
+async function getProducts() {
+  const res = await useAxios(`/document/provider/purchase?itemsPerPage=&orderBy=id&perPage=&search=`, {})
+  console.log(res)
+}
+getProducts()
 onMounted(() => {
   products.value = [{
     id: '1000',
@@ -77,142 +83,271 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-[16px]">
+  <div class="grid grid-cols-12 gap-[16px] purchase-filter">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search"/>
       <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
     </IconField>
-   <Button label="Создать"></Button>
-    <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Склад"
-              class="w-full  col-span-2"/>
-    <Dropdown v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Поставщик"
-              class="w-full col-span-2"/>
+    <Dropdown
+        v-model="selectedCity"
+        :options="cities"
+        optionLabel="name"
+        placeholder="Склад"
+        class="w-full col-span-2"
+    />
+    <Dropdown
+        v-model="selectedCity"
+        :options="cities"
+        optionLabel="name"
+        placeholder="Поставщик"
+        class="w-full col-span-2"
+    />
     <div class="flex gap-4 col-span-2">
-      <fin-button @click="visibleFilter = true" severity="primary" class="w-[46px]">
-        <img src="@/assets/img/menu.svg" alt="">
+      <fin-button
+          @click="visibleFilter = true"
+          severity="primary"
+          class="w-[46px]"
+      >
+        <img src="@/assets/img/menu.svg" alt=""/>
       </fin-button>
-      <fin-button @click="visibleRight = true" severity="success" icon="pi pi-plus" class="w-[80%]"
-                  label="Создать"/>
+      <fin-button
+          @click="visibleRight = true"
+          severity="success"
+          icon="pi pi-plus"
+          class="w-[80%]"
+          label="Создать"
+      />
     </div>
   </div>
   <div class="card mt-4">
-    <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+    <Dialog
+        v-model:visible="deleteProductsDialog"
+        :style="{ width: '450px' }"
+        header="Confirm"
+        :modal="true"
+    >
       <div class="flex items-center gap-4">
         <i class="pi pi-exclamation-triangle !text-3xl"/>
         <span v-if="product">
-          Are you sure you want to delete <b>{{ product.name }}</b>?
+          Are you sure you want to delete <b>{{ product.name }}</b
+        >?
         </span>
       </div>
       <template #footer>
-        <fin-button label="No" icon="pi pi-times" text @click="deleteProductDialog = false"/>
+        <fin-button
+            label="No"
+            icon="pi pi-times"
+            text
+            @click="deleteProductDialog = false"
+        />
         <fin-button label="Yes" icon="pi pi-check" @click="deleteProduct"/>
       </template>
     </Dialog>
     <Toolbar v-if="!(!selectedProduct || !selectedProduct.length)">
       <template #start>
         <div class="flex gap-3 items-center">
-          <div class="text-[15px] leading-4 font-semibold font-[Manrope] text-[#3935E7]">
+          <div
+              class="text-[15px] leading-4 font-semibold font-[Manrope] text-[#3935E7]"
+          >
             Выбран: {{ selectedProduct.length }}
           </div>
-          <fin-button label="Провести" icon="pi pi-trash" class="p-button-sm" severity="warning" @click="confirmDeleteSelected"
-                      :disabled="!selectedProduct || !selectedProduct.length"/>
-          <fin-button label="Удалить" icon="pi pi-trash" severity="warning" class="p-button-sm" @click="confirmDeleteSelected"
-                      :disabled="!selectedProduct || !selectedProduct.length"/>
-          <fin-button label="Дублировать" icon="pi pi-copy" severity="warning" class="p-button-sm" @click="confirmDeleteSelected"
-                      :disabled="!selectedProduct || !selectedProduct.length"/>
+          <fin-button
+              label="Провести"
+              icon="pi pi-trash"
+              class="p-button-sm"
+              severity="warning"
+              @click="confirmDeleteSelected"
+              :disabled="!selectedProduct || !selectedProduct.length"
+          />
+          <fin-button
+              label="Удалить"
+              icon="pi pi-trash"
+              severity="warning"
+              class="p-button-sm"
+              @click="confirmDeleteSelected"
+              :disabled="!selectedProduct || !selectedProduct.length"
+          />
+          <fin-button
+              label="Дублировать"
+              icon="pi pi-copy"
+              severity="warning"
+              class="p-button-sm"
+              @click="confirmDeleteSelected"
+              :disabled="!selectedProduct || !selectedProduct.length"
+          />
         </div>
       </template>
     </Toolbar>
-    <DataTable v-model:selection="selectedProduct"
-               :value="products"
-               dataKey="id"
-               tableStyle="min-width:100%"
-               selectionMode="multiple"
-               :metaKeySelection="metaKey">
+    <DataTable
+        v-model:selection="selectedProduct"
+        :value="products"
+        dataKey="id"
+        tableStyle="min-width:100%"
+        :metaKeySelection="metaKey"
+    >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
 
       <Column field="name" :sortable="true" header="Дата">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Поставщик">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="image" :sortable="true" header="Организация">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="price" :sortable="true" header="Сумма">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Склад">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Статус">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
         <template #body>
           <Tag value="Проведен" severity="success"/>
-<!--          <Tag value="Не проведен" severity="warn"/>-->
+          <!--<Tag value="Не проведен" severity="warn"/>-->
         </template>
       </Column>
       <Column field="inventoryStatus" :sortable="true" header="Автор">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
       <Column field="rating" :sortable="true" header="Валюта">
         <template #sorticon>
-          <i @click="openUp = !openUp" v-if="openUp" class="pi pi-arrow-down text-[#808BA0] text-[5px]"></i>
-          <i @click="openUp = !openUp" v-else class="pi pi-arrow-up text-[#808BA0] text-[5px]"></i>
+          <i
+              @click="openUp = !openUp"
+              v-if="openUp"
+              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+          ></i>
+          <i
+              @click="openUp = !openUp"
+              v-else
+              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+          ></i>
         </template>
       </Column>
     </DataTable>
     <div class="paginator-dropdown w-full bg-white">
-      <span class="paginator-text">
-        Элементов на странице:
-      </span>
-      <Dropdown
-          v-model="selectPage"
-          :options="pageCounts"
-      >
+      <span class="paginator-text"> Элементов на странице: </span>
+      <Dropdown v-model="selectPage" :options="pageCounts">
         <template #value="slotProps">{{ slotProps.value.count }}</template>
 
         <template #option="slotProps">
           {{ slotProps.option.count }}
         </template>
       </Dropdown>
-      <Paginator :rows="1" :totalRecords="120" :rowsPerPageOptions="[10, 20, 30]"
-                 template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-                 currentPageReportTemplate="{first} / {totalRecords}"/>
+      <Paginator
+          :rows="1"
+          :totalRecords="120"
+          :rowsPerPageOptions="[10, 20, 30]"
+          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          currentPageReportTemplate="{first} / {totalRecords}"
+      />
     </div>
   </div>
-  <Sidebar v-model:visible="visibleRight" :show-close-icon="false" position="right">
-    <CreatePurchase/>
+  <Sidebar
+      v-model:visible="visibleRight"
+      :show-close-icon="false"
+      position="right"
+  >
+    <CreatePurchase @close-dialog="visibleRight= false"/>
   </Sidebar>
-  <Sidebar v-model:visible="visibleFilter" :show-close-icon="false" position="right">
+  <Sidebar
+      v-model:visible="visibleFilter"
+      :show-close-icon="false"
+      position="right"
+  >
     <filter-purchase/>
   </Sidebar>
 </template>
@@ -228,13 +363,12 @@ onMounted(() => {
     font-weight: 500;
     line-height: 15px;
     text-align: left;
-    color: #141C30;
-
+    color: #141c30;
   }
 
   .p-select {
-    border-color: #E9E9E9 !important;
-    border-radius: 10px !important;
+    border-color: #e9e9e9;
+    border-radius: 10px;
     height: 29px;
     width: 65px;
     justify-content: center;
@@ -256,47 +390,43 @@ onMounted(() => {
     margin-right: 10px;
   }
 }
+
+.purchase-filter {
+  .p-inputtext {
+    border-color: white !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .p-inputtext::placeholder {
+    color: #808ba0 !important;
+    font-size: 15px !important;
+    font-weight: 600;
+    font-family: Manrope, sans-serif;
+    line-height: 15px;
+  }
+
+  .p-select {
+    border-color: white;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .p-placeholder {
+    color: #808ba0 !important;
+    font-size: 15px !important;
+    font-weight: 600;
+    font-family: Manrope, sans-serif;
+  }
+};
+
 .p-drawer-right .p-drawer {
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
-.p-inputtext {
-  border-color: white !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-}
-
-.p-inputtext::placeholder {
-  color: #808BA0 !important;
-  font-size: 15px !important;
-  font-weight: 600;
-  font-family: Manrope, sans-serif;
-  line-height: 15px;
-}
-
-.p-focus {
-  border-color: white !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-}
-
-.p-placeholder {
-  color: #808BA0 !important;
-  font-size: 15px !important;
-  font-weight: 600;
-  font-family: Manrope, sans-serif;
-
-}
-
-.p-select{
-  border-radius: 10px !important;
-}
-.p-select-open{
-  border-color: #3935E7 !important;
-}
 
 .p-datatable-column-title {
-  color: #808BA0;
+  color: #808ba0;
   font-family: Manrope, sans-serif;
   font-weight: 600;
   font-size: 15px;
@@ -312,30 +442,33 @@ onMounted(() => {
   line-height: 13px;
   font-weight: 600;
   font-family: Manrope, sans-serif;
-
 }
 
 .p-tag-success {
-  background: #CBF7D2 !important;
+  background: #cbf7d2 !important;
   padding: 8px 12px 8px 12px !important;
-  color: #17A825;
+  color: #17a825;
 }
-.p-tag-warn{
-  background: #FFE9C9!important;
+
+.p-tag-warn {
+  background: #ffe9c9 !important;
   padding: 8px 12px 8px 12px !important;
-  color: #C1790C;
+  color: #c1790c;
 }
-.p-datatable-tbody > tr > td{
-  color: #141C30;
+
+.p-datatable-tbody > tr > td {
+  color: #141c30;
   font-weight: 500;
   font-family: Manrope, sans-serif;
   font-size: 15px;
   line-height: 15px;
 }
-.p-datatable-header-cell:nth-child(1){
+
+.p-datatable-header-cell:nth-child(1) {
   border-top-left-radius: 10px !important;
 }
-.p-datatable-header-cell:nth-child(10){
+
+.p-datatable-header-cell:nth-child(10) {
   border-top-right-radius: 10px !important;
 }
 
@@ -343,4 +476,3 @@ onMounted(() => {
   justify-content: end !important;
 }
 </style>
-

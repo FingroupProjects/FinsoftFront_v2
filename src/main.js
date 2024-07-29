@@ -7,21 +7,22 @@ import Aura from '@primevue/themes/aura';
 import router from "@/router/index.js";
 import 'primeicons/primeicons.css'
 import Ripple from 'primevue/ripple';
-import inputs from '@/components/ui/Inputs.vue'
+import Inputs from '@/components/ui/Inputs.vue'
 import Button from "primevue/button";
-import selects from "@/components/ui/Selects.vue"
+import Selects from "@/components/ui/Selects.vue"
 
 const app = createApp(App)
 
 app.use(PrimeVue, {
         theme: {
             preset: Aura
-        }
-    },
-    {ripple: true});
+        },
+    ripple: true
+});
+
 app.use(router)
-app.component('fin-input', inputs)
+app.component('fin-input', Inputs)
 app.component('fin-button',Button)
-app.component('fin-select', selects)
+app.component('fin-select', Selects)
 app.directive('ripple', Ripple);
 app.mount('#app')

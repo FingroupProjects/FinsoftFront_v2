@@ -1,7 +1,6 @@
 <template>
   <div class="relative rounded-lg">
-    <Select
-        :id="selectId"
+    <Dropdown
         v-model="selectedValue"
         :options="options"
         :option-label="optionLabel"
@@ -12,7 +11,7 @@
         :filter="filter"
         :filter-placeholder="filterPlaceholder"
         :scroll-height="scrollHeight"
-        :class="['block w-full border text-secondary bg-transparent rounded-2xl border-1 border-border appearance-none focus:outline-none focus:ring-0 focus:border-primary', inputClass]"
+        :class="['block w-full border text-secondary bg-transparent rounded-lg border-1 border-border appearance-none focus:outline-none focus:ring-0 focus:border-primary', inputClass]"
         :style="inputStyle"
         :show-clear="showClear"
         :append-to="appendTo"
@@ -36,21 +35,14 @@
         tabindex="tabindex"
         aria-label="ariaLabel"
         aria-labelledby="ariaLabelledby"
-    >
-      <template #option="slotProps">
-        <slot name="option" v-bind="slotProps"></slot>
-      </template>
-      <template #selectedItem="slotProps">
-        <slot name="selectedItem" v-bind="slotProps"></slot>
-      </template>
-    </Select>
+    />
     <i v-if="showClear && selectedValue" class="fas fa-times cursor-pointer absolute right-2 top-3 text-secondary" @click="clearSelection"></i>
   </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
-import Select from "primevue/select";
+import {defineEmits, defineProps, ref} from 'vue'
+import Dropdown from 'primevue/dropdown';
 
 const props = defineProps({
   modelValue: [String, Number],
@@ -60,7 +52,7 @@ const props = defineProps({
   optionDisabled: [String, Function],
   placeholder: {
     type: String,
-    default: ''
+    default: 'Select an option'
   },
   disabled: Boolean,
   filter: Boolean,
@@ -100,7 +92,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'clear'])
-
 const selectedValue = ref(props.modelValue)
 
 const clearSelection = () => {
@@ -110,6 +101,9 @@ const clearSelection = () => {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+.p-dropdown-item.p-highlight {
+  background-color: #3935E7 !important;
+  color: white !important;
+}
 </style>
