@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from 'vue';
+import {ref} from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import IconField from 'primevue/iconfield';
@@ -14,25 +14,33 @@ import Paginator from 'primevue/paginator';
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
 import {useAxios} from "@/composable/useAxios.js";
+import moment from "moment";
+import {useStaticApi} from "@/composable/useStaticApi.js";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
+
+const toast = useToast()
+const {
+  findStorage,
+  storage,
+  loadingStorage,
+  findCounterparty,
+  counterparty,
+  loadingCounterparty
+} = useStaticApi()
 
 const visibleRight = ref(false);
 const products = ref();
+const selectedStorage = ref('')
 const selectedProduct = ref();
-const value1 = ref('')
-const selectedCity = ref();
-const selectPage = ref(50)
+const search = ref('')
+const selectedCounterparty = ref();
+const first = ref('')
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const deleteProductDialog = ref(false);
 const deleteProductsDialog = ref(false);
 const product = ref({});
-const cities = ref([
-  {name: 'New York', code: 'NY'},
-  {name: 'Rome', code: 'RM'},
-  {name: 'London', code: 'LDN'},
-  {name: 'Istanbul', code: 'IST'},
-  {name: 'Paris', code: 'PRS'}
-]);
 const pageCounts = ref([
   {
     count: 5
@@ -51,53 +59,75 @@ const pageCounts = ref([
   }
 ])
 const openUp = ref(true)
+const pagination = ref({
+  perPage: '',
+  totalPages: ''
+})
+const selectPage = ref({
+  count: 5
+})
 
-const deleteProduct = () => {
-  products.value = products.value.filter(val => val.id !== products.value.id);
-  deleteProductDialog.value = false;
-  product.value = {};
+const deleteProduct = async () => {
+  const id = ref()
+  try {
+    const res = await useAxios(`/document/provider/massDelete`, {
+      method: 'POST',
+      data: {
+        "ids": id.value
+      }
+    })
+    id.value = selectedProduct.value.flatMap(el => el.id);
+    deleteProductDialog.value = false;
+  } catch (e) {
+    toast.add({severity: 'error', summary: 'Error Message', detail: e, life: 3000});
+  }
+
 };
 const confirmDeleteSelected = () => {
   deleteProductsDialog.value = true;
 };
 
 async function getProducts() {
-  const res = await useAxios(`/document/provider/purchase?itemsPerPage=&orderBy=id&perPage=&search=`, {})
-  console.log(res)
+  const res = await useAxios(`/document/provider/purchase?itemsPerPage=${selectPage.value.count}&orderBy=id&perPage=${first.value}&search=${search.value}`)
+  pagination.value.totalPages = res.result.pagination.total_pages
+  return products.value = res.result.data
 }
+
+const getSeverity = (status) => {
+  switch (status) {
+    case true:
+      return {
+        status: 'success',
+        name: 'Проведен'
+      };
+
+    case false:
+      return {
+        status: 'warn',
+        name: 'Не проведен'
+      };
+  }
+};
 getProducts()
-onMounted(() => {
-  products.value = [{
-    id: '1000',
-    code: '322',
-    name: '11.07.2024 12:11:00',
-    description: 'Ultra Holding SLL',
-    image: 'Miss Alysa Lockman III',
-    price: 45,
-    category: 'Serena Price',
-    quantity: 24,
-    inventoryStatus: 'Admin',
-    rating: 'Сомони'
-  }]
-});
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search"/>
-      <InputText class="w-full" v-model="value1" placeholder="Поиск"/>
+      <InputText class="w-full" @input="getProducts" v-model="search" placeholder="Поиск"/>
     </IconField>
     <Dropdown
-        v-model="selectedCity"
-        :options="cities"
+        v-model="selectedStorage"
         optionLabel="name"
         placeholder="Склад"
+        @click="findStorage" :loading="loadingStorage" :options="storage"
         class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedCity"
-        :options="cities"
+        v-model="selectedCounterparty"
+        :loading="loadingCounterparty"
+        @click="findCounterparty" :options="counterparty"
         optionLabel="name"
         placeholder="Поставщик"
         class="w-full col-span-2"
@@ -199,6 +229,9 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          <span class=" text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data.id }}</span>
+        </template>
       </Column>
 
       <Column field="name" :sortable="true" header="Дата">
@@ -214,6 +247,9 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          {{ moment(new Date(slotProps.data.date)).format(' D YYYY h:mm') }}
+        </template>
       </Column>
       <Column field="category" :sortable="true" header="Поставщик">
         <template #sorticon>
@@ -227,6 +263,9 @@ onMounted(() => {
               v-else
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.counterparty?.name }}
         </template>
       </Column>
       <Column field="image" :sortable="true" header="Организация">
@@ -242,6 +281,9 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          {{ slotProps.data.organization?.name }}
+        </template>
       </Column>
       <Column field="price" :sortable="true" header="Сумма">
         <template #sorticon>
@@ -255,6 +297,9 @@ onMounted(() => {
               v-else
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.sum }}
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Склад">
@@ -270,6 +315,9 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          {{ slotProps.data.storage?.name }}
+        </template>
       </Column>
       <Column field="category" :sortable="true" header="Статус">
         <template #sorticon>
@@ -284,9 +332,8 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
-        <template #body>
-          <Tag value="Проведен" severity="success"/>
-          <!--<Tag value="Не проведен" severity="warn"/>-->
+        <template #body="slotProps">
+          <Tag :value="getSeverity(slotProps.data.active).name" :severity="getSeverity(slotProps.data.active).status"/>
         </template>
       </Column>
       <Column field="inventoryStatus" :sortable="true" header="Автор">
@@ -302,6 +349,9 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          {{ slotProps.data?.author?.name }}
+        </template>
       </Column>
       <Column field="rating" :sortable="true" header="Валюта">
         <template #sorticon>
@@ -316,20 +366,25 @@ onMounted(() => {
               class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
+        <template #body="slotProps">
+          {{ slotProps.data?.currency?.name }}
+        </template>
       </Column>
     </DataTable>
     <div class="paginator-dropdown w-full bg-white">
       <span class="paginator-text"> Элементов на странице: </span>
-      <Dropdown v-model="selectPage" :options="pageCounts">
+      <Dropdown v-model="selectPage"
+                @update:model-value="getProducts" :options="pageCounts">
         <template #value="slotProps">{{ slotProps.value.count }}</template>
-
         <template #option="slotProps">
           {{ slotProps.option.count }}
         </template>
       </Dropdown>
       <Paginator
           :rows="1"
-          :totalRecords="120"
+          :totalRecords="pagination.totalPages"
+          v-model:first="first"
+          @page="getProducts"
           :rowsPerPageOptions="[10, 20, 30]"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} / {totalRecords}"
@@ -350,6 +405,7 @@ onMounted(() => {
   >
     <filter-purchase/>
   </Sidebar>
+  <Toast/>
 </template>
 <style lang="scss">
 .paginator-dropdown {

@@ -1,12 +1,15 @@
 <script setup>
+import {ref, watch, watchEffect} from "vue";
 import Dropdown from "primevue/dropdown";
-import {ref} from "vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+
+const emit = defineEmits(['postGoods'])
 
 const selectedSearch = ref();
 const addInput = ref(false);
 const products = ref([]);
+const postProducts = []
 const coleVo = ref('');
 const price = ref('');
 const sum = ref('');
@@ -23,12 +26,20 @@ function addFn() {
     price: price.value,
     sum: sum.value
   };
+  const postProduct = {
+    amount: coleVo.value,
+    good_id: price.value,
+    price: sum.value
+  }
+
   if (newProduct.coleVo && newProduct.price && newProduct.sum) {
     products.value.push(newProduct);
+    postProducts.push(postProduct)
     getAllSum.value += Number(newProduct.sum);
     getAllProduct.value += Number(newProduct.coleVo);
+    addInput.value = false
+    emit('postGoods', postProducts);
   }
-  addInput.value = false
   coleVo.value = ''
   price.value = ''
   sum.value = ''
@@ -39,6 +50,9 @@ const confirmDeleteProduct = (index) => {
   getAllSum.value -= Number(deletedProduct.sum);
   getAllProduct.value -= Number(deletedProduct.coleVo);
 };
+watchEffect(() => {
+  sum.value = coleVo.value * price.value
+})
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 <script setup>
-import {reactive, ref} from 'vue';
-import Calendar from 'primevue/calendar';
+import {reactive, ref, watchEffect} from 'vue';
+import DatePicker from 'primevue/DatePicker';
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
@@ -8,8 +8,13 @@ import Dropdown from "primevue/dropdown";
 import moment from "moment";
 import {useVuelidate} from '@vuelidate/core';
 import {required} from '@vuelidate/validators';
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
+import FloatLabel from 'primevue/floatlabel'
 
 const emit = defineEmits(['closeDialog'])
+
+const toast = useToast();
 
 const {
   findCurrency,
@@ -21,11 +26,15 @@ const {
   findOrganization,
   organization,
   findCounterparty,
-  counterparty
+  counterparty,
+  loadingCounterparty,
+  loadingOrganization
 } = useStaticApi()
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
+const productsInfo = ref()
+
 const createValues = reactive({
   datetime24h: '',
   selectCurrency: '',
@@ -39,11 +48,13 @@ const rules = reactive({
   datetime24h: {required},
   selectCurrency: {required},
   selectedStorage: {required},
-  comments: {required},
   selectedOrganization: {required},
   selectedCounterparty: {required},
   selectedAgreement: {required},
 })
+const userName = {
+  name:localStorage.getItem('user_name')
+}
 const v$ = useVuelidate(rules, createValues)
 
 async function getAgreement() {
@@ -53,10 +64,9 @@ async function getAgreement() {
     return agreementList.value = res.result.data.map(el => {
       return {
         name: el.name,
-        code: el.id
+        code: el.id,
       }
     })
-
   } catch (e) {
     console.log(e)
   } finally {
@@ -66,6 +76,7 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate()
+
   if (result) {
     try {
       const res = await useAxios(`/document/provider/purchase`, {
@@ -77,21 +88,34 @@ async function saveFn() {
           "counterparty_agreement_id": createValues.selectedAgreement.code,
           "storage_id": createValues.selectedStorage.code,
           "currency_id": createValues.selectCurrency.code,
-          "goods": [
-            {
-              "good_id": 4,
-              "amount": 1,
-              "price": 123
-            }
-          ]
+          "goods": productsInfo.value
         }
       })
-      console.log(res)
+      toast.add({severity: 'success', summary: 'Success Message', detail: 'Message Content', life: 3000});
+      emit('closeDialog')
     } catch (e) {
       console.log(e)
+      toast.add({severity: 'error', summary: 'Error Message', detail: e, life: 3000});
     }
   }
 }
+
+function getProducts(products) {
+  console.log(products)
+  productsInfo.value = products
+}
+
+watchEffect(() => {
+  if (createValues.selectedCounterparty && createValues.selectedCounterparty.agreement && createValues.selectedCounterparty.agreement.length > 0) {
+    createValues.selectedAgreement ={
+          name: createValues.selectedCounterparty.agreement[0].name,
+          code: createValues.selectedCounterparty.agreement[0].id
+        }
+  } else {
+    createValues.selectedAgreement= null
+  }
+})
+
 </script>
 
 <template>
@@ -113,35 +137,63 @@ async function saveFn() {
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <Calendar showIcon placeholder="Дата" v-model="createValues.datetime24h"
+      <DatePicker showIcon placeholder="Дата" v-model="createValues.datetime24h"
                 :class="{'p-invalid':v$.datetime24h.$error}" showTime hourFormat="24" fluid
                 iconDisplay="input" class="col-span-4"/>
+
+      <FloatLabel class="col-span-4">
       <Dropdown v-model="createValues.selectedOrganization" :options="organization"
                 :class="{'p-invalid':v$.selectedOrganization.$error}"
                 @click="findOrganization"
-                optionLabel="name" placeholder="Организация" class="col-span-4"/>
+                :loading="loadingOrganization"
+                optionLabel="name" class="w-full "/>
+        <label for="dd-city">Организация</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
       <Dropdown v-model="createValues.selectedCounterparty" :class="{'p-invalid':v$.selectedCounterparty.$error}"
-                @click="findCounterparty" :options="counterparty"
-                optionLabel="name" placeholder="Поставщик" class="col-span-4"/>
+                @click="findCounterparty" :options="counterparty" :loading="loadingCounterparty"
+                optionLabel="name" class="w-full"/>
+      <label for="dd-city">Поставщик</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-3">
       <Dropdown v-model="createValues.selectedAgreement" :class="{'p-invalid':v$.selectedAgreement.$error}"
                 @click="getAgreement" :loading="loadingAgreement"
-                :options="agreementList" optionLabel="name" placeholder="Договор" class="col-span-3"/>
+                :options="agreementList" optionLabel="name" class="w-full">
+        <template #value>{{ createValues.selectedAgreement?.name }}</template>
+      </Dropdown>
+      <label for="dd-city">Договор</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-3">
       <Dropdown v-model="createValues.selectedStorage" :class="{'p-invalid':v$.selectedStorage.$error}"
                 @click="findStorage" :loading="loadingStorage" :options="storage"
-                optionLabel="name" placeholder="Склад" class="col-span-3"/>
-      <Dropdown optionLabel="name" disabled placeholder="Автор" class="col-span-3"/>
+                optionLabel="name" class="w-full"/>
+      <label for="dd-city">Склад</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-3">
+      <Dropdown optionLabel="name" v-model="userName" disabled class="w-full">
+        <template #value>
+          {{ userName.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Склад</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-3">
       <Dropdown v-model="createValues.selectCurrency" :class="{'p-invalid':v$.selectCurrency.$error}"
                 @click="findCurrency" :loading="loading" :options="currency"
-                optionLabel="name" placeholder="Валюта" class="col-span-3"/>
-      <fin-input v-model="createValues.comments" :error="v$.comments.$error" placeholder="Комментарий"
+                optionLabel="name" placeholder="Валюта" class="w-full"/>
+      <label for="dd-city">Склад</label>
+      </FloatLabel>
+      <fin-input v-model="createValues.comments" placeholder="Комментарий"
                  class="col-span-12 mt-[10px]"/>
     </div>
 
   </div>
-  <CreateProduct/>
+  <CreateProduct @postGoods="getProducts"/>
+  <Toast/>
 </template>
 
 <style lang="scss">
+
 .create-purchase {
   .p-select {
     border-color: #DCDFE3;
@@ -169,6 +221,8 @@ async function saveFn() {
 
   .p-select-label {
     font-weight: bold !important;
+    position: relative;
+    top: 5px;
   }
 
   .p-select-list-container {

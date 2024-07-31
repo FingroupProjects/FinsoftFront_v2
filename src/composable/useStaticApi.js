@@ -70,7 +70,8 @@ export const useStaticApi = () => {
             return counterparty.value = res.result.data.map(el => {
                 return {
                     name: el.name,
-                    code: el.id
+                    code: el.id,
+                    agreement:el.counterpartyAgreement
                 }
             })
         } catch (e) {
@@ -90,6 +91,8 @@ export const useStaticApi = () => {
         findOrganization,
         organization,
         findCounterparty,
-        counterparty
+        counterparty,
+        loadingCounterparty,
+        loadingOrganization
     }
 }
