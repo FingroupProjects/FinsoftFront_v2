@@ -9,7 +9,7 @@ import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
-import FilterPurchase from "@/components/FilterPurchase.vue";
+import ViewPurchase from "@/components/ViewPurchase.vue";
 import Paginator from 'primevue/paginator';
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
@@ -21,7 +21,7 @@ const selectedProduct = ref();
 const value1 = ref('')
 const selectedCity = ref();
 const selectPage = ref(50)
-const visibleFilter = ref(false)
+const visibleView = ref(false)
 const metaKey = ref(true);
 const deleteProductDialog = ref(false);
 const deleteProductsDialog = ref(false);
@@ -104,7 +104,7 @@ onMounted(() => {
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
-          @click="visibleFilter = true"
+
           severity="primary"
           class="w-[46px]"
       >
@@ -184,6 +184,8 @@ onMounted(() => {
         dataKey="id"
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
+        @click="visibleView = true"
+        class="pointer"
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
@@ -344,11 +346,11 @@ onMounted(() => {
     <CreatePurchase @close-dialog="visibleRight= false"/>
   </Sidebar>
   <Sidebar
-      v-model:visible="visibleFilter"
+      v-model:visible="visibleView"
       :show-close-icon="false"
       position="right"
   >
-    <filter-purchase/>
+    <view-purchase/>
   </Sidebar>
 </template>
 <style lang="scss">
@@ -365,6 +367,8 @@ onMounted(() => {
     text-align: left;
     color: #141c30;
   }
+
+
 
   .p-select {
     border-color: #e9e9e9;
@@ -391,6 +395,9 @@ onMounted(() => {
   }
 }
 
+.pointer{
+  cursor: pointer;
+}
 .purchase-filter {
   .p-inputtext {
     border-color: white !important;
