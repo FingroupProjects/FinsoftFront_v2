@@ -20,13 +20,13 @@ export default [
                     {
                         label: 'Заявка товаров',
                         icon: 'pi pi-eraser',
-                        route: '/ppp',
+                        route: '/',
 
                     },
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/333'
+                        route: '/'
                     }
                 ]
             },
@@ -50,15 +50,15 @@ export default [
                 data:[
                     {
                         label: 'Продажа клиентам',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Возврат от клиентов',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Заказ клиентов',
-                        route: '/client'
+                        route: '/'
                     }
                 ]
             }
@@ -67,7 +67,7 @@ export default [
     {
         label: 'Товары',
         icon: 'pi pi-shield',
-        route: '/rrr'
+        route: '/'
     },
     {
         label: 'Финансы',
@@ -82,15 +82,15 @@ export default [
                     },
                     {
                         label: 'Расход средств',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Приход рас.сч',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Расход рас.сч',
-                        route: '/client'
+                        route: '/'
                     }
                 ]
             },
@@ -99,11 +99,11 @@ export default [
                 data:[
                     {
                         label:'Движение средств',
-                        route:'/rrr'
+                        route:'/'
                     },
                     {
                         label:'Остаток средств',
-                        route:'/rrr'
+                        route:'/'
                     }
                 ]
             },
@@ -116,15 +116,15 @@ export default [
                     },
                     {
                         label:'Кассы',
-                        route: '/mmm'
+                        route: '/'
                     },
                     {
                         label:'Валюта',
-                        route: '/mmm'
+                        route: '/'
                     },
                     {
                         label:'Виды цен',
-                        route: '/mmm'
+                        route: '/'
                     },
                 ]
             }
@@ -139,15 +139,15 @@ export default [
                 data:[
                     {
                         label: 'Оприходование',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Списание',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Инвентаризация',
-                        route: '/client'
+                        route: '/'
                     }
                 ]
             },
@@ -156,15 +156,15 @@ export default [
                 data:[
                     {
                         label:'Остаток товаров',
-                        route:'/rrr'
+                        route:'/'
                     },
                     {
                         label:'Движения товаров',
-                        route:'/rrr'
+                        route:'/'
                     },
                     {
                         label:'Перемещение товаров',
-                        route:'/rrr'
+                        route:'/'
                     }
                 ]
             },
@@ -173,11 +173,11 @@ export default [
                 data:[
                     {
                         label:'Склады',
-                        route: '/mmm'
+                        route: '/'
                     },
                     {
                         label:'Ед.Из',
-                        route: '/mmm'
+                        route: '/'
                     }
                 ]
             }
@@ -199,19 +199,19 @@ export default [
                     },
                     {
                         label: 'Контрагенты',
-                        route: '/2'
+                        route: '/'
                     },
                     {
                         label: 'Мои организации',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Виды цен',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Волюты',
-                        route: '/shopping',
+                        route: '/',
                         component: () => import('@/components/ShoppingMovement.vue'),
                     }
                 ]
@@ -226,15 +226,15 @@ export default [
                 datas: [
                     {
                         label: 'Товар',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Магазины',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Склады',
-                        route: '/client'
+                        route: '/'
                     }
                 ]
             }
@@ -248,31 +248,31 @@ export default [
                 datas:[
                     {
                         label: 'Взаиморасчет с поставщиками',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Взаиморасчет с клиентами',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Акт сверки с поставщиками',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Акт сверки с клиентами',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Отчет покупки поставщиков',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Отчет покупки клиентов',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'АБС анализ',
-                        route: '/client'
+                        route: '/'
                     },
                 ]
             }
@@ -286,39 +286,39 @@ export default [
                 datas:[
                     {
                         label: 'Сотрудники',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Должности',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Прием на работу',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Кадровое перемещение',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Увольнение',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Начисление зарплаты',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Оплата зарплаты',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Табель',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Ведомость зарплаты',
-                        route: '/client'
+                        route: '/'
                     },
                 ]
             }
@@ -333,11 +333,11 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники',
-                        route: '/ee'
+                        route: '/'
                     },
                     {
                         label: 'Должности',
-                        route: '/ee'
+                        route: '/'
                     },
                     {
                         label: 'Прием на работу',
@@ -350,15 +350,15 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники1',
-                        route: '/w'
+                        route: '/'
                     },
                     {
                         label: 'Должности',
-                        route: '/d'
+                        route: '/'
                     },
                     {
                         label: 'Прием на работу',
-                        route: '/d'
+                        route: '/'
                     },
                 ]
             },
@@ -367,15 +367,15 @@ export default [
                 data:[
                     {
                         label: 'Сотрудники2',
-                        route: '/d'
+                        route: '/'
                     },
                     {
                         label: 'Должности',
-                        route: '/d'
+                        route: '/'
                     },
                     {
                         label: 'Прием на работу',
-                        route: '/d'
+                        route: '/'
                     },
                 ]
             }
@@ -390,19 +390,19 @@ export default [
                 datas:[
                     {
                         label: 'Настройка',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Ввод начальных графика',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Погашения',
-                        route: '/client'
+                        route: '/'
                     },
                     {
                         label: 'Ввод нач. остаток',
-                        route: '/client'
+                        route: '/'
                     }
                 ]
             }

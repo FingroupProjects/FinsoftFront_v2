@@ -32,7 +32,6 @@
         :empty-selection-message="emptySelectionMessage"
         :empty-filter-message="emptyFilterMessage"
         :empty-message="emptyMessage"
-        tabindex="tabindex"
         aria-label="ariaLabel"
         aria-labelledby="ariaLabelledby"
     />
@@ -86,7 +85,6 @@ const props = defineProps({
   emptySelectionMessage: String,
   emptyFilterMessage: String,
   emptyMessage: String,
-  tabindex: Number,
   ariaLabel: String,
   ariaLabelledby: String
 })
