@@ -8,8 +8,11 @@ import FinInput from "@/components/ui/Inputs.vue";
 import FinSelect from "@/components/ui/Selects.vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast}  from "primevue/usetoast";
+import Sidebar from "primevue/sidebar";
+import ShoppingMovement from "@/components/ShoppingMovement.vue";
 
 const toast = useToast();
+const visibleMovement = ref(false)
 const approved = ref(false)
 const isOpen = ref(true);
 const viewDocument = ref({
@@ -46,17 +49,33 @@ async function getAgreement() {
     console.log(e)
   }
 }
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const options = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  return date.toLocaleString('en-GB', options).replace(',', '');
+};
+
 const getView = async () => {
   try {
-    const res = await useAxios('/document/show/0e97bb29-d408-4380-8c44-e0431c2db7c8');
+    const res = await useAxios('/document/show/2c1ac4be-7563-44f5-8100-d3a8eb5abfda');
     const item = res.result;
+
     viewDocument.value = {
       organizationName: item.organization.name,
       author: item.author.name,
       counterpartyName: item.counterparty.name,
       counterpartyAgreementName: item.counterpartyAgreement.name,
       storageName: item.storage.name,
-      date: new Date(item.date),
+      date: formatDate(item.date),
       currencyName: item.currency.name,
     };
   } catch (e) {
@@ -113,7 +132,7 @@ onMounted(async () => {
         <fin-button v-if="approved === true" @click="unApprove()" icon="pi pi-arrow-right" label="Не провести" severity="secondary" class="p-button-lg"/>
       </div>
       <div class="flex gap-[16px]">
-        <fin-button  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
+        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
       </div>
     </div>
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
@@ -159,6 +178,9 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
+      <fin-button class="icon-history" icon="pi pi-history" severity="success" label="История"/>
+      <fin-button class="icon-print" icon="pi pi-print" severity="success" label="Печать"/>
+
     </div>
   </div>
   <purchasing-table/>
@@ -179,6 +201,15 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
+    <Sidebar
+        v-model:visible="visibleMovement"
+        :show-close-icon="false"
+        position="right"
+        class="drower-movement"
+    >
+      <shopping-movement/>
+    </Sidebar>
 </template>
 
 <style lang="scss">
@@ -208,6 +239,21 @@ onMounted(async () => {
     border-color: #3935E7  !important;
   }
 }
+.icon-history{
+  margin-left: 600px !important;
+  background-color: white !important;
+  color: #3935E7 !important;
+  font-weight: bold !important;
+  border: 2px solid #DCDFE3 !important;
+}
+.icon-print{
+  background-color: white !important;
+  color: #3935E7 !important;
+  font-weight: bold !important;
+  border: 2px solid #DCDFE3 !important;
+}
+
+
 .create-purchase {
   .p-select {
     border-color: #DCDFE3;
@@ -216,7 +262,14 @@ onMounted(async () => {
     height: 46px;
     align-items: center;
   }
+
 }
+.drower-movement {
+  width: 850px !important;
+  border-top-left-radius: 30px;
+}
+
+
 .header {
   display: flex;
   justify-content: space-between;
