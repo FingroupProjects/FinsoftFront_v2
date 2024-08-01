@@ -18,7 +18,10 @@ async function fetchOrders() {
       }
     });
     cookies.set('token', res.token)
-    if (res.token) router.push('/dashboard')
+    if (res.token){
+      router.push('/dashboard')
+      localStorage.setItem('user_name', res.user.name)
+    }
   } catch (e) {
     console.log(e)
   }

@@ -4,10 +4,12 @@ import Dashboard from "@/views/Dashboard.vue";
 const routes = [
     {
         path: '/',
+        name:'Auth',
         component: () => import('@/views/Auth.vue'),
     },
     {
         path: '/dashboard',
+        name:'Dashboard',
         component: Dashboard,
         children:[
             {
