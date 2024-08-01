@@ -184,7 +184,7 @@ onMounted(() => {
         dataKey="id"
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
-        @click="visibleView = true"
+        @row-click="visibleView = true"
         class="pointer"
     >
       <Column selectionMode="multiple"></Column>

@@ -10,6 +10,8 @@ import Ripple from 'primevue/ripple';
 import Inputs from '@/components/ui/Inputs.vue'
 import Button from "primevue/button";
 import Selects from "@/components/ui/Selects.vue"
+import ToastService from 'primevue/toastservice';
+import Toast from 'primevue/toast';
 
 const app = createApp(App)
 
@@ -21,8 +23,11 @@ app.use(PrimeVue, {
 });
 
 app.use(router)
+app.use(ToastService)
 app.component('fin-input', Inputs)
 app.component('fin-button',Button)
 app.component('fin-select', Selects)
+app.component('Toast', Toast);
+
 app.directive('ripple', Ripple);
 app.mount('#app')
