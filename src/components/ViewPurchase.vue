@@ -7,8 +7,9 @@ import { useAxios } from "@/composable/useAxios.js";
 import FinInput from "@/components/ui/Inputs.vue";
 import FinSelect from "@/components/ui/Selects.vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
+import {useToast}  from "primevue/usetoast";
 
-
+const toast = useToast();
 const approved = ref(false)
 const isOpen = ref(true);
 const viewDocument = ref({
@@ -24,10 +25,8 @@ const viewDocument = ref({
 const {
   findCurrency,
   currency,
-  loading,
   findStorage,
   storage,
-  loadingStorage,
   findOrganization,
   organization,
   findCounterparty,
@@ -43,18 +42,14 @@ async function getAgreement() {
         code: el.id
       }
     })
-
   } catch (e) {
     console.log(e)
   }
 }
-
-
 const getView = async () => {
   try {
     const res = await useAxios('/document/show/0e97bb29-d408-4380-8c44-e0431c2db7c8');
     const item = res.result;
-
     viewDocument.value = {
       organizationName: item.organization.name,
       author: item.author.name,
@@ -64,12 +59,10 @@ const getView = async () => {
       date: new Date(item.date),
       currencyName: item.currency.name,
     };
-
   } catch (e) {
     console.error('Error fetching data:', e);
   }
 };
-
 
 const approve = async () => {
   try {
@@ -79,9 +72,11 @@ const approve = async () => {
         ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
       }
     });
+    toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
     approved.value = true
   }catch (e) {
     console.error(e)
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500 });
   }
 }
 
@@ -94,19 +89,20 @@ const unApprove = async () =>{
       }
     });
     approved.value = false
+    toast.add({ severity: 'success', summary: 'Не проведен', detail: 'Документ не проведен!', life: 1500 });
   }catch (e){
     console.error(e)
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось отменить одобрение документа', life: 1500 });
   }
 }
-
 
 onMounted(async () => {
   await getView();
 });
 </script>
-
 <template>
   <div class="create-purchase">
+    <Toast/>
     <div class="header">
       <div class="flex gap-[16px]">
         <div>
@@ -120,43 +116,24 @@ onMounted(async () => {
         <fin-button  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
       </div>
     </div>
-
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
       <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-
-      <Dropdown placeholder="Организация" class="col-span-4"
-                :options="organization"
-                @click="findOrganization"
-                option-label="name"
-      >
+      <Dropdown placeholder="Организация" class="col-span-4" :options="organization" @click="findOrganization" option-label="name">
         <template #value >
           {{viewDocument.organizationName}}
         </template>
       </Dropdown>
-      <Dropdown placeholder="Поставщик" class="col-span-4"
-                :options="counterparty"
-                @click="findCounterparty"
-                option-label="name"
-                >
+      <Dropdown placeholder="Поставщик" class="col-span-4" :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
           {{viewDocument.counterpartyName}}
         </template>
       </Dropdown>
-      <Dropdown placeholder="Договор" class="col-span-3"
-                :options="agreementList"
-                @click="getAgreement"
-                option-label="name"
-      >
+      <Dropdown placeholder="Договор" class="col-span-3" :options="agreementList" @click="getAgreement" option-label="name">
         <template #value>
           {{viewDocument.counterpartyAgreementName}}
         </template>
       </Dropdown>
-      <Dropdown v-model="viewDocument.storageName"
-                placeholder="Склад" class="col-span-3"
-                :options="storage"
-                @click="findStorage"
-                option-label="name"
-      >
+      <Dropdown v-model="viewDocument.storageName" placeholder="Склад" class="col-span-3" :options="storage" @click="findStorage" option-label="name">
         <template #value>
           {{viewDocument.storageName}}
         </template>
@@ -166,12 +143,7 @@ onMounted(async () => {
           {{viewDocument.author}}
         </template>
       </Dropdown>
-      <Dropdown v-model="viewDocument.currencyName"
-                placeholder="Валюта" class="col-span-3"
-                :options="currency"
-                @click="findCurrency"
-                option-label="name"
-                >
+      <Dropdown v-model="viewDocument.currencyName" placeholder="Валюта" class="col-span-3" :options="currency" @click="findCurrency" option-label="name">
         <template #value>
           {{viewDocument.currencyName}}
         </template>
@@ -181,7 +153,6 @@ onMounted(async () => {
         <button @click="isOpen = false" class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
       </div>
     </div>
-
     <div v-if="isOpen === false" class="border-y py-5 mt-[30px] col-span-12">
       <button @click="isOpen = true" class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть <i class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
     </div>
@@ -216,7 +187,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
 }
-
 .view-doc{
   .p-select-option .p-focus{
     background-color: #3935E7 !important;
@@ -238,7 +208,6 @@ onMounted(async () => {
     border-color: #3935E7  !important;
   }
 }
-
 .create-purchase {
   .p-select {
     border-color: #DCDFE3;
