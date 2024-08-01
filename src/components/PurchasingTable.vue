@@ -1,54 +1,58 @@
 <script setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import FinSelect from "@/components/ui/Selects.vue";
+import {useAxios} from "@/composable/useAxios.js";
+const goods = ref([])
 
-const products = ref([
-  { select: null, name: 'Маслины без косточки Colossal 121-140 850мл Греция', price: '10.00', quantity: 50, summ: '500.00', deleteIcon: 'pi pi-trash' },
-  { select: null, name: 'Острые чипсы Lays Чили и лайм 5 пачек по 125 грамм', price: '15.00', quantity: 30, summ: '450.00', deleteIcon: 'pi pi-trash' },
-  { select: null, name: 'Соус Pesto con Basilico e Rucola 190', price: '20.00', quantity: 20, summ: '400.00', deleteIcon: 'pi pi-trash' },
-]);
 
-const options = [
-  { label: 'option1', value: 1, color: '#ff0000' },
-  { label: 'option2', value: 2, color: '#00ff00' },
-  { label: 'option3', value: 3, color: '#ffff00' }
-];
 
-const deleteItem = (rowData) => {
-  const index = products.value.indexOf(rowData.data);
-  if (index !== -1) {
-    products.value.splice(index, 1);
+const getGood = async () => {
+  try {
+    const res = await useAxios('/document/show/0e97bb29-d408-4380-8c44-e0431c2db7c8');
+    const items = res.result.goods;
+    const sum = res.result.sum;
+
+
+    const imgURL = import.meta.env.VITE_IMG_URL;
+
+    goods.value = items.map(item => ({
+      name: item.good.name,
+      amount: item.amount,
+      price: item.good.price,
+      sum: sum,
+      photo: item.image ? `${imgURL}${item.image}` : ''
+    }));
+  } catch (error) {
+    console.log(error);
   }
 };
+
+
+onMounted( ()=>{
+   getGood();
+})
+
+
 </script>
 
 <template>
   <div class="card-sidebar">
-    <DataTable :value="products" tableStyle="min-width: 50rem">
-      <Column field="select" header="Наименование">
-        <template #body="rowData">
-          <fin-select :options="options" v-model="rowData.data.select" optionLabel="label" >
-            <template #option="{ option }">
-              <div class="flex items-center">
-                <span :style="{ backgroundColor: option.color }" class="color-circle"></span>
-                <span>{{ option.label }}</span>
-              </div>
-            </template>
-            <template #selectedItem="{ value }">
-              <div class="flex items-center">
-                <span :style="{ backgroundColor: value ? value.color : 'transparent' }" class="color-circle"></span>
-              </div>
-            </template>
-          </fin-select>
+    <DataTable :value="goods" tableStyle="min-width: 10px; height: 100px;  ">
+      <Column header="Наименование">
+        <template #body="slotProps">
+          <div style="display: flex; align-items: center;">
+            <i v-if="!slotProps.data.photo" class=" image-good pi pi-image" style="margin-right: 10px;"></i>
+            <img v-else :src="slotProps.data.photo" class="image-good">
+            <span class="ml-[10px]" >{{ slotProps.data.name }} </span>
+          </div>
         </template>
       </Column>
-      <Column field="name" header=""></Column>
-      <Column field="quantity" header="Кол-во"></Column>
-      <Column field="price" header="Цена"></Column>
-      <Column field="summ" header="Сумма"></Column>
-      <Column header="">
+      <Column field="amount" header="Кол-во" style="width: 100px;"></Column>
+      <Column field="price" header="Цена" style="width: 100px;"></Column>
+      <Column field="sum" header="Сумма" style="width: 100px;"></Column>
+      <Column header="" style="width: 50px;">
         <template #body="rowData">
           <i class="pi pi-trash" style="cursor: pointer;" @click="deleteItem(rowData)"></i>
         </template>
@@ -61,6 +65,13 @@ const deleteItem = (rowData) => {
 @import "@/assets/style/colors";
 
 .card-sidebar {
+
+  td{
+    color: black !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+  }
+
   .p-datatable-header-cell{
     background-color: $table-bg-color !important;
   }
@@ -82,10 +93,17 @@ const deleteItem = (rowData) => {
     color: black !important;
   }
 
-
   .pi-trash{
     color:$text-color !important;
   }
+  .image-good{
+    background-color: #f6f6f6 !important;
+    border-radius: 10px !important;
+    padding: 3px;
+    width: 50px;
+    height: 50px;
+  }
+
 
   .p-datatable-table-container{
     border-top-right-radius: 10px !important;
