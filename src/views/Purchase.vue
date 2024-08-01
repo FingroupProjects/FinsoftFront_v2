@@ -9,7 +9,7 @@ import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
-import FilterPurchase from "@/components/FilterPurchase.vue";
+import FilterPurchase from "@/components/ViewPurchase.vue";
 import Paginator from 'primevue/paginator';
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
