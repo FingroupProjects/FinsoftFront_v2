@@ -16,7 +16,7 @@
           :required="props.required"
           :type="type"
           autocomplete="off"
-          class="block px-2.5 pb-3  w-full border text-secondary
+          class="block px-2.5 pb-3 w-full border text-secondary
           bg-transparent rounded-lg border-1 border-border appearance-none  focus:outline-none focus:ring-0 focus:border-primary peer "
           placeholder=" "
           @focus="$emit('focus')"
@@ -31,7 +31,7 @@
         'pl-6' : props.searchible }"
           :for="inputId"
           class="absolute  text-[#808BA0] font-semibold duration-300 transform -translate-y-4 scale-75   origin-[0] left-[12px]  peer-focus:text-primary  peer-placeholder-shown:scale-100  line-clamp-1
-           peer-placeholder-shown:-translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-4">
+           peer-placeholder-shown:-translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-[28px]">
         {{ props.placeholder }}
       </label>
 

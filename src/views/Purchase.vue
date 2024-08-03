@@ -1,74 +1,82 @@
 <script setup>
-import {ref} from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Dropdown from 'primevue/dropdown';
-import Tag from 'primevue/tag';
+import { ref } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
+
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
 import {useAxios} from "@/composable/useAxios.js";
+
 import moment from "moment";
-import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useToast} from "primevue/usetoast";
+import { useStaticApi } from "@/composable/useStaticApi.js";
+import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
+
 import ViewPurchase from "@/components/ViewPurchase.vue";
 
-const toast = useToast()
+import { watch } from "vue";
+
+
+const toast = useToast();
 const {
   findStorage,
   storage,
   loadingStorage,
   findCounterparty,
   counterparty,
-  loadingCounterparty
-} = useStaticApi()
+  loadingCounterparty,
+} = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref();
-const selectedStorage = ref('')
+const selectedStorage = ref(null);
 const selectedProduct = ref();
+
 const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
 const first = ref('')
 const visibleView = ref(false)
 const visibleFilter = ref(false)
+
 const metaKey = ref(true);
 const deleteProductDialog = ref(false);
 const deleteProductsDialog = ref(false);
 const product = ref({});
 const pageCounts = ref([
   {
-    count: 5
+    count: 5,
   },
 
   {
-    count: 10
+    count: 10,
   },
 
   {
-    count: 15
+    count: 15,
   },
 
   {
-    count: 20
-  }
-])
-const openUp = ref(true)
+    count: 20,
+  },
+]);
+const openUp = ref(true);
 const pagination = ref({
-  perPage: '',
-  totalPages: ''
-})
+  perPage: 0,
+  totalPages: 0,
+});
 const selectPage = ref({
-  count: 5
-})
+  count: 20,
+});
 
 const onRowClick = (event) => {
   const product = event.data;
@@ -82,142 +90,161 @@ const onRowClick = (event) => {
 };
 
 const deleteProduct = async () => {
-  const id = ref()
+  const id = ref();
   try {
     const res = await useAxios(`/document/provider/massDelete`, {
-      method: 'POST',
+      method: "POST",
       data: {
-        "ids": id.value
-      }
-    })
-    id.value = selectedProduct.value.flatMap(el => el.id);
+        ids: id.value,
+      },
+    });
+    id.value = selectedProduct.value.flatMap((el) => el.id);
     deleteProductDialog.value = false;
   } catch (e) {
-    toast.add({severity: 'error', summary: 'Error Message', detail: e, life: 3000});
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
   }
-
 };
 const confirmDeleteSelected = () => {
   deleteProductsDialog.value = true;
 };
 
 async function getProducts() {
-  const res = await useAxios(`/document/provider/purchase?itemsPerPage=${selectPage.value.count}&orderBy=id&perPage=${first.value}&search=${search.value}`)
-  pagination.value.totalPages = res.result.pagination.total_pages
-  return products.value = res.result.data
+  const res = await useAxios(
+    `/document/provider/purchase?itemsPerPage=${selectPage.value.count}&orderBy=id&perPage=${first.value}&search=${search.value}
+    &storage_id=${selectedStorage.value?.code}`
+  );
+  pagination.value.totalPages = res.result.pagination.total_pages;
+  return (products.value = res.result.data);
 }
 
 const getSeverity = (status) => {
   switch (status) {
     case true:
       return {
-        status: 'success',
-        name: 'Проведен'
+        status: "success",
+        name: "Проведен",
       };
 
     case false:
       return {
-        status: 'warn',
-        name: 'Не проведен'
+        status: "warn",
+        name: "Не проведен",
       };
   }
 };
-getProducts()
+watch(selectedStorage, (newValue) => {
+  getProducts();
+});
+getProducts();
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter">
     <IconField class="col-span-6">
-      <InputIcon class="pi pi-search"/>
-      <InputText class="w-full" @input="getProducts" v-model="search" placeholder="Поиск"/>
+      <InputIcon class="pi pi-search" />
+      <InputText
+        class="w-full"
+        @input="getProducts"
+        v-model="search"
+        placeholder="Поиск"
+      />
     </IconField>
     <Dropdown
-        v-model="selectedStorage"
-        optionLabel="name"
-        placeholder="Склад"
-        @click="findStorage" :loading="loadingStorage" :options="storage"
-        class="w-full col-span-2"
+      v-model="selectedStorage"
+      optionLabel="name"
+      placeholder="Склад"
+      @click="findStorage"
+      :loading="loadingStorage"
+      :options="storage"
+      class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedCounterparty"
-        :loading="loadingCounterparty"
-        @click="findCounterparty" :options="counterparty"
-        optionLabel="name"
-        placeholder="Поставщик"
-        class="w-full col-span-2"
+      v-model="selectedCounterparty"
+      :loading="loadingCounterparty"
+      @click="findCounterparty"
+      :options="counterparty"
+      optionLabel="name"
+      placeholder="Поставщик"
+      class="w-full col-span-2"
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
-          @click="visibleFilter = true "
+      @click="visibleFilter = true "
           severity="primary"
           class="w-[46px]"
+
       >
-        <img src="@/assets/img/menu.svg" alt=""/>
+        <img src="@/assets/img/menu.svg" alt="" />
       </fin-button>
       <fin-button
-          @click="visibleRight = true"
-          severity="success"
-          icon="pi pi-plus"
-          class="w-[80%]"
-          label="Создать"
+        @click="visibleRight = true"
+        severity="success"
+        icon="pi pi-plus"
+        class="w-[80%]"
+        label="Создать"
       />
     </div>
   </div>
   <div class="card mt-4">
     <Dialog
-        v-model:visible="deleteProductsDialog"
-        :style="{ width: '450px' }"
-        header="Confirm"
-        :modal="true"
+      v-model:visible="deleteProductsDialog"
+      :style="{ width: '450px' }"
+      header="Confirm"
+      :modal="true"
     >
       <div class="flex items-center gap-4">
-        <i class="pi pi-exclamation-triangle !text-3xl"/>
+        <i class="pi pi-exclamation-triangle !text-3xl" />
         <span v-if="product">
           Are you sure you want to delete <b>{{ product.name }}</b
-        >?
+          >?
         </span>
       </div>
       <template #footer>
         <fin-button
-            label="No"
-            icon="pi pi-times"
-            text
-            @click="deleteProductDialog = false"
+          label="No"
+          icon="pi pi-times"
+          text
+          @click="deleteProductDialog = false"
         />
-        <fin-button label="Yes" icon="pi pi-check" @click="deleteProduct"/>
+        <fin-button label="Yes" icon="pi pi-check" @click="deleteProduct" />
       </template>
     </Dialog>
     <Toolbar v-if="!(!selectedProduct || !selectedProduct.length)">
       <template #start>
         <div class="flex gap-3 items-center">
           <div
-              class="text-[15px] leading-4 font-semibold font-[Manrope] text-[#3935E7]"
+            class="text-[15px] leading-4 font-semibold font-[Manrope] text-[#3935E7]"
           >
             Выбран: {{ selectedProduct.length }}
           </div>
           <fin-button
-              label="Провести"
-              icon="pi pi-trash"
-              class="p-button-sm"
-              severity="warning"
-              @click="confirmDeleteSelected"
-              :disabled="!selectedProduct || !selectedProduct.length"
+            label="Провести"
+            icon="pi pi-trash"
+            class="p-button-sm"
+            severity="warning"
+            @click="confirmDeleteSelected"
+            :disabled="!selectedProduct || !selectedProduct.length"
           />
           <fin-button
-              label="Удалить"
-              icon="pi pi-trash"
-              severity="warning"
-              class="p-button-sm"
-              @click="confirmDeleteSelected"
-              :disabled="!selectedProduct || !selectedProduct.length"
+            label="Удалить"
+            icon="pi pi-trash"
+            severity="warning"
+            class="p-button-sm"
+            @click="confirmDeleteSelected"
+            :disabled="!selectedProduct || !selectedProduct.length"
           />
           <fin-button
-              label="Дублировать"
-              icon="pi pi-copy"
-              severity="warning"
-              class="p-button-sm"
-              @click="confirmDeleteSelected"
-              :disabled="!selectedProduct || !selectedProduct.length"
+            label="Дублировать"
+            icon="pi pi-copy"
+            severity="warning"
+            class="p-button-sm"
+            @click="confirmDeleteSelected"
+            :disabled="!selectedProduct || !selectedProduct.length"
           />
         </div>
       </template>
@@ -229,54 +256,58 @@ getProducts()
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
+
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
-          <span class=" text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data.id }}</span>
+          <span
+            class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden"
+            >{{ slotProps.data.doc_number }}</span
+          >
         </template>
       </Column>
 
       <Column field="name" :sortable="true" header="Дата">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
-          {{ moment(new Date(slotProps.data.date)).format(' D YYYY h:mm') }}
+          {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Поставщик">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -286,14 +317,14 @@ getProducts()
       <Column field="image" :sortable="true" header="Организация">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -303,14 +334,14 @@ getProducts()
       <Column field="price" :sortable="true" header="Сумма">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -320,14 +351,14 @@ getProducts()
       <Column field="category" :sortable="true" header="Склад">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -337,31 +368,34 @@ getProducts()
       <Column field="category" :sortable="true" header="Статус">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
-          <Tag :value="getSeverity(slotProps.data.active).name" :severity="getSeverity(slotProps.data.active).status"/>
+          <Tag
+            :value="getSeverity(slotProps.data.active).name"
+            :severity="getSeverity(slotProps.data.active).status"
+          />
         </template>
       </Column>
       <Column field="inventoryStatus" :sortable="true" header="Автор">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -371,14 +405,14 @@ getProducts()
       <Column field="rating" :sortable="true" header="Валюта">
         <template #sorticon>
           <i
-              @click="openUp = !openUp"
-              v-if="openUp"
-              class="pi pi-arrow-down text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-if="openUp"
+            class="pi pi-arrow-down text-[#808BA0] text-[5px]"
           ></i>
           <i
-              @click="openUp = !openUp"
-              v-else
-              class="pi pi-arrow-up text-[#808BA0] text-[5px]"
+            @click="openUp = !openUp"
+            v-else
+            class="pi pi-arrow-up text-[#808BA0] text-[5px]"
           ></i>
         </template>
         <template #body="slotProps">
@@ -388,33 +422,39 @@ getProducts()
     </DataTable>
     <div class="paginator-dropdown w-full bg-white">
       <span class="paginator-text"> Элементов на странице: </span>
-      <Dropdown v-model="selectPage"
-                @update:model-value="getProducts" :options="pageCounts">
+      <Dropdown
+        v-model="selectPage"
+        @update:model-value="getProducts"
+        :options="pageCounts"
+      >
         <template #value="slotProps">{{ slotProps.value.count }}</template>
         <template #option="slotProps">
           {{ slotProps.option.count }}
         </template>
       </Dropdown>
       <Paginator
-          :rows="1"
-          :totalRecords="pagination.totalPages"
-          v-model:first="first"
-          @page="getProducts"
-          :rowsPerPageOptions="[10, 20, 30]"
-          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          currentPageReportTemplate="{first} / {totalRecords}"
+        :rows="1"
+        :totalRecords="pagination.totalPages"
+        v-model:first="first"
+        @page="getProducts"
+        :rowsPerPageOptions="[10, 20, 30]"
+        template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} / {totalRecords}"
       />
     </div>
   </div>
   <Sidebar
+
       v-model:visible="visibleRight"
       :show-close-icon="false"
       position="right"
       class="create-purchase"
+
   >
-    <CreatePurchase @close-dialog="visibleRight= false"/>
+    <CreatePurchase @close-dialog="visibleRight = false" />
   </Sidebar>
   <Sidebar
+
       v-model:visible="visibleView"
       :show-close-icon="false"
       position="right"
@@ -429,8 +469,9 @@ getProducts()
       class="filter-purchase"
   >
     <FilterPurchase/>
+
   </Sidebar>
-  <Toast/>
+  <Toast />
 </template>
 <style lang="scss">
 .paginator-dropdown {
@@ -499,7 +540,7 @@ getProducts()
     font-weight: 600;
     font-family: Manrope, sans-serif;
   }
-};
+}
 
 .drawer-purchase {
   width: 1154px !important;

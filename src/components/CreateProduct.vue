@@ -47,6 +47,7 @@ function addFn() {
 
 const confirmDeleteProduct = (index) => {
   const deletedProduct = products.value.splice(index, 1)[0];
+  postProducts.splice(index, 1)[0];
   getAllSum.value -= Number(deletedProduct.sum);
   getAllProduct.value -= Number(deletedProduct.coleVo);
 };
