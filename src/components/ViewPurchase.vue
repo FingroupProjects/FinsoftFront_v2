@@ -9,9 +9,19 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast}  from "primevue/usetoast";
 import Sidebar from "primevue/sidebar";
 import ShoppingMovement from "@/components/ShoppingMovement.vue";
+import HistoryPurchase from "@/components/HistoryPurchase.vue";
+import {useVuelidate} from "@vuelidate/core";
+import moment from "moment";
 
+
+const props = defineProps({
+  productId:{
+    required: true,
+  }
+});
 const toast = useToast();
 const visibleMovement = ref(false)
+const visibleHistory = ref(false)
 const approved = ref(false)
 const isOpen = ref(true);
 const viewDocument = ref({
@@ -23,6 +33,8 @@ const viewDocument = ref({
   date: null,
   currencyName: '',
 });
+
+const v$ = useVuelidate();
 
 const {
   findCurrency,
@@ -65,22 +77,47 @@ const formatDate = (dateString) => {
 
 const getView = async () => {
   try {
-    const res = await useAxios('/document/show/2c1ac4be-7563-44f5-8100-d3a8eb5abfda');
+    const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
 
     viewDocument.value = {
-      organizationName: item.organization.name,
-      author: item.author.name,
-      counterpartyName: item.counterparty.name,
-      counterpartyAgreementName: item.counterpartyAgreement.name,
-      storageName: item.storage.name,
+      organizationName: item.organization,
+      author: item.author,
+      counterpartyName: item.counterparty,
+      counterpartyAgreementName: item.counterpartyAgreement,
+      storageName: item.storage,
       date: formatDate(item.date),
-      currencyName: item.currency.name,
+      currencyName: item.currency,
     };
+
   } catch (e) {
     console.error('Error fetching data:', e);
   }
 };
+
+const updateView = async () =>{
+  const result = await v$.value.$validate()
+  if (result) {
+    try{
+      const res = await useAxios(`/document/update/${props.productId}`, {
+        method: 'PATCH',
+        data: {
+          organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code ,
+          counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
+          storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
+          date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
+          currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
+          counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code
+        }
+      })
+    }catch (e) {
+      console.error(e)
+    }
+  }
+}
+
+
+
 
 const approve = async () => {
   try {
@@ -92,6 +129,7 @@ const approve = async () => {
     });
     toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
     approved.value = true
+
   }catch (e) {
     console.error(e)
     toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500 });
@@ -114,9 +152,15 @@ const unApprove = async () =>{
   }
 }
 
+const ddd = () =>{
+  console.log('OUR DOCUMENT',viewDocument.value.organizationName.id)
+}
+
 onMounted(async () => {
   await getView();
 });
+
+
 </script>
 <template>
   <div class="create-purchase">
@@ -129,6 +173,7 @@ onMounted(async () => {
         </div>
         <fin-button v-if="approved === false" @click="approve()" icon="pi pi-arrow-right" label="Провести" severity="secondary" class="p-button-lg"/>
         <fin-button v-if="approved === true" @click="unApprove()" icon="pi pi-arrow-right" label="Не провести" severity="secondary" class="p-button-lg"/>
+        <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" severity="success" class="p-button-lg"/>
       </div>
       <div class="flex gap-[16px]">
         <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
@@ -136,34 +181,44 @@ onMounted(async () => {
     </div>
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
       <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-      <Dropdown placeholder="Организация" class="col-span-4" :options="organization" @click="findOrganization" option-label="name">
-        <template #value >
-          {{viewDocument.organizationName}}
+      <Dropdown
+          v-model="viewDocument.organizationName"
+          placeholder="Организация"
+          class="col-span-4"
+          :options="organization"
+          option-label="name"
+          @click="findOrganization"
+      >
+        <template #value>
+          {{ viewDocument.organizationName.name }}
         </template>
       </Dropdown>
-      <Dropdown placeholder="Поставщик" class="col-span-4" :options="counterparty" @click="findCounterparty" option-label="name">
+
+      <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
+                :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
-          {{viewDocument.counterpartyName}}
+          {{viewDocument.counterpartyName.name}}
         </template>
       </Dropdown>
-      <Dropdown placeholder="Договор" class="col-span-3" :options="agreementList" @click="getAgreement" option-label="name">
+      <Dropdown v-model="viewDocument.counterpartyAgreementName" placeholder="Договор" class="col-span-3"
+                :options="agreementList" @click="getAgreement" option-label="name">
         <template #value>
-          {{viewDocument.counterpartyAgreementName}}
+          {{viewDocument.counterpartyAgreementName.name}}
         </template>
       </Dropdown>
       <Dropdown v-model="viewDocument.storageName" placeholder="Склад" class="col-span-3" :options="storage" @click="findStorage" option-label="name">
         <template #value>
-          {{viewDocument.storageName}}
+          {{viewDocument.storageName.name}}
         </template>
       </Dropdown>
       <Dropdown v-model="viewDocument.author" disabled placeholder="Автор" class="col-span-3">
         <template #value>
-          {{viewDocument.author}}
+          {{viewDocument.author.name}}
         </template>
       </Dropdown>
       <Dropdown v-model="viewDocument.currencyName" placeholder="Валюта" class="col-span-3" :options="currency" @click="findCurrency" option-label="name">
         <template #value>
-          {{viewDocument.currencyName}}
+          {{viewDocument.currencyName.name}}
         </template>
       </Dropdown>
       <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
@@ -177,12 +232,17 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
-      <fin-button class="icon-history" icon="pi pi-history" severity="success" label="История"/>
-      <fin-button class="icon-print" icon="pi pi-print" severity="success" label="Печать"/>
-
+      <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
+        <i class="pi pi-history"></i>
+        <span style="font-weight: bold; margin-bottom: 3px;">История</span>
+      </fin-button>
+      <fin-button class="icon-print" severity="success">
+        <i class="pi pi-print"></i>
+        <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
+      </fin-button>
     </div>
   </div>
-  <purchasing-table/>
+  <purchasing-table :productId="productId"/>
   <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]">
     <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">Итого:</div>
     <div class="flex gap-[49px]">
@@ -200,7 +260,6 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-
     <Sidebar
         v-model:visible="visibleMovement"
         :show-close-icon="false"
@@ -209,6 +268,14 @@ onMounted(async () => {
     >
       <shopping-movement/>
     </Sidebar>
+  <Sidebar
+      v-model:visible="visibleHistory"
+      :show-close-icon="false"
+      position="right"
+      class="drower-movement"
+  >
+    <history-purchase :productId="productId"/>
+  </Sidebar>
 </template>
 
 <style lang="scss">
@@ -242,14 +309,16 @@ onMounted(async () => {
   margin-left: 600px !important;
   background-color: white !important;
   color: #3935E7 !important;
-  font-weight: bold !important;
   border: 2px solid #DCDFE3 !important;
+  width: 112px !important;
+  height: 31px !important;
 }
 .icon-print{
   background-color: white !important;
   color: #3935E7 !important;
-  font-weight: bold !important;
   border: 2px solid #DCDFE3 !important;
+  width: 112px !important;
+  height: 31px !important;
 }
 
 

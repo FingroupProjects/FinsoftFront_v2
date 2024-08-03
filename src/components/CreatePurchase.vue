@@ -145,7 +145,10 @@ watch(createValues, (newValue) => {
   <div class="create-purchase">
     <div class="header">
       <div>
-        <div class="header-title">Создание закупки</div>
+        <div class="header-title">
+          Создание закупки
+        </div>
+
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №32151
         </div>
@@ -231,28 +234,19 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Склад</label>
       </FloatLabel>
       <FloatLabel class="col-span-3">
-        <Dropdown optionLabel="name" v-model="userName" disabled class="w-full">
-          <template #value>
-            {{ userName.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Автор</label>
+      <Dropdown optionLabel="name" v-model="userName" disabled class="w-full">
+        <template #value>
+          {{ userName.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Автор</label>
       </FloatLabel>
       <FloatLabel class="col-span-3">
-        <Dropdown
-          v-model="createValues.selectCurrency"
-          :class="{ 'p-invalid': v$.selectCurrency.$error }"
-          @click="findCurrency(createValues.selectedAgreement)"
-          :loading="loading"
-          :options="currency"
-          optionLabel="name"
-          class="w-full"
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Валюта</label>
+      <Dropdown v-model="createValues.selectCurrency" :class="{'p-invalid':v$.selectCurrency.$error}"
+                @click="findCurrency" :loading="loading" :options="currency"
+                optionLabel="name" placeholder="Валюта" class="w-full"/>
+      <label for="dd-city">Волюта</label>
+
       </FloatLabel>
       <fin-input
         v-model="createValues.comments"
