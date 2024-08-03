@@ -1,12 +1,12 @@
 .p-floatlabel:has(input:focus) label, .p-floatlabel:has(input.p-filled) label, .p-floatlabel:has(input:-webkit-autofill) label, .p-floatlabel:has(textarea:focus) label, .p-floatlabel:has(textarea.p-filled) label, .p-floatlabel:has(.p-inputwrapper-focus) label, .p-floatlabel:has(.p-inputwrapper-filled) label
 {
-  top: 1rem !important;
+  top: 0.1rem !important;
   font-size: 13px !important;
   color: #808BA0 !important;
   font-weight: 600 !important;
+  background: white !important;
 }
 .p-floatlabel label{
-
   color: #808BA0 !important;
   font-weight: 600 !important;
 }

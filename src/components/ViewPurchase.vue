@@ -5,7 +5,6 @@ import Dropdown from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
 import { useAxios } from "@/composable/useAxios.js";
 import FinInput from "@/components/ui/Inputs.vue";
-import FinSelect from "@/components/ui/Selects.vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast}  from "primevue/usetoast";
 import Sidebar from "primevue/sidebar";
