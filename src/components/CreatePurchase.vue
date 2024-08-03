@@ -124,7 +124,6 @@ watchEffect(() => {
       <div>
         <div class="header-title">
           Создание закупки
-
         </div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №32151
@@ -175,13 +174,13 @@ watchEffect(() => {
           {{ userName.name }}
         </template>
       </Dropdown>
-      <label for="dd-city">Склад</label>
+      <label for="dd-city">Автор</label>
       </FloatLabel>
       <FloatLabel class="col-span-3">
       <Dropdown v-model="createValues.selectCurrency" :class="{'p-invalid':v$.selectCurrency.$error}"
                 @click="findCurrency" :loading="loading" :options="currency"
                 optionLabel="name" placeholder="Валюта" class="w-full"/>
-      <label for="dd-city">Склад</label>
+      <label for="dd-city">Волюта</label>
       </FloatLabel>
       <fin-input v-model="createValues.comments" placeholder="Комментарий"
                  class="col-span-12 mt-[10px]"/>
