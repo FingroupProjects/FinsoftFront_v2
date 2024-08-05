@@ -9,16 +9,22 @@ import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
 import CreatePurchase from "@/components/CreatePurchase.vue";
-import FilterPurchase from "@/components/ViewPurchase.vue";
-import Paginator from "primevue/paginator";
-import Toolbar from "primevue/toolbar";
-import Dialog from "primevue/dialog";
-import { useAxios } from "@/composable/useAxios.js";
+
+import FilterPurchase from "@/components/FilterPurchase.vue";
+import Paginator from 'primevue/paginator';
+import Toolbar from 'primevue/toolbar';
+import Dialog from 'primevue/dialog';
+import {useAxios} from "@/composable/useAxios.js";
+
 import moment from "moment";
 import { useStaticApi } from "@/composable/useStaticApi.js";
 import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
+
+import ViewPurchase from "@/components/ViewPurchase.vue";
+
 import { watch } from "vue";
+
 
 const toast = useToast();
 const {
@@ -34,10 +40,14 @@ const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
 const selectedProduct = ref();
-const search = ref("");
+
+const selectedProductId = ref()
+const search = ref('')
 const selectedCounterparty = ref();
-const first = ref(null);
-const visibleFilter = ref(false);
+const first = ref('')
+const visibleView = ref(false)
+const visibleFilter = ref(false)
+
 const metaKey = ref(true);
 const deleteProductDialog = ref(false);
 const deleteProductsDialog = ref(false);
@@ -68,6 +78,17 @@ const pagination = ref({
 const selectPage = ref({
   count: 20,
 });
+
+const onRowClick = (event) => {
+  const product = event.data;
+  if (product) {
+    console.log('ID:', product.id);
+    visibleView.value = true;
+    selectedProductId.value = product.id
+  } else {
+    console.log('No product selected');
+  }
+};
 
 const deleteProduct = async () => {
   const id = ref();
@@ -190,9 +211,10 @@ getProducts();
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
-        @click="visibleFilter = true"
-        severity="primary"
-        class="w-[46px]"
+      @click="visibleFilter = true "
+          severity="primary"
+          class="w-[46px]"
+
       >
         <img src="@/assets/img/menu.svg" alt="" />
       </fin-button>
@@ -286,11 +308,13 @@ getProducts();
       </template>
     </Toolbar>
     <DataTable
-      v-model:selection="selectedProduct"
-      :value="products"
-      dataKey="id"
-      tableStyle="min-width:100%"
-      :metaKeySelection="metaKey"
+        v-model:selection="selectedProduct"
+        :value="products"
+        dataKey="id"
+        tableStyle="min-width:100%"
+        :metaKeySelection="metaKey"
+        @row-click="onRowClick"
+
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
@@ -478,18 +502,32 @@ getProducts();
     </div>
   </div>
   <Sidebar
-    v-model:visible="visibleRight"
-    :show-close-icon="false"
-    position="right"
+
+      v-model:visible="visibleRight"
+      :show-close-icon="false"
+      position="right"
+      class="create-purchase"
+
   >
     <CreatePurchase @close-dialog="visibleRight = false" />
   </Sidebar>
   <Sidebar
-    v-model:visible="visibleFilter"
-    :show-close-icon="false"
-    position="right"
+
+      v-model:visible="visibleView"
+      :show-close-icon="false"
+      position="right"
+      class="drawer-purchase"
   >
-    <filter-purchase />
+    <view-purchase :productId="selectedProductId"/>
+  </Sidebar>
+  <Sidebar
+      v-model:visible="visibleFilter"
+      :show-close-icon="false"
+      position="right"
+      class="filter-purchase"
+  >
+    <FilterPurchase/>
+
   </Sidebar>
   <Toast />
 </template>
@@ -562,10 +600,16 @@ getProducts();
   }
 }
 
-.p-drawer-right .p-drawer {
+.drawer-purchase {
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
+.filter-purchase{
+  width: 500px !important;
+  border-top-left-radius: 30px;
+}
+
+
 
 .p-datatable-column-title {
   color: #808ba0;

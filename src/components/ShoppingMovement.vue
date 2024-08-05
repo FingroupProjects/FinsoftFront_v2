@@ -154,22 +154,24 @@ onMounted(() => {
 
 .p-tab{
   color: $data-label-color;
-
 }
+
 
 .p-tablist-active-bar {
   background: $primary-color !important;
   height: 3px !important;
 }
 .movement-card{
-  ::v-deep .p-datatable-thead .p-datatable-header-cell{
+    .p-datatable-thead .p-datatable-header-cell{
     background-color: $table-bg-color !important;
     border-top-right-radius: 10px !important;
   }
-  .p-datatable-thead{}
-  border-top-right-radius: 10px !important;
-  border-top-left-radius: 10px !important;
-  background-color: $table-bg-color !important;
+  .p-datatable-thead{
+    border-top-right-radius: 10px !important;
+    border-top-left-radius: 10px !important;
+    background-color: $table-bg-color !important;
+  }
+
 }
 
 </style>
