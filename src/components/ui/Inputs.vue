@@ -26,12 +26,12 @@
 
       <label
           :class="{ 'peer-focus:text-error ': props.error, 'left-[40px]': props.email, 'peer-focus:text-primary ': !props.error, 'left-4 ': !props.email,
-        'top-[14px] text-sm' : props.size === 'sm',
+        'top-[16px] text-sm' : props.size === 'sm',
         'top-[16px] text-base ' : props.size === 'md',
         'pl-6' : props.searchible }"
           :for="inputId"
-          class="absolute  text-[#808BA0] font-semibold duration-300 transform -translate-y-4 scale-75   origin-[0] left-[12px]  peer-focus:text-primary  peer-placeholder-shown:scale-100  line-clamp-1
-           peer-placeholder-shown:-translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-[28px]">
+          class="absolute  text-[#808BA0] bg-white font-semibold duration-300 transform -translate-y-[28px] scale-75 origin-[0] left-[12px]  peer-focus:text-primary
+          peer-placeholder-shown:scale-100  line-clamp-1 peer-placeholder-shown:-translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-[28px]">
         {{ props.placeholder }}
       </label>
 

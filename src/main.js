@@ -11,7 +11,8 @@ import Inputs from '@/components/ui/Inputs.vue'
 import Button from "primevue/button";
 import Selects from "@/components/ui/Selects.vue"
 import ToastService from 'primevue/toastservice';
-
+import { createPinia } from 'pinia'
+const pinia = createPinia()
 const app = createApp(App);
 
 app.use(PrimeVue, {
@@ -22,6 +23,7 @@ app.use(PrimeVue, {
 });
 
 app.use(router)
+app.use(pinia)
 app.component('fin-input', Inputs);
 app.component('fin-button',Button);
 app.use(ToastService);

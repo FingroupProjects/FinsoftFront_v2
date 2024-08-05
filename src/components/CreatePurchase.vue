@@ -99,7 +99,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog");
+      emit("closeDialog",res.result.id);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -168,9 +168,9 @@ watch(createValues, (newValue) => {
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
+      <FloatLabel class="col-span-4">
       <DatePicker
         showIcon
-        placeholder="Дата"
         v-model="createValues.datetime24h"
         :class="{ 'p-invalid': v$.datetime24h.$error }"
         showTime
@@ -178,8 +178,10 @@ watch(createValues, (newValue) => {
         dateFormat="dd.mm.yy,"
         fluid
         iconDisplay="input"
-        class="col-span-4"
+        class="w-full"
       />
+        <label for="dd-city">Дата</label>
+      </FloatLabel>
 
       <FloatLabel class="col-span-4">
         <Dropdown
@@ -272,7 +274,10 @@ watch(createValues, (newValue) => {
     height: 46px;
     align-items: center;
   }
-
+  .p-button-secondary{
+    color: transparent !important;
+    border-color: transparent !important;
+  }
   .p-invalid {
     border: 1px solid #f2376f !important;
   }
