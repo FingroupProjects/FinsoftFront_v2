@@ -133,8 +133,8 @@ watchEffect(() => {
 watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
     findCurrency(newValue.selectedAgreement).then(() => {
-       createValues.selectCurrency = currency.value[0];
-         console.log(currency.value);
+      createValues.selectCurrency = currency.value[0];
+      console.log(currency.value);
     });
     isCurrencyFetched.value = true;
   }
@@ -145,10 +145,7 @@ watch(createValues, (newValue) => {
   <div class="create-purchase">
     <div class="header">
       <div>
-        <div class="header-title">
-          Создание закупки
-        </div>
-
+        <div class="header-title">Создание закупки</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №32151
         </div>
@@ -178,6 +175,7 @@ watch(createValues, (newValue) => {
         :class="{ 'p-invalid': v$.datetime24h.$error }"
         showTime
         hourFormat="24"
+        dateFormat="dd.mm.yy,"
         fluid
         iconDisplay="input"
         class="col-span-4"
@@ -207,7 +205,7 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectedAgreement"
           :class="{ 'p-invalid': v$.selectedAgreement.$error }"
@@ -221,7 +219,7 @@ watch(createValues, (newValue) => {
         </Dropdown>
         <label for="dd-city">Договор</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectedStorage"
           :class="{ 'p-invalid': v$.selectedStorage.$error }"
@@ -233,20 +231,22 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Склад</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
-      <Dropdown optionLabel="name" v-model="userName" disabled class="w-full">
-        <template #value>
-          {{ userName.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Автор</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-3">
-      <Dropdown v-model="createValues.selectCurrency" :class="{'p-invalid':v$.selectCurrency.$error}"
-                @click="findCurrency" :loading="loading" :options="currency"
-                optionLabel="name" placeholder="Валюта" class="w-full"/>
-      <label for="dd-city">Волюта</label>
 
+      <FloatLabel class="col-span-4">
+        <Dropdown
+          v-model="createValues.selectCurrency"
+          :class="{ 'p-invalid': v$.selectCurrency.$error }"
+          @click="findCurrency(createValues.selectedAgreement)"
+          :loading="loading"
+          :options="currency"
+          optionLabel="name"
+          class="w-full"
+        >
+          <template #value>
+            {{ createValues.selectCurrency?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Валюта</label>
       </FloatLabel>
       <fin-input
         v-model="createValues.comments"
@@ -256,10 +256,14 @@ watch(createValues, (newValue) => {
     </div>
   </div>
   <CreateProduct @postGoods="getProducts" />
+  <div class="text-[20px] font-[600] absolute bottom-[40px]">
+    Автор: {{ userName.name }}
+  </div>
   <Toast />
 </template>
 
 <style lang="scss">
+@import "@/assets/style/colors";
 .create-purchase {
   .p-select {
     border-color: #dcdfe3;
@@ -301,6 +305,17 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
+    .p-inputtext:enabled:hover{
+      border-color: transparent;
+    }
+    .p-inputtext:enabled:focus{
+      border-color: transparent !important;
+    }
+
+  }
+  .p-button-secondary{
+    color: $primary-color !important;
+    border-color: $primary-color !important;
   }
   .p-inputtext {
     border-color: white;
