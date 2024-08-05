@@ -41,6 +41,7 @@ const visibleFilter = ref(false);
 const metaKey = ref(true);
 const deleteProductDialog = ref(false);
 const deleteProductsDialog = ref(false);
+const copyProductsDialog = ref(false);
 const product = ref({});
 const pageCounts = ref([
   {
@@ -94,12 +95,45 @@ const confirmDeleteSelected = () => {
 
 async function getProducts() {
   const res = await useAxios(
-    `/document/provider/purchase?itemsPerPage=${selectPage.value.count}&orderBy=id&perPage=${first.value}&search=${search.value}
-    &storage_id=${selectedStorage.value?.code}`
+    `/document/provider/purchase`,  {
+    params: {
+      itemsPerPage: selectPage.value.count,
+      orderBy: 'id',
+      perPage: first.value,
+      search: search.value,
+      storage_id: selectedStorage.value?.code,
+      counterparty_id:selectedCounterparty.value?.code
+    },
+  }
   );
   pagination.value.totalPages = res.result.pagination.total_pages;
   return (products.value = res.result.data);
+};
+
+function opeCopyModal() {
+  copyProductsDialog.value = true
 }
+
+const copyProducts = async () => {
+  const id = ref();
+  try {
+    const res = await useAxios(`/document/provider/massDelete`, {
+      method: "POST",
+      data: {
+        ids: id.value,
+      },
+    });
+    id.value = selectedProduct.value.flatMap((el) => el.id);
+    deleteProductDialog.value = false;
+  } catch (e) {
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
+  }
+};
 
 const getSeverity = (status) => {
   switch (status) {
@@ -116,7 +150,10 @@ const getSeverity = (status) => {
       };
   }
 };
-watch(selectedStorage, (newValue) => {
+watch(selectedStorage, () => {
+  getProducts();
+});
+watch(selectedCounterparty, () => {
   getProducts();
 });
 getProducts();
@@ -192,6 +229,27 @@ getProducts();
         <fin-button label="Yes" icon="pi pi-check" @click="deleteProduct" />
       </template>
     </Dialog>
+     <Dialog
+      v-model:visible="copyProductsDialog"
+      :style="{ width: '450px' }"
+      header="Confirm"
+      :modal="true"
+    >
+      <div class="flex items-center gap-4">
+        <i class="pi pi-exclamation-triangle !text-3xl" />
+        <span v-if="product">copy
+        </span>
+      </div>
+      <template #footer>
+        <fin-button
+          label="No"
+          icon="pi pi-times"
+          text
+          @click="deleteProductDialog = false"
+        />
+        <fin-button label="Yes" icon="pi pi-check" @click="copyProducts" />
+      </template>
+    </Dialog>
     <Toolbar v-if="!(!selectedProduct || !selectedProduct.length)">
       <template #start>
         <div class="flex gap-3 items-center">
@@ -202,7 +260,7 @@ getProducts();
           </div>
           <fin-button
             label="Провести"
-            icon="pi pi-trash"
+            icon="pi pi-external-link"
             class="p-button-sm"
             severity="warning"
             @click="confirmDeleteSelected"
@@ -221,7 +279,7 @@ getProducts();
             icon="pi pi-copy"
             severity="warning"
             class="p-button-sm"
-            @click="confirmDeleteSelected"
+            @click="opeCopyModal"
             :disabled="!selectedProduct || !selectedProduct.length"
           />
         </div>

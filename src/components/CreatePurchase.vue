@@ -133,8 +133,8 @@ watchEffect(() => {
 watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
     findCurrency(newValue.selectedAgreement).then(() => {
-       createValues.selectCurrency = currency.value[0];
-         console.log(currency.value);
+      createValues.selectCurrency = currency.value[0];
+      console.log(currency.value);
     });
     isCurrencyFetched.value = true;
   }
@@ -175,6 +175,7 @@ watch(createValues, (newValue) => {
         :class="{ 'p-invalid': v$.datetime24h.$error }"
         showTime
         hourFormat="24"
+        dateFormat="dd.mm.yy,"
         fluid
         iconDisplay="input"
         class="col-span-4"
@@ -204,7 +205,7 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectedAgreement"
           :class="{ 'p-invalid': v$.selectedAgreement.$error }"
@@ -218,7 +219,7 @@ watch(createValues, (newValue) => {
         </Dropdown>
         <label for="dd-city">Договор</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectedStorage"
           :class="{ 'p-invalid': v$.selectedStorage.$error }"
@@ -230,15 +231,8 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Склад</label>
       </FloatLabel>
-      <FloatLabel class="col-span-3">
-        <Dropdown optionLabel="name" v-model="userName" disabled class="w-full">
-          <template #value>
-            {{ userName.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Автор</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-3">
+
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectCurrency"
           :class="{ 'p-invalid': v$.selectCurrency.$error }"
@@ -262,10 +256,14 @@ watch(createValues, (newValue) => {
     </div>
   </div>
   <CreateProduct @postGoods="getProducts" />
+  <div class="text-[20px] font-[600] absolute bottom-[40px]">
+    Автор: {{ userName.name }}
+  </div>
   <Toast />
 </template>
 
 <style lang="scss">
+@import "@/assets/style/colors";
 .create-purchase {
   .p-select {
     border-color: #dcdfe3;
@@ -307,6 +305,17 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
+    .p-inputtext:enabled:hover{
+      border-color: transparent;
+    }
+    .p-inputtext:enabled:focus{
+      border-color: transparent !important;
+    }
+
+  }
+  .p-button-secondary{
+    color: $primary-color !important;
+    border-color: $primary-color !important;
   }
   .p-inputtext {
     border-color: white;

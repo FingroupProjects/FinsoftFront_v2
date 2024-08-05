@@ -197,20 +197,6 @@
       box-shadow: none !important;
     }
   }
-  &-secondary {
-    color: #17A825 !important;
-    border-color: #17A825 !important;
-    background-color: #fff !important;
-  }
-  &-text {
-    color: #17A825 !important;
-    &:hover {
-      color: #17A825 !important;
-      background-color: #fff !important;
-      border: none !important;
-    }
-  }
-
   &-danger {
     border: 1px solid var(--background-danger);
     background-color: var(--background-danger) !important;
