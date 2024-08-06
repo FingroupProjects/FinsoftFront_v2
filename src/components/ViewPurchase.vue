@@ -110,21 +110,20 @@ const updateView = async () =>{
           counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code
         }
       })
+      toast.add({ severity: 'success', summary: 'Изменен!', detail: 'Документ успешно изменен!', life: 1500 });
     }catch (e) {
       console.error(e)
+      toast.add({ severity: 'error', summary: 'Ошибка!', detail: `Не удалось изменить документ! ${e} ` , life: 1500 });
     }
   }
 }
-
-
-
 
 const approve = async () => {
   try {
     const res = await useAxios(`/document/provider/approve`, {
       method: 'POST',
       data:{
-        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
+        ids:[`${props.productId}`]
       }
     });
     toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
@@ -141,7 +140,7 @@ const unApprove = async () =>{
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data:{
-        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
+        ids:[`${props.productId}`]
       }
     });
     approved.value = false
@@ -152,14 +151,14 @@ const unApprove = async () =>{
   }
 }
 
-const ddd = () =>{
-  console.log('OUR DOCUMENT',viewDocument.value.organizationName.id)
-}
+const openDocumentPrint = (productId) => {
+  const url = `#/documents/${productId}`;
+  window.open(url, '_blank');
+};
 
 onMounted(async () => {
   await getView();
 });
-
 
 </script>
 <template>
@@ -193,7 +192,6 @@ onMounted(async () => {
           {{ viewDocument.organizationName.name }}
         </template>
       </Dropdown>
-
       <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
                 :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
@@ -236,7 +234,7 @@ onMounted(async () => {
         <i class="pi pi-history"></i>
         <span style="font-weight: bold; margin-bottom: 3px;">История</span>
       </fin-button>
-      <fin-button class="icon-print" severity="success">
+      <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
         <i class="pi pi-print"></i>
         <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
       </fin-button>
@@ -266,7 +264,7 @@ onMounted(async () => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement/>
+      <shopping-movement :productId="productId" />
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"
