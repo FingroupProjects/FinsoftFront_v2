@@ -31,6 +31,7 @@ const clearInputValues = () => {
   coleVo.value = "";
   price.value = "";
   sum.value = "";
+  selectedProducts.value=null
 };
 
 const addFn = async () => {
