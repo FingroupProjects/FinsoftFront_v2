@@ -24,6 +24,7 @@
       />
 
 
+
       <label
           :class="{ 'peer-focus:text-error ': props.error, 'left-[40px]': props.email, 'peer-focus:text-primary ': !props.error, 'left-4 ': !props.email,
         'top-[16px] text-sm' : props.size === 'sm',
