@@ -1,12 +1,12 @@
 <script setup>
-import { ref, watchEffect, onMounted } from "vue";
+import { ref, watchEffect, onMounted,computed } from "vue";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import { useAxios } from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
-
+import formatInputAmount from "@/constants/formatInput.js";
 const emit = defineEmits(["postGoods"]);
 
 const selectedProducts = ref();
@@ -25,6 +25,7 @@ const newProduct = ref();
 const validateProduct = (product) => {
   return product.coleVo && product.price && product.sum;
 };
+
 
 const clearInputValues = () => {
   newProduct.value = {};
@@ -121,9 +122,9 @@ onMounted(async () => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="coleVo" placeholder="Кол-во" />
-      <fin-input v-model="price" placeholder="Цена" />
-      <fin-input v-model="sum" placeholder="Сумма" />
+      <fin-input v-model="coleVo" :model-value="formatInputAmount(coleVo)" placeholder="Кол-во" />
+      <fin-input v-model="price" :model-value="formatInputAmount(price)"  placeholder="Цена" />
+      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" type="number" />
       <fin-button
         icon="pi pi-save"
         @click="addFn"
