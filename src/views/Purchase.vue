@@ -98,6 +98,10 @@ async function getProducts() {
   pagination.value.totalPages = res.result.pagination.total_pages;
   return (products.value = res.result.data);
 }
+function getProductMethods(){
+  selectedProduct.value = null
+  getProducts()
+}
 
 const getSeverity = (status, deleted) => {
   if (deleted) {
@@ -194,7 +198,7 @@ getProducts();
     </div>
   </div>
   <div class="card mt-4 bg-white h-[80vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProducts" :select-products="selectedProduct"
+    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         v-model:selection="selectedProduct"
@@ -351,7 +355,7 @@ getProducts();
         </template>
       </Column>
     </DataTable>
-    <div class="paginator-dropdown w-full bg-white sticky bottom-[0]">
+    <div class="paginator-dropdown w-[98.3%] bg-white fixed left-0 bottom-[0]">
       <span class="paginator-text"> Элементов на странице: </span>
       <Dropdown
           v-model="selectPage"
