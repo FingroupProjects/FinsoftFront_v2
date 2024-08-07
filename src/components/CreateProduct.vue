@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect, onMounted } from "vue";
+import { ref, watchEffect, onMounted,computed } from "vue";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -25,6 +25,18 @@ const newProduct = ref();
 const validateProduct = (product) => {
   return product.coleVo && product.price && product.sum;
 };
+const formattedCardNumber = computed({
+  get() {
+    const cardNumberWithoutSpaces = price.value.replace(/\s/g, '');
+    const formattedNumber = cardNumberWithoutSpaces.replace(/\B(?=(\d{4})+(?!\d))/g, ' ');
+    return formattedNumber;
+  },
+  set(value) {
+    const regex = /\D/g; // Regular expression to remove non-digits
+    price.value = value.replace(regex, '');
+  }
+});
+
 
 const clearInputValues = () => {
   newProduct.value = {};
@@ -121,9 +133,9 @@ onMounted(async () => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="coleVo" placeholder="Кол-во" />
-      <fin-input v-model="price" placeholder="Цена" />
-      <fin-input v-model="sum" placeholder="Сумма" />
+      <fin-input v-model="coleVo" placeholder="Кол-во" type="number"/>
+      <fin-input v-model="price" placeholder="Цена" type="number" />
+      <fin-input v-model="sum" placeholder="Сумма" type="number" />
       <fin-button
         icon="pi pi-save"
         @click="addFn"

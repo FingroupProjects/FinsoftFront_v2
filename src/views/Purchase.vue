@@ -74,42 +74,54 @@ const onRowClick = (event) => {
 };
 const handleFiltersUpdate = (filters) => {
   console.log('Received filters:', filters);
-  getProducts(filters);
-  visibleFilter.value = false
+  for (const filter of filters) {
+    if (filter !== '') {
+      filterData.value = filter;
+    }
+    console.log(filterData)
+  }
 }
 
-async function getProducts(filters = {}) {
-  const params = {
-    itemsPerPage: selectPage.value.count,
-    orderBy: 'id',
-    perPage: first.value,
-    search: search.value,
-    storage_id: selectedStorage.value?.code,
-    counterparty_id: selectedCounterparty.value?.code,
-    page: first.value + 1,
-    ...filters,
-  };
-
-  const res = await useAxios(`/document/provider/purchase`, { params });
-
+async function getProducts() {
+  const res = await useAxios(`/document/provider/purchase`,  {
+    params: {
+      itemsPerPage: selectPage.value.count,
+      orderBy: 'id',
+      perPage: first.value,
+      search: search.value,
+      storage_id: selectedStorage.value?.code,
+      counterparty_id:selectedCounterparty.value?.code,
+      page:first.value+1
+    },
+  }
+  );
   pagination.value.totalPages = res.result.pagination.total_pages;
-  products.value = res.result.data;
-  return products.value;
+  return (products.value = res.result.data);
 }
 
+const getSeverity = (status, deleted) => {
+  if (deleted) {
+    return {
+      status: "warn",
+      name: "Удалено",
+    };
+  }
 
-const getSeverity = (status) => {
   switch (status) {
     case true:
       return {
         status: "success",
         name: "Проведен",
       };
-
     case false:
       return {
         status: "warn",
         name: "Не проведен",
+      };
+    default:
+      return {
+        status: "error",
+        name: "Unknown status",
       };
   }
 };
@@ -191,10 +203,12 @@ getProducts();
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
-
+        @sort="sortData('code')"
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
+        <template #header>
+        </template>
         <template #sorticon="{index}">
           <i
               @click="sortData('code',index)"
@@ -301,8 +315,8 @@ getProducts();
         </template>
         <template #body="slotProps">
           <Tag
-              :value="getSeverity(slotProps.data.active).name"
-              :severity="getSeverity(slotProps.data.active).status"
+              :value="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).name"
+              :severity="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).status"
           />
         </template>
       </Column>
