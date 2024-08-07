@@ -74,30 +74,29 @@ const onRowClick = (event) => {
 };
 const handleFiltersUpdate = (filters) => {
   console.log('Received filters:', filters);
-  for (const filter of filters) {
-    if (filter !== '') {
-      filterData.value = filter;
-    }
-    console.log(filterData)
-  }
+  getProducts(filters);
+  visibleFilter.value = false
 }
 
-async function getProducts() {
-  const res = await useAxios(`/document/provider/purchase`,  {
-    params: {
-      itemsPerPage: selectPage.value.count,
-      orderBy: 'id',
-      perPage: first.value,
-      search: search.value,
-      storage_id: selectedStorage.value?.code,
-      counterparty_id:selectedCounterparty.value?.code,
-      page:first.value+1
-    },
-  }
-  );
+async function getProducts(filters = {}) {
+  const params = {
+    itemsPerPage: selectPage.value.count,
+    orderBy: 'id',
+    perPage: first.value,
+    search: search.value,
+    storage_id: selectedStorage.value?.code,
+    counterparty_id: selectedCounterparty.value?.code,
+    page: first.value + 1,
+    ...filters,
+  };
+
+  const res = await useAxios(`/document/provider/purchase`, { params });
+
   pagination.value.totalPages = res.result.pagination.total_pages;
-  return (products.value = res.result.data);
+  products.value = res.result.data;
+  return products.value;
 }
+
 
 const getSeverity = (status) => {
   switch (status) {
