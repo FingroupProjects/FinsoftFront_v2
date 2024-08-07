@@ -99,29 +99,18 @@ async function getProducts() {
   return (products.value = res.result.data);
 }
 
-const getSeverity = (status, deleted) => {
-  if (deleted) {
-    return {
-      status: "danger",
-      name: "Удалено",
-    };
-  }
-
+const getSeverity = (status) => {
   switch (status) {
     case true:
       return {
         status: "success",
         name: "Проведен",
       };
+
     case false:
       return {
         status: "warn",
         name: "Не проведен",
-      };
-    default:
-      return {
-        status: "error",
-        name: "Unknown status",
       };
   }
 };
@@ -193,7 +182,7 @@ getProducts();
       />
     </div>
   </div>
-  <div class="card mt-4 bg-white h-[86vh] overflow-auto relative bottom-[43px]">
+  <div class="card mt-4 bg-white h-[80vh] overflow-auto relative bottom-[43px]">
     <MethodsPurchase @get-product="getProducts" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
@@ -203,7 +192,6 @@ getProducts();
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
-        @sort="sortData('code')"
 
     >
       <Column selectionMode="multiple"></Column>
@@ -314,8 +302,8 @@ getProducts();
         </template>
         <template #body="slotProps">
           <Tag
-              :value="getSeverity(slotProps.data.active,slotProps.data.deleted_at).name"
-              :severity="getSeverity(slotProps.data.active,deleted_at).status"
+              :value="getSeverity(slotProps.data.active).name"
+              :severity="getSeverity(slotProps.data.active).status"
           />
         </template>
       </Column>
@@ -350,9 +338,8 @@ getProducts();
         </template>
       </Column>
     </DataTable>
-    <div class="paginator-dropdown w-[98.3%] bg-white fixed bottom-[0] left-0">
+    <div class="paginator-dropdown w-full bg-white sticky bottom-[0]">
       <span class="paginator-text"> Элементов на странице: </span>
-
       <Dropdown
           v-model="selectPage"
           @update:model-value="getProducts"
@@ -387,10 +374,10 @@ getProducts();
   </div>
 
   <Sidebar
-      v-model:visible="openViewPurchase"
+      v-model:visible="visibleView"
       :show-close-icon="false"
       position="right"
-      class="create-purchase"
+      class="create-purchase-sidebar"
   >
     <view-purchase :productId="selectedProductId"/>
   </Sidebar>
@@ -472,6 +459,11 @@ getProducts();
     font-weight: 600;
     font-family: Manrope, sans-serif;
   }
+}
+
+.create-purchase-sidebar{
+  width: 1154px !important;
+  border-top-left-radius: 30px;
 }
 
 .create-purchase{

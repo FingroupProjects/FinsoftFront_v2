@@ -2,70 +2,114 @@
 import DatePicker from "primevue/DatePicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
-import {onMounted, reactive, ref} from "vue";
-import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useAxios} from "@/composable/useAxios.js";
+import { onMounted, reactive, ref, watch } from "vue";
+import { useStaticApi } from "@/composable/useStaticApi.js";
+import { useAxios } from "@/composable/useAxios.js";
 
-const userNames = ref()
+const userNames = ref([]);
 const deleted = ref([
-  { label: 'Да', value: '1' },
-  { label: 'Нет', value: '0 ' },
+  { label: 'Да', value: 1},
+  { label: 'Нет', value: 0 },
 ]);
 const status = ref([
-  { label: 'Проведен', value: '1' },
-  { label: 'Не проведен', value: '0' },
+  { label: 'Проведен', value: 1 },
+  { label: 'Не проведен', value: 0 },
 ]);
+const rawDateFirst = ref(null);
+const rawDateSecond = ref(null);
 const filterValues = reactive({
-  first: '',
-  second: '',
+  startDate: '',
+  endDate: '',
   organization_id: '',
-  storage_id:'',
-  currency_id:'',
+  currency_id: '',
   author_id: '',
-  deleted:'',
-  active:'',
-})
+  deleted: '',
+  active: ''
+});
 
-const emit = defineEmits(['updateFilters']); // Define emits if not already defined
+function formatDateTime(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = String(d.getFullYear()).slice(-2);
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
 
+  return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+}
+
+watch(rawDateFirst, (newValue) => {
+  if (newValue) {
+    try {
+      const formattedDateTime = formatDateTime(newValue);
+      filterValues.startDate = formattedDateTime;
+    } catch (error) {
+      console.error('Error formatting date and time:', error);
+      filterValues.startDate = '';
+    }
+  } else {
+    filterValues.startDate = '';
+  }
+});
+
+watch(rawDateSecond, (newValue) => {
+  if (newValue) {
+    try {
+      const formattedDateTime = formatDateTime(newValue);
+      filterValues.endDate = formattedDateTime;
+    } catch (error) {
+      console.error('Error formatting date and time:', error);
+      filterValues.endDate = '';
+    }
+  } else {
+    filterValues.endDate = '';
+  }
+});
+
+const emit = defineEmits(['updateFilters']);
 const datas = () => {
   emit('updateFilters', filterValues);
-}
+};
+
 
 const getUsers = async () => {
   try {
     const res = await useAxios('/user');
     const items = res.result.data;
-
-    userNames.value = items.map(user => user.name);
-
-    console.log('filters',userNames);
+    userNames.value = items.map(user => ({ label: user.name, value: user.id }));
   } catch (error) {
     console.error('Error fetching users:', error);
   }
 };
 
+const clear = () => {
+  Object.keys(filterValues).forEach(key => filterValues[key] = '');
+  rawDateFirst.value = '';
+  rawDateSecond.value = '';
+  datas()
+};
+
 const {
   findCurrency,
   currency,
-  findStorage,
-  storage,
   findOrganization,
   organization,
+} = useStaticApi();
 
-} = useStaticApi()
 
-onMounted(()=>{
-  getUsers()
-})
+onMounted(() => {
+  getUsers();
+});
 </script>
+
 
 <template>
   <div class="filters-purchase ml-5">
     <div class="text-black text-[20px] font-semibold ">Фильтры</div>
     <FloatLabel class="mt-[14px] col-span-4">
       <DatePicker
-          v-model="filterValues.first"
+          v-model="rawDateFirst"
           showIcon
           showTime
           hourFormat="24"
@@ -78,11 +122,11 @@ onMounted(()=>{
     </FloatLabel>
     <FloatLabel class="col-span-4 mt-[22px]">
       <DatePicker
-          v-model="filterValues.second"
+          v-model="rawDateSecond"
           showIcon
           showTime
           hourFormat="24"
-          dateFormat="dd.mm.yy,"
+          dateFormat="dd.mm.yy"
           fluid
           iconDisplay="input"
           class="w-[466px]"
@@ -97,42 +141,38 @@ onMounted(()=>{
         @click="findOrganization"
         option-value="code"
     />
-    <Dropdown class="mt-[22px] w-[466px] font-semibold"
-              v-model="filterValues.storage_id"
-              placeholder="Склад"
-              :options="storage"
-              option-label="name"
-              @click="findStorage"
-              option-value="code"
-    />
     <div class="flex mt-[22px] gap-4">
       <Dropdown class="w-[225px] font-semibold" placeholder="Статус"
                 v-model="filterValues.active"
                 :options="status"
                 option-label="label"
+                option-value="value"
       />
       <Dropdown class="w-[225px] font-semibold" placeholder="Удален"
                 v-model="filterValues.deleted"
                 :options="deleted"
                 option-label="label"
+                option-value="value"
       />
     </div>
     <div class="flex mt-[22px] gap-4">
       <Dropdown class="w-[225px] font-semibold" placeholder="Автор"
                 v-model="filterValues.author_id"
                 :options="userNames"
+                option-label="label"
+                option-value="value"
       />
       <Dropdown class="w-[225px] font-semibold"
                 v-model="filterValues.currency_id"
                 placeholder="Валюта"
                 :options="currency"
-                option-label="name"
+                option-label="label "
                 @click="findCurrency"
       />
     </div>
     <div class="flex mt-[22px] gap-4">
       <fin-button @click="datas()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
-      <fin-button icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
+      <fin-button @click="clear()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
     </div>
   </div>
 </template>
