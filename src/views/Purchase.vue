@@ -31,7 +31,7 @@ const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
 const selectedProduct = ref();
-
+const filterData = ref()
 const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
@@ -76,10 +76,18 @@ const onRowClick = (event) => {
     console.log('No product selected');
   }
 };
+const handleFiltersUpdate = (filters) => {
+  console.log('Received filters:', filters);
+  for (const filter of filters) {
+    if (filter !== '') {
+      filterData.value = filter;
+    }
+    console.log(filterData)
+  }
+}
 
 async function getProducts() {
-  const res = await useAxios(
-    `/document/provider/purchase`,  {
+  const res = await useAxios(`/document/provider/purchase`,  {
     params: {
       itemsPerPage: selectPage.value.count,
       orderBy: 'id',
@@ -93,8 +101,7 @@ async function getProducts() {
   );
   pagination.value.totalPages = res.result.pagination.total_pages;
   return (products.value = res.result.data);
-};
-
+}
 
 const getSeverity = (status) => {
   switch (status) {
@@ -370,7 +377,7 @@ getProducts();
   </div>
 
   <Sidebar
-      v-model:visible="openViewPurchase"
+      v-model:visible="visibleView"
       :show-close-icon="false"
       position="right"
       class="create-purchase-sidebar"
@@ -382,10 +389,9 @@ getProducts();
       v-model:visible="visibleFilter"
       :show-close-icon="false"
       position="right"
-      class="filter-purchase"
+      class="filters-purchase"
   >
-    <FilterPurchase/>
-
+    <filter-purchase  @updateFilters="handleFiltersUpdate"  />
   </Sidebar>
   <Toast />
 </template>
@@ -458,13 +464,18 @@ getProducts();
   }
 }
 
-.p-drawer-right .p-drawer {
-  width: 1004px !important;
+.create-purchase-sidebar{
+  width: 1154px !important;
   border-top-left-radius: 30px;
 }
 
-.filter-purchase{
-  width: 500px !important;
+.create-purchase{
+  width: 1154px !important;
+  border-top-left-radius: 30px;
+}
+
+.filters-purchase{
+  width: 546px !important;
   border-top-left-radius: 30px;
 }
 
