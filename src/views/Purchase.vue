@@ -99,18 +99,29 @@ async function getProducts() {
   return (products.value = res.result.data);
 }
 
-const getSeverity = (status) => {
+const getSeverity = (status, deleted) => {
+  if (deleted) {
+    return {
+      status: "warn",
+      name: "Удалено",
+    };
+  }
+
   switch (status) {
     case true:
       return {
         status: "success",
         name: "Проведен",
       };
-
     case false:
       return {
         status: "warn",
         name: "Не проведен",
+      };
+    default:
+      return {
+        status: "error",
+        name: "Unknown status",
       };
   }
 };
@@ -192,10 +203,12 @@ getProducts();
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
-
+        @sort="sortData('code')"
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
+        <template #header>
+        </template>
         <template #sorticon="{index}">
           <i
               @click="sortData('code',index)"
@@ -302,8 +315,8 @@ getProducts();
         </template>
         <template #body="slotProps">
           <Tag
-              :value="getSeverity(slotProps.data.active).name"
-              :severity="getSeverity(slotProps.data.active).status"
+              :value="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).name"
+              :severity="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).status"
           />
         </template>
       </Column>
@@ -374,7 +387,7 @@ getProducts();
   </div>
 
   <Sidebar
-      v-model:visible="visibleView"
+      v-model:visible="openViewPurchase"
       :show-close-icon="false"
       position="right"
       class="create-purchase-sidebar"
