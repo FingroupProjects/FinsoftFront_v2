@@ -366,14 +366,13 @@ getProducts();
         :show-close-icon="false"
         position="right"
         class="create-purchase"
-
     >
       <CreatePurchase @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
   <Sidebar
-      v-model:visible="visibleView"
+      v-model:visible="openViewPurchase"
       :show-close-icon="false"
       position="right"
       class="create-purchase-sidebar"
