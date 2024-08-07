@@ -120,7 +120,7 @@ const approve = async () => {
     const res = await useAxios(`/document/provider/approve`, {
       method: 'POST',
       data:{
-        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
+        ids:[`${props.productId}`]
       }
     });
     toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
@@ -137,7 +137,7 @@ const unApprove = async () =>{
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data:{
-        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
+        ids:[`${props.productId}`]
       }
     });
     approved.value = false
@@ -148,9 +148,11 @@ const unApprove = async () =>{
   }
 }
 
-const ddd = () =>{
-  console.log('OUR DOCUMENT',viewDocument.value.organizationName.id)
-}
+const openDocumentPrint = (productId) => {
+  const url = `#/documents/${productId}`;
+  window.open(url, '_blank');
+};
+
 
 onMounted(async () => {
   await getView();
@@ -187,7 +189,7 @@ onMounted(async () => {
       >
         <template #value>
           {{ viewDocument.organizationName.name }}
-        </template>
+          </template>
       </Dropdown>
 
       <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
@@ -228,8 +230,14 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
-      <fin-button @click="visibleHistory = true" icon="pi pi-history" label="История" class="p-button-lg"  severity="warning"/>
-      <fin-button icon="pi pi-print" label="Печать" class="p-button-lg"  severity="warning"/>
+      <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
+        <i class="pi pi-history"></i>
+        <span style="font-weight: bold; margin-bottom: 3px;">История</span>
+      </fin-button>
+      <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
+        <i class="pi pi-print"></i>
+        <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
+      </fin-button>
     </div>
   </div>
   <purchasing-table :productId="productId"/>
@@ -256,7 +264,7 @@ onMounted(async () => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement/>
+      <shopping-movement :productId="productId"/>
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"
@@ -304,6 +312,7 @@ onMounted(async () => {
   height: 31px !important;
 }
 .icon-print{
+
   background-color: white !important;
   color: #3935E7 !important;
   border: 2px solid #DCDFE3 !important;
