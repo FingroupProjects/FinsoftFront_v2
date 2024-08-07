@@ -384,7 +384,6 @@ getProducts();
         :show-close-icon="false"
         position="right"
         class="create-purchase"
-
     >
       <CreatePurchase @close-dialog="closeFn"/>
     </Sidebar>
