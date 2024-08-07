@@ -11,6 +11,7 @@ import { required } from "@vuelidate/validators";
 import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
+import Textarea from 'primevue/textarea';
 
 const emit = defineEmits(["closeDialog"]);
 
@@ -250,11 +251,10 @@ watch(createValues, (newValue) => {
         </Dropdown>
         <label for="dd-city">Валюта</label>
       </FloatLabel>
-      <fin-input
-        v-model="createValues.comments"
-        placeholder="Комментарий"
-        class="col-span-12 mt-[10px]"
-      />
+      <FloatLabel class="col-span-12 mt-[10px]">
+      <Textarea v-model="createValues.comments" class="w-full" rows="5" cols="30" />
+        <label for="dd-city">Комментарий</label>
+      </FloatLabel>
     </div>
   </div>
   <CreateProduct @postGoods="getProducts" />
@@ -323,9 +323,16 @@ watch(createValues, (newValue) => {
     border-color: $primary-color !important;
   }
   .p-inputtext {
-    border-color: white;
+    //border-color: white;
     border-radius: 10px;
   }
+  .p-inputtext:enabled:focus {
+    border-color: $primary-color;
+    border-radius: 10px;
+  }
+}
+.p-textarea:enabled:focus{
+  border-color: $primary-color !important;
 }
 
 .header {

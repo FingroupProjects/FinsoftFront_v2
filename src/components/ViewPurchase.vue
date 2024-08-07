@@ -13,7 +13,6 @@ import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
 
-
 const props = defineProps({
   productId:{
     required: true,
@@ -110,10 +109,8 @@ const updateView = async () =>{
           counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code
         }
       })
-      toast.add({ severity: 'success', summary: 'Изменен!', detail: 'Документ успешно изменен!', life: 1500 });
     }catch (e) {
       console.error(e)
-      toast.add({ severity: 'error', summary: 'Ошибка!', detail: `Не удалось изменить документ! ${e} ` , life: 1500 });
     }
   }
 }
@@ -123,7 +120,7 @@ const approve = async () => {
     const res = await useAxios(`/document/provider/approve`, {
       method: 'POST',
       data:{
-        ids:[`${props.productId}`]
+        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
       }
     });
     toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
@@ -140,7 +137,7 @@ const unApprove = async () =>{
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data:{
-        ids:[`${props.productId}`]
+        ids:["0e97bb29-d408-4380-8c44-e0431c2db7c8"]
       }
     });
     approved.value = false
@@ -151,14 +148,14 @@ const unApprove = async () =>{
   }
 }
 
-const openDocumentPrint = (productId) => {
-  const url = `#/documents/${productId}`;
-  window.open(url, '_blank');
-};
+const ddd = () =>{
+  console.log('OUR DOCUMENT',viewDocument.value.organizationName.id)
+}
 
 onMounted(async () => {
   await getView();
 });
+
 
 </script>
 <template>
@@ -175,10 +172,10 @@ onMounted(async () => {
         <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" severity="success" class="p-button-lg"/>
       </div>
       <div class="flex gap-[16px]">
-        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg mr-10"/>
+        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
       </div>
     </div>
-    <div v-if="isOpen" class="view-doc pr-10 form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
+    <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
       <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
       <Dropdown
           v-model="viewDocument.organizationName"
@@ -192,6 +189,7 @@ onMounted(async () => {
           {{ viewDocument.organizationName.name }}
         </template>
       </Dropdown>
+
       <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
                 :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
@@ -230,14 +228,8 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
-      <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
-        <i class="pi pi-history"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">История</span>
-      </fin-button>
-      <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
-        <i class="pi pi-print"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
-      </fin-button>
+      <fin-button @click="visibleHistory = true" icon="pi pi-history" label="История" class="p-button-lg"  severity="warning"/>
+      <fin-button icon="pi pi-print" label="Печать" class="p-button-lg"  severity="warning"/>
     </div>
   </div>
   <purchasing-table :productId="productId"/>
@@ -264,7 +256,7 @@ onMounted(async () => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement :productId="productId" />
+      <shopping-movement/>
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"
