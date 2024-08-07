@@ -23,6 +23,7 @@ import OverlayBadge from 'primevue/overlaybadge';
             <img width="93" src="@/assets/img/CloudFin.svg" class="h-[28px] me-3" alt="FlowBite Logo"/>
           </a>
         </div>
+
         <div class="flex items-center">
           <div class="flex items-center gap-[21px]">
             <OverlayBadge value="12">
