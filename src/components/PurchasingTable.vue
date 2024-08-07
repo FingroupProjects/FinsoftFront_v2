@@ -1,23 +1,113 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import FinSelect from '@/components/ui/Selects.vue';
-import { useAxios } from '@/composable/useAxios.js';
-import FinInput from '@/components/ui/Inputs.vue';
+import { ref, watchEffect, onMounted, reactive } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import { useAxios } from "@/composable/useAxios.js";
+import FloatLabel from "primevue/floatlabel";
+import Dropdown from "primevue/dropdown";
 import { useVuelidate } from "@vuelidate/core";
-import moment from "moment/moment.js";
 
 const v$ = useVuelidate();
-const goods = ref([]);
 
+const emit = defineEmits(["postGoods"]);
+
+const goods = ref([]);
+const selectedProducts = ref();
+const addInput = ref(false);
+const products = ref([]);
+const postProducts = ref([]);
+const amount = ref("");
+const price = ref("");
+const sum = ref("");
+const getAllSum = ref(0);
+const getAllProduct = ref(0);
+const productsId = ref([]);
+const editingRows = ref([]);
+const newProduct = ref();
+const editing = reactive({});
+
+const validateProduct = (product) => {
+  return product.amount && product.price && product.sum;
+};
 const props = defineProps({
-  productId: {
+  productId:{
     required: true,
-  },
+  }
 });
 
-const editing = reactive({});
+const clearInputValues = () => {
+  newProduct.value = {};
+  amount.value = "";
+  price.value = "";
+  sum.value = "";
+  selectedProducts.value = null;
+};
+
+const addFn = async () => {
+  const product = {
+    amount: amount.value,
+    price: price.value,
+    sum: sum.value,
+    good_id: selectedProducts.value.code,
+    products: selectedProducts.value.products,
+  };
+
+  if (validateProduct(product)) {
+    goods.value.push(product);
+    postProducts.value.push({
+      amount: product.amount,
+      good_id: selectedProducts.value.code,
+      price: product.price,
+    });
+    getAllSum.value += Number(product.sum);
+    getAllProduct.value += Number(product.amount);
+    getAllProduct.value += Number(product.price);
+
+    addInput.value = false;
+
+    emit("postGoods", postProducts.value);
+  }
+
+  clearInputValues();
+};
+
+const confirmDeleteProduct = (index) => {
+  const deletedProduct = goods.value.splice(index, 1)[0];  // Update goods
+  postProducts.value.splice(index, 1);
+  getAllSum.value -= Number(deletedProduct.sum);
+  getAllProduct.value -= Number(deletedProduct.amount);
+  getAllProduct.value -= Number(deletedProduct.price);
+};
+
+const getIdProducts = async () => {
+  const res = await useAxios(`good?search=3412123123`);
+  productsId.value = res.result.data.map((el) => ({
+    products: el.name,
+    code: el.id,
+  }));
+};
+
+const onRowEditSave = (event) => {
+  const { newData, index } = event;
+  const oldProduct = goods.value[index];
+
+  goods.value.splice(index, 1, newData); // Update goods
+  postProducts.value.splice(index, 1, {
+    amount: newData.amount,
+    good_id: newData.products.code,
+    price: newData.price,
+  });
+
+  getAllSum.value -= Number(oldProduct.sum);
+  getAllSum.value += Number(newData.sum);
+
+  getAllProduct.value -= Number(oldProduct.amount);
+  getAllProduct.value += Number(newData.amount);
+  getAllProduct.value -= Number(oldProduct.price);
+  getAllProduct.value += Number(newData.price);
+  goods.value.sum = newData.price * getAllProduct.value;
+  console.log(postProducts);
+};
 
 const editColumn = (rowIndex, field) => {
   editing[rowIndex] = editing[rowIndex] || {};
@@ -27,7 +117,7 @@ const editColumn = (rowIndex, field) => {
 const saveChanges = (rowIndex, field) => {
   if (editing[rowIndex]) {
     delete editing[rowIndex][field];
-    // Mark the item as updated
+
     goods.value[rowIndex].updated = true;
   }
 };
@@ -51,13 +141,17 @@ const getGood = async () => {
     goods.value = items.map((item) => ({
       name: item.good.name,
       amount: item.amount,
-      price: item.good.price,
-      sum: sum,
+      price: item.price,
+      sum: item.price * item.price,
       photo: item.image ? `${imgURL}${item.image}` : '',
       created: false,
       updated: false,
       deleted: false,
     }));
+
+    getAllSum.value = sum;
+    getAllProduct.value = items.reduce((total, item) => total + Number(item.amount), 0);
+    console.log('name',goods.value)
   } catch (error) {
     console.log(error);
   }
@@ -84,131 +178,105 @@ const updateGoods = async () => {
   }
 };
 
-onMounted(() => {
-  getGood();
+watchEffect(() => {
+  sum.value = amount.value * price.value;
+
+});
+
+onMounted(async () => {
+  await getIdProducts();
+  await getGood();
+  console.log('sum',sum.value)
 });
 </script>
 
 <template>
   <div class="card-sidebar">
-    <DataTable :value="goods" tableStyle="min-width: 10px; height: 100px;">
-      <Column header="Наименование">
-        <template #body="slotProps">
-          <div style="display: flex; align-items: center;">
-            <i v-if="!slotProps.data.photo" class="pi pi-image" style="margin-right: 10px;"></i>
-            <img v-else :src="slotProps.data.photo" class="image-good">
-            <span class="ml-[10px]">{{ slotProps.data.name }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column header="Кол-во" style="width: 100px;">
-        <template #body="slotProps">
-          <div @dblclick="editColumn(slotProps.rowIndex, 'amount')">
-            <template v-if="isEditing(slotProps.rowIndex, 'amount')">
-              <fin-input placeholder="Кол-во" v-model="slotProps.data.amount" @blur="saveChanges(slotProps.rowIndex, 'amount')" />
-            </template>
-            <template v-else>
-              {{ slotProps.data.amount }}
-            </template>
-          </div>
-        </template>
-      </Column>
-      <Column header="Цена" style="width: 100px;">
-        <template #body="slotProps">
-          <div @dblclick="editColumn(slotProps.rowIndex, 'price')">
-            <template v-if="isEditing(slotProps.rowIndex, 'price')">
-              <fin-input placeholder="Цена" v-model="slotProps.data.price" @blur="saveChanges(slotProps.rowIndex, 'price')" />
-            </template>
-            <template v-else>
-              {{ slotProps.data.price }}
-            </template>
-          </div>
-        </template>
-      </Column>
-      <Column header="Сумма" style="width: 100px;">
-        <template #body="slotProps">
-          <div @dblclick="editColumn(slotProps.rowIndex, 'sum')">
-            <template v-if="isEditing(slotProps.rowIndex, 'sum')">
-              <fin-input placeholder="Сумма" v-model="slotProps.data.sum" @blur="saveChanges(slotProps.rowIndex, 'sum')" />
-            </template>
-            <template v-else>
-              {{ slotProps.data.sum }}
-            </template>
-          </div>
-        </template>
-      </Column>
-      <Column header="" style="width: 50px;">
-        <template #body="slotProps">
-          <i class="pi pi-trash" style="cursor: pointer;" @click="updateGoods()"></i>
-        </template>
-      </Column>
-    </DataTable>
+    <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
+      <FloatLabel class="col-span-6">
+        <Dropdown
+            v-model="selectedProducts"
+            :options="productsId"
+            optionLabel="products"
+            class="w-full"
+        />
+        <label for="">Поиск по Id, наименованию, штрих коду</label>
+      </FloatLabel>
+      <div class="col-span-6 flex gap-[16px]">
+        <fin-input v-model="amount" placeholder="Кол-во" />
+        <fin-input v-model="price" placeholder="Цена" />
+        <fin-input v-model="sum" placeholder="Сумма" />
+        <fin-button
+            icon="pi pi-save"
+            @click="addFn"
+            label="Сохранить"
+            severity="success"
+            class="p-button-lg"
+        />
+      </div>
+    </div>
+    <div class="table-create" v-if="goods.length > 0">
+      <DataTable
+          :value="goods"
+          class="mt-[21px]"
+          v-model:editingRows="editingRows"
+          @row-edit-save="onRowEditSave"
+          editMode="row"
+          tableStyle="min-width: 50rem"
+      >
+        <Column field="name" header="Наименование">
+          <template #editor="{ data, field }">
+            <Dropdown
+                v-model="data[field]"
+                :options="productsId"
+                optionLabel="name"
+                placeholder="Поиск по Id, наименованию, штрих коду"
+                class="h-[46px]"
+                fluid
+            >
+              <template #value>
+                <span v-if="data[field]">{{ data[field] }}</span>
+                <span v-else>{{ data[field] }}</span>
+              </template>
+            </Dropdown>
+          </template>
+        </Column>
+          <Column field="amount" header="Кол-во">
+          <template #editor="{ data, field }">
+            <fin-input v-model="data[field]" fluid  />
+          </template>
+        </Column>
+        <Column field="price" header="Цена">
+          <template #editor="{ data, field }">
+            <fin-input v-model="data[field]" fluid  />
+          </template>
+        </Column>
+        <Column field="sum" header="Сумма"></Column>
+        <Column field="quantity" header="">
+          <template #body="{ index }">
+            <i
+                @click="confirmDeleteProduct(index)"
+                class="pi pi-trash text-[#808BA0] cursor-pointer"
+            ></i>
+          </template>
+        </Column>
+        <Column
+            :rowEditor="true"
+            bodyClass="w-[7%]"
+            headerStyle="min-width: 4rem"
+        ></Column>
+      </DataTable>
+    </div>
+    <div class="footer-card flex justify-end text-[18px] mt-[30px] p-[15px] bg-[#F5F6FA]">
+      <p class="mr-[15px]">Итого: </p>
+      <span class="font-[600]">{{ getAllSum }} ₽</span>
+    </div>
   </div>
 </template>
 
-<style lang="scss">
-@import "@/assets/style/colors";
+<style scoped>
 
-.card-sidebar {
-  td {
-    color: black !important;
-    font-size: 18px !important;
-    font-weight: 600 !important;
-  }
-
-  .p-datatable-header-cell {
-    background-color: $table-bg-color !important;
-  }
-  .p-select-open {
-    background-color: white !important;
-    width: 20px !important;
-  }
-  .relative {
-    width: 170px !important;
-  }
-  .p-focus {
-    background-color: white !important;
-    border: 1px solid $pi-chevron-color !important;
-  }
-  .p-select-option {
-    border-radius: 10px !important;
-    padding: 8px 16px !important;
-    margin: 4px 0 !important;
-    color: black !important;
-  }
-
-  .pi-trash {
-    color: $text-color !important;
-  }
-  .image-good {
-    background-color: #f6f6f6 !important;
-    border-radius: 10px !important;
-    padding: 3px;
-    width: 50px;
-    height: 50px;
-  }
-  .pi-image {
-    background-color: #f6f6f6 !important;
-    border-radius: 10px !important;
-    padding: 3px;
-    width: 50px;
-    height: 50px;
-    font-size: 30px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #808ba0 !important;
-  }
-
-  .p-datatable-table-container {
-    border-top-right-radius: 10px !important;
-  }
-}
-
-.color-circle {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin-right: 8px;
+.table-create {
+  margin-top: 1rem;
 }
 </style>
