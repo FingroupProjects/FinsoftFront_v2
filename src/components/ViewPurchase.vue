@@ -12,6 +12,7 @@ import ShoppingMovement from "@/components/ShoppingMovement.vue";
 import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
+import CreateProduct from "@/components/CreateProduct.vue";
 
 const props = defineProps({
   productId:{
@@ -229,7 +230,6 @@ onMounted(async () => {
     </div>
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
-      <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
       <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
         <i class="pi pi-history"></i>
         <span style="font-weight: bold; margin-bottom: 3px;">История</span>
@@ -240,24 +240,9 @@ onMounted(async () => {
       </fin-button>
     </div>
   </div>
+
   <purchasing-table :productId="productId"/>
-  <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]">
-    <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">Итого:</div>
-    <div class="flex gap-[49px]">
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">Кол-во</div>
-        780
-      </div>
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">Товаров</div>
-        4
-      </div>
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">Сумма</div>
-        28 190
-      </div>
-    </div>
-  </div>
+
     <Sidebar
         v-model:visible="visibleMovement"
         :show-close-icon="false"
@@ -277,11 +262,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss">
-.p-datepicker {
-  border-radius: 100px;
-  display: flex;
-  align-items: center;
-}
+
 .view-doc{
   .p-select-option .p-focus{
     background-color: #3935E7 !important;
@@ -304,7 +285,7 @@ onMounted(async () => {
   }
 }
 .icon-history{
-  margin-left: 600px !important;
+  margin-left: 800px !important;
   background-color: white !important;
   color: #3935E7 !important;
   border: 2px solid #DCDFE3 !important;
@@ -328,6 +309,10 @@ onMounted(async () => {
     box-shadow: none !important;
     height: 46px;
     align-items: center;
+  }
+  .p-inputtext {
+    border: 1px solid #DCDFE3;
+    border-radius: 10px !important;
   }
 
 }
