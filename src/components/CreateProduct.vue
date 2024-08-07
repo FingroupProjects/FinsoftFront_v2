@@ -6,7 +6,7 @@ import Column from "primevue/column";
 import { useAxios } from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
-
+import formatInputAmount from "@/constants/formatInput.js";
 const emit = defineEmits(["postGoods"]);
 
 const selectedProducts = ref();
@@ -25,17 +25,6 @@ const newProduct = ref();
 const validateProduct = (product) => {
   return product.coleVo && product.price && product.sum;
 };
-const formattedCardNumber = computed({
-  get() {
-    const cardNumberWithoutSpaces = price.value.replace(/\s/g, '');
-    const formattedNumber = cardNumberWithoutSpaces.replace(/\B(?=(\d{4})+(?!\d))/g, ' ');
-    return formattedNumber;
-  },
-  set(value) {
-    const regex = /\D/g; // Regular expression to remove non-digits
-    price.value = value.replace(regex, '');
-  }
-});
 
 
 const clearInputValues = () => {
@@ -133,9 +122,9 @@ onMounted(async () => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="coleVo" placeholder="Кол-во" type="number"/>
-      <fin-input v-model="price" placeholder="Цена" type="number" />
-      <fin-input v-model="sum" placeholder="Сумма" type="number" />
+      <fin-input v-model="coleVo" :model-value="formatInputAmount(coleVo)" placeholder="Кол-во" />
+      <fin-input v-model="price" :model-value="formatInputAmount(price)"  placeholder="Цена" />
+      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" type="number" />
       <fin-button
         icon="pi pi-save"
         @click="addFn"

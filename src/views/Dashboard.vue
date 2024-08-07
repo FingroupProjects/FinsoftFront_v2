@@ -4,7 +4,7 @@ import OverlayBadge from 'primevue/overlaybadge';
 </script>
 
 <template>
-  <nav class="fixed top-0 z-50 w-full   border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+  <nav class="fixed top-0 z-50 w-full border-gray-200 dark:bg-gray-800 dark:border-gray-700">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
@@ -79,9 +79,9 @@ import OverlayBadge from 'primevue/overlaybadge';
 
   <Sidebar/>
 
-  <div class="p-4 sm:ml-64">
-    <div class="p-4 rounded-lg  dark:border-gray-700 mt-[28px]">
-      <div class=" gap-4 mb-4">
+  <div class=" pt-4 pl-4 pr-4 pb-0 sm:ml-64">
+    <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]">
+      <div class=" gap-4">
         <router-view></router-view>
       </div>
     </div>
