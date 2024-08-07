@@ -385,7 +385,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <CreatePurchase @close-dialog="closeFn"/>
+      <CreatePurchase @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 

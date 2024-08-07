@@ -13,7 +13,7 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 
-const emit = defineEmits(["closeDialog"]);
+const emit = defineEmits(["closeDialog","closeSidebar"]);
 
 const toast = useToast();
 
@@ -62,7 +62,7 @@ async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-      `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
+      `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty?.code || ''}`
     );
     return (agreementList.value = res.result.data.map((el) => {
       return {
@@ -161,7 +161,7 @@ watch(createValues, (newValue) => {
         />
         <fin-button
           icon="pi pi-times"
-          @click="emit('closeDialog')"
+          @click="emit('closeSidebar')"
           label="Отменить"
           severity="warning"
           class="p-button-lg"
