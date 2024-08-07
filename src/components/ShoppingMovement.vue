@@ -12,10 +12,16 @@ import {useAxios} from "@/composable/useAxios.js";
 const balance = ref({})
 const goodAccounting = ref({})
 const counterparty = ref({})
+const props = defineProps({
+  productId: {
+    required: true,
+  },
+});
 
 const getBalance = async () => {
   try {
-    const res = await useAxios(`http://192.168.1.61/api/document-report/balance/7e0d3c97-fb72-422f-8513-46c315923868`);
+    const res = await useAxios(`document-report/balance/${props.productId}`);
+
     const items = res.result.data;
 
     if (items && items.length > 0) {
@@ -37,7 +43,7 @@ const getBalance = async () => {
 
 const getGoodAccounting = async () => {
   try {
-    const res = await useAxios(`http://192.168.1.61/api/document-report/good-accountings/7e0d3c97-fb72-422f-8513-46c315923868`)
+    const res = await useAxios(`document-report/good-accountings/${props.productId}`)
     const items = res.result.data;
     if (items && items.length > 0) {
       const goodAccountings = items.map(item => ({
@@ -60,7 +66,7 @@ const getGoodAccounting = async () => {
 
 const getCounterparty = async () =>{
   try{
-    const res = await useAxios(`http://192.168.1.61/api/document-report/counterparty-settlements/7e0d3c97-fb72-422f-8513-46c315923868`)
+    const res = await useAxios(`document-report/counterparty-settlements/${props.productId}`)
     const items = res.result.data
     if (items && items.length > 0) {
       const counterparties = items.map(item => ({

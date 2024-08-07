@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
+import DocumentPrint from "@/components/DocumentPrint.vue";
 
 const routes = [
     {
@@ -19,6 +20,12 @@ const routes = [
             }
         ]
     },
+    {
+        path: '/documents/:productId', // Updated to include a route parameter
+        name: 'DocumentPrint',
+        component: DocumentPrint,
+        props: true // Allows passing route params as props to the component
+    }
 ]
 
 const router = createRouter({
