@@ -17,6 +17,7 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
+import HeaderPurchase from "@/components/HeaderPurchase.vue";
 
 const {
   findStorage,
@@ -36,7 +37,6 @@ const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
 const first = ref(1)
-const visibleView = ref(false)
 const visibleFilter = ref(false)
 const openViewPurchase = ref(false)
 const metaKey = ref(true);
@@ -69,12 +69,8 @@ const selectPage = ref({
 
 const onRowClick = (event) => {
   const product = event.data;
-  if (product) {
-    visibleView.value = true;
-    selectedProductId.value = product.id
-  } else {
-    console.log('No product selected');
-  }
+  openViewPurchase.value = true;
+  selectedProductId.value = product.id
 };
 
 async function getProducts() {
@@ -132,7 +128,8 @@ getProducts();
 </script>
 
 <template>
-  <div class="grid grid-cols-12 gap-[16px] purchase-filter">
+  <header-purchase/>
+  <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search" />
       <InputText
@@ -178,7 +175,7 @@ getProducts();
       />
     </div>
   </div>
-  <div class="card mt-4 bg-white h-[86vh] relative overflow-auto">
+  <div class="card mt-4 bg-white h-[80vh] overflow-auto relative bottom-[43px]">
     <MethodsPurchase @get-product="getProducts" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
@@ -334,7 +331,7 @@ getProducts();
         </template>
       </Column>
     </DataTable>
-    <div class="paginator-dropdown w-full bg-white absolute bottom-[0]">
+    <div class="paginator-dropdown w-full bg-white sticky bottom-[0]">
       <span class="paginator-text"> Элементов на странице: </span>
       <Dropdown
           v-model="selectPage"

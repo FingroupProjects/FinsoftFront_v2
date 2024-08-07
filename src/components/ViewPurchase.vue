@@ -13,7 +13,6 @@ import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
 
-
 const props = defineProps({
   productId:{
     required: true,
@@ -115,9 +114,6 @@ const updateView = async () =>{
     }
   }
 }
-
-
-
 
 const approve = async () => {
   try {
@@ -232,14 +228,8 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button icon="pi pi-plus" severity="success" label="Добавить"/>
-      <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
-        <i class="pi pi-history"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">История</span>
-      </fin-button>
-      <fin-button class="icon-print" severity="success">
-        <i class="pi pi-print"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
-      </fin-button>
+      <fin-button @click="visibleHistory = true" icon="pi pi-history" label="История" class="p-button-lg"  severity="warning"/>
+      <fin-button icon="pi pi-print" label="Печать" class="p-button-lg"  severity="warning"/>
     </div>
   </div>
   <purchasing-table :productId="productId"/>

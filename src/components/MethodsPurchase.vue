@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {ref, watchEffect} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
@@ -15,15 +15,27 @@ const deleteProductsDialog = ref(false);
 const copyProductsDialog = ref(false);
 const conductDialog = ref(false)
 
+const selectProduct = (product) => {
+  const hasActive = props.selectProducts.some(p => p.active);
+  console.log(hasActive)
+  if (props.selectProducts[0].active !== hasActive) {
+    return toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: '',
+      life: 3000,
+    });
+  }
+};
+watchEffect(() => {
+  selectProduct()
+})
 const copyProducts = async () => {
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   try {
-    const res = await useAxios(`/document/provider/massRestore`, {
+    const res = await useAxios(`/document/copy/${id.value[0]}`, {
       method: "POST",
-      data: {
-        ids: id.value,
-      },
     });
     emit('getProduct')
     copyProductsDialog.value = false;
@@ -45,28 +57,32 @@ const copyProducts = async () => {
 
 const deleteProduct = async () => {
   const id = ref();
+  id.value = props.selectProducts.flatMap((el) => el.id);
+
+  const endpoint = props.selectProducts[0].active
+      ? '/document/provider/massDelete'
+      :'/document/provider/massRestore' ;
 
   try {
-    id.value = props.selectProducts.flatMap((el) => el.id);
-    const res = await useAxios(`/document/provider/massDelete`, {
+    const response = await useAxios(endpoint, {
       method: "POST",
       data: {
         ids: id.value,
       },
     });
-    emit('getProduct')
-    deleteProductsDialog.value = false;
+    emit('getProduct'); // Trigger an event to refresh product data
+    deleteProductsDialog.value = false; // Close the delete dialog
     toast.add({
       severity: "success",
-      summary: "Success Message",
-      detail: '',
+      summary: "Success",
+      detail: "Products deleted successfully.",
       life: 3000,
     });
-  } catch (e) {
+  } catch (error) {
     toast.add({
       severity: "error",
-      summary: "Error Message",
-      detail: e,
+      summary: "Error",
+      detail: error.message || 'An error occurred during deletion.', // Provide more detailed error message if available
       life: 3000,
     });
   }
@@ -74,16 +90,20 @@ const deleteProduct = async () => {
 
 async function conductMethod(){
   const id = ref();
+  id.value = props.selectProducts.flatMap((el) => el.id);
+  const endpoint = props.selectProducts[0].active
+      ? '/document/provider/unApprove'
+      :'/document/provider/approve' ;
+
   try {
-    id.value = props.selectProducts.flatMap((el) => el.id);
-    const res = await useAxios(`/document/provider/approve`, {
+    const res = await useAxios(endpoint, {
       method: "POST",
       data: {
         ids: id.value,
       },
     });
     emit('getProduct')
-    deleteProductsDialog.value = false;
+    conductDialog.value = false;
     toast.add({
       severity: "success",
       summary: "Success Message",
