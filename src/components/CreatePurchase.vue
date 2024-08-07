@@ -143,7 +143,7 @@ watch(createValues, (newValue) => {
 </script>
 
 <template>
-  <div class="create-purchase">
+  <div class="create-purchases">
     <div class="header">
       <div>
         <div class="header-title">Создание закупки</div>
@@ -266,7 +266,7 @@ watch(createValues, (newValue) => {
 
 <style lang="scss">
 @import "@/assets/style/colors";
-.create-purchase {
+.create-purchases {
   .p-select {
     border-color: #dcdfe3;
     border-radius: 10px !important;
