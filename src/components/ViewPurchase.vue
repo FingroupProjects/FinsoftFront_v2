@@ -161,7 +161,7 @@ onMounted(async () => {
 
 </script>
 <template>
-  <div class="create-purchase">
+  <div class="edit-purchase">
     <Toast/>
     <div class="header">
       <div class="flex gap-[16px]">
@@ -321,7 +321,7 @@ onMounted(async () => {
 }
 
 
-.create-purchase {
+.edit-purchase {
   .p-select {
     border-color: #DCDFE3;
     border-radius: 10px !important;
