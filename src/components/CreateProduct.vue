@@ -128,7 +128,7 @@ onMounted(async () => {
       <fin-button
         icon="pi pi-save"
         @click="addFn"
-        label="Сохранить"
+        label="Добавить"
         severity="success"
         class="p-button-lg"
       />
