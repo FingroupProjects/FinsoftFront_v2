@@ -41,13 +41,13 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes,
 })
 router.beforeEach((to, from, next) => {
 
     const { cookies } = useCookies()
-    const isAuthenticated = cookies.isKey('auth-token')
+    const isAuthenticated = cookies.isKey('token')
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/')
