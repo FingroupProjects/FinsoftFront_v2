@@ -1,17 +1,17 @@
 <script setup>
-import {reactive} from 'vue'
+import {reactive,computed} from 'vue'
 import {useAxios} from "@/composable/useAxios.js";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {useCookies} from 'vue3-cookies'
 import Toast from "primevue/toast";
 import {useToast} from "primevue/usetoast";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
-import Dropdown from "primevue/dropdown";
 
 const { cookies } = useCookies()
 
 const router = useRouter()
+const route = useRoute()
 const toast = useToast()
 
 const data = reactive({
@@ -23,7 +23,7 @@ const rules = reactive({
   password: {required},
 });
 const v$ = useVuelidate(rules, data);
-
+const layout = computed(() => route.meta?.layout)
 async function fetchOrders() {
   const result = await v$.value.$validate();
 
@@ -44,7 +44,7 @@ async function fetchOrders() {
           detail: "Message Content",
           life: 3000,
         });
-        await router.push('/dashboard')
+        await router.push({ name: 'Dashboard' })
         localStorage.setItem('user_name', res.user.name)
         localStorage.setItem('hasOneOrganization', res.user?.hasOneOrganization)
         localStorage.setItem('organization', JSON.stringify(res.user?.organization))
@@ -72,8 +72,8 @@ async function fetchOrders() {
       <img src="@/assets/img/FullLogo.png" alt="" class="relative bottom-[138px] object-cover">
       <div>
         <div class="text-[16px] leading-[16px] text-center font-semibold">Вход</div>
-        <fin-input  :error="v$.login.$error" v-model="data.login" class="w-[360px] mt-[50px]" placeholder="name"></fin-input>
-        <fin-input :error="v$.password.$error"  v-model="data.password" class="w-[360px] mt-[26px]" placeholder="password"></fin-input>
+        <fin-input  :error="v$.login.$error" v-model="data.login" class="w-[360px] mt-[50px]" placeholder="Логин"></fin-input>
+        <fin-input :error="v$.password.$error"  v-model="data.password" class="w-[360px] mt-[26px]" placeholder="Пароль"></fin-input>
         <fin-button severity="success" class="w-[360px] mt-[26px]" label="Войти" @click="fetchOrders()"/>
         <div class="text-[16px] leading-[16px] text-center font-semibold text-[#3935E7] mt-[50px]">
           Забыли пароль?
