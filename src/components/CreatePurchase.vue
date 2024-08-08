@@ -178,6 +178,7 @@ watch(createValues, (newValue) => {
         hourFormat="24"
         dateFormat="dd.mm.yy,"
         fluid
+        hideOnDateTimeSelect
         iconDisplay="input"
         class="w-full"
       />
