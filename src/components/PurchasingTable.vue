@@ -65,9 +65,8 @@ const addFn = async () => {
     });
     getAllSum.value += Number(product.sum);
     getAllProduct.value += Number(product.amount);
-    getAllProduct.value += Number(product.price);
-
     addInput.value = false;
+
     emit("postGoods", { goods: postProducts.value });
   }
 
@@ -79,7 +78,6 @@ const confirmDeleteProduct = (index) => {
   postProducts.value.splice(index, 1);
   getAllSum.value -= Number(deletedProduct.sum);
   getAllProduct.value -= Number(deletedProduct.amount);
-  getAllProduct.value -= Number(deletedProduct.price);
 };
 
 const getIdProducts = async () => {
@@ -106,8 +104,6 @@ const onRowEditSave = (event) => {
 
   getAllProduct.value -= Number(oldProduct.amount);
   getAllProduct.value += Number(newData.amount);
-  getAllProduct.value -= Number(oldProduct.price);
-  getAllProduct.value += Number(newData.price);
   goods.value.sum = newData.price * getAllProduct.value;
   console.log(postProducts);
 };
@@ -154,7 +150,6 @@ const getGood = async () => {
     }));
 
     getAllSum.value = sum;
-    getAllProduct.value = items.reduce((total, item) => total + Number(item.amount), 0);
     console.log('name',goods.value)
   } catch (error) {
     console.log(error);
@@ -235,7 +230,7 @@ onMounted(async () => {
           </template>
         </Column>
         <Column field="sum" header="Сумма"></Column>
-        <Column field="quantity" header="">
+        <Column field="quantity" header="Сумма">
           <template #body="{ index }">
             <i
                 @click="confirmDeleteProduct(index)"
@@ -251,34 +246,37 @@ onMounted(async () => {
       </DataTable>
     </div>
 
+
   </div>
-    <div class="summary-container">
-      <div class="rounded-[10px] flex justify-between items-center p-[18px] bg-[#F6F6F6]">
-        <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-          Итого:
+  <div class="summary-container">
+    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-10 bg-[#F6F6F6]">
+      <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
+        Итого:
+      </div>
+      <div class="flex gap-[49px]">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Кол-во
+          </div>
+          {{ getAllProduct }}
         </div>
-        <div class="flex gap-[49px]">
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-              Кол-во
-            </div>
-            {{ getAllProduct }}
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Товаров
           </div>
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-              Товаров
-            </div>
-            {{ goods.length }}
+          {{ goods.length }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Сумма
           </div>
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-              Сумма
-            </div>
-            {{ getAllSum.toLocaleString() }}
-          </div>
+          {{ getAllSum.toLocaleString() }}
         </div>
       </div>
     </div>
+  </div>
+
+
 
 
 </template>
@@ -293,6 +291,10 @@ onMounted(async () => {
   .p-select-label {
     margin-top: 5px;
   }
+}
+
+.summary-container{
+  position: inherit !important;
 }
 
 .card-sidebar {

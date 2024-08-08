@@ -74,7 +74,6 @@ const datas = () => {
   emit('updateFilters', filterValues);
 };
 
-
 const getUsers = async () => {
   try {
     const res = await useAxios('/user');
@@ -94,9 +93,7 @@ const getCurrency = async () =>{
     }));
     console.log('log', currency.value)
   }catch (e){
-
   }
-
 }
 const clear = () => {
   Object.keys(filterValues).forEach(key => filterValues[key] = '');
@@ -104,9 +101,6 @@ const clear = () => {
   rawDateSecond.value = '';
   datas()
 };
-
-
-
 
 const {
   findOrganization,
@@ -158,7 +152,6 @@ onMounted(() => {
         @click="findOrganization"
         option-value="code"
     />
-
     <div class="flex mt-[22px] gap-4">
       <Dropdown class="w-[225px] font-semibold" placeholder="Статус"
                 v-model="filterValues.active"
