@@ -303,7 +303,10 @@ onMounted(async () => {
     </div>
   </div>
 
-  <purchasing-table :productId="productId" @post-goods="getProducts"/>
+  <div>
+    <purchasing-table :productId="productId" @post-goods="getProducts"/>
+  </div>
+
 
     <Sidebar
         v-model:visible="visibleMovement"

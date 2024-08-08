@@ -163,7 +163,6 @@ const getGood = async () => {
 
 watchEffect(() => {
   sum.value = amount.value * price.value;
-
 });
 
 onMounted(async () => {
@@ -189,9 +188,9 @@ onMounted(async () => {
         <fin-input v-model="price" placeholder="Цена" />
         <fin-input v-model="sum" placeholder="Сумма" />
         <fin-button
-            icon="pi pi-save"
+            icon="pi pi-plus"
             @click="addFn"
-            label="Сохранить"
+            label="Добавить"
             severity="success"
             class="p-button-lg"
         />
@@ -250,45 +249,56 @@ onMounted(async () => {
         ></Column>
       </DataTable>
     </div>
-    <div
-        class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]"
-    >
-      <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-        Итого:
-      </div>
-      <div class="flex gap-[49px]">
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div
-              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
-          >
-            Кол-во
-          </div>
-          {{ getAllProduct }}
+
+  </div>
+    <div class="summary-container">
+      <div class="rounded-[10px] flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+        <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
+          Итого:
         </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div
-              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
-          >
-            Товаров
+        <div class="flex gap-[49px]">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Кол-во
+            </div>
+            {{ getAllProduct }}
           </div>
-          {{ goods.length }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div
-              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
-          >
-            Сумма
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Товаров
+            </div>
+            {{ goods.length }}
           </div>
-          {{ getAllSum.toLocaleString() }}
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Сумма
+            </div>
+            {{ getAllSum.toLocaleString() }}
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+
 </template>
 
 <style scoped>
 
+
 .table-create {
-  margin-top: 1rem;
+  .p-datatable-header-cell {
+    background: #f6f6f6;
+  }
+  .p-select-label {
+    margin-top: 5px;
+  }
+}
+
+.card-sidebar {
+  .p-component {
+    height: 48px !important;
+    border-radius: 10px !important;
+    border-color: #DCDFE3 !important;
+  }
 }
 </style>

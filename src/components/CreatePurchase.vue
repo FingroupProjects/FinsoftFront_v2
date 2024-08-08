@@ -1,19 +1,19 @@
 <script setup>
-import {reactive, ref, watch, watchEffect} from "vue";
-import DatePicker from "primevue/datePicker";
-import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useAxios} from "@/composable/useAxios.js";
+import { reactive, ref, watchEffect, watch } from "vue";
+import DatePicker from "primevue/datepicker";
+import { useStaticApi } from "@/composable/useStaticApi.js";
+import { useAxios } from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
 import moment from "moment";
-import {useVuelidate} from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
-import {useToast} from "primevue/usetoast";
+import { useVuelidate } from "@vuelidate/core";
+import { required } from "@vuelidate/validators";
+import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 
-const emit = defineEmits(["closeDialog","closeSidebar"]);
+const emit = defineEmits(["closeDialog"]);
 
 const toast = useToast();
 
@@ -36,13 +36,8 @@ const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
-const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-
-const organizationJson = localStorage.getItem('organization');
-const organizationHas = JSON.parse(organizationJson);
-
 const createValues = reactive({
-  datetime24h: new Date,
+  datetime24h: "",
   selectCurrency: "",
   selectedStorage: "",
   selectedAgreement: "",
@@ -67,7 +62,7 @@ async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-      `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty?.code || ''}`
+      `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
     );
     return (agreementList.value = res.result.data.map((el) => {
       return {
@@ -121,7 +116,6 @@ async function saveFn() {
 function getProducts(products) {
   productsInfo.value = products;
 }
-findStorage()
 
 watchEffect(() => {
   if (
@@ -136,12 +130,6 @@ watchEffect(() => {
   } else {
     createValues.selectedAgreement = null;
   }
-    if (hasOrganization === true) createValues.selectedOrganization = {
-      name:organizationHas.name,
-      code:organizationHas.id
-    }
-    if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
-
 });
 watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
@@ -173,7 +161,7 @@ watch(createValues, (newValue) => {
         />
         <fin-button
           icon="pi pi-times"
-          @click="emit('closeSidebar')"
+          @click="emit('closeDialog')"
           label="Отменить"
           severity="warning"
           class="p-button-lg"
@@ -188,22 +176,20 @@ watch(createValues, (newValue) => {
         :class="{ 'p-invalid': v$.datetime24h.$error }"
         showTime
         hourFormat="24"
-        showButtonBar
         dateFormat="dd.mm.yy,"
         fluid
-        hideOnDateTimeSelect
         iconDisplay="input"
         class="w-full"
       />
         <label for="dd-city">Дата</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
+
+      <FloatLabel class="col-span-4">
         <Dropdown
           v-model="createValues.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
           @click="findOrganization"
-
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
@@ -316,7 +302,7 @@ watch(createValues, (newValue) => {
   }
 
   .p-datepicker {
-    border: transparent;
+    border: 1px solid #dcdfe3;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -324,6 +310,13 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
+    .p-inputtext:enabled:hover{
+      border-color: transparent;
+    }
+    .p-inputtext:enabled:focus{
+      border-color: transparent !important;
+    }
+
   }
   .p-button-secondary{
     color: $primary-color !important;
@@ -341,9 +334,7 @@ watch(createValues, (newValue) => {
 .p-textarea:enabled:focus{
   border-color: $primary-color !important;
 }
-.p-inputtext:enabled:focus{
-  border-color: #DCDFE3 !important;
-}
+
 .header {
   display: flex;
   justify-content: space-between;

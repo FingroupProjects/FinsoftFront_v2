@@ -110,7 +110,7 @@ onMounted(async () => {
     <div class="header-title">Товары</div>
   </div>
   <div
-    class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
+    class="filter-form grid create-purchase grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
   >
     <FloatLabel class="col-span-6">
       <Dropdown
@@ -123,12 +123,12 @@ onMounted(async () => {
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
       <fin-input v-model="coleVo" :model-value="formatInputAmount(coleVo)" placeholder="Кол-во" />
-      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
+      <fin-input v-model="price" :model-value="formatInputAmount(price)"  placeholder="Цена" />
       <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" type="number" />
       <fin-button
         icon="pi pi-save"
         @click="addFn"
-        label="Добавить"
+        label="Сохранить"
         severity="success"
         class="p-button-lg"
       />
@@ -265,9 +265,6 @@ onMounted(async () => {
   .p-select-label {
     margin-top: 5px;
   }
-}
-.create-purchases .p-datepicker{
-  border: none;
 }
 </style>
 
