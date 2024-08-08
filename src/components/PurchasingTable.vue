@@ -6,7 +6,7 @@ import { useAxios } from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import Dropdown from "primevue/dropdown";
 import { useVuelidate } from "@vuelidate/core";
-
+import inputText from 'primevue/inputtext'
 const v$ = useVuelidate();
 
 const emit = defineEmits(["postGoods"]);
@@ -225,12 +225,12 @@ onMounted(async () => {
         </Column>
           <Column field="amount" header="Кол-во">
           <template #editor="{ data, field }">
-            <fin-input v-model="data[field]" fluid  />
+            <input-text v-model="data[field]" fluid  />
           </template>
         </Column>
         <Column field="price" header="Цена">
           <template #editor="{ data, field }">
-            <fin-input v-model="data[field]" fluid  />
+            <input-text v-model="data[field]" fluid  />
           </template>
         </Column>
         <Column field="sum" header="Сумма"></Column>
