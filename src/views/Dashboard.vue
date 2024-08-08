@@ -30,8 +30,6 @@ import OverlayBadge from 'primevue/overlaybadge';
               <img src="@/assets/img/ring.svg" alt="">
             </OverlayBadge>
             <div>
-
-
               <button type="button"
                       class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                       aria-expanded="false" data-dropdown-toggle="dropdown-user">
@@ -82,9 +80,9 @@ import OverlayBadge from 'primevue/overlaybadge';
 
   <Sidebar/>
 
-  <div class=" pt-4 pl-4 pr-4 pb-0 sm:ml-64">
+  <div class=" pt-4 pl-4 pr-4 pb-0 sm:ml-64 bg-[#ECF1FB]">
     <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]">
-      <div class=" gap-4">
+      <div class="gap-4">
         <router-view></router-view>
       </div>
     </div>
