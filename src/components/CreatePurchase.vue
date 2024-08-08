@@ -36,8 +36,9 @@ const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
+const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const createValues = reactive({
-  datetime24h: "",
+  datetime24h: new Date,
   selectCurrency: "",
   selectedStorage: "",
   selectedAgreement: "",
@@ -116,6 +117,7 @@ async function saveFn() {
 function getProducts(products) {
   productsInfo.value = products;
 }
+findStorage()
 
 watchEffect(() => {
   if (
@@ -130,8 +132,7 @@ watchEffect(() => {
   } else {
     createValues.selectedAgreement = null;
   }
-  if (organization.value.length === 1) createValues.selectedOrganization = organization.value[0]
-  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
+    if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 
 });
 watch(createValues, (newValue) => {
@@ -189,12 +190,13 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Дата</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
           v-model="createValues.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
           @click="findOrganization"
+
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
