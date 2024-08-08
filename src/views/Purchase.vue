@@ -390,7 +390,7 @@ getProducts();
 
   <Sidebar
       v-model:visible="openViewPurchase"
-      :show-close-icon="false"
+      :show-close-icon="true"
       position="right"
       class="create-purchase-sidebar"
   >

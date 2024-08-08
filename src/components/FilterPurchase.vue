@@ -1,5 +1,5 @@
 <script setup>
-import DatePicker from "primevue/datePicker";
+import DatePicker from "primevue/datepicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
 import { onMounted, reactive, ref, watch } from "vue";
@@ -7,6 +7,7 @@ import { useStaticApi } from "@/composable/useStaticApi.js";
 import { useAxios } from "@/composable/useAxios.js";
 
 const userNames = ref([]);
+const currency = ref([])
 const deleted = ref([
   { label: 'Да', value: 1},
   { label: 'Нет', value: 0 },
@@ -36,7 +37,7 @@ function formatDateTime(date) {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const seconds = String(d.getSeconds()).padStart(2, '0');
 
-  return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 
@@ -83,7 +84,20 @@ const getUsers = async () => {
     console.error('Error fetching users:', error);
   }
 };
+const getCurrency = async () =>{
+  try {
+    const res = await useAxios(`/currency`)
+    const items = res.result.data;
+    currency.value = items.map(user => ({
+      id: user.id,
+      name: user.name,
+    }));
+    console.log('log', currency.value)
+  }catch (e){
 
+  }
+
+}
 const clear = () => {
   Object.keys(filterValues).forEach(key => filterValues[key] = '');
   rawDateFirst.value = '';
@@ -91,9 +105,10 @@ const clear = () => {
   datas()
 };
 
+
+
+
 const {
-  findCurrency,
-  currency,
   findOrganization,
   organization,
 } = useStaticApi();
@@ -101,6 +116,7 @@ const {
 
 onMounted(() => {
   getUsers();
+  getCurrency();
 });
 </script>
 
@@ -168,8 +184,8 @@ onMounted(() => {
                 v-model="filterValues.currency_id"
                 placeholder="Валюта"
                 :options="currency"
-                option-label="label "
-                @click="findCurrency"
+                option-label="name"
+                option-value="id"
       />
     </div>
     <div class="flex mt-[22px] gap-4">

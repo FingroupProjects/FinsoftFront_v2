@@ -123,12 +123,12 @@ onMounted(async () => {
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
       <fin-input v-model="coleVo" :model-value="formatInputAmount(coleVo)" placeholder="Кол-во" />
-      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
+      <fin-input v-model="price" :model-value="formatInputAmount(price)"  placeholder="Цена" />
       <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" type="number" />
       <fin-button
         icon="pi pi-save"
         @click="addFn"
-        label="Добавить"
+        label="Сохранить"
         severity="success"
         class="p-button-lg"
       />
@@ -265,9 +265,6 @@ onMounted(async () => {
   .p-select-label {
     margin-top: 5px;
   }
-}
-.create-purchases .p-datepicker{
-  border: none;
 }
 </style>
 
