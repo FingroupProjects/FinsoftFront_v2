@@ -19,6 +19,8 @@ const props = defineProps({
     required: true,
   }
 });
+
+const productsInfo = ref()
 const toast = useToast();
 const visibleMovement = ref(false)
 const visibleHistory = ref(false)
@@ -61,6 +63,14 @@ async function getAgreement() {
   }
 }
 
+const receivedGoods = ref([]);
+
+const handlePostGoods = (data) => {
+  receivedGoods.value = data.goods;
+
+  console.log('goods', receivedGoods.value)
+};
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const options = {
@@ -95,26 +105,75 @@ const getView = async () => {
   }
 };
 
-const updateView = async () =>{
-  const result = await v$.value.$validate()
+
+const updateView = async () => {
+  const result = await v$.value.$validate();
   if (result) {
-    try{
+    try {
+      console.log('viewDocument:', viewDocument.value);
+
+      // Ensure productsInfo is always an array and handle potential undefined values
+      const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
+
+      // Fetch existing goods from the server
+      const existingGoods = await fetchExistingGoods(); // Call here
+      const existingGoodsMap = new Map(existingGoods.map(good => [good.good_id, good]));
+
+      // Determine new or updated goods
+      const newOrUpdatedGoods = goodsArray.filter(product => {
+        const existingGood = existingGoodsMap.get(product.good_id);
+        return !existingGood || (existingGood.price !== product.price || existingGood.amount !== product.amount);
+      });
+
+      // Prepare the data to be sent
+      const data = {
+        organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code,
+        counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
+        storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
+        date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
+        currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
+        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        goods: newOrUpdatedGoods.map(product => ({
+          good_id: product.good_id,
+          price: parseFloat(product.price),
+          amount: parseInt(product.amount, 10),
+          created: product.created || false,
+          updated: product.updated || false,
+          deleted: product.deleted || false
+        }))
+      };
+
+      console.log('Data to be sent:', data);
+
+      // Send the update request
       const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
-        data: {
-          organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code ,
-          counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
-          storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
-          date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
-          currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
-          counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code
-        }
-      })
-    }catch (e) {
-      console.error(e)
+        data: data
+      });
+
+      toast.add({ severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500 });
+      console.log('Response:', res);
+    } catch (e) {
+      console.error(e);
+      toast.add({ severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500 });
     }
   }
-}
+};
+
+// Fetch existing goods
+const fetchExistingGoods = async () => {
+  try {
+    const response = await useAxios(`/document/${props.productId}`);
+    return response.data.goods || [];
+  } catch (error) {
+    console.error('Error fetching existing goods:', error);
+    return [];
+  }
+};
+
+
+
+
 
 const approve = async () => {
   try {
@@ -154,6 +213,9 @@ const openDocumentPrint = (productId) => {
   window.open(url, '_blank');
 };
 
+function getProducts(products) {
+  productsInfo.value = products;
+}
 
 onMounted(async () => {
   await getView();
@@ -241,7 +303,7 @@ onMounted(async () => {
     </div>
   </div>
 
-  <purchasing-table :productId="productId"/>
+  <purchasing-table :productId="productId" @post-goods="getProducts"/>
 
     <Sidebar
         v-model:visible="visibleMovement"

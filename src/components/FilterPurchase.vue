@@ -1,5 +1,5 @@
 <script setup>
-import DatePicker from "primevue/DatePicker";
+import DatePicker from "primevue/datePicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
 import { onMounted, reactive, ref, watch } from "vue";

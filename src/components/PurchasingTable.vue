@@ -49,7 +49,10 @@ const addFn = async () => {
     price: price.value,
     sum: sum.value,
     good_id: selectedProducts.value.code,
-    products: selectedProducts.value.products,
+    name: selectedProducts.value.products,
+    created: true,
+    deleted: false,
+    updated: false
   };
 
   if (validateProduct(product)) {
@@ -64,8 +67,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.price);
 
     addInput.value = false;
-
-    emit("postGoods", postProducts.value);
+    emit("postGoods", { goods: postProducts.value });
   }
 
   clearInputValues();
@@ -139,6 +141,7 @@ const getGood = async () => {
     const imgURL = import.meta.env.VITE_IMG_URL;
 
     goods.value = items.map((item) => ({
+      good_id: item.good.id,
       name: item.good.name,
       amount: item.amount,
       price: item.price,
@@ -157,26 +160,6 @@ const getGood = async () => {
   }
 };
 
-const updateGoods = async () => {
-  const result = await v$.value.$validate();
-  if (result) {
-    try {
-      const filteredGoods = goods.value.filter(good => good.created || good.updated || good.deleted);
-
-      const res = await useAxios(`/document/update/${props.productId}`, {
-        method: 'PATCH',
-        data: {
-          goods: filteredGoods
-        }
-      });
-
-      // Handle the response if necessary
-      console.log(res.data);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-};
 
 watchEffect(() => {
   sum.value = amount.value * price.value;
@@ -186,7 +169,6 @@ watchEffect(() => {
 onMounted(async () => {
   await getIdProducts();
   await getGood();
-  console.log('sum',sum.value)
 });
 </script>
 
@@ -213,6 +195,7 @@ onMounted(async () => {
             severity="success"
             class="p-button-lg"
         />
+
       </div>
     </div>
     <div class="table-create" v-if="goods.length > 0">
@@ -267,9 +250,38 @@ onMounted(async () => {
         ></Column>
       </DataTable>
     </div>
-    <div class="footer-card flex justify-end text-[18px] mt-[30px] p-[15px] bg-[#F5F6FA]">
-      <p class="mr-[15px]">Итого: </p>
-      <span class="font-[600]">{{ getAllSum }} ₽</span>
+    <div
+        class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]"
+    >
+      <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
+        Итого:
+      </div>
+      <div class="flex gap-[49px]">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div
+              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
+          >
+            Кол-во
+          </div>
+          {{ getAllProduct }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div
+              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
+          >
+            Товаров
+          </div>
+          {{ goods.length }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div
+              class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
+          >
+            Сумма
+          </div>
+          {{ getAllSum.toLocaleString() }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
