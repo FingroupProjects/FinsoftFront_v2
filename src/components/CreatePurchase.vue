@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref, watchEffect, watch } from "vue";
-import DatePicker from "primevue/datePicker";
+import DatePicker from "primevue/datepicker";
 import { useStaticApi } from "@/composable/useStaticApi.js";
 import { useAxios } from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
