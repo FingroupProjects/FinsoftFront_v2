@@ -110,7 +110,7 @@ onMounted(async () => {
     <div class="header-title">Товары</div>
   </div>
   <div
-    class="filter-form grid create-purchase grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
+    class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
   >
     <FloatLabel class="col-span-6">
       <Dropdown

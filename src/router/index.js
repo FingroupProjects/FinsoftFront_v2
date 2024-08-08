@@ -6,6 +6,10 @@ const routes = [
     {
         path: '/',
         name:'Auth',
+        meta: {
+            layout: 'auth',
+            requiresAuth: false
+        },
         component: () => import('@/views/Auth.vue'),
     },
     {
@@ -13,8 +17,8 @@ const routes = [
         name:'Dashboard',
         component: Dashboard,
         meta: {
-            layout: 'auth',
-            requiresAuth: false
+            requiresAuth: true,
+            layout: 'main'
         },
         children:[
             {
@@ -28,6 +32,10 @@ const routes = [
         path: '/documents/:productId', // Updated to include a route parameter
         name: 'DocumentPrint',
         component: DocumentPrint,
+        meta: {
+            requiresAuth: true,
+            layout: 'main'
+        },
         props: true // Allows passing route params as props to the component
     }
 ]
@@ -42,7 +50,7 @@ router.beforeEach((to, from, next) => {
     const isAuthenticated = cookies.isKey('auth-token')
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/sign-in')
+        next('/')
         // next()
     } else {
         next()
