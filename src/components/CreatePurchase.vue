@@ -1,14 +1,14 @@
 <script setup>
-import { reactive, ref, watchEffect, watch } from "vue";
+import {reactive, ref, watch, watchEffect} from "vue";
 import DatePicker from "primevue/datePicker";
-import { useStaticApi } from "@/composable/useStaticApi.js";
-import { useAxios } from "@/composable/useAxios.js";
+import {useStaticApi} from "@/composable/useStaticApi.js";
+import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
 import moment from "moment";
-import { useVuelidate } from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
-import { useToast } from "primevue/usetoast";
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
+import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
@@ -37,6 +37,10 @@ const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
+const organizationJson = localStorage.getItem('organization');
+const organizationHas = JSON.parse(organizationJson);
+
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -132,6 +136,10 @@ watchEffect(() => {
   } else {
     createValues.selectedAgreement = null;
   }
+    if (hasOrganization === true) createValues.selectedOrganization = {
+      name:organizationHas.name,
+      code:organizationHas.id
+    }
     if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 
 });
@@ -189,7 +197,6 @@ watch(createValues, (newValue) => {
       />
         <label for="dd-city">Дата</label>
       </FloatLabel>
-
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
           v-model="createValues.selectedOrganization"
