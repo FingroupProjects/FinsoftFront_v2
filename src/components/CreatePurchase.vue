@@ -37,7 +37,7 @@ const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const createValues = reactive({
-  datetime24h: "",
+  datetime24h: new Date,
   selectCurrency: "",
   selectedStorage: "",
   selectedAgreement: "",
