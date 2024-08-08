@@ -130,6 +130,9 @@ watchEffect(() => {
   } else {
     createValues.selectedAgreement = null;
   }
+  if (organization.value.length === 1) createValues.selectedOrganization = organization.value[0]
+  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
+
 });
 watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
@@ -176,8 +179,10 @@ watch(createValues, (newValue) => {
         :class="{ 'p-invalid': v$.datetime24h.$error }"
         showTime
         hourFormat="24"
+        showButtonBar
         dateFormat="dd.mm.yy,"
         fluid
+        hideOnDateTimeSelect
         iconDisplay="input"
         class="w-full"
       />
@@ -302,7 +307,7 @@ watch(createValues, (newValue) => {
   }
 
   .p-datepicker {
-    border: 1px solid #dcdfe3;
+    border: transparent;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -310,13 +315,6 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
-    .p-inputtext:enabled:hover{
-      border-color: transparent;
-    }
-    .p-inputtext:enabled:focus{
-      border-color: transparent !important;
-    }
-
   }
   .p-button-secondary{
     color: $primary-color !important;
@@ -334,7 +332,9 @@ watch(createValues, (newValue) => {
 .p-textarea:enabled:focus{
   border-color: $primary-color !important;
 }
-
+.p-inputtext:enabled:focus{
+  border-color: #DCDFE3 !important;
+}
 .header {
   display: flex;
   justify-content: space-between;

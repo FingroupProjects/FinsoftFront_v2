@@ -32,7 +32,6 @@ const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
 const selectedProduct = ref();
-const filterData = ref()
 const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
@@ -40,7 +39,7 @@ const first = ref(1)
 const visibleFilter = ref(false)
 const openViewPurchase = ref(false)
 const metaKey = ref(true);
-
+const hasOrganization = Boolean(localStorage.getItem('hasOneOrganization'));
 const pageCounts = ref([
   {
     count: 5,
@@ -260,7 +259,7 @@ getProducts();
           {{ slotProps.data.counterparty?.name }}
         </template>
       </Column>
-      <Column field="image" :sortable="true" header="Организация">
+      <Column field="image" v-if="hasOrganization" :sortable="true" header="Организация">
         <template #sorticon="{index}">
           <i
               @click="sortData('code',index)"

@@ -21,6 +21,7 @@ async function fetchOrders() {
     if (res.token){
       router.push('/dashboard')
       localStorage.setItem('user_name', res.user.name)
+      localStorage.setItem('hasOneOrganization', res.user?.hasOneOrganization)
     }
   } catch (e) {
     console.log(e)
