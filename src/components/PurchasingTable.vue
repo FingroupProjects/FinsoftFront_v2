@@ -1,12 +1,13 @@
 <script setup>
-import { ref, watchEffect, onMounted, reactive } from "vue";
+import {onMounted, reactive, ref, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import { useAxios } from "@/composable/useAxios.js";
+import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import Dropdown from "primevue/dropdown";
-import { useVuelidate } from "@vuelidate/core";
+import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
+
 const v$ = useVuelidate();
 
 const emit = defineEmits(["postGoods"]);

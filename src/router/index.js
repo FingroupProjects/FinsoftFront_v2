@@ -1,7 +1,7 @@
-import { createRouter, createWebHashHistory} from 'vue-router'
+import { createRouter, createWebHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
 import DocumentPrint from "@/components/DocumentPrint.vue";
-
+import { useCookies } from 'vue3-cookies'
 const routes = [
     {
         path: '/',
@@ -12,6 +12,10 @@ const routes = [
         path: '/dashboard',
         name:'Dashboard',
         component: Dashboard,
+        meta: {
+            layout: 'auth',
+            requiresAuth: false
+        },
         children:[
             {
                 path: '/purchase',
@@ -29,7 +33,21 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes,
 })
+router.beforeEach((to, from, next) => {
+
+    const { cookies } = useCookies()
+    const isAuthenticated = cookies.isKey('auth-token')
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next('/sign-in')
+        // next()
+    } else {
+        next()
+    }
+
+})
+
 export default router
