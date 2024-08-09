@@ -4,7 +4,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
 
@@ -171,7 +171,7 @@ onMounted(async () => {
   <div class="card-sidebar">
     <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
       <FloatLabel class="col-span-6">
-        <Dropdown
+        <Select
             v-model="selectedProducts"
             :options="productsId"
             optionLabel="products"
@@ -204,7 +204,7 @@ onMounted(async () => {
       >
         <Column field="name" header="Наименование">
           <template #editor="{ data, field }">
-            <Dropdown
+            <Select
                 v-model="data[field]"
                 :options="productsId"
                 optionLabel="name"
@@ -216,7 +216,7 @@ onMounted(async () => {
                 <span v-if="data[field]">{{ data[field] }}</span>
                 <span v-else>{{ data[field] }}</span>
               </template>
-            </Dropdown>
+            </Select>
           </template>
         </Column>
           <Column field="amount" header="Кол-во">
