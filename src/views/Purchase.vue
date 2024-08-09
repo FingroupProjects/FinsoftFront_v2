@@ -93,7 +93,7 @@ async function getProducts(filters = {}) {
 
   const res = await useAxios(`/document/provider/purchase`, { params });
 
-  pagination.value.totalPages = res.result.pagination.total_pages;
+  pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
   return products.value;
 }
@@ -370,7 +370,7 @@ getProducts();
       </Dropdown>
       <Paginator
           :rows="1"
-          :totalRecords="`${pagination.totalPages}`"
+          :totalRecords="Number(pagination.totalPages)"
           v-model:first="first"
           @page="getProducts"
           :rowsPerPageOptions="[10, 20, 30]"
