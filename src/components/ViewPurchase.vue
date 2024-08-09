@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import Calendar from 'primevue/calendar';
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import PurchasingTable from "@/components/PurchasingTable.vue";
 import { useAxios } from "@/composable/useAxios.js";
 import FinInput from "@/components/ui/Inputs.vue";
@@ -245,7 +245,7 @@ onMounted(async () => {
         </div>
 
         <FloatLabel class="col-span-4 ">
-          <Dropdown
+          <Select
               v-model="status"
               placeholder="Организация"
               class="col-span-4 p-focus active-approve"
@@ -255,7 +255,7 @@ onMounted(async () => {
               <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
             </template>
 
-          </Dropdown>
+          </Select>
           <label for="dd-city">Статус</label>
         </FloatLabel>
 
@@ -285,7 +285,7 @@ onMounted(async () => {
 
       <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
 
-        <Dropdown
+        <Select
             v-model="viewDocument.organizationName"
             placeholder="Организация"
             class="col-span-4"
@@ -297,34 +297,34 @@ onMounted(async () => {
             {{ viewDocument.organizationName.name }}
             </template>
 
-        </Dropdown>
-      <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
+        </Select>
+      <Select v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
                 :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
           {{viewDocument.counterpartyName.name}}
         </template>
-      </Dropdown>
-      <Dropdown v-model="viewDocument.counterpartyAgreementName" placeholder="Договор" class="col-span-3"
+      </Select>
+      <Select v-model="viewDocument.counterpartyAgreementName" placeholder="Договор" class="col-span-3"
                 :options="agreementList" @click="getAgreement" option-label="name">
         <template #value>
           {{viewDocument.counterpartyAgreementName.name}}
         </template>
-      </Dropdown>
-      <Dropdown v-model="viewDocument.storageName" placeholder="Склад" class="col-span-3" :options="storage" @click="findStorage" option-label="name">
+      </Select>
+      <Select v-model="viewDocument.storageName" placeholder="Склад" class="col-span-3" :options="storage" @click="findStorage" option-label="name">
         <template #value>
           {{viewDocument.storageName.name}}
         </template>
-      </Dropdown>
-      <Dropdown v-model="viewDocument.author" disabled placeholder="Автор" class="col-span-3">
+      </Select>
+      <Select v-model="viewDocument.author" disabled placeholder="Автор" class="col-span-3">
         <template #value>
           {{viewDocument.author.name}}
         </template>
-      </Dropdown>
-      <Dropdown v-model="viewDocument.currencyName" placeholder="Валюта" class="col-span-3" :options="currency" @click="findCurrency" option-label="name">
+      </Select>
+      <Select v-model="viewDocument.currencyName" placeholder="Валюта" class="col-span-3" :options="currency" @click="findCurrency" option-label="name">
         <template #value>
           {{viewDocument.currencyName.name}}
         </template>
-      </Dropdown>
+      </Select>
       <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
       <div  class="col-span-12">
         <button @click="isOpen = false" class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
