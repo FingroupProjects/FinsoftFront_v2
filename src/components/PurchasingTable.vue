@@ -258,7 +258,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Кол-во
           </div>
-          {{ getAllProduct }}
+            {{ getAllProduct }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
