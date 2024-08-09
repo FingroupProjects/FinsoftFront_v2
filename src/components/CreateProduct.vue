@@ -1,12 +1,13 @@
 <script setup>
-import { ref, watchEffect, onMounted,computed } from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import { useAxios } from "@/composable/useAxios.js";
+import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
+
 const emit = defineEmits(["postGoods"]);
 
 const selectedProducts = ref();
@@ -80,20 +81,20 @@ const onRowEditSave = (event) => {
   const { newData, index } = event;
   const oldProduct = products.value[index];
 
-  products.value.splice(index, 1, newData); // Update product in place
+   newData.sum = newData.price * newData.coleVo;
+
+  products.value.splice(index, 1, newData);
+
   postProducts.value.splice(index, 1, {
     amount: newData.coleVo,
     good_id: newData.products.code,
     price: newData.price,
   });
 
-  getAllSum.value -= Number(oldProduct.sum);
-  getAllSum.value += Number(newData.sum);
+  getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
+  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
 
-  getAllProduct.value -= Number(oldProduct.coleVo);
-  getAllProduct.value += Number(newData.coleVo);
-  products.value.sum = newData.price * getAllProduct.value;
-  console.log(postProducts);
+  console.log(newData);
 };
 
 watchEffect(() => {
@@ -112,12 +113,12 @@ onMounted(async () => {
   <div
     class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
   >
-    <FloatLabel class="col-span-6">
+    <FloatLabel class="col-span-6 h-[47px]">
       <Dropdown
         v-model="selectedProducts"
         :options="productsId"
         optionLabel="products"
-        class="w-full"
+        class="w-full h-[47px] rounded-[10px]"
       />
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>

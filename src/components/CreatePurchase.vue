@@ -302,8 +302,9 @@ watch(createValues, (newValue) => {
     width: 100% !important;
   }
 
+
   .p-datepicker {
-    border: 1px solid #dcdfe3;
+    border:none;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -311,12 +312,7 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
-    .p-inputtext:enabled:hover{
-      border-color: transparent;
-    }
-    .p-inputtext:enabled:focus{
-      border-color: transparent !important;
-    }
+
 
   }
   .p-button-secondary{
@@ -332,6 +328,13 @@ watch(createValues, (newValue) => {
     border-radius: 10px;
   }
 }
+.p-inputtext:enabled:hover{
+  border-color: transparent;
+}
+.p-inputtext:enabled:focus{
+  border-color: #DCDFE3 !important;
+}
+
 .p-textarea:enabled:focus{
   border-color: $primary-color !important;
 }
