@@ -13,6 +13,7 @@ import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
 import CreateProduct from "@/components/CreateProduct.vue";
+import FloatLabel from "primevue/floatlabel";
 
 const props = defineProps({
   productId:{
@@ -20,12 +21,14 @@ const props = defineProps({
   }
 });
 
+
+const status = ref('Не проведен')
 const productsInfo = ref()
 const toast = useToast();
 const visibleMovement = ref(false)
 const visibleHistory = ref(false)
 const approved = ref(false)
-const isOpen = ref(true);
+const isOpen = ref(false);
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -71,6 +74,14 @@ const handlePostGoods = (data) => {
   console.log('goods', receivedGoods.value)
 };
 
+const statusActive = () =>{
+  if (approved.value === false) {
+    status.value = 'Проведено';
+  }else {
+    status.value = 'Не проведено';
+  }
+}
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const options = {
@@ -85,6 +96,7 @@ const formatDate = (dateString) => {
   return date.toLocaleString('en-GB', options).replace(',', '');
 };
 
+
 const getView = async () => {
   try {
     const res = await useAxios(`/document/show/${props.productId}`)
@@ -98,6 +110,7 @@ const getView = async () => {
       storageName: item.storage,
       date: formatDate(item.date),
       currencyName: item.currency,
+      doc_number: item.doc_number,
     };
 
   } catch (e) {
@@ -171,10 +184,6 @@ const fetchExistingGoods = async () => {
   }
 };
 
-
-
-
-
 const approve = async () => {
   try {
     const res = await useAxios(`/document/provider/approve`, {
@@ -185,7 +194,7 @@ const approve = async () => {
     });
     toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
     approved.value = true
-
+    status.value = 'Проведен'
   }catch (e) {
     console.error(e)
     toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500 });
@@ -201,7 +210,8 @@ const unApprove = async () =>{
       }
     });
     approved.value = false
-    toast.add({ severity: 'success', summary: 'Не проведен', detail: 'Документ не проведен!', life: 1500 });
+    status.value = 'Не проведен'
+    toast.add({ severity: 'success', summary: 'Проведение отменено!', detail: 'Документ не проведен!', life: 1500 });
   }catch (e){
     console.error(e)
     toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось отменить одобрение документа', life: 1500 });
@@ -227,34 +237,67 @@ onMounted(async () => {
   <div class="edit-purchase">
     <Toast/>
     <div class="header">
-      <div class="flex gap-[16px]">
+
+      <div class="flex gap-[16px] pt-2">
         <div>
           <div class="header-title">Закупка</div>
-          <div class="header-text text-[#808BA0] font-semibold text-[16px]">№32151</div>
+          <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{viewDocument.doc_number}}</div>
         </div>
-        <fin-button v-if="approved === false" @click="approve()" icon="pi pi-arrow-right" label="Провести" severity="secondary" class="p-button-lg"/>
-        <fin-button v-if="approved === true" @click="unApprove()" icon="pi pi-arrow-right" label="Не провести" severity="secondary" class="p-button-lg"/>
+
+        <FloatLabel class="col-span-4 ">
+          <Dropdown
+              v-model="status"
+              placeholder="Организация"
+              class="col-span-4 p-focus active-approve"
+              disabled
+          >
+            <template #value >
+              <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
+            </template>
+
+          </Dropdown>
+          <label for="dd-city">Статус</label>
+        </FloatLabel>
+
+        <fin-button v-if="approved === false" @click="approve()"
+          icon="pi pi-arrow-right bold" label="Провести"
+          severity="secondary" class="p-button-lg btn-approve"
+          :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
+        />
+
+        <fin-button v-if="approved === true"
+          @click="unApprove()" icon="pi pi-arrow-right"
+          label="Отменить проведение" severity="secondary"
+          class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
+        />
+
         <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" severity="success" class="p-button-lg"/>
       </div>
-      <div class="flex gap-[16px]">
-        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" label="Движение" severity="warning" class="p-button-lg"/>
+      <div class="flex gap-[16px] pt-2">
+        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" severity="warning" class="p-button-lg btn-movement w-[158px]">
+          <img src="../assets/img/img.png" height="16px" width="16px"/>
+          Движение
+        </fin-button>
       </div>
     </div>
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
-      <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-      <Dropdown
-          v-model="viewDocument.organizationName"
-          placeholder="Организация"
-          class="col-span-4"
-          :options="organization"
-          option-label="name"
-          @click="findOrganization"
-      >
-        <template #value>
-          {{ viewDocument.organizationName.name }}
-          </template>
-      </Dropdown>
 
+
+      <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
+
+        <Dropdown
+            v-model="viewDocument.organizationName"
+            placeholder="Организация"
+            class="col-span-4"
+            :options="organization"
+            option-label="name"
+            @click="findOrganization"
+        >
+          <template #value>
+            {{ viewDocument.organizationName.name }}
+            </template>
+
+        </Dropdown>
       <Dropdown v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
                 :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
@@ -293,12 +336,12 @@ onMounted(async () => {
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
       <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
-        <i class="pi pi-history"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">История</span>
+        <i class="pi pi-history mb-[1px] "></i>
+        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
       </fin-button>
       <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
-        <i class="pi pi-print"></i>
-        <span style="font-weight: bold; margin-bottom: 3px;">Печать</span>
+        <i class="pi pi-print mb-[1px ]"></i>
+        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
       </fin-button>
     </div>
   </div>
@@ -350,19 +393,19 @@ onMounted(async () => {
   }
 }
 .icon-history{
-  margin-left: 800px !important;
+  margin-left: 780px !important;
   background-color: white !important;
   color: #3935E7 !important;
-  border: 2px solid #DCDFE3 !important;
-  width: 112px !important;
+  border: 1px solid #DCDFE3 !important;
+  width: 160px !important;
   height: 31px !important;
 }
 .icon-print{
 
   background-color: white !important;
   color: #3935E7 !important;
-  border: 2px solid #DCDFE3 !important;
-  width: 112px !important;
+  border: 1px solid #DCDFE3 !important;
+  width: 150px !important;
   height: 31px !important;
 }
 
@@ -380,11 +423,46 @@ onMounted(async () => {
     border-radius: 10px !important;
   }
 
+  .btn-movement {
+    font-weight: bold !important;
+    font-size: 16px !important;
+    width: 138px !important;
+    height: 46px !important;
+    gap: 10px !important;
+  }
+
+  .btn-movement:hover{
+    color: #3935E7 !important;
+  }
+  .btn-approve:hover{
+    color: #17A825 !important;
+    border-color: #17A825 !important;
+    font-weight: bold !important;
+    background-color: #fff !important;
+  }
+  .btn-approve .p-button-label {
+    font-weight: 600;
+  }
+  .btn-un-approve .p-button-label{
+    font-weight: 600;
+  }
+
+  .btn-un-approve{
+    color: #C1790C !important;
+    border-color: #C1790C !important;
+    font-weight: bold !important;
+    background-color: #fff !important;
+  }
+  .active-approve{
+    background-color: #fff !important;
+  }
+
 }
 .drower-movement {
   width: 850px !important;
   border-top-left-radius: 30px;
 }
+
 
 
 .header {
