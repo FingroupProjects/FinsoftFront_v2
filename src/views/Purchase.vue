@@ -196,10 +196,12 @@ getProducts();
       />
     </div>
   </div>
-  <div class="card mt-4 bg-white h-[80vh] overflow-auto relative bottom-[43px]">
+  <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
     <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
+        scrollable
+        scrollHeight="660px"
         v-model:selection="selectedProduct"
         :value="products"
         dataKey="id"
@@ -354,7 +356,7 @@ getProducts();
         </template>
       </Column>
     </DataTable>
-    <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
+    <div class="paginator-dropdown bg-white sticky left-0 top-[80%]">
       <span class="paginator-text"> Элементов на странице: </span>
       <Dropdown
           v-model="selectPage"
