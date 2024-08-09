@@ -13,7 +13,7 @@ export default function formatInputAmount(input) {
     }
 
     const decimalIndex = input.indexOf('.');
-    if (decimalIndex !== -1 && decimalIndex < input.length - 2) {
+    if (decimalIndex !== -1 && decimalIndex < input.length - 3) {
         return null;
     }
 

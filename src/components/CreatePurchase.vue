@@ -13,7 +13,7 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 
-const emit = defineEmits(["closeDialog"]);
+const emit = defineEmits(["closeDialog",'close-sidebar']);
 
 const toast = useToast();
 
@@ -56,6 +56,9 @@ const rules = reactive({
 const userName = {
   name: localStorage.getItem("user_name"),
 };
+const organizationJson = localStorage.getItem('organization');
+const organizationHas = JSON.parse(organizationJson);
+const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const v$ = useVuelidate(rules, createValues);
 
 async function getAgreement() {
@@ -116,6 +119,7 @@ async function saveFn() {
 function getProducts(products) {
   productsInfo.value = products;
 }
+findStorage()
 
 watchEffect(() => {
   if (
@@ -130,12 +134,16 @@ watchEffect(() => {
   } else {
     createValues.selectedAgreement = null;
   }
+  if (hasOrganization === true) createValues.selectedOrganization = {
+    name:organizationHas.name,
+    code:organizationHas.id
+  }
+  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 });
 watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
     findCurrency(newValue.selectedAgreement).then(() => {
       createValues.selectCurrency = currency.value[0];
-      console.log(currency.value);
     });
     isCurrencyFetched.value = true;
   }
@@ -161,7 +169,7 @@ watch(createValues, (newValue) => {
         />
         <fin-button
           icon="pi pi-times"
-          @click="emit('closeDialog')"
+          @click="emit('close-sidebar')"
           label="Отменить"
           severity="warning"
           class="p-button-lg"
@@ -185,7 +193,7 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Дата</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
           v-model="createValues.selectedOrganization"
           :options="organization"
@@ -253,7 +261,7 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-      <Textarea v-model="createValues.comments" class="w-full" rows="5" cols="30" />
+      <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20" />
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
     </div>

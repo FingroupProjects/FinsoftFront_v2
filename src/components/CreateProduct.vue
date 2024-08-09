@@ -81,24 +81,22 @@ const onRowEditSave = (event) => {
   const { newData, index } = event;
   const oldProduct = products.value[index];
 
-   newData.sum = newData.price * newData.coleVo;
+  newData.sum = Number((newData.price * newData.coleVo).toFixed(2));
 
   products.value.splice(index, 1, newData);
 
   postProducts.value.splice(index, 1, {
     amount: newData.coleVo,
-    good_id: newData.products.code,
+    good_id: newData.products.code || oldProduct.good_id,
     price: newData.price,
   });
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
-
-  console.log(newData);
 };
 
 watchEffect(() => {
-  sum.value = coleVo.value * price.value;
+  sum.value = Number((coleVo.value * price.value).toFixed(2))
 });
 
 onMounted(async () => {
@@ -199,12 +197,12 @@ onMounted(async () => {
       </Column>
       <Column field="coleVo" header="Кол-во">
         <template #editor="{ data, field }">
-          <InputText v-model="data[field]" fluid class="w-[10%]" />
+          <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])"  fluid class="w-[10%]" />
         </template>
       </Column>
       <Column field="price" header="Цена">
         <template #editor="{ data, field }">
-          <InputText v-model="data[field]" fluid class="w-[10%]" />
+          <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])"  fluid class="w-[10%]" />
         </template>
       </Column>
       <Column field="sum" header="Сумма"></Column>
