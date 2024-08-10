@@ -216,9 +216,10 @@ onMounted(async () => {
       </Column>
       <Column
         :rowEditor="true"
-        style="width: 10%; min-width: 8rem"
+        style="width: 10%; min-width: 8rem; "
         bodyStyle="text-align:center"
-      ></Column>
+      >
+      </Column>
     </DataTable>
   </div>
 
@@ -264,6 +265,9 @@ onMounted(async () => {
   }
   .p-select-label {
     margin-top: 5px;
+  }
+  .p-datatable-row-editor-init{
+    right: 80px;
   }
 }
 </style>
