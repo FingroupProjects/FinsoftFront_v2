@@ -7,6 +7,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
+import formatNumber from '../constants/formatNumber.js'
 
 const emit = defineEmits(["postGoods"]);
 
@@ -26,7 +27,6 @@ const newProduct = ref();
 const validateProduct = (product) => {
   return product.coleVo && product.price && product.sum;
 };
-
 
 const clearInputValues = () => {
   newProduct.value = {};
@@ -108,9 +108,7 @@ onMounted(async () => {
   <div class="flex items-center mt-[30px] gap-[21px]">
     <div class="header-title">Товары</div>
   </div>
-  <div
-    class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]"
-  >
+  <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-6 h-[47px]">
       <Dropdown
         v-model="selectedProducts"
@@ -136,6 +134,8 @@ onMounted(async () => {
   <div class="table-create" v-if="products.length > 0">
     <DataTable
       :value="products"
+      scrollable
+      scrollHeight="280px"
       class="mt-[21px]"
       v-model:editingRows="editingRows"
       @row-edit-save="onRowEditSave"
@@ -235,7 +235,7 @@ onMounted(async () => {
         >
           Кол-во
         </div>
-        {{ getAllProduct }}
+        {{  formatNumber(getAllProduct) }}
       </div>
       <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
         <div
@@ -251,7 +251,8 @@ onMounted(async () => {
         >
           Сумма
         </div>
-        {{ getAllSum.toLocaleString() }}
+
+        {{ formatNumber(getAllSum) }}
       </div>
     </div>
   </div>

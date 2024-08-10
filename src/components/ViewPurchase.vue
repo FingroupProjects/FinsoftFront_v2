@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import Calendar from 'primevue/calendar';
-import Select from "primevue/select";
+import Calendar from 'primevue/datepicker';
+import Select from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
 import { useAxios } from "@/composable/useAxios.js";
 import FinInput from "@/components/ui/Inputs.vue";
@@ -275,7 +275,7 @@ onMounted(async () => {
       </div>
       <div class="flex gap-[16px] pt-2">
         <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" severity="warning" class="p-button-lg btn-movement w-[158px]">
-          <img src="../assets/img/img.png" height="16px" width="16px"/>
+          <img src="../assets/img/img.png" alt=""/>
           Движение
         </fin-button>
       </div>

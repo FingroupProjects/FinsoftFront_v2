@@ -4,7 +4,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
-import Select from "primevue/select";
+import Select from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
 
@@ -15,7 +15,6 @@ const emit = defineEmits(["postGoods"]);
 const goods = ref([]);
 const selectedProducts = ref();
 const addInput = ref(false);
-const products = ref([]);
 const postProducts = ref([]);
 const amount = ref("");
 const price = ref("");

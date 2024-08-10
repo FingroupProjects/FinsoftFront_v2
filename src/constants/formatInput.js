@@ -1,4 +1,3 @@
-import { computed } from 'vue';
 export default function formatInputAmount(input) {
     input = input.toString();
 
@@ -14,7 +13,7 @@ export default function formatInputAmount(input) {
 
     const decimalIndex = input.indexOf('.');
     if (decimalIndex !== -1 && decimalIndex < input.length - 3) {
-        return null;
+        return input.slice(0, decimalIndex + 2);
     }
 
     const parsedNumber = parseFloat(input);
