@@ -259,11 +259,11 @@ watch(viewDocument.value, (newValue) => {
           <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{viewDocument.doc_number}}</div>
         </div>
 
-        <FloatLabel class="col-span-4 ">
+        <FloatLabel class="col-span-4">
           <Select
               v-model="status"
               placeholder="Организация"
-              class="col-span-4 p-focus active-approve"
+              class="w-full p-focus active-approve"
               disabled
           >
             <template #value >
@@ -290,7 +290,7 @@ watch(viewDocument.value, (newValue) => {
       </div>
       <div class="flex gap-[16px] pt-2">
         <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" severity="warning" class="p-button-lg btn-movement w-[158px]">
-          <img src="../assets/img/img.png" alt=""/>
+          <img src="../assets/img/img.png" alt="" class="w-[20px]"/>
           Движение
         </fin-button>
       </div>
@@ -385,10 +385,8 @@ watch(viewDocument.value, (newValue) => {
       </fin-button>
     </div>
   </div>
-
-  <div>
     <purchasing-table :productId="productId" @post-goods="getProducts"/>
-  </div>
+
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>
@@ -399,7 +397,7 @@ watch(viewDocument.value, (newValue) => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement :productId="productId"/>
+      <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"

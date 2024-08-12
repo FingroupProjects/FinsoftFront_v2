@@ -145,11 +145,11 @@ watch(selectedStorage, () => {
 watch(selectedCounterparty, () => {
   getProducts();
 });
-  getProducts();
+getProducts();
 </script>
 
 <template>
-  <header-purchase/>
+  <header-purchase header-title="Покупка товаров"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search" />

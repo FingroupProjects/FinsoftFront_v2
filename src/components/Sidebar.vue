@@ -27,7 +27,7 @@
           <template #item="{ item, index }" >
             <div>
               <template v-if="item.label">
-                <a v-ripple
+                <router-link :to="item.route" v-ripple
                    class="flex items-center cursor-pointer text-surface-700 font-[600] dark:text-[#ffffff] px-3 py-2 hover:text-[#ffffff] text-[#141C30] h-[42px] w-[250px]"
                    :class="{'active-item': $route.path === item.route,}"
                    @click="toggleOpen(item.label)"
@@ -40,7 +40,7 @@
                   <span v-if="item.items && dataOpened !== item.label" class="ml-auto">
                     <i class="some-color" :class="'pi pi-chevron-right'"></i>
                   </span>
-                </a>
+                </router-link>
               </template>
                 <div v-if="item.title" class="page-data">
                   <div  class="sub-item uppercase">
