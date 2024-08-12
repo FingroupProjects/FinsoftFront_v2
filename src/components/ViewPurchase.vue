@@ -1,26 +1,24 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import Calendar from 'primevue/datepicker';
+import {onMounted, ref, watch, watchEffect} from 'vue';
 import Select from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
-import { useAxios } from "@/composable/useAxios.js";
-import FinInput from "@/components/ui/Inputs.vue";
+import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useToast}  from "primevue/usetoast";
+import {useToast} from "primevue/usetoast";
 import Sidebar from "primevue/sidebar";
 import ShoppingMovement from "@/components/ShoppingMovement.vue";
 import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
-import CreateProduct from "@/components/CreateProduct.vue";
 import FloatLabel from "primevue/floatlabel";
+import Textarea from "primevue/textarea";
+import DatePicker from "primevue/datepicker";
 
 const props = defineProps({
   productId:{
     required: true,
   }
 });
-
 
 const status = ref('Не проведен')
 const productsInfo = ref()
@@ -29,6 +27,7 @@ const visibleMovement = ref(false)
 const visibleHistory = ref(false)
 const approved = ref(false)
 const isOpen = ref(false);
+const isCurrencyFetched = ref(false);
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -52,9 +51,16 @@ const {
   counterparty
 } = useStaticApi()
 const agreementList = ref([]);
+const userName = {
+  name: localStorage.getItem("user_name"),
+};
+const organizationJson = localStorage.getItem('organization');
+const organizationHas = JSON.parse(organizationJson);
+const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
 async function getAgreement() {
   try {
-    const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/1`)
+    const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/${viewDocument.counterpartyName?.code}`)
     return agreementList.value = res.result.data.map(el => {
       return {
         name: el.name,
@@ -63,22 +69,6 @@ async function getAgreement() {
     })
   } catch (e) {
     console.log(e)
-  }
-}
-
-const receivedGoods = ref([]);
-
-const handlePostGoods = (data) => {
-  receivedGoods.value = data.goods;
-
-  console.log('goods', receivedGoods.value)
-};
-
-const statusActive = () =>{
-  if (approved.value === false) {
-    status.value = 'Проведено';
-  }else {
-    status.value = 'Не проведено';
   }
 }
 
@@ -95,7 +85,6 @@ const formatDate = (dateString) => {
   };
   return date.toLocaleString('en-GB', options).replace(',', '');
 };
-
 
 const getView = async () => {
   try {
@@ -117,7 +106,6 @@ const getView = async () => {
     console.error('Error fetching data:', e);
   }
 };
-
 
 const updateView = async () => {
   const result = await v$.value.$validate();
@@ -231,7 +219,34 @@ onMounted(async () => {
   await getView();
 });
 
+findStorage();
+watchEffect(() => {
+    if (viewDocument.value.counterpartyName &&
+        viewDocument.value.counterpartyName.agreement &&
+        viewDocument.value.counterpartyName.agreement.length > 0) {
+     viewDocument.value.counterpartyAgreementName = {
+      name: viewDocument.value.counterpartyName.agreement[0].name,
+      code: viewDocument.value.counterpartyName.agreement[0].id,
+    };
+  } else {
+    viewDocument.counterpartyAgreementName = null;
+  }
+  if (hasOrganization === true) viewDocument.organizationName = {
+    name:organizationHas.name,
+    code:organizationHas.id
+  }
+  if (storage.value.length === 1) viewDocument.storageName = storage.value[0]
+});
+watch(viewDocument.value, (newValue) => {
+  console.log(newValue)
+  if (newValue.counterpartyAgreementName && !isCurrencyFetched.value) {
 
+    findCurrency(newValue.counterpartyAgreementName).then(() => {
+      viewDocument.value.currencyName = currency.value[0];
+    });
+    isCurrencyFetched.value = true;
+  }
+},{deep:true});
 </script>
 <template>
   <div class="edit-purchase">
@@ -281,51 +296,76 @@ onMounted(async () => {
       </div>
     </div>
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
+      <FloatLabel class="col-span-4">
+        <DatePicker
+            showIcon
+            v-model="viewDocument.date"
+            showTime
+            hourFormat="24"
+            dateFormat="dd.mm.yy,"
+            fluid
+            hideOnDateTimeSelect
+            iconDisplay="input"
+            class="w-full"
+        />
+        <label for="dd-city">Дата</label>
+      </FloatLabel>
 
-
-      <Calendar v-model="viewDocument.date" showIcon placeholder="Дата" iconDisplay="input" class="col-span-4"/>
-
+      <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Select
             v-model="viewDocument.organizationName"
-            placeholder="Организация"
-            class="col-span-4"
+            class="w-full"
             :options="organization"
             option-label="name"
             @click="findOrganization"
         >
           <template #value>
-            {{ viewDocument.organizationName.name }}
+            {{ viewDocument.organizationName?.name }}
             </template>
-
         </Select>
-      <Select v-model="viewDocument.counterpartyName" placeholder="Поставщик" class="col-span-4"
+        <label for="dd-city">Организация</label>
+      </FloatLabel>
+
+      <FloatLabel class="col-span-4">
+        <Select v-model="viewDocument.counterpartyName" class="w-full"
                 :options="counterparty" @click="findCounterparty" option-label="name">
         <template #value>
-          {{viewDocument.counterpartyName.name}}
+          {{ viewDocument.counterpartyName?.name }}
         </template>
       </Select>
-      <Select v-model="viewDocument.counterpartyAgreementName" placeholder="Договор" class="col-span-3"
+        <label for="dd-city">Поставщик</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
+        <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
                 :options="agreementList" @click="getAgreement" option-label="name">
         <template #value>
-          {{viewDocument.counterpartyAgreementName.name}}
+          {{ viewDocument.counterpartyAgreementName?.name }}
         </template>
       </Select>
-      <Select v-model="viewDocument.storageName" placeholder="Склад" class="col-span-3" :options="storage" @click="findStorage" option-label="name">
+        <label for="dd-city">Договор</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
+        <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
+                @click="findStorage">
         <template #value>
-          {{viewDocument.storageName.name}}
+          {{ viewDocument.storageName?.name }}
         </template>
       </Select>
-      <Select v-model="viewDocument.author" disabled placeholder="Автор" class="col-span-3">
+        <label for="dd-city">Склад</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
+        <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
+                @click="findCurrency">
         <template #value>
-          {{viewDocument.author.name}}
+          {{ viewDocument.currencyName?.name }}
         </template>
       </Select>
-      <Select v-model="viewDocument.currencyName" placeholder="Валюта" class="col-span-3" :options="currency" @click="findCurrency" option-label="name">
-        <template #value>
-          {{viewDocument.currencyName.name}}
-        </template>
-      </Select>
-      <fin-input placeholder="Комментарий" class="col-span-12 mt-[10px]"/>
+        <label for="dd-city">Валюта</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-12 mt-[10px]">
+        <Textarea class="w-full" style="min-height: 20px" rows="2" cols="20" />
+        <label for="dd-city">Комментарий</label>
+      </FloatLabel>
       <div  class="col-span-12">
         <button @click="isOpen = false" class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
       </div>
@@ -349,7 +389,9 @@ onMounted(async () => {
   <div>
     <purchasing-table :productId="productId" @post-goods="getProducts"/>
   </div>
-
+  <div class="text-[20px] font-[600] absolute bottom-[40px]">
+    Автор: {{ userName.name }}
+  </div>
 
     <Sidebar
         v-model:visible="visibleMovement"
