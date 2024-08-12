@@ -114,6 +114,7 @@ onMounted(async () => {
         v-model="selectedProducts"
         :options="productsId"
         optionLabel="products"
+        editable
         class="w-full h-[47px] rounded-[10px]"
       />
       <label for="">Поиск по Id, наименованию, штрих коду</label>
@@ -216,13 +217,12 @@ onMounted(async () => {
       </Column>
       <Column
         :rowEditor="true"
-        style="width: 10%; min-width: 8rem; "
+        style="width: 10%; min-width: 8rem;"
         bodyStyle="text-align:center"
       >
       </Column>
     </DataTable>
   </div>
-
   <div
     class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]"
   >

@@ -1,11 +1,13 @@
 <script setup>
-
+const props = defineProps({
+  headerTitle:''
+})
 </script>
 
 <template>
   <div class="relative z-20 bottom-[40px]">
     <div class="header-text font-semibold text-[20px] leading-[20px] text-[#141C30]">
-      Покупка товаров
+      {{props.headerTitle}}
     </div>
     <div class="grid grid-cols-5 gap-[20px]">
       <div class="card-header mt-4 mb-4 col-span-1">

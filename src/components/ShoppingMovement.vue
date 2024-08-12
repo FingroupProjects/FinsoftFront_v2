@@ -16,6 +16,9 @@ const props = defineProps({
   productId: {
     required: true,
   },
+  numberAgreement: {
+    required: true,
+  },
 });
 
 const getBalance = async () => {
@@ -91,14 +94,12 @@ onMounted(() => {
   getGoodAccounting()
   getCounterparty()
 })
-
-
 </script>
 <template>
 <div>
   <div class="ml-5 -mt-2">
     <p class="text-[20px] font-semibold text-[#141C30]">Движение закупки</p>
-    <p class="text-[#808BA0] text-[16px]">№32151</p>
+    <p class="text-[#808BA0] text-[16px]">№{{ props.numberAgreement }}</p>
   </div>
   <div class="carddes ml-5">
     <Tabs value="0">

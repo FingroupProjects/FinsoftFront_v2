@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
 import DocumentPrint from "@/components/DocumentPrint.vue";
-import { useCookies } from 'vue3-cookies'
+import { useCookies } from 'vue3-cookies';
 const routes = [
     {
         path: '/',
@@ -25,7 +25,12 @@ const routes = [
                 path: '/purchase',
                 name: 'purchase',
                 component: () => import('@/views/Purchase.vue'),
-            }
+            },
+            {
+                path: '/goods',
+                name: 'goods',
+                component: () => import('@/views/Goods.vue'),
+            },
         ]
     },
     {
