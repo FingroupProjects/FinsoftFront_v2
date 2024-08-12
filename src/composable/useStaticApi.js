@@ -32,7 +32,6 @@ export const useStaticApi = () => {
     try {
       loading.value = true;
       const res = await useAxios(`/currency/${agreementId?.code|| ''}?itemsPerPage=10`);
-      console.log('qweryty',res.data);
       if (res.result.data) {
         return currency.value = res.result.data.map((el) => {
             return {

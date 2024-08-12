@@ -145,7 +145,7 @@ watch(selectedStorage, () => {
 watch(selectedCounterparty, () => {
   getProducts();
 });
-getProducts();
+  getProducts();
 </script>
 
 <template>
@@ -392,7 +392,7 @@ getProducts();
 
   <Sidebar
       v-model:visible="openViewPurchase"
-      :show-close-icon="true"
+      :show-close-icon="false"
       position="right"
       class="create-purchase-sidebar"
   >

@@ -24,7 +24,14 @@ const rules = reactive({
 });
 const v$ = useVuelidate(rules, data);
 const layout = computed(() => route.meta?.layout)
-async function fetchOrders() {
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    // Call your function here
+    fetchOrders();
+  }
+});
+async function fetchOrders(event) {
+
   const result = await v$.value.$validate();
 
   if (result) {
@@ -73,7 +80,7 @@ async function fetchOrders() {
       <div>
         <div class="text-[16px] leading-[16px] text-center font-semibold">Вход</div>
         <fin-input  :error="v$.login.$error" v-model="data.login" class="w-[360px] mt-[50px]" placeholder="Логин"></fin-input>
-        <fin-input :error="v$.password.$error"  v-model="data.password" class="w-[360px] mt-[26px]" placeholder="Пароль"></fin-input>
+        <fin-input :error="v$.password.$error"  v-model="data.password" class="w-[360px] mt-[26px]" placeholder="Пароль" :type="`password`" :show-value="true"></fin-input>
         <fin-button severity="success" class="w-[360px] mt-[26px]" label="Войти" @click="fetchOrders()"/>
         <div class="text-[16px] leading-[16px] text-center font-semibold text-[#3935E7] mt-[50px]">
           Забыли пароль?

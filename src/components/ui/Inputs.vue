@@ -23,8 +23,6 @@
           @input="moneyMask"
       />
 
-
-
       <label
           :class="{ 'peer-focus:text-error ': props.error, 'left-[40px]': props.email, 'peer-focus:text-primary ': !props.error, 'left-4 ': !props.email,
         'top-[16px] text-sm' : props.size === 'sm',
@@ -41,8 +39,8 @@
          class="pi pi-exclamation-circle cursor-pointer mr-3 absolute right-0 top-4 text-[#F2376F]"></i>
 
       <div v-if="props.error === false ? props.showValue : false" class="absolute right-0 top-3">
-        <i v-if="show" class="fas fa-eye-low-vision mr-3 cursor-pointer text-secondary" @click="hideValue"></i>
-        <i v-else class="fas fa-eye mr-3 text-slate-700 cursor-pointer" @click="showValueHandle"></i>
+        <i v-if="show" class="pi pi-eye mr-3 cursor-pointer text-secondary" @click="hideValue"></i>
+        <i v-else class="pi pi-eye-slash mr-3 text-slate-700 cursor-pointer" @click="showValueHandle"></i>
       </div>
 
       <div v-if="props.clearable && props.modelValue.length > 0">

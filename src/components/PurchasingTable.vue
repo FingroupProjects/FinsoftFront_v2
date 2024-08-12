@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, reactive, ref, watchEffect} from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
@@ -7,6 +7,8 @@ import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
+import formatInputAmount from "@/constants/formatInput.js";
+import formatNumber from '../constants/formatNumber.js'
 
 const v$ = useVuelidate();
 
@@ -24,7 +26,6 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
-const editing = reactive({});
 
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
@@ -98,34 +99,9 @@ const onRowEditSave = (event) => {
     price: newData.price,
   });
 
-  getAllSum.value -= Number(oldProduct.sum);
-  getAllSum.value += Number(newData.sum);
-
-  getAllProduct.value -= Number(oldProduct.amount);
-  getAllProduct.value += Number(newData.amount);
-  goods.value.sum = newData.price * getAllProduct.value;
+  getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
+  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
   console.log(postProducts);
-};
-
-const editColumn = (rowIndex, field) => {
-  editing[rowIndex] = editing[rowIndex] || {};
-  editing[rowIndex][field] = true;
-};
-
-const saveChanges = (rowIndex, field) => {
-  if (editing[rowIndex]) {
-    delete editing[rowIndex][field];
-
-    goods.value[rowIndex].updated = true;
-  }
-};
-
-const isEditing = (rowIndex, field) => {
-  return editing[rowIndex] && editing[rowIndex][field];
-};
-
-const deleteItem = (rowIndex) => {
-  goods.value[rowIndex].deleted = true;
 };
 
 const getGood = async () => {
@@ -149,7 +125,6 @@ const getGood = async () => {
     }));
 
     getAllSum.value = sum;
-    console.log('name',goods.value)
   } catch (error) {
     console.log(error);
   }
@@ -157,7 +132,7 @@ const getGood = async () => {
 
 
 watchEffect(() => {
-  sum.value = amount.value * price.value;
+  sum.value = amount.value*price.value;
 });
 
 onMounted(async () => {
@@ -167,7 +142,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card-sidebar">
+  <div class="">
     <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
       <FloatLabel class="col-span-6">
         <Select
@@ -179,9 +154,9 @@ onMounted(async () => {
         <label for="">Поиск по Id, наименованию, штрих коду</label>
       </FloatLabel>
       <div class="col-span-6 flex gap-[16px]">
-        <fin-input v-model="amount" placeholder="Кол-во" />
-        <fin-input v-model="price" placeholder="Цена" />
-        <fin-input v-model="sum" placeholder="Сумма" />
+        <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во" />
+        <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
+        <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" />
         <fin-button
             icon="pi pi-plus"
             @click="addFn"
@@ -195,6 +170,8 @@ onMounted(async () => {
     <div class="table-create" v-if="goods.length > 0">
       <DataTable
           :value="goods"
+          scrollable
+          scrollHeight="280px"
           class="mt-[21px]"
           v-model:editingRows="editingRows"
           @row-edit-save="onRowEditSave"
@@ -220,35 +197,34 @@ onMounted(async () => {
         </Column>
           <Column field="amount" header="Кол-во">
           <template #editor="{ data, field }">
-            <input-text v-model="data[field]" fluid  />
+            <input-text v-model="data[field]" fluid :model-value="formatInputAmount(data[field])" />
           </template>
         </Column>
         <Column field="price" header="Цена">
           <template #editor="{ data, field }">
-            <input-text v-model="data[field]" fluid  />
+            <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid  />
           </template>
         </Column>
         <Column field="sum" header="Сумма"></Column>
-        <Column field="quantity" header="Сумма">
+        <Column field="quantity" >
           <template #body="{ index }">
             <i
                 @click="confirmDeleteProduct(index)"
                 class="pi pi-trash text-[#808BA0] cursor-pointer"
             ></i>
+
           </template>
         </Column>
         <Column
             :rowEditor="true"
-            bodyClass="w-[7%]"
-            headerStyle="min-width: 4rem"
+            bodyClass=""
         ></Column>
       </DataTable>
     </div>
-
-
   </div>
+
   <div class="summary-container">
-    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-10 bg-[#F6F6F6]">
+    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]">
       <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
         Итого:
       </div>
@@ -257,32 +233,27 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Кол-во
           </div>
-            {{ getAllProduct }}
+            {{formatNumber(getAllProduct) }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Товаров
           </div>
-          {{ goods.length }}
+          {{ goods?.length }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Сумма
           </div>
-          {{ getAllSum.toLocaleString() }}
+          {{formatNumber(getAllSum)  }}
         </div>
       </div>
     </div>
   </div>
 
-
-
-
 </template>
 
-<style scoped>
-
-
+<style scoped lang="scss">
 .table-create {
   .p-datatable-header-cell {
     background: #f6f6f6;
@@ -290,10 +261,6 @@ onMounted(async () => {
   .p-select-label {
     margin-top: 5px;
   }
-}
-
-.summary-container{
-  position: inherit !important;
 }
 
 .card-sidebar {
