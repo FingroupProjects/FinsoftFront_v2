@@ -8,6 +8,7 @@ import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
+import Select from "primevue/dropdown";
 
 const emit = defineEmits(["postGoods"]);
 
@@ -69,8 +70,8 @@ const confirmDeleteProduct = (index) => {
   getAllProduct.value -= Number(deletedProduct.coleVo);
 };
 
-const getIdProducts = async () => {
-  const res = await useAxios(`good?search=3412123123`);
+const getIdProducts = async (inputValue) => {
+  const res = await useAxios(`good?search=${inputValue.srcElement.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
@@ -114,8 +115,8 @@ onMounted(async () => {
         v-model="selectedProducts"
         :options="productsId"
         optionLabel="products"
-
-        filter
+        @keyup="getIdProducts"
+         editable
         class="w-full h-[47px] rounded-[10px]"
       />
       <label for="">Поиск по Id, наименованию, штрих коду</label>
