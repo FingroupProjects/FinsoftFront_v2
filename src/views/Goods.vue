@@ -295,7 +295,7 @@ getProducts();
         </template>
       </Column>
     </DataTable>
-    <div class="paginator-dropdown bg-white sticky left-0 top-[80%]">
+    <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
       <span class="paginator-text"> Элементов на странице: </span>
       <Dropdown
           v-model="selectPage"

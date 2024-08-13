@@ -97,7 +97,8 @@ const getView = async () => {
       counterpartyName: item.counterparty,
       counterpartyAgreementName: item.counterpartyAgreement,
       storageName: item.storage,
-      date: formatDate(item.date),
+      date: new Date(item.date),
+      postDate:item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
     };
@@ -109,24 +110,19 @@ const getView = async () => {
 
 const updateView = async () => {
   const result = await v$.value.$validate();
+
   if (result) {
     try {
-      console.log('viewDocument:', viewDocument.value);
-
-      // Ensure productsInfo is always an array and handle potential undefined values
       const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
 
-      // Fetch existing goods from the server
-      const existingGoods = await fetchExistingGoods(); // Call here
+      const existingGoods = await fetchExistingGoods();
       const existingGoodsMap = new Map(existingGoods.map(good => [good.good_id, good]));
 
-      // Determine new or updated goods
       const newOrUpdatedGoods = goodsArray.filter(product => {
         const existingGood = existingGoodsMap.get(product.good_id);
         return !existingGood || (existingGood.price !== product.price || existingGood.amount !== product.amount);
       });
 
-      // Prepare the data to be sent
       const data = {
         organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code,
         counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
@@ -217,6 +213,7 @@ function getProducts(products) {
 
 onMounted(async () => {
   await getView();
+
 });
 
 findStorage();
@@ -296,6 +293,7 @@ watch(viewDocument.value, (newValue) => {
       </div>
     </div>
     <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
+
       <FloatLabel class="col-span-4">
         <DatePicker
             showIcon
@@ -307,7 +305,9 @@ watch(viewDocument.value, (newValue) => {
             hideOnDateTimeSelect
             iconDisplay="input"
             class="w-full"
-        />
+        >
+
+        </DatePicker>
         <label for="dd-city">Дата</label>
       </FloatLabel>
 
