@@ -89,7 +89,7 @@ const confirmDeleteProduct = (index) => {
 
 const getIdProducts = async (inputValue) => {
 
-  const res = await useAxios(`good?search=${inputValue.srcElement.value}`);
+  const res = await useAxios(`good?search=${inputValue?.srcElement.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
