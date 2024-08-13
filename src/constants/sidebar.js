@@ -67,7 +67,7 @@ export default [
     {
         label: 'Товары',
         icon: 'pi pi-shield',
-        route: '/goods'
+        route: '/'
     },
     {
         label: 'Финансы',
@@ -173,7 +173,7 @@ export default [
                 data:[
                     {
                         label:'Склады',
-                        route: '/'
+                        route: '/warehouses'
                     },
                     {
                         label:'Ед.Из',

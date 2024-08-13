@@ -114,7 +114,8 @@ onMounted(async () => {
         v-model="selectedProducts"
         :options="productsId"
         optionLabel="products"
-        editable
+
+        filter
         class="w-full h-[47px] rounded-[10px]"
       />
       <label for="">Поиск по Id, наименованию, штрих коду</label>

@@ -7,8 +7,10 @@ import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
+import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
+
 
 const v$ = useVuelidate();
 
@@ -26,7 +28,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
-
+const searchInput = ref();
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
@@ -86,7 +88,8 @@ const confirmDeleteProduct = (index) => {
 };
 
 const getIdProducts = async () => {
-  const res = await useAxios(`good?search=3412123123`);
+
+  const res = await useAxios(`good?search=${searchInput.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
@@ -96,17 +99,16 @@ const getIdProducts = async () => {
 const onRowEditSave = (event) => {
   const { newData, index } = event;
   const oldProduct = goods.value[index];
-
-  goods.value.splice(index, 1, newData); // Update goods
+  newData.sum = Number((newData.price * newData.amount).toFixed(2));
+  goods.value.splice(index, 1, newData);
   postProducts.value.splice(index, 1, {
     amount: newData.amount,
-    good_id: newData.products.code,
+    good_id: newData.good_id || oldProduct.good_id,
     price: newData.price,
   });
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
-  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
-  console.log(postProducts);
+  getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
 };
 
 const getGood = async () => {
@@ -138,7 +140,7 @@ const getGood = async () => {
 };
 
 watchEffect(() => {
-  sum.value = amount.value*price.value;
+  sum.value = Number((amount.value * price.value).toFixed(2))
 });
 
 onMounted(async () => {
@@ -154,9 +156,14 @@ onMounted(async () => {
             v-model="selectedProducts"
             :options="productsId"
             optionLabel="products"
-            class="w-full"
-            editable
-        />
+            class="w-full h-[47px] rounded-[10px]"
+
+        >
+          <template #header>
+            <InputText placeholder="search" type="text" class="w-[97%] flex justify-center m-auto mt-3"
+                       @input="getIdProducts" v-model="searchInput"/>
+          </template>
+        </Select>
         <label for="">Поиск по Id, наименованию, штрих коду</label>
       </FloatLabel>
       <div class="col-span-6 flex gap-[16px]">
