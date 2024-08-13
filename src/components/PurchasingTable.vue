@@ -87,9 +87,9 @@ const confirmDeleteProduct = (index) => {
   }
 };
 
-const getIdProducts = async () => {
+const getIdProducts = async (inputValue) => {
 
-  const res = await useAxios(`good?search=${searchInput.value}`);
+  const res = await useAxios(`good?search=${inputValue.srcElement.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
@@ -157,12 +157,9 @@ onMounted(async () => {
             :options="productsId"
             optionLabel="products"
             class="w-full h-[47px] rounded-[10px]"
-
+            editable
+            @keyup="getIdProducts"
         >
-          <template #header>
-            <InputText placeholder="search" type="text" class="w-[97%] flex justify-center m-auto mt-3"
-                       @input="getIdProducts" v-model="searchInput"/>
-          </template>
         </Select>
         <label for="">Поиск по Id, наименованию, штрих коду</label>
       </FloatLabel>
