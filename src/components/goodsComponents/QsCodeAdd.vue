@@ -5,60 +5,91 @@ import Column from "primevue/column";
 import formatInputAmount from "@/constants/formatInput.js";
 import moment from "moment";
 import Dropdown from "primevue/dropdown";
+import {useAxios} from "@/composable/useAxios.js";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
 
-const products = ref([]);
-const postProducts = ref([]);
+const props = defineProps({
+  productId: {
+    required: true,
+  }
+});
+const toast = useToast();
+
 const coleVo = ref("");
-const getAllSum = ref(0);
-const getAllProduct = ref(0);
 const editingRows = ref([]);
 const newProduct = ref();
 const selectedStatus = ref({name: 'Активный', code: 'NY'},);
 const listStatus = ref([
   {name: 'Активный', code: 'NY'},
   {name: 'Не Активный', code: 'RM'},
-
 ]);
+const barCodeList = ref([]);
+
 const clearInputValues = () => {
   newProduct.value = {};
   coleVo.value = "";
 };
 
-const addFn = async () => {
-  const product = {
-    coleVo: coleVo.value,
-    data: new Date
-  };
-  products.value.push(product);
-
-  clearInputValues();
+const confirmDeleteProduct = async (index) => {
+  try {
+    const res = await useAxios(`/barcode/${index}`);
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    getBarcode()
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
+  }
 };
 
-const confirmDeleteProduct = (index) => {
-  const deletedProduct = products.value.splice(index, 1)[0];
-  postProducts.value.splice(index, 1);
-  getAllSum.value -= Number(deletedProduct.sum);
-  getAllProduct.value -= Number(deletedProduct.coleVo);
-};
+async function postMethod() {
+  try {
+    const res = await useAxios(`/barcode`, {
+      method: "POST",
+      data: {
+        "barcode": coleVo.value,
+        "good_id": props.productId
+      },
+    });
+    getBarcode()
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    clearInputValues();
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
+  }
+}
 
-const onRowEditSave = (event) => {
-  const {newData, index} = event;
-  const oldProduct = products.value[index];
+async function getBarcode() {
+  try {
+    const res = await useAxios(`/barcode/${props.productId}`);
+    barCodeList.value = res.result.data
+  } catch (e) {
+    console.log(e);
+  }
+}
 
-  newData.sum = Number((newData.price * newData.coleVo).toFixed(2));
-
-  products.value.splice(index, 1, newData);
-
-  postProducts.value.splice(index, 1, {
-    amount: newData.coleVo,
-    good_id: newData.products.code || oldProduct.good_id,
-    price: newData.price,
-  });
-
-  getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
-  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
-};
-
+getBarcode()
 </script>
 
 <template>
@@ -71,21 +102,20 @@ const onRowEditSave = (event) => {
                  placeholder="Введите номер штрих-кода"/>
       <fin-button
           icon="pi pi-save"
-          @click="addFn"
+          @click="postMethod"
           label="Добавить"
           severity="success"
           class="p-button-lg"
       />
     </div>
   </div>
-  <div class="table-create dropdown-status" v-if="products.length > 0">
+  <div class="table-create dropdown-status" v-if="barCodeList.length > 0">
     <DataTable
-        :value="products"
+        :value="barCodeList"
         scrollable
         scrollHeight="280px"
         class="mt-[21px]"
         v-model:editingRows="editingRows"
-        @row-edit-save="onRowEditSave"
         editMode="row"
         tableStyle="min-width: 50rem"
     >
@@ -93,38 +123,42 @@ const onRowEditSave = (event) => {
         <template #body="{ data }">
           <div class="flex items-center gap-[10px]">
             <img src="@/assets/img/shtirxImg.svg" alt="" class="me-2">
-            <div>{{ data.coleVo }}</div>
+            <div>{{ data.barcode }}</div>
           </div>
         </template>
       </Column>
       <Column field="data" header="Дата создания">
         <template #body="{data}">
-          {{ moment(new Date(data.data)).format(" D.MM.YYYY h:mm") }}
+          {{ moment(new Date(data?.created_at)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
       <Column field="sum" header="Статус">
-        <template #body>
+        <template #body="{data}">
+
           <Dropdown v-model="selectedStatus"
                     class="h-[32px] items-center" optionLabel="name" :options="listStatus">
             <template #value>
               <div class="flex gap-3 items-center">
-                <img src="@/assets/img/greenActive.svg" alt="">
-                <div class="text-[#000000] font-semibold">{{ selectedStatus.name }}</div>
+                <img src="@/assets/img/greenActive.svg" alt="" v-if="data?.deleted_at===null">
+                <img src="@/assets/img/redRounded.svg" alt="" v-else>
+                <div class="text-[#000000] font-semibold" v-if="data?.deleted_at===null">Активный</div>
+                <div class="text-[#000000] font-semibold" v-else>Не активный</div>
               </div>
             </template>
           </Dropdown>
         </template>
       </Column>
       <Column field="quantity" header="">
-        <template #body="{ index }">
+        <template #body="{ data }">
           <i
-              @click="confirmDeleteProduct(index)"
+              @click="confirmDeleteProduct(data.id)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>
       </Column>
     </DataTable>
   </div>
+  <Toast/>
 </template>
 <style lang="scss">
 .table-create {
@@ -136,7 +170,8 @@ const onRowEditSave = (event) => {
     margin-top: 5px;
   }
 }
-.dropdown-status{
+
+.dropdown-status {
   .p-select {
     border-radius: 10px;
   }

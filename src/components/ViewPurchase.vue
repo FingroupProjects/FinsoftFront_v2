@@ -28,6 +28,7 @@ const visibleHistory = ref(false)
 const approved = ref(false)
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
+const comments = ref('')
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -363,7 +364,7 @@ watch(viewDocument.value, (newValue) => {
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea class="w-full" style="min-height: 20px" rows="2" cols="20" />
+        <Textarea class="w-full" v-model="comments" style="min-height: 20px" rows="2" cols="20" />
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
       <div  class="col-span-12">

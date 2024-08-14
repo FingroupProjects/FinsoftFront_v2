@@ -16,7 +16,8 @@ import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import AddGoods from "@/components/goodsComponents/AddGoods.vue";
+import AddGoods from "@/components/goodsComponents/ViewGoods.vue";
+import CreateGoods from "@/components/goodsComponents/createGoods.vue";
 
 const {
   findStorage,
@@ -90,7 +91,7 @@ async function getProducts(filters = {}) {
     ...filters,
   };
 
-  const res = await useAxios(`/document/provider/purchase`, {params});
+  const res = await useAxios(`good?search=3412123123`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -102,30 +103,17 @@ function getProductMethods() {
   getProducts()
 }
 
-const getSeverity = (status, deleted) => {
-  if (deleted) {
+const getSeverity = (status) => {
+  if (status == null) {
+    return {
+      status: "success",
+      name: "Проведен",
+    };
+  } else {
     return {
       status: "warn",
-      name: "Удалено",
+      name: "Не проведен",
     };
-  }
-
-  switch (status) {
-    case true:
-      return {
-        status: "success",
-        name: "Проведен",
-      };
-    case false:
-      return {
-        status: "warn",
-        name: "Не проведен",
-      };
-    default:
-      return {
-        status: "error",
-        name: "Unknown status",
-      };
   }
 };
 
@@ -225,10 +213,7 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          <span
-              class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden"
-          >{{ slotProps.data?.doc_number }}</span
-          >
+          <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Наименование">
@@ -243,7 +228,7 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.counterparty?.name }}
+          {{ slotProps.data?.name }}
         </template>
       </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="Артикул">
@@ -258,7 +243,7 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.organization?.name }}
+          {{ slotProps.data?.vendor_code }}
         </template>
       </Column>
       <Column field="price" :sortable="true" header="Категория">
@@ -273,7 +258,7 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.sum }}
+          {{ slotProps.data?.goodGroup?.name }}
         </template>
       </Column>
       <Column field="status" :sortable="true" header="Статус">
@@ -325,7 +310,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <add-goods @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
+<create-goods/>
     </Sidebar>
   </div>
 
@@ -335,7 +320,7 @@ getProducts();
       position="right"
       class="create-purchase-sidebar"
   >
-    <view-purchase :productId="selectedProductId"/>
+    <add-goods :product-id="selectedProductId" @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
   </Sidebar>
 
   <Sidebar
