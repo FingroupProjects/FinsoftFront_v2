@@ -116,7 +116,7 @@ const getGood = async () => {
     const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
-
+    console.log(sum)
     const imgURL = import.meta.env.VITE_IMG_URL;
 
     goods.value = items.map((item) => ({
@@ -134,6 +134,7 @@ const getGood = async () => {
       return total + el?.amount;
     }, 0);
     getAllSum.value = sum
+    console.log(getAllSum)
   } catch (error) {
     console.log(error);
   }

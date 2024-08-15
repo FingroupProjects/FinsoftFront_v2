@@ -20,7 +20,7 @@ export default [
                     {
                         label: 'Заявка товаров',
                         icon: 'pi pi-eraser',
-                        route: '/',
+                        route: '/providerOrder',
 
                     },
                     {
