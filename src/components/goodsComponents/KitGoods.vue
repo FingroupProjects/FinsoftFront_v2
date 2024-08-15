@@ -31,12 +31,8 @@ async function addUnit() {
     const res = await useAxios(`/goods/addUnits/${props.productId}`, {
       method: "POST",
       data: {
-        "units": [
-          {
             "amount": coleVo.value,
             "unit_id": selectUnit.value.code
-          }
-        ]
       },
     });
     getUnit()

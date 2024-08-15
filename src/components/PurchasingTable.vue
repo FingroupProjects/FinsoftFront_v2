@@ -11,7 +11,6 @@ import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
 
-
 const v$ = useVuelidate();
 
 const emit = defineEmits(["postGoods"]);
@@ -28,7 +27,6 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
-const searchInput = ref();
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
@@ -76,7 +74,6 @@ const addFn = async () => {
 };
 
 const confirmDeleteProduct = (index) => {
-  const deletedProduct = goods.value.splice(index, 1)[0];
   postProducts.value.splice(index, 1);
   getAllSum.value = goods.value.reduce((total, el) => {
     console.log(total)

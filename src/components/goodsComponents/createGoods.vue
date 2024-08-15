@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {reactive, computed, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Dropdown from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
@@ -9,14 +9,9 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
-import FileUpload from 'primevue/fileupload';
+import emptyImg from '@/assets/img/emptyImg.svg';
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-const props = defineProps({
-  productId: {
-    required: true,
-  }
-});
 
 const toast = useToast();
 
@@ -39,7 +34,11 @@ const rules = reactive({
   selectedGoodGroup: {required},
   selectUnit: {required},
 });
-const fileupload = ref();
+const fileInput = ref()
+const imagePreview = ref(emptyImg)
+const imageRef = ref(null)
+
+
 const v$ = useVuelidate(rules, createValues);
 
 async function unitList() {
@@ -92,19 +91,20 @@ goodGroupGet()
 
 async function saveFn() {
   const result = await v$.value.$validate();
-
+  const formData = new FormData()
+  formData.append('name', createValues.nameProduct)
+  formData.append('vendor_code', createValues.vendorCode)
+  formData.append('unit_id',createValues.selectUnit.code)
+  formData.append('good_group_id', createValues.selectedGoodGroup.code)
+  formData.append('goods', productsInfo.value)
+  if (imageRef.value !== null) {
+    formData.append('main_image', imageRef.value)
+  }
   if (result) {
     try {
       const res = await useAxios(`/good`, {
         method: "POST",
-        data: {
-          name: createValues.nameProduct,
-          vendor_code: createValues.vendorCode,
-          unit_id: createValues.selectUnit.code,
-          good_group_id: createValues.selectedGoodGroup.code,
-          goods: productsInfo.value,
-          main_image:''
-        },
+        data: formData,
       });
       toast.add({
         severity: "success",
@@ -123,6 +123,25 @@ async function saveFn() {
       });
     }
   }
+}
+
+
+const selectAvatar = event => {
+  const files = event.target.files
+  imageRef.value = files[0]
+  let filename = files[0].name
+  if (filename.lastIndexOf('.') <= 0) {
+    return
+  }
+  const fileReader = new FileReader()
+  fileReader.addEventListener('load', () => {
+    imagePreview.value = fileReader.result
+  })
+  fileReader.readAsDataURL(files[0])
+}
+
+const onPickFile = () => {
+  fileInput.value.click()
 }
 </script>
 
@@ -154,7 +173,21 @@ async function saveFn() {
     </div>
     <div class="flex mt-[30px] gap-[26px]">
       <div class="">
-        <img src="@/assets/img/emptyImg.svg" alt=""  class="w-full">
+        <div class="relative" style="width: 100%;">
+          <input
+              accept="image/*"
+              type="file"
+              @change="selectAvatar"
+              style="display: none"
+              ref="fileInput"
+          />
+          <div v-if="imagePreview.length === 0">
+            <fin-button @click="onPickFile">Загрузить фото</fin-button>
+          </div>
+          <div v-else>
+            <img :src="imagePreview" class="rounded-[16px] img-goods" @click="onPickFile" />
+          </div>
+        </div>
       </div>
       <div class="form w-full grid grid-cols-12 gap-[16px]">
         <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
@@ -164,6 +197,7 @@ async function saveFn() {
               v-model="createValues.selectedGoodGroup"
               :options="goodGroupList"
               :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
+
               optionLabel="name"
               class="w-full"
           />
@@ -183,7 +217,7 @@ async function saveFn() {
           <label for="dd-city">Ед. изм.</label>
         </FloatLabel>
         <FloatLabel class="col-span-3">
-<!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
+          <!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
           <Dropdown
               v-model="createValues.selectLocation"
 
@@ -249,6 +283,12 @@ async function saveFn() {
   line-height: 15px;
   color: #808BA0;
   font-weight: 600;
+}
+.img-goods{
+  width: 261px !important;
+  height: 207px !important;
+  position: relative;
+  z-index: 333;
 }
 
 </style>

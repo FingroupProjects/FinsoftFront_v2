@@ -310,7 +310,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-<create-goods/>
+      <create-goods @close-sidebar="visibleRight=false"/>
     </Sidebar>
   </div>
 
@@ -320,7 +320,7 @@ getProducts();
       position="right"
       class="create-purchase-sidebar"
   >
-    <add-goods :product-id="selectedProductId" @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
+    <add-goods :product-id="selectedProductId" @close-sidebar="openViewPurchase=false" @close-dialog="closeFn"/>
   </Sidebar>
 
   <Sidebar
@@ -329,7 +329,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase @updateFilters="handleFiltersUpdate" />
   </Sidebar>
   <Toast/>
 </template>
