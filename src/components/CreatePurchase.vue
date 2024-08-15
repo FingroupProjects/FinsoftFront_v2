@@ -94,6 +94,7 @@ async function saveFn() {
           counterparty_agreement_id: createValues.selectedAgreement.code,
           storage_id: createValues.selectedStorage.code,
           currency_id: createValues.selectCurrency.code,
+          comment: createValues.comments,
           goods: productsInfo.value,
         },
       });
