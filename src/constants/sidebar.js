@@ -173,12 +173,16 @@ export default [
                 data:[
                     {
                         label:'Склады',
-                        route: '/warehouses'
+                        route: '/'
                     },
                     {
                         label:'Ед.Из',
                         route: '/'
-                    }
+                    },
+                    {
+                        label:'Товары',
+                        route: '/warehouses'
+                    },
                 ]
             }
         ]

@@ -15,7 +15,11 @@ import QsCodeAdd from "@/components/goodsComponents/QsCodeAdd.vue";
 import KitGoods from "@/components/goodsComponents/KitGoods.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-
+const props = defineProps({
+  productId:{
+    required: true,
+  }
+});
 const toast = useToast();
 
 const {
@@ -241,8 +245,8 @@ watch(createValues, (newValue) => {
     </div>
 
   </div>
-  <qs-code-add @postGoods="getProducts"/>
-  <kit-goods/>
+  <qs-code-add :product-id="props.productId" @postGoods="getProducts"/>
+  <kit-goods :product-id="props.productId"/>
   <Toast/>
 </template>
 

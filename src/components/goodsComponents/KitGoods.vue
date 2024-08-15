@@ -3,62 +3,108 @@ import {ref} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import formatInputAmount from "@/constants/formatInput.js";
-import moment from "moment";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
+import {useAxios} from "@/composable/useAxios.js";
+import {useToast} from "primevue/usetoast";
 
-const products = ref([]);
-const postProducts = ref([]);
+const props = defineProps({
+  productId: {
+    required: true,
+  }
+});
+
+const toast = useToast();
+
 const coleVo = ref("");
-const getAllSum = ref(0);
-const getAllProduct = ref(0);
-const editingRows = ref([]);
-const newProduct = ref();
-const selectedStatus = ref();
-const listStatus = ref([
-  {name: 'Активный', code: 'NY'},
-  {name: 'Не Активный', code: 'RM'},
-]);
+const selectUnit = ref();
+const listUnit = ref([]);
+const getUnitList = ref([]);
+
 const clearInputValues = () => {
-  newProduct.value = {};
+  selectUnit.value = {};
   coleVo.value = "";
 };
 
-const addFn = async () => {
-  const product = {
-    coleVo: coleVo.value,
-    data: new Date
-  };
-  products.value.push(product);
+async function addUnit() {
+  try {
+    const res = await useAxios(`/goods/addUnits/${props.productId}`, {
+      method: "POST",
+      data: {
+        "units": [
+          {
+            "amount": coleVo.value,
+            "unit_id": selectUnit.value.code
+          }
+        ]
+      },
+    });
+    getUnit()
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    clearInputValues();
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
+  }
+}
 
-  clearInputValues();
+
+const confirmDeleteProduct = async (index) => {
+  try {
+    const res = await useAxios(`/removeUnit/${index}`);
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    getUnit()
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e,
+      life: 3000,
+    });
+  }
 };
 
-const confirmDeleteProduct = (index) => {
-  const deletedProduct = products.value.splice(index, 1)[0];
-  postProducts.value.splice(index, 1);
-  getAllSum.value -= Number(deletedProduct.sum);
-  getAllProduct.value -= Number(deletedProduct.coleVo);
-};
+async function getUnit() {
+  try {
+    const res = await useAxios(`/goods/units/${props.productId}`);
+    return getUnitList.value = res
+  } catch (e) {
+    console.log(e);
+  }
+}
 
-const onRowEditSave = (event) => {
-  const {newData, index} = event;
-  const oldProduct = products.value[index];
+getUnit()
 
-  newData.sum = Number((newData.price * newData.coleVo).toFixed(2));
-
-  products.value.splice(index, 1, newData);
-
-  postProducts.value.splice(index, 1, {
-    amount: newData.coleVo,
-    good_id: newData.products.code || oldProduct.good_id,
-    price: newData.price,
-  });
-
-  getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
-  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
-};
-
+async function unitList() {
+  try {
+    const res = await useAxios(`/unit`);
+    return listUnit.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+unitList()
 </script>
 
 <template>
@@ -68,10 +114,9 @@ const onRowEditSave = (event) => {
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-3 h-[47px]">
       <Dropdown
-          v-model="selectedStatus"
-          :options="listStatus"
-          optionLabel="products"
-          editable
+          v-model="selectUnit"
+          :options="listUnit"
+          optionLabel="name"
           class="w-full h-[47px] rounded-[10px]"
       />
       <label for="">Ед. изм.</label>
@@ -82,42 +127,39 @@ const onRowEditSave = (event) => {
                  placeholder="Кол-во"/>
       <fin-button
           icon="pi pi-save"
-          @click="addFn"
+          @click="addUnit"
           label="Добавить"
           severity="success"
           class="p-button-lg"
       />
     </div>
   </div>
-  <div class="table-create dropdown-status" v-if="products.length > 0">
+  <div class="table-create dropdown-status" v-if="getUnitList.length > 0">
     <DataTable
-        :value="products"
+        :value="getUnitList"
         scrollable
         scrollHeight="280px"
         class="mt-[21px]"
-        v-model:editingRows="editingRows"
-        @row-edit-save="onRowEditSave"
-        editMode="row"
         tableStyle="min-width: 50rem"
     >
-      <Column field="coleVo" header="Наименование">
+      <Column field="coleVo" header="Ед. изм.">
         <template #body="{ data }">
           <div class="flex items-center gap-[10px]">
             <img src="@/assets/img/boxIcon.svg" alt="" class="me-2">
-            <div>{{ data.coleVo }}</div>
+            <div>{{ data.name }}</div>
           </div>
         </template>
       </Column>
       <Column field="data" header="Кол-во в упаковке">
         <template #body="{data}">
-          {{data.coleVo }}
+          {{ data?.pivot.amount }}
         </template>
       </Column>
 
       <Column field="quantity" header="">
-        <template #body="{ index }">
+        <template #body="{ data }">
           <i
-              @click="confirmDeleteProduct(index)"
+              @click="confirmDeleteProduct(data.id)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>
@@ -135,7 +177,8 @@ const onRowEditSave = (event) => {
     margin-top: 5px;
   }
 }
-.dropdown-status{
+
+.dropdown-status {
   .p-select {
     border-radius: 10px;
   }
