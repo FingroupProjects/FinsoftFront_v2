@@ -13,6 +13,7 @@ import moment from "moment";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
+import ProviderReturnTable from "@/components/ProviderReturnTable.vue";
 
 const props = defineProps({
   productId:{
@@ -89,7 +90,7 @@ const formatDate = (dateString) => {
 
 const getView = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`)
+    const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
     viewDocument.value = {
       organizationName: item.organization,
@@ -131,6 +132,7 @@ const updateView = async () => {
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        comment: viewDocument.value.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
           price: parseFloat(product.price),
@@ -171,7 +173,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/approve`, {
+    const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
       data:{
         ids:[`${props.productId}`]
@@ -188,7 +190,7 @@ const approve = async () => {
 
 const unApprove = async () =>{
   try{
-    const res = await useAxios(`/document/provider/order/unApprove`, {
+    const res = await useAxios(`/document/provider/return/unApprove`, {
       method: 'POST',
       data:{
         ids:[`${props.productId}`]
@@ -386,7 +388,7 @@ watch(viewDocument.value, (newValue) => {
       </fin-button>
     </div>
   </div>
-    <provider-order-table :productId="productId" @post-goods="getProducts"/>
+    <provider-return-table :productId="productId" @post-goods="getProducts"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}

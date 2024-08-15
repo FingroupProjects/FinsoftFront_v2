@@ -19,7 +19,9 @@ import ViewProviderOrder from "@/components/ViewProviderOrder.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import CreateProviderOrder from "@/components/CreateProviderOrder.vue";
-import MethodsProviderOrder from "@/components/MethodsProviderOrder.vue";
+import MethodsReturnProvider from "@/components/MethodsReturnProvider.vue";
+import CreateProviderReturn from "@/components/CreateProviderReturn.vue";
+import ViewProviderReturn from "@/components/ViewProviderReturn.vue";
 
 const {
   findStorage,
@@ -92,7 +94,7 @@ async function getProducts(filters = {}) {
     ...filters,
   };
 
-  const res = await useAxios(`/document/provider/order`, { params });
+  const res = await useAxios(`document/provider/return`, { params });
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -150,7 +152,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Заказ поставщику"/>
+  <header-purchase header-title="Возврат товаров поставщику"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search" />
@@ -198,7 +200,7 @@ getProducts();
     </div>
   </div>
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsProviderOrder @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsReturnProvider @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         scrollable
@@ -245,7 +247,7 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
+          {{ moment(new Date(slotProps.data.date)).format("D.MM.YYYY") }}
         </template>
       </Column>
       <Column field="category" :sortable="true" header="Поставщик">
@@ -387,7 +389,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <CreateProviderOrder @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
+      <CreateProviderReturn @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -397,7 +399,7 @@ getProducts();
       position="right"
       class="create-purchase-sidebar"
   >
-    <view-provider-order :productId="selectedProductId"/>
+    <view-provider-return :productId="selectedProductId"/>
   </Sidebar>
 
   <Sidebar
