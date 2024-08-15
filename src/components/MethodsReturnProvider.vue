@@ -60,8 +60,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
 
   const endpoint = props.selectProducts[0].deleted_at
-      ? '/document/provider/massRestore'
-      :'/document/provider/massDelete' ;
+      ? '/document/provider/return/massRestore'
+      :'/document/provider/return/massDelete' ;
 
   try {
     const response = await useAxios(endpoint, {
@@ -92,8 +92,8 @@ async function conductMethod(){
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   const endpoint = props.selectProducts[0].active
-      ? '/document/provider/unApprove'
-      :'/document/provider/approve' ;
+      ? '/document/provider/return/approve'
+      :'/document/provider/return/unApprove' ;
 
   try {
     const res = await useAxios(endpoint, {

@@ -26,7 +26,7 @@ export default [
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/'
+                        route: '/providerReturn'
                     }
                 ]
             },
