@@ -106,6 +106,8 @@ async function saveFn() {
   formData.append('unit_id', createValues.selectUnit.id)
   formData.append('good_group_id', createValues.selectedGoodGroup.id)
   formData.append('goods', productsInfo.value)
+  formData.append('description', createValues.comments)
+  formData.append('location', createValues.selectLocation)
   if (imageRef.value !== null) {
     formData.append('main_image', imageRef.value)
   }
@@ -128,7 +130,7 @@ async function saveFn() {
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e,
+        detail: e.response.data.message,
         life: 3000,
       });
     }
@@ -143,8 +145,12 @@ async function getGood() {
     createValues.selectedGoodGroup = res.result.good_group
     createValues.selectUnit = res.result.storage
     createValues.comments = res.result.description
+    if (res.result?.location){
+      createValues.selectLocation = {name: res.result?.location}
+    }
+
     if (res.result.images?.length > 0) {
-      imagePreview.value = res.result.images[0].image;
+      imagePreview.value = 'http://testtask.taskpro.tj/test/public' + res.result.images[0].image;
     } else {
       imagePreview.value = emptyImg;
     }
@@ -215,7 +221,7 @@ const onPickFile = () => {
             <fin-button @click="onPickFile">Загрузить фото</fin-button>
           </div>
           <div v-else>
-            <img :src="'http://testtask.taskpro.tj/test/public' +imagePreview" class="rounded-[16px] img-goods" alt=""
+            <img :src="imagePreview" class="rounded-[16px] img-goods" alt=""
                  @click="onPickFile"/>
           </div>
         </div>

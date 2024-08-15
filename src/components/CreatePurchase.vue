@@ -277,13 +277,7 @@ watch(createValues, (newValue) => {
 <style lang="scss">
 @import "@/assets/style/colors";
 .create-purchases {
-  .p-select {
-    border-color: #dcdfe3;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    height: 46px;
-    align-items: center;
-  }
+
   .p-button-secondary{
     color: transparent !important;
     border-color: transparent !important;
@@ -311,7 +305,6 @@ watch(createValues, (newValue) => {
     width: 100% !important;
   }
 
-
   .p-datepicker {
     border:none;
     border-radius: 10px;
@@ -321,15 +314,12 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
   .p-button-secondary{
     color: $primary-color !important;
     border-color: $primary-color !important;
   }
   .p-inputtext {
-    //border-color: white;
     border-radius: 10px;
   }
   .p-inputtext:enabled:focus {

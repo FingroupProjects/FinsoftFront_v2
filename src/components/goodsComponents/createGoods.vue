@@ -97,6 +97,8 @@ async function saveFn() {
   formData.append('unit_id',createValues.selectUnit.code)
   formData.append('good_group_id', createValues.selectedGoodGroup.code)
   formData.append('goods', productsInfo.value)
+  formData.append('description', createValues.comments)
+  formData.append('location', createValues.selectLocation)
   if (imageRef.value !== null) {
     formData.append('main_image', imageRef.value)
   }
@@ -118,13 +120,12 @@ async function saveFn() {
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e,
+        detail: e.response.data.message,
         life: 3000,
       });
     }
   }
 }
-
 
 const selectAvatar = event => {
   const files = event.target.files

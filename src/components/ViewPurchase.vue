@@ -442,14 +442,12 @@ watch(viewDocument.value, (newValue) => {
   height: 31px !important;
 }
 .icon-print{
-
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
   width: 150px !important;
   height: 31px !important;
 }
-
 
 .edit-purchase {
   .p-select {
@@ -475,6 +473,7 @@ watch(viewDocument.value, (newValue) => {
   .btn-movement:hover{
     color: #3935E7 !important;
   }
+
   .btn-approve:hover{
     color: #17A825 !important;
     border-color: #17A825 !important;
@@ -497,14 +496,11 @@ watch(viewDocument.value, (newValue) => {
   .active-approve{
     background-color: #fff !important;
   }
-
 }
 .drower-movement {
   width: 850px !important;
   border-top-left-radius: 30px;
 }
-
-
 
 .header {
   display: flex;

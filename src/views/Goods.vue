@@ -118,9 +118,11 @@ const getSeverity = (status) => {
 };
 
 function closeFn(id) {
+  console.log('dsds')
   selectedProductId.value = id
   visibleRight.value = false
   openViewPurchase.value = true
+
 }
 
 const sortData = (field, index) => {
@@ -310,7 +312,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <create-goods @close-sidebar="visibleRight=false"/>
+      <create-goods @close-dialog="closeFn" @close-sidebar="visibleRight = false"/>
     </Sidebar>
   </div>
 
@@ -329,7 +331,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate" />
+    <filter-purchase @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
 </template>
