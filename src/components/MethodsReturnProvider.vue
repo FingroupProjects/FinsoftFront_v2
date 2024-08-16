@@ -92,8 +92,8 @@ async function conductMethod(){
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   const endpoint = props.selectProducts[0].active
-      ? '/document/provider/return/approve'
-      :'/document/provider/return/unApprove' ;
+      ? '/document/provider/return/unApprove'
+      :'/document/provider/return/approve' ;
 
   try {
     const res = await useAxios(endpoint, {

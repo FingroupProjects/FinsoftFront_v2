@@ -65,11 +65,6 @@ export default [
         ]
     },
     {
-        label: 'Товары',
-        icon: 'pi pi-shield',
-        route: '/'
-    },
-    {
         label: 'Финансы',
         icon: 'pi pi-building-columns',
         items: [
