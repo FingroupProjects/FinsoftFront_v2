@@ -109,7 +109,7 @@ async function saveFn() {
   formData.append('good_group_id', createValues.selectedGoodGroup.id)
   formData.append('goods', productsInfo.value)
   formData.append('description', createValues.comments)
-  formData.append('location', createValues.selectLocation)
+  formData.append('location', createValues.selectLocation.code)
 
   if (imageRefs.value.length > 0) {
     for (const file of imageRefs.value) {
@@ -151,7 +151,7 @@ async function getGood() {
     createValues.selectUnit = res.result.storage
     createValues.comments = res.result.description
     if (res.result?.location) {
-      createValues.selectLocation = {name: res.result?.location}
+      createValues.selectLocation = {name: res.result?.location.name}
     }
     if (res.result.images?.length > 0) {
       imagePreview.value = res.result.images.map((el) => {
@@ -297,7 +297,11 @@ const responsiveOptions = ref([
               :options="locationList"
               optionLabel="name"
               class="w-full"
-          />
+          >
+            <template #value>
+              {{ createValues.selectLocation?.name }}
+            </template>
+          </Dropdown>
           <label for="dd-city">Местоположение</label>
         </FloatLabel>
 

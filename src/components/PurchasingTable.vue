@@ -119,7 +119,6 @@ const getGood = async () => {
     const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
-    console.log(sum)
     const imgURL = import.meta.env.VITE_IMG_URL;
 
     goods.value = items.map((item) => ({
@@ -128,7 +127,7 @@ const getGood = async () => {
       amount: item.amount,
       price: item.price,
       sum: item.price * item.price,
-      img: item.image ? 'http://testtask.taskpro.tj/test/public/' + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
+      img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
       created: false,
       updated: false,
       deleted: false,

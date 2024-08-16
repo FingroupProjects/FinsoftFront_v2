@@ -35,16 +35,17 @@ const selectedStatus = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
 const openViewPurchase = ref(false)
-const metaKey = ref(true);
+const metaKey = ref(true)
+const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const statusList = ref([
   {
-    name:'Активный',
-    code:0
+    name: 'Активный',
+    code: 0
   },
   {
-    name:'Не активный',
-    code:1
+    name: 'Не активный',
+    code: 1
   },
 ])
 const pageCounts = ref([
@@ -139,7 +140,7 @@ watch(selectedStorage, () => {
 watch(selectedStatus, () => {
   getProducts();
 });
-  getProducts();
+getProducts();
 </script>
 
 <template>
@@ -233,11 +234,12 @@ watch(selectedStatus, () => {
         </template>
         <template #body="slotProps">
           <div class="flex items-center gap-[10px]">
-            <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0" class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            <img v-else :src="'http://testtask.taskpro.tj/test/public/'+slotProps?.data?.images[0]?.image" alt="" class="w-[32px] h-[32px] object-cover rounded-[8px]">
+            <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0"
+                 class="w-[32px] h-[32px] object-cover rounded-[8px]">
+            <img v-else :src="'http://testtask.taskpro.tj/test/public'+ slotProps?.data?.images[0]?.image" alt=""
+                 class="w-[32px] h-[32px] object-cover rounded-[8px]">
             {{ slotProps.data?.name }}
           </div>
-
         </template>
       </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="Артикул">

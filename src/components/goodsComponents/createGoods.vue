@@ -95,7 +95,7 @@ async function saveFn() {
   formData.append('unit_id', createValues.selectUnit.code)
   formData.append('good_group_id', createValues.selectedGoodGroup.code)
   formData.append('description', createValues.comments)
-  formData.append('location', createValues.selectLocation)
+  formData.append('location_id', createValues.selectLocation.code)
 
   if (imageRefs.value.length > 0) {
     for (const file of imageRefs.value) {

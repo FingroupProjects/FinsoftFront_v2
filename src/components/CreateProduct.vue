@@ -72,6 +72,7 @@ const confirmDeleteProduct = (index) => {
 };
 
 const getIdProducts = async (inputValue) => {
+  const imgURL = import.meta.env.VITE_IMG_URL;
   const res = await useAxios(`good?search=${inputValue?.srcElement.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
