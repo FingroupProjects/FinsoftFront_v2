@@ -128,7 +128,7 @@ const getGood = async () => {
       amount: item.amount,
       price: item.price,
       sum: item.price * item.price,
-      photo: item.image ? `${imgURL}${item.image}` : '',
+      img: item.image ? 'http://testtask.taskpro.tj/test/public/' + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
       created: false,
       updated: false,
       deleted: false,
@@ -207,7 +207,15 @@ onMounted(async () => {
               <span v-if="data[field]">{{ data[field] }}</span>
               <span v-else>{{ data[field] }}</span>
             </template>
+
           </Select>
+        </template>
+        <template #body="slotProps">
+          <div class="flex items-center gap-[10px]">
+            <img :src="slotProps.data?.img" alt=""
+                 class="w-[32px] h-[32px] rounded-[8px] object-cover">
+            <span>{{ slotProps.data?.name }}</span>
+          </div>
         </template>
       </Column>
       <Column field="amount" header="Кол-во">

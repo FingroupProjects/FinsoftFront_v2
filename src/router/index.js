@@ -2,6 +2,7 @@ import { createRouter, createWebHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
 import DocumentPrint from "@/components/DocumentPrint.vue";
 import { useCookies } from 'vue3-cookies';
+
 const routes = [
     {
         path: '/',

@@ -10,14 +10,15 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
 import emptyImg from '@/assets/img/emptyImg.svg';
+import Carousel from 'primevue/carousel';
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
 const goodGroupList = ref([]);
-const productsInfo = ref();
 const listUnit = ref([]);
+const imageRefs = ref([]);
 const locationList = ref([]);
 const createValues = reactive({
   nameProduct: '',
@@ -30,14 +31,11 @@ const createValues = reactive({
 const rules = reactive({
   nameProduct: {required},
   vendorCode: {required},
-  // selectLocation: {required},
   selectedGoodGroup: {required},
   selectUnit: {required},
 });
 const fileInput = ref()
-const imagePreview = ref(emptyImg)
-const imageRef = ref(null)
-
+const imagePreview = ref([emptyImg])
 
 const v$ = useVuelidate(rules, createValues);
 
@@ -94,14 +92,17 @@ async function saveFn() {
   const formData = new FormData()
   formData.append('name', createValues.nameProduct)
   formData.append('vendor_code', createValues.vendorCode)
-  formData.append('unit_id',createValues.selectUnit.code)
+  formData.append('unit_id', createValues.selectUnit.code)
   formData.append('good_group_id', createValues.selectedGoodGroup.code)
-  formData.append('goods', productsInfo.value)
   formData.append('description', createValues.comments)
   formData.append('location', createValues.selectLocation)
-  if (imageRef.value !== null) {
-    formData.append('main_image', imageRef.value)
+
+  if (imageRefs.value.length > 0) {
+    for (const file of imageRefs.value) {
+      formData.append('add_images[]', file);
+    }
   }
+
   if (result) {
     try {
       const res = await useAxios(`/good`, {
@@ -115,6 +116,7 @@ async function saveFn() {
         life: 3000,
       });
       emit("closeDialog", res.result.id);
+
     } catch (e) {
       console.log(e);
       toast.add({
@@ -127,23 +129,43 @@ async function saveFn() {
   }
 }
 
-const selectAvatar = event => {
-  const files = event.target.files
-  imageRef.value = files[0]
-  let filename = files[0].name
-  if (filename.lastIndexOf('.') <= 0) {
-    return
+const selectImage = (event) => {
+  const files = event.target.files;
+  for (const file of files) {
+    imageRefs.value.push(file);
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+      imagePreview.value.push(fileReader.result);
+    });
+    fileReader.readAsDataURL(file);
   }
-  const fileReader = new FileReader()
-  fileReader.addEventListener('load', () => {
-    imagePreview.value = fileReader.result
-  })
-  fileReader.readAsDataURL(files[0])
-}
+};
 
 const onPickFile = () => {
-  fileInput.value.click()
-}
+  fileInput.value.click();
+};
+const responsiveOptions = ref([
+  {
+    breakpoint: '1400px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '1199px',
+    numVisible: 3,
+    numScroll: 1
+  },
+  {
+    breakpoint: '767px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '575px',
+    numVisible: 1,
+    numScroll: 1
+  }
+]);
 </script>
 
 <template>
@@ -172,25 +194,28 @@ const onPickFile = () => {
         />
       </div>
     </div>
-    <div class="flex mt-[30px] gap-[26px]">
-      <div class="">
-        <div class="relative" style="width: 100%;">
-          <input
-              accept="image/*"
-              type="file"
-              @change="selectAvatar"
-              style="display: none"
-              ref="fileInput"
-          />
-          <div v-if="imagePreview.length === 0">
-            <fin-button @click="onPickFile">Загрузить фото</fin-button>
-          </div>
-          <div v-else>
-            <img :src="imagePreview" class="rounded-[16px] img-goods" @click="onPickFile" />
-          </div>
+    <div class="grid grid-cols-12 mt-[30px] gap-[26px]">
+      <div class="relative col-span-4">
+        <input
+            accept="image/*"
+            type="file"
+            @change="selectImage"
+            style="display: none"
+            ref="fileInput"
+            multiple
+        />
+
+        <div v-if="imagePreview.length !== 0">
+          <Carousel :value="imagePreview" :numVisible="1" :page="1" :showIndicators="false"
+                    :responsiveOptions="responsiveOptions">
+            <template #item="slotProps">
+              <img :src="slotProps.data" @click="onPickFile" alt=""
+                   class="w-[210px] m-auto rounded-[16px] h-[210px] object-cover"/>
+            </template>
+          </Carousel>
         </div>
       </div>
-      <div class="form w-full grid grid-cols-12 gap-[16px]">
+      <div class="form w-full col-span-8 grid grid-cols-12 gap-[16px] relative create-goods">
         <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
 
         <FloatLabel class="col-span-3">
@@ -207,7 +232,7 @@ const onPickFile = () => {
         <fin-input class="col-span-3" placeholder="Артикул" v-model="createValues.vendorCode">
 
         </fin-input>
-        <FloatLabel class="col-span-3">
+        <FloatLabel class="col-span-3 ">
           <Dropdown
               v-model="createValues.selectUnit"
               :class="{ 'p-invalid': v$.selectUnit.$error }"
@@ -218,7 +243,6 @@ const onPickFile = () => {
           <label for="dd-city">Ед. изм.</label>
         </FloatLabel>
         <FloatLabel class="col-span-3">
-          <!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
           <Dropdown
               v-model="createValues.selectLocation"
 
@@ -285,7 +309,8 @@ const onPickFile = () => {
   color: #808BA0;
   font-weight: 600;
 }
-.img-goods{
+
+.img-goods {
   width: 261px !important;
   height: 207px !important;
   position: relative;

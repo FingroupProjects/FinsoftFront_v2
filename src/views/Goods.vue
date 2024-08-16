@@ -23,9 +23,6 @@ const {
   findStorage,
   storage,
   loadingStorage,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
 } = useStaticApi();
 
 const visibleRight = ref(false);
@@ -34,13 +31,22 @@ const selectedStorage = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
-const selectedCounterparty = ref();
+const selectedStatus = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
 const openViewPurchase = ref(false)
 const metaKey = ref(true);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-
+const statusList = ref([
+  {
+    name:'Активный',
+    code:0
+  },
+  {
+    name:'Не активный',
+    code:1
+  },
+])
 const pageCounts = ref([
   {
     count: 5,
@@ -86,7 +92,7 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     storage_id: selectedStorage.value?.code,
-    counterparty_id: selectedCounterparty.value?.code,
+    deleted: selectedStatus.value?.code,
     page: first.value + 1,
     ...filters,
   };
@@ -107,22 +113,20 @@ const getSeverity = (status) => {
   if (status == null) {
     return {
       status: "success",
-      name: "Проведен",
+      name: "Активный",
     };
   } else {
     return {
       status: "warn",
-      name: "Не проведен",
+      name: "Не активный",
     };
   }
 };
 
 function closeFn(id) {
-  console.log('dsds')
   selectedProductId.value = id
   visibleRight.value = false
   openViewPurchase.value = true
-
 }
 
 const sortData = (field, index) => {
@@ -132,10 +136,10 @@ const sortData = (field, index) => {
 watch(selectedStorage, () => {
   getProducts();
 });
-watch(selectedCounterparty, () => {
+watch(selectedStatus, () => {
   getProducts();
 });
-getProducts();
+  getProducts();
 </script>
 
 <template>
@@ -160,10 +164,8 @@ getProducts();
         class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedCounterparty"
-        :loading="loadingCounterparty"
-        @click="findCounterparty"
-        :options="counterparty"
+        v-model="selectedStatus"
+        :options="statusList"
         optionLabel="name"
         placeholder="Статус"
         class="w-full col-span-2"
@@ -230,7 +232,12 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.name }}
+          <div class="flex items-center gap-[10px]">
+            <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0" class="w-[32px] h-[32px] object-cover rounded-[8px]">
+            <img v-else :src="'http://testtask.taskpro.tj/test/public/'+slotProps?.data?.images[0]?.image" alt="" class="w-[32px] h-[32px] object-cover rounded-[8px]">
+            {{ slotProps.data?.name }}
+          </div>
+
         </template>
       </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="Артикул">

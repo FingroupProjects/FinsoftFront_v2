@@ -57,7 +57,9 @@ async function addUnit() {
 
 const confirmDeleteProduct = async (index) => {
   try {
-    const res = await useAxios(`/removeUnit/${index}`);
+    const res = await useAxios(`/goods/removeUnit/${index}`,{
+      method: "DELETE",
+    });
     toast.add({
       severity: "success",
       summary: "Success Message",

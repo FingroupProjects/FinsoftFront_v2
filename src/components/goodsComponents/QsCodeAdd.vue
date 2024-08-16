@@ -27,7 +27,10 @@ const clearInputValues = () => {
 
 const confirmDeleteProduct = async (index) => {
   try {
-    const res = await useAxios(`/barcode/${index}`);
+    const res = await useAxios(`/barcode/${index}`,{
+      method: "DELETE",
+    });
+
     toast.add({
       severity: "success",
       summary: "Success Message",
