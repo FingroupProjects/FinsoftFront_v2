@@ -155,7 +155,7 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание заказа поставщику</div>
+        <div class="header-title">Создание возврата</div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
