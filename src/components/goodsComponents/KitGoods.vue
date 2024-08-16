@@ -31,12 +31,8 @@ async function addUnit() {
     const res = await useAxios(`/goods/addUnits/${props.productId}`, {
       method: "POST",
       data: {
-        "units": [
-          {
             "amount": coleVo.value,
             "unit_id": selectUnit.value.code
-          }
-        ]
       },
     });
     getUnit()
@@ -52,7 +48,7 @@ async function addUnit() {
     toast.add({
       severity: "error",
       summary: "Error Message",
-      detail: e,
+      detail: e.response.data.message,
       life: 3000,
     });
   }
@@ -61,7 +57,9 @@ async function addUnit() {
 
 const confirmDeleteProduct = async (index) => {
   try {
-    const res = await useAxios(`/removeUnit/${index}`);
+    const res = await useAxios(`/goods/removeUnit/${index}`,{
+      method: "DELETE",
+    });
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -74,7 +72,7 @@ const confirmDeleteProduct = async (index) => {
     toast.add({
       severity: "error",
       summary: "Error Message",
-      detail: e,
+      detail: e.response.data.message,
       life: 3000,
     });
   }
@@ -181,6 +179,34 @@ unitList()
 .dropdown-status {
   .p-select {
     border-radius: 10px;
+  }
+  .p-datatable-header-cell {
+    background: #f6f6f6 !important;
+  }
+
+  .p-datatable-row-editor-init {
+    right: 40px;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar {
+    width: 4px !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-track {
+    background-color: #f1f1f1 !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-thumb {
+    background-color: #3935E7 !important;
+    border-radius: 6px !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #3935E7;
+    height: 3px !important;
   }
 }
 </style>

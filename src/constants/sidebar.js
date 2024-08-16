@@ -26,7 +26,7 @@ export default [
                     {
                         label: 'Возврат товаров',
                         icon: 'pi pi-eraser',
-                        route: '/'
+                        route: '/providerReturn'
                     }
                 ]
             },
@@ -63,11 +63,6 @@ export default [
                 ]
             }
         ]
-    },
-    {
-        label: 'Товары',
-        icon: 'pi pi-shield',
-        route: '/'
     },
     {
         label: 'Финансы',

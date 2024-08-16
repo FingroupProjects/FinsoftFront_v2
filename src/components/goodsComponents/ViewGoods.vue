@@ -1,9 +1,7 @@
 <script setup>
-import {reactive, ref, watch, watchEffect} from "vue";
-import {useStaticApi} from "@/composable/useStaticApi.js";
+import {reactive, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Dropdown from "primevue/dropdown";
-import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
@@ -11,93 +9,119 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
+import emptyImg from '@/assets/img/emptyImg.svg';
 import QsCodeAdd from "@/components/goodsComponents/QsCodeAdd.vue";
 import KitGoods from "@/components/goodsComponents/KitGoods.vue";
+import Carousel from "primevue/carousel";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
+
 const props = defineProps({
-  productId:{
+  productId: {
     required: true,
   }
 });
+
 const toast = useToast();
 
-const {
-  findCurrency,
-  currency,
-  findStorage,
-  storage,
-  loadingStorage,
-  findOrganization,
-  organization,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
-  loadingOrganization,
-} = useStaticApi();
-
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
+const goodGroupList = ref([]);
 const productsInfo = ref();
-const isCurrencyFetched = ref(false);
+const listUnit = ref([]);
+const locationList = ref([]);
+const goodNumber = ref();
+const imageRefs = ref([]);
 const createValues = reactive({
-  datetime24h: new Date,
-  selectCurrency: "",
-  selectedStorage: "",
-  selectedAgreement: "",
+  nameProduct: '',
+  vendorCode: "",
+  selectLocation: "",
+  selectedGoodGroup: "",
+  selectUnit: "",
   comments: "",
-  selectedOrganization: "",
-  selectedCounterparty: "",
 });
 const rules = reactive({
-  datetime24h: {required},
-  selectCurrency: {required},
-  selectedStorage: {required},
-  selectedOrganization: {required},
-  selectedCounterparty: {required},
-  selectedAgreement: {required},
+  nameProduct: {required},
+  vendorCode: {required},
+  // selectLocation: {required},
+  selectedGoodGroup: {required},
+  selectUnit: {required},
 });
+const fileInput = ref()
+const imagePreview = ref([])
+const imageRef = ref(null)
 
-const organizationJson = localStorage.getItem('organization');
-const organizationHas = JSON.parse(organizationJson);
-const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
 const v$ = useVuelidate(rules, createValues);
 
-async function getAgreement() {
+async function unitList() {
   try {
-    loadingAgreement.value = true;
-    const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
-    );
-    return (agreementList.value = res.result.data.map((el) => {
+    const res = await useAxios(`/unit`);
+    return listUnit.value = res.result.data.map(item => {
       return {
-        name: el.name,
-        code: el.id,
-      };
-    }));
+        code: item.id,
+        name: item.name,
+      }
+    })
   } catch (e) {
     console.log(e);
-  } finally {
-    loadingAgreement.value = false;
   }
 }
 
+unitList()
+
+async function locationGet() {
+  try {
+    const res = await useAxios(`/location`);
+    return locationList.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+locationGet()
+
+async function goodGroupGet() {
+  try {
+    const res = await useAxios(`/good-group`);
+    return goodGroupList.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+goodGroupGet()
+
 async function saveFn() {
   const result = await v$.value.$validate();
+  const formData = new FormData()
+  formData.append('name', createValues.nameProduct)
+  formData.append('vendor_code', createValues.vendorCode)
+  formData.append('unit_id', createValues.selectUnit.id)
+  formData.append('good_group_id', createValues.selectedGoodGroup.id)
+  formData.append('goods', productsInfo.value)
+  formData.append('description', createValues.comments)
+  formData.append('location', createValues.selectLocation)
 
+  if (imageRefs.value.length > 0) {
+    for (const file of imageRefs.value) {
+      formData.append('add_images[]', file);
+    }
+  }
+  console.log(formData)
   if (result) {
     try {
-      const res = await useAxios(`/document/provider/purchase`, {
+      const res = await useAxios(`/good/${props.productId}`, {
         method: "POST",
-        data: {
-          date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-          organization_id: createValues.selectedOrganization.code,
-          counterparty_id: createValues.selectedCounterparty.code,
-          counterparty_agreement_id: createValues.selectedAgreement.code,
-          storage_id: createValues.selectedStorage.code,
-          currency_id: createValues.selectCurrency.code,
-          goods: productsInfo.value,
-        },
+        data: formData,
       });
       toast.add({
         severity: "success",
@@ -111,46 +135,76 @@ async function saveFn() {
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e,
+        detail: e.response.data.message,
         life: 3000,
       });
     }
   }
 }
 
-function getProducts(products) {
-  productsInfo.value = products;
+async function getGood() {
+  try {
+    const res = await useAxios(`/good/${props.productId}`);
+    createValues.nameProduct = res.result.name
+    createValues.vendorCode = res.result.vendor_code
+    createValues.selectedGoodGroup = res.result.good_group
+    createValues.selectUnit = res.result.storage
+    createValues.comments = res.result.description
+    if (res.result?.location) {
+      createValues.selectLocation = {name: res.result?.location}
+    }
+    if (res.result.images?.length > 0) {
+      imagePreview.value = res.result.images.map((el) => {
+        return 'http://testtask.taskpro.tj/test/public/' + el.image;
+      });
+    } else {
+      imagePreview.value.push(emptyImg);
+    }
+    goodNumber.value = res.result.id
+  } catch (e) {
+    console.log(e);
+  }
 }
 
-findStorage()
+getGood()
 
-watchEffect(() => {
-  if (
-      createValues.selectedCounterparty &&
-      createValues.selectedCounterparty.agreement &&
-      createValues.selectedCounterparty.agreement.length > 0
-  ) {
-    createValues.selectedAgreement = {
-      name: createValues.selectedCounterparty.agreement[0].name,
-      code: createValues.selectedCounterparty.agreement[0].id,
-    };
-  } else {
-    createValues.selectedAgreement = null;
-  }
-  if (hasOrganization === true) createValues.selectedOrganization = {
-    name: organizationHas.name,
-    code: organizationHas.id
-  }
-  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
-});
-watch(createValues, (newValue) => {
-  if (newValue.selectedAgreement && !isCurrencyFetched.value) {
-    findCurrency(newValue.selectedAgreement).then(() => {
-      createValues.selectCurrency = currency.value[0];
+const selectImage = (event) => {
+  const files = event.target.files;
+  for (const file of files) {
+    imageRefs.value.push(file);
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+      imagePreview.value.push(fileReader.result);
     });
-    isCurrencyFetched.value = true;
+    fileReader.readAsDataURL(file);
   }
-});
+};
+
+const onPickFile = () => {
+  fileInput.value.click();
+};
+const responsiveOptions = ref([
+  {
+    breakpoint: '1400px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '1199px',
+    numVisible: 3,
+    numScroll: 1
+  },
+  {
+    breakpoint: '767px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '575px',
+    numVisible: 1,
+    numScroll: 1
+  }
+]);
 </script>
 
 <template>
@@ -159,7 +213,7 @@ watch(createValues, (newValue) => {
       <div>
         <div class="header-title">Добавление товара</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
+          №{{ goodNumber }}
         </div>
       </div>
       <div class="flex gap-[16px]">
@@ -179,58 +233,68 @@ watch(createValues, (newValue) => {
         />
       </div>
     </div>
-    <div class="flex mt-[30px] gap-[26px]">
-      <div class="">
-        <img src="../../assets/img/GoodsImg.svg" alt="" class="w-full">
-      </div>
-      <div class="form w-full grid grid-cols-12 gap-[16px]">
-        <fin-input placeholder="Наименвоание" class="col-span-12"/>
+    <div class="mt-[30px] grid grid-cols-12 gap-[26px]">
+      <div class="relative col-span-4">
+        <input
+            accept="image/*"
+            type="file"
+            @change="selectImage"
+            style="display: none"
+            ref="fileInput"
+            multiple
+        />
 
-        <FloatLabel class="col-span-3" v-if="!hasOrganization">
-          <Dropdown
-              v-model="createValues.selectedOrganization"
-              :options="organization"
-              :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-              @click="findOrganization"
-              :loading="loadingOrganization"
-              optionLabel="name"
-              class="w-full"
-          />
-          <label for="dd-city">Категория</label>
-        </FloatLabel>
+        <div v-if="imagePreview?.length !== 0">
+          <Carousel :value="imagePreview" :numVisible="1" :page="1" :showIndicators="false"
+                    :responsiveOptions="responsiveOptions">
+            <template #item="slotProps">
+              <img :src="slotProps.data" @click="onPickFile" alt=""
+                   class="w-[210px] rounded-[16px] m-auto h-[210px] object-cover"/>
+            </template>
+          </Carousel>
+        </div>
+      </div>
+      <div class="form w-full grid grid-cols-12 col-span-8 gap-[16px] create-goods">
+        <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
+
         <FloatLabel class="col-span-3">
           <Dropdown
-              v-model="createValues.selectedCounterparty"
-              :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-              @click="findCounterparty"
-              :options="counterparty"
-              :loading="loadingCounterparty"
-              optionLabel="name"
-              class="w-full"
-          />
-          <label for="dd-city">Артикул</label>
-        </FloatLabel>
-        <FloatLabel class="col-span-3">
-          <Dropdown
-              v-model="createValues.selectedAgreement"
-              :class="{ 'p-invalid': v$.selectedAgreement.$error }"
-              @click="getAgreement"
-              :loading="loadingAgreement"
-              :options="agreementList"
+              v-model="createValues.selectedGoodGroup"
+              :options="goodGroupList"
+              :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
+
               optionLabel="name"
               class="w-full"
           >
-            <template #value>{{ createValues.selectedAgreement?.name }}</template>
+            <template #value>
+              {{ createValues.selectedGoodGroup?.name }}
+            </template>
+          </Dropdown>
+          <label for="dd-city">Категория</label>
+        </FloatLabel>
+        <fin-input class="col-span-3" placeholder="Артикул" v-model="createValues.vendorCode">
+
+        </fin-input>
+        <FloatLabel class="col-span-3">
+          <Dropdown
+              v-model="createValues.selectUnit"
+              :class="{ 'p-invalid': v$.selectUnit.$error }"
+              :options="listUnit"
+              optionLabel="name"
+              class="w-full"
+          >
+            <template #value>
+              {{ createValues.selectUnit?.name }}
+            </template>
           </Dropdown>
           <label for="dd-city">Ед. изм.</label>
         </FloatLabel>
         <FloatLabel class="col-span-3">
+          <!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
           <Dropdown
-              v-model="createValues.selectedStorage"
-              :class="{ 'p-invalid': v$.selectedStorage.$error }"
-              @click="findStorage"
-              :loading="loadingStorage"
-              :options="storage"
+              v-model="createValues.selectLocation"
+
+              :options="locationList"
               optionLabel="name"
               class="w-full"
           />
@@ -245,107 +309,33 @@ watch(createValues, (newValue) => {
     </div>
 
   </div>
-  <qs-code-add :product-id="props.productId" @postGoods="getProducts"/>
+  <qs-code-add :product-id="props.productId"/>
   <kit-goods :product-id="props.productId"/>
   <Toast/>
 </template>
 
-<style lang="scss">
-@import "@/assets/style/colors";
-
-.create-purchases {
-  .p-select {
-    border-color: #dcdfe3;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    height: 46px;
-    align-items: center;
-  }
-
-  .p-button-secondary {
-    color: transparent !important;
-    border-color: transparent !important;
-  }
-
-  .p-invalid {
-    border: 1px solid #f2376f !important;
-  }
-
-  .p-select-option {
-    width: 90% !important;
-    margin: 0 15px !important;
-    border-radius: 10px !important;
-    font-weight: bold !important;
-  }
-
-  .p-focus {
-    color: #fff !important;
-  }
-
-  .p-select-label {
-    font-weight: bold !important;
-  }
-
-  .p-select-list-container {
-    width: 100% !important;
-  }
-
-
-  .p-datepicker {
-    border: none;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-
-    &-input-icon-container {
-      top: 15px !important;
-    }
-
-
-  }
-
-  .p-button-secondary {
-    color: $primary-color !important;
-    border-color: $primary-color !important;
-  }
-
-  .p-inputtext {
-    //border-color: white;
-    border-radius: 10px;
-  }
-
-  .p-inputtext:enabled:focus {
-    border-color: $primary-color;
-    border-radius: 10px;
-  }
+<style lang="scss" scoped>
+.text-qs-code {
+  font-family: Manrope, sans-serif;
+  font-size: 20px;
+  line-height: 20px;
+  color: #141C30;
+  font-weight: 600;
 }
 
-.p-inputtext:enabled:hover {
-  border-color: transparent;
+.dissipation-qs-code {
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  line-height: 15px;
+  color: #808BA0;
+  font-weight: 600;
 }
 
-.p-inputtext:enabled:focus {
-  border-color: #DCDFE3 !important;
+.img-goods {
+  width: 261px !important;
+  height: 207px !important;
+  position: relative;
+  z-index: 333;
 }
 
-.p-textarea:enabled:focus {
-  border-color: $primary-color !important;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-
-  &-title {
-    font-family: Manrope, sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 20px;
-    color: var(--fin-text-header);
-
-    &-text {
-      font-family: Manrope, sans-serif;
-    }
-  }
-}
 </style>

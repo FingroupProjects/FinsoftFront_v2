@@ -19,6 +19,7 @@ import ViewProviderOrder from "@/components/ViewProviderOrder.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import CreateProviderOrder from "@/components/CreateProviderOrder.vue";
+import MethodsProviderOrder from "@/components/MethodsProviderOrder.vue";
 
 const {
   findStorage,
@@ -149,7 +150,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Покупка товаров"/>
+  <header-purchase header-title="Заказ поставщику"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search" />
@@ -197,7 +198,7 @@ getProducts();
     </div>
   </div>
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsProviderOrder @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         scrollable

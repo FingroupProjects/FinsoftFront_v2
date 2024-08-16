@@ -8,21 +8,24 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
+import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
+import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import AddGoods from "@/components/goodsComponents/ViewGoods.vue";
-import CreateGoods from "@/components/goodsComponents/createGoods.vue";
 
 const {
   findStorage,
   storage,
   loadingStorage,
+  findCounterparty,
+  counterparty,
+  loadingCounterparty,
 } = useStaticApi();
 
 const visibleRight = ref(false);
@@ -31,22 +34,13 @@ const selectedStorage = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
-const selectedStatus = ref();
+const selectedCounterparty = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
 const openViewPurchase = ref(false)
 const metaKey = ref(true);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-const statusList = ref([
-  {
-    name:'Активный',
-    code:0
-  },
-  {
-    name:'Не активный',
-    code:1
-  },
-])
+
 const pageCounts = ref([
   {
     count: 5,
@@ -92,34 +86,46 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     storage_id: selectedStorage.value?.code,
-    deleted: selectedStatus.value?.code,
+    counterparty_id: selectedCounterparty.value?.code,
     page: first.value + 1,
     ...filters,
   };
 
-  const res = await useAxios(`good?search=3412123123`, {params});
+  const res = await useAxios(`/document/client/purchase`, { params });
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
   return products.value;
 }
-
-function getProductMethods() {
+function getProductMethods(){
   selectedProduct.value = null
   getProducts()
 }
 
-const getSeverity = (status) => {
-  if (status == null) {
-    return {
-      status: "success",
-      name: "Активный",
-    };
-  } else {
+const getSeverity = (status, deleted) => {
+  if (deleted) {
     return {
       status: "warn",
-      name: "Не активный",
+      name: "Удалено",
     };
+  }
+
+  switch (status) {
+    case true:
+      return {
+        status: "success",
+        name: "Проведен",
+      };
+    case false:
+      return {
+        status: "warn",
+        name: "Не проведен",
+      };
+    default:
+      return {
+        status: "error",
+        name: "Unknown status",
+      };
   }
 };
 
@@ -136,55 +142,57 @@ const sortData = (field, index) => {
 watch(selectedStorage, () => {
   getProducts();
 });
-watch(selectedStatus, () => {
+watch(selectedCounterparty, () => {
   getProducts();
 });
-  getProducts();
+getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Товары"/>
+  <header-purchase header-title="Покупка товаров"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
-      <InputIcon class="pi pi-search"/>
+      <InputIcon class="pi pi-search" />
       <InputText
-          class="w-full"
-          @input="getProducts"
-          v-model="search"
-          placeholder="Поиск по названию, артикулу, штрих-коду"
+        class="w-full"
+        @input="getProducts"
+        v-model="search"
+        placeholder="Поиск"
       />
     </IconField>
     <Dropdown
-        v-model="selectedStorage"
-        optionLabel="name"
-        placeholder="Категория"
-        @click="findStorage"
-        :loading="loadingStorage"
-        :options="storage"
-        class="w-full col-span-2"
+      v-model="selectedStorage"
+      optionLabel="name"
+      placeholder="Склад"
+      @click="findStorage"
+      :loading="loadingStorage"
+      :options="storage"
+      class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedStatus"
-        :options="statusList"
-        optionLabel="name"
-        placeholder="Статус"
-        class="w-full col-span-2"
+      v-model="selectedCounterparty"
+      :loading="loadingCounterparty"
+      @click="findCounterparty"
+      :options="counterparty"
+      optionLabel="name"
+      placeholder="Поставщик"
+      class="w-full col-span-2"
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
-          @click="visibleFilter = true "
+      @click="visibleFilter = true "
           severity="primary"
           class="w-[46px]"
 
       >
-        <img src="@/assets/img/menu.svg" alt=""/>
+        <img src="@/assets/img/menu.svg" alt="" />
       </fin-button>
       <fin-button
-          @click="visibleRight = true"
-          severity="success"
-          icon="pi pi-plus"
-          class="w-[80%]"
-          label="Доабвить"
+        @click="visibleRight = true"
+        severity="success"
+        icon="pi pi-plus"
+        class="w-[80%]"
+        label="Создать"
       />
     </div>
   </div>
@@ -217,30 +225,14 @@ watch(selectedStatus, () => {
           ></i>
         </template>
         <template #body="slotProps">
-          <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
+          <span
+              class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden"
+          >{{ slotProps.data?.doc_number }}</span
+          >
         </template>
       </Column>
-      <Column field="category" :sortable="true" header="Наименование">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-        </template>
-        <template #body="slotProps">
-          <div class="flex items-center gap-[10px]">
-            <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0" class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            <img v-else :src="'http://testtask.taskpro.tj/test/public/'+slotProps?.data?.images[0]?.image" alt="" class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            {{ slotProps.data?.name }}
-          </div>
 
-        </template>
-      </Column>
-      <Column field="image" v-if="!hasOrganization" :sortable="true" header="Артикул">
+      <Column field="name" :sortable="true" header="Дата">
         <template #sorticon="{index}">
           <i
               @click="sortData('code',index)"
@@ -252,10 +244,10 @@ watch(selectedStatus, () => {
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.vendor_code }}
+          {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="Категория">
+      <Column field="category" :sortable="true" header="Поставщик">
         <template #sorticon="{index}">
           <i
               @click="sortData('code',index)"
@@ -267,7 +259,52 @@ watch(selectedStatus, () => {
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.goodGroup?.name }}
+          {{ slotProps.data.counterparty?.name }}
+        </template>
+      </Column>
+      <Column field="image" v-if="!hasOrganization" :sortable="true" header="Организация">
+        <template #sorticon="{index}">
+          <i
+              @click="sortData('code',index)"
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.organization?.name }}
+        </template>
+      </Column>
+      <Column field="price" :sortable="true" header="Сумма">
+        <template #sorticon="{index}">
+          <i
+              @click="sortData('code',index)"
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.sum }}
+        </template>
+      </Column>
+      <Column field="storage" :sortable="true" header="Склад">
+        <template #sorticon="{data,index}">
+          <i
+              @click="sortData('code',index)"
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.storage?.name }}
         </template>
       </Column>
       <Column field="status" :sortable="true" header="Статус">
@@ -286,6 +323,36 @@ watch(selectedStatus, () => {
               :value="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).name"
               :severity="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).status"
           />
+        </template>
+      </Column>
+      <Column field="inventoryStatus" :sortable="true" header="Автор">
+        <template #sorticon="{index}">
+          <i
+              @click="sortData('code',index)"
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data?.author?.name }}
+        </template>
+      </Column>
+      <Column field="rating" :sortable="true" header="Валюта">
+        <template #sorticon="{index}">
+          <i
+              @click="sortData('code',index)"
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data?.currency?.name }}
         </template>
       </Column>
     </DataTable>
@@ -319,7 +386,7 @@ watch(selectedStatus, () => {
         position="right"
         class="create-purchase"
     >
-      <create-goods @close-dialog="closeFn" @close-sidebar="visibleRight = false"/>
+      <CreatePurchase @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -329,7 +396,7 @@ watch(selectedStatus, () => {
       position="right"
       class="create-purchase-sidebar"
   >
-    <add-goods :product-id="selectedProductId" @close-sidebar="openViewPurchase=false" @close-dialog="closeFn"/>
+    <view-purchase :productId="selectedProductId"/>
   </Sidebar>
 
   <Sidebar
@@ -338,9 +405,9 @@ watch(selectedStatus, () => {
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase  @updateFilters="handleFiltersUpdate"  />
   </Sidebar>
-  <Toast/>
+  <Toast />
 </template>
 <style lang="scss">
 .paginator-dropdown {
@@ -411,17 +478,17 @@ watch(selectedStatus, () => {
   }
 }
 
-.create-purchase-sidebar {
+.create-purchase-sidebar{
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
 
-.create-purchase {
+.create-purchase{
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
 
-.filters-purchase {
+.filters-purchase{
   width: 546px !important;
   border-top-left-radius: 30px;
 }
@@ -476,8 +543,7 @@ watch(selectedStatus, () => {
 .p-paginator {
   justify-content: end !important;
 }
-
-.p-select:not(.p-disabled).p-focus {
+.p-select:not(.p-disabled).p-focus{
   border-color: #3935E7 !important;
 }
 </style>

@@ -11,6 +11,7 @@ import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
 
+
 const v$ = useVuelidate();
 
 const emit = defineEmits(["postGoods"]);
@@ -27,6 +28,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
+const searchInput = ref();
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
@@ -74,16 +76,11 @@ const addFn = async () => {
 };
 
 const confirmDeleteProduct = (index) => {
+  const deletedProduct = goods.value.splice(index, 1)[0];
   postProducts.value.splice(index, 1);
-  getAllSum.value = goods.value.reduce((total, el) => {
-    console.log(total)
-    return el?.sum -total;
-  }, 0);
+  getAllSum.value = Number(getAllSum.value) - Number(deletedProduct.sum);
 
-  getAllProduct.value = goods.value.reduce((total, el) => {
-    console.log(total)
-    return el?.amount -total;
-  }, 0);
+  getAllProduct.value = Number(getAllSum.value) - Number(deletedProduct.amount);
   if (goods.value.length === 0){
     getAllSum.value = 0
     getAllProduct.value = 0
@@ -119,7 +116,7 @@ const getGood = async () => {
     const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
-    console.log(sum)
+
     const imgURL = import.meta.env.VITE_IMG_URL;
 
     goods.value = items.map((item) => ({
@@ -128,17 +125,16 @@ const getGood = async () => {
       amount: item.amount,
       price: item.price,
       sum: item.price * item.price,
-      img: item.image ? 'http://testtask.taskpro.tj/test/public/' + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
+      photo: item.image ? `${imgURL}${item.image}` : '',
       created: false,
       updated: false,
       deleted: false,
     }));
     getAllProduct.value = goods.value.reduce((total, el) => {
-      console.log(total)
       return total + el?.amount;
     }, 0);
     getAllSum.value = sum
-    console.log(getAllSum)
+
   } catch (error) {
     console.log(error);
   }
@@ -156,31 +152,31 @@ onMounted(async () => {
 
 <template>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
-      <FloatLabel class="col-span-6">
-        <Select
-            v-model="selectedProducts"
-            :options="productsId"
-            optionLabel="products"
-            class="w-full h-[47px] rounded-[10px]"
-            editable
-            @keyup="getIdProducts"
-        >
-        </Select>
-        <label for="">Поиск по Id, наименованию, штрих коду</label>
-      </FloatLabel>
-      <div class="col-span-6 flex gap-[16px]">
-        <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во" />
-        <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
-        <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" />
-        <fin-button
-            icon="pi pi-plus"
-            @click="addFn"
-            label="Добавить"
-            severity="success"
-            class="p-button-lg"
-        />
-      </div>
+    <FloatLabel class="col-span-6">
+      <Select
+          v-model="selectedProducts"
+          :options="productsId"
+          optionLabel="products"
+          class="w-full h-[47px] rounded-[10px]"
+          editable
+          @keyup="getIdProducts"
+      >
+      </Select>
+      <label for="">Поиск по Id, наименованию, штрих коду</label>
+    </FloatLabel>
+    <div class="col-span-6 flex gap-[16px]">
+      <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во" />
+      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
+      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" />
+      <fin-button
+          icon="pi pi-plus"
+          @click="addFn"
+          label="Добавить"
+          severity="success"
+          class="p-button-lg"
+      />
     </div>
+  </div>
 
   <div class="purchase-table-header" v-if="goods.length > 0">
     <DataTable
@@ -207,15 +203,7 @@ onMounted(async () => {
               <span v-if="data[field]">{{ data[field] }}</span>
               <span v-else>{{ data[field] }}</span>
             </template>
-
           </Select>
-        </template>
-        <template #body="slotProps">
-          <div class="flex items-center gap-[10px]">
-            <img :src="slotProps.data?.img" alt=""
-                 class="w-[32px] h-[32px] rounded-[8px] object-cover">
-            <span>{{ slotProps.data?.name }}</span>
-          </div>
         </template>
       </Column>
       <Column field="amount" header="Кол-во">
@@ -252,7 +240,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Кол-во
           </div>
-            {{formatNumber(getAllProduct) }}
+          {{formatNumber(getAllProduct) }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">

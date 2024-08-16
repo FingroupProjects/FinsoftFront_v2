@@ -4,7 +4,6 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import formatInputAmount from "@/constants/formatInput.js";
 import moment from "moment";
-import Dropdown from "primevue/dropdown";
 import {useAxios} from "@/composable/useAxios.js";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
@@ -19,11 +18,6 @@ const toast = useToast();
 const coleVo = ref("");
 const editingRows = ref([]);
 const newProduct = ref();
-const selectedStatus = ref({name: 'Активный', code: 'NY'},);
-const listStatus = ref([
-  {name: 'Активный', code: 'NY'},
-  {name: 'Не Активный', code: 'RM'},
-]);
 const barCodeList = ref([]);
 
 const clearInputValues = () => {
@@ -33,7 +27,10 @@ const clearInputValues = () => {
 
 const confirmDeleteProduct = async (index) => {
   try {
-    const res = await useAxios(`/barcode/${index}`);
+    const res = await useAxios(`/barcode/${index}`,{
+      method: "DELETE",
+    });
+
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -74,7 +71,7 @@ async function postMethod() {
     toast.add({
       severity: "error",
       summary: "Error Message",
-      detail: e,
+      detail: e.response.data.message,
       life: 3000,
     });
   }
@@ -132,22 +129,6 @@ getBarcode()
           {{ moment(new Date(data?.created_at)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
-      <Column field="sum" header="Статус">
-        <template #body="{data}">
-
-          <Dropdown v-model="selectedStatus"
-                    class="h-[32px] items-center" optionLabel="name" :options="listStatus">
-            <template #value>
-              <div class="flex gap-3 items-center">
-                <img src="@/assets/img/greenActive.svg" alt="" v-if="data?.deleted_at===null">
-                <img src="@/assets/img/redRounded.svg" alt="" v-else>
-                <div class="text-[#000000] font-semibold" v-if="data?.deleted_at===null">Активный</div>
-                <div class="text-[#000000] font-semibold" v-else>Не активный</div>
-              </div>
-            </template>
-          </Dropdown>
-        </template>
-      </Column>
       <Column field="quantity" header="">
         <template #body="{ data }">
           <i
@@ -174,6 +155,34 @@ getBarcode()
 .dropdown-status {
   .p-select {
     border-radius: 10px;
+  }
+  .p-datatable-header-cell {
+    background: #f6f6f6 !important;
+  }
+
+  .p-datatable-row-editor-init {
+    right: 40px;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar {
+    width: 4px !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-track {
+    background-color: #f1f1f1 !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-thumb {
+    background-color: #3935E7 !important;
+    border-radius: 6px !important;
+    height: 3px !important;
+  }
+
+  .p-datatable-table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #3935E7;
+    height: 3px !important;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {reactive, computed, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Dropdown from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
@@ -9,20 +9,16 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
-import FileUpload from 'primevue/fileupload';
+import emptyImg from '@/assets/img/emptyImg.svg';
+import Carousel from 'primevue/carousel';
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-const props = defineProps({
-  productId: {
-    required: true,
-  }
-});
 
 const toast = useToast();
 
 const goodGroupList = ref([]);
-const productsInfo = ref();
 const listUnit = ref([]);
+const imageRefs = ref([]);
 const locationList = ref([]);
 const createValues = reactive({
   nameProduct: '',
@@ -35,11 +31,12 @@ const createValues = reactive({
 const rules = reactive({
   nameProduct: {required},
   vendorCode: {required},
-  // selectLocation: {required},
   selectedGoodGroup: {required},
   selectUnit: {required},
 });
-const fileupload = ref();
+const fileInput = ref()
+const imagePreview = ref([emptyImg])
+
 const v$ = useVuelidate(rules, createValues);
 
 async function unitList() {
@@ -92,19 +89,25 @@ goodGroupGet()
 
 async function saveFn() {
   const result = await v$.value.$validate();
+  const formData = new FormData()
+  formData.append('name', createValues.nameProduct)
+  formData.append('vendor_code', createValues.vendorCode)
+  formData.append('unit_id', createValues.selectUnit.code)
+  formData.append('good_group_id', createValues.selectedGoodGroup.code)
+  formData.append('description', createValues.comments)
+  formData.append('location', createValues.selectLocation)
+
+  if (imageRefs.value.length > 0) {
+    for (const file of imageRefs.value) {
+      formData.append('add_images[]', file);
+    }
+  }
 
   if (result) {
     try {
       const res = await useAxios(`/good`, {
         method: "POST",
-        data: {
-          name: createValues.nameProduct,
-          vendor_code: createValues.vendorCode,
-          unit_id: createValues.selectUnit.code,
-          good_group_id: createValues.selectedGoodGroup.code,
-          goods: productsInfo.value,
-          main_image:''
-        },
+        data: formData,
       });
       toast.add({
         severity: "success",
@@ -113,17 +116,56 @@ async function saveFn() {
         life: 3000,
       });
       emit("closeDialog", res.result.id);
+
     } catch (e) {
       console.log(e);
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e,
+        detail: e.response.data.message,
         life: 3000,
       });
     }
   }
 }
+
+const selectImage = (event) => {
+  const files = event.target.files;
+  for (const file of files) {
+    imageRefs.value.push(file);
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+      imagePreview.value.push(fileReader.result);
+    });
+    fileReader.readAsDataURL(file);
+  }
+};
+
+const onPickFile = () => {
+  fileInput.value.click();
+};
+const responsiveOptions = ref([
+  {
+    breakpoint: '1400px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '1199px',
+    numVisible: 3,
+    numScroll: 1
+  },
+  {
+    breakpoint: '767px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '575px',
+    numVisible: 1,
+    numScroll: 1
+  }
+]);
 </script>
 
 <template>
@@ -152,11 +194,28 @@ async function saveFn() {
         />
       </div>
     </div>
-    <div class="flex mt-[30px] gap-[26px]">
-      <div class="">
-        <img src="@/assets/img/emptyImg.svg" alt=""  class="w-full">
+    <div class="grid grid-cols-12 mt-[30px] gap-[26px]">
+      <div class="relative col-span-4">
+        <input
+            accept="image/*"
+            type="file"
+            @change="selectImage"
+            style="display: none"
+            ref="fileInput"
+            multiple
+        />
+
+        <div v-if="imagePreview.length !== 0">
+          <Carousel :value="imagePreview" :numVisible="1" :page="1" :showIndicators="false"
+                    :responsiveOptions="responsiveOptions">
+            <template #item="slotProps">
+              <img :src="slotProps.data" @click="onPickFile" alt=""
+                   class="w-[210px] m-auto rounded-[16px] h-[210px] object-cover"/>
+            </template>
+          </Carousel>
+        </div>
       </div>
-      <div class="form w-full grid grid-cols-12 gap-[16px]">
+      <div class="form w-full col-span-8 grid grid-cols-12 gap-[16px] relative create-goods">
         <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
 
         <FloatLabel class="col-span-3">
@@ -164,6 +223,7 @@ async function saveFn() {
               v-model="createValues.selectedGoodGroup"
               :options="goodGroupList"
               :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
+
               optionLabel="name"
               class="w-full"
           />
@@ -172,7 +232,7 @@ async function saveFn() {
         <fin-input class="col-span-3" placeholder="Артикул" v-model="createValues.vendorCode">
 
         </fin-input>
-        <FloatLabel class="col-span-3">
+        <FloatLabel class="col-span-3 ">
           <Dropdown
               v-model="createValues.selectUnit"
               :class="{ 'p-invalid': v$.selectUnit.$error }"
@@ -183,7 +243,6 @@ async function saveFn() {
           <label for="dd-city">Ед. изм.</label>
         </FloatLabel>
         <FloatLabel class="col-span-3">
-<!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
           <Dropdown
               v-model="createValues.selectLocation"
 
@@ -249,6 +308,13 @@ async function saveFn() {
   line-height: 15px;
   color: #808BA0;
   font-weight: 600;
+}
+
+.img-goods {
+  width: 261px !important;
+  height: 207px !important;
+  position: relative;
+  z-index: 333;
 }
 
 </style>

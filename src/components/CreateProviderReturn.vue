@@ -85,7 +85,7 @@ async function saveFn() {
 
   if (result) {
     try {
-      const res = await useAxios(`/document/provider/purchase`, {
+      const res = await useAxios(`/document/provider/return`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
@@ -155,10 +155,7 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание закупки</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
-        </div>
+        <div class="header-title">Создание возврата</div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -277,7 +274,13 @@ watch(createValues, (newValue) => {
 <style lang="scss">
 @import "@/assets/style/colors";
 .create-purchases {
-
+  .p-select {
+    border-color: #dcdfe3;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    height: 46px;
+    align-items: center;
+  }
   .p-button-secondary{
     color: transparent !important;
     border-color: transparent !important;
@@ -305,6 +308,7 @@ watch(createValues, (newValue) => {
     width: 100% !important;
   }
 
+
   .p-datepicker {
     border:none;
     border-radius: 10px;
@@ -314,12 +318,15 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
+
+
   }
   .p-button-secondary{
     color: $primary-color !important;
     border-color: $primary-color !important;
   }
   .p-inputtext {
+    //border-color: white;
     border-radius: 10px;
   }
   .p-inputtext:enabled:focus {

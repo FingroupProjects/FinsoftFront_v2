@@ -398,7 +398,7 @@ watch(viewDocument.value, (newValue) => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
+      <shopping-movement :productId="productId"  :number-agreement="viewDocument.doc_number"/>
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"

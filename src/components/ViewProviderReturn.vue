@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref, watch, watchEffect} from 'vue';
 import Select from "primevue/dropdown";
-import PurchasingTable from "@/components/PurchasingTable.vue";
+import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
@@ -13,6 +13,7 @@ import moment from "moment";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
+import ProviderReturnTable from "@/components/ProviderReturnTable.vue";
 
 const props = defineProps({
   productId:{
@@ -28,7 +29,6 @@ const visibleHistory = ref(false)
 const approved = ref(false)
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
-const comments = ref('')
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -37,6 +37,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
+  comment: null
 });
 
 const v$ = useVuelidate();
@@ -91,7 +92,6 @@ const getView = async () => {
   try {
     const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
-
     viewDocument.value = {
       organizationName: item.organization,
       author: item.author,
@@ -102,6 +102,7 @@ const getView = async () => {
       postDate:item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
+      comment: item.comment
     };
 
   } catch (e) {
@@ -131,6 +132,7 @@ const updateView = async () => {
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        comment: viewDocument.value.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
           price: parseFloat(product.price),
@@ -171,7 +173,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
-    const res = await useAxios(`/document/provider/approve`, {
+    const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
       data:{
         ids:[`${props.productId}`]
@@ -188,7 +190,7 @@ const approve = async () => {
 
 const unApprove = async () =>{
   try{
-    const res = await useAxios(`/document/provider/unApprove`, {
+    const res = await useAxios(`/document/provider/return/unApprove`, {
       method: 'POST',
       data:{
         ids:[`${props.productId}`]
@@ -236,7 +238,7 @@ watchEffect(() => {
   if (storage.value.length === 1) viewDocument.storageName = storage.value[0]
 });
 watch(viewDocument.value, (newValue) => {
-  console.log(newValue)
+
   if (newValue.counterpartyAgreementName && !isCurrencyFetched.value) {
 
     findCurrency(newValue.counterpartyAgreementName).then(() => {
@@ -364,7 +366,7 @@ watch(viewDocument.value, (newValue) => {
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea class="w-full" v-model="comments" style="min-height: 20px" rows="2" cols="20" />
+        <Textarea class="w-full" style="min-height: 20px" v-model="viewDocument.comment" rows="2" cols="20" />
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
       <div  class="col-span-12">
@@ -386,7 +388,7 @@ watch(viewDocument.value, (newValue) => {
       </fin-button>
     </div>
   </div>
-    <purchasing-table :productId="productId" @post-goods="getProducts"/>
+    <provider-return-table :productId="productId" @post-goods="getProducts"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
@@ -398,7 +400,7 @@ watch(viewDocument.value, (newValue) => {
         position="right"
         class="drower-movement"
     >
-      <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
+      <shopping-movement :productId="productId"  :number-agreement="viewDocument.doc_number"/>
     </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"
@@ -442,12 +444,14 @@ watch(viewDocument.value, (newValue) => {
   height: 31px !important;
 }
 .icon-print{
+
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
   width: 150px !important;
   height: 31px !important;
 }
+
 
 .edit-purchase {
   .p-select {
@@ -473,7 +477,6 @@ watch(viewDocument.value, (newValue) => {
   .btn-movement:hover{
     color: #3935E7 !important;
   }
-
   .btn-approve:hover{
     color: #17A825 !important;
     border-color: #17A825 !important;
@@ -496,11 +499,14 @@ watch(viewDocument.value, (newValue) => {
   .active-approve{
     background-color: #fff !important;
   }
+
 }
 .drower-movement {
   width: 850px !important;
   border-top-left-radius: 30px;
 }
+
+
 
 .header {
   display: flex;
