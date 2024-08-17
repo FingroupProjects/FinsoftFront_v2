@@ -129,6 +129,8 @@ async function saveFn() {
   }
 }
 
+const reversedImgeRefs = computed(() => [...imagePreview.value].reverse());
+
 const selectImage = (event) => {
   const files = event.target.files;
   for (const file of files) {
@@ -206,11 +208,20 @@ const responsiveOptions = ref([
         />
 
         <div v-if="imagePreview.length !== 0">
-          <Carousel :value="imagePreview" :numVisible="1" :page="1" :showIndicators="false"
-                    :responsiveOptions="responsiveOptions">
+          <Carousel
+              :value="reversedImgeRefs"
+              :numVisible="1"
+              :page="0"
+              :showIndicators="false"
+              :responsiveOptions="responsiveOptions"
+          >
             <template #item="slotProps">
-              <img :src="slotProps.data" @click="onPickFile" alt=""
-                   class="w-[210px] m-auto rounded-[16px] h-[210px] object-cover"/>
+              <img
+                  :src="slotProps.data"
+                  @click="onPickFile"
+                  alt=""
+                  class="w-[210px] m-auto rounded-[16px] h-[210px] object-cover"
+              />
             </template>
           </Carousel>
         </div>
@@ -223,7 +234,6 @@ const responsiveOptions = ref([
               v-model="createValues.selectedGoodGroup"
               :options="goodGroupList"
               :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
-
               optionLabel="name"
               class="w-full"
           />
@@ -245,7 +255,6 @@ const responsiveOptions = ref([
         <FloatLabel class="col-span-3">
           <Dropdown
               v-model="createValues.selectLocation"
-
               :options="locationList"
               optionLabel="name"
               class="w-full"

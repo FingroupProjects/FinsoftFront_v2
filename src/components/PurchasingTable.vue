@@ -144,7 +144,7 @@ const getGood = async () => {
 };
 
 watchEffect(() => {
-  sum.value = Number((amount.value * price.value).toFixed(2))
+  sum.value = Number((amount.value*price.value).toFixed(2))
 });
 
 onMounted(async () => {
