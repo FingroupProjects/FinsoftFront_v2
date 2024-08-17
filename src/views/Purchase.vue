@@ -37,8 +37,8 @@ const search = ref('')
 const selectedCounterparty = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
-const openViewPurchase = ref(false)
 const metaKey = ref(true);
+const createOpenModal = ref(false)
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -69,12 +69,12 @@ const selectPage = ref({
 
 const onRowClick = (event) => {
   const product = event.data;
-  openViewPurchase.value = true;
+  visibleRight.value = true;
+  createOpenModal.value =true
   selectedProductId.value = product.id
 };
 
 const handleFiltersUpdate = (filters) => {
-  console.log('Received filters:', filters);
   getProducts(filters);
   visibleFilter.value = false
 }
@@ -131,10 +131,12 @@ const getSeverity = (status, deleted) => {
 
 function closeFn(id) {
   selectedProductId.value = id
-  visibleRight.value = false
-  openViewPurchase.value = true
+  createOpenModal.value = true
 }
-
+function createOpen() {
+  visibleRight.value = true
+  createOpenModal.value = false
+}
 const sortData = (field, index) => {
   products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
   openUp.value[index] = !openUp.value[index];
@@ -180,15 +182,14 @@ getProducts();
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
-      @click="visibleFilter = true "
+          @click="visibleFilter = true"
           severity="primary"
           class="w-[46px]"
-
       >
         <img src="@/assets/img/menu.svg" alt="" />
       </fin-button>
       <fin-button
-        @click="visibleRight = true"
+        @click="createOpen"
         severity="success"
         icon="pi pi-plus"
         class="w-[80%]"
@@ -386,18 +387,10 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <CreatePurchase @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
+      <view-purchase v-if="createOpenModal" :productId="selectedProductId"/>
+      <CreatePurchase v-else @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
-
-  <Sidebar
-      v-model:visible="openViewPurchase"
-      :show-close-icon="false"
-      position="right"
-      class="create-purchase-sidebar"
-  >
-    <view-purchase :productId="selectedProductId"/>
-  </Sidebar>
 
   <Sidebar
       v-model:visible="visibleFilter"
