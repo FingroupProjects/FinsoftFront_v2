@@ -77,7 +77,7 @@ const getIdProducts = async (inputValue) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
-    img: el.images[0]?.image ? 'http://testtask.taskpro.tj/test/public/' + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
+    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
   }));
 };
 

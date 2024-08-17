@@ -25,7 +25,6 @@ const props = defineProps({
 const toast = useToast();
 
 const goodGroupList = ref([]);
-const productsInfo = ref();
 const listUnit = ref([]);
 const locationList = ref([]);
 const goodNumber = ref();
@@ -46,6 +45,7 @@ const rules = reactive({
 });
 const fileInput = ref()
 const imagePreview = ref([])
+const imgURL = import.meta.env.VITE_IMG_URL;
 
 const v$ = useVuelidate(rules, createValues);
 
@@ -156,7 +156,8 @@ async function getGood() {
     }
     if (res.result.images?.length > 0) {
       imagePreview.value = res.result.images.map((el) => {
-        return 'http://testtask.taskpro.tj/test/public/' + el.image;
+
+        return imgURL + el.image;
       });
     } else {
       imagePreview.value.push(emptyImg);
