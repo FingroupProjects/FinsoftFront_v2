@@ -18,6 +18,7 @@ import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import AddGoods from "@/components/goodsComponents/ViewGoods.vue";
 import CreateGoods from "@/components/goodsComponents/createGoods.vue";
+import MethodsGoods from "@/components/goodsComponents/MethodsGoods.vue";
 
 const {
   findStorage,
@@ -194,7 +195,7 @@ getProducts();
     </div>
   </div>
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsGoods @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         scrollable
@@ -288,9 +289,10 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
+
           <Tag
-              :value="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).name"
-              :severity="getSeverity(slotProps.data.active,slotProps.data?.deleted_at).status"
+              :value="getSeverity(slotProps.data?.deleted_at).name"
+              :severity="getSeverity(slotProps.data?.deleted_at).status"
           />
         </template>
       </Column>

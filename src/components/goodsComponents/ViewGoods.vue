@@ -143,7 +143,10 @@ async function getGood() {
     createValues.nameProduct = res.result.name
     createValues.vendorCode = res.result.vendor_code
     createValues.selectedGoodGroup = res.result.good_group
-    createValues.selectUnit = res.result.unit
+    createValues.selectUnit ={
+      name:res.result.unit.name,
+      code:res.result.unit.id
+    }
     createValues.comments = res.result.description
     if (res.result?.location) {
       createValues.selectLocation = {
