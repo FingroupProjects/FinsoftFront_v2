@@ -210,7 +210,7 @@ const responsiveOptions = ref([
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Добавление товара</div>
+        <div class="header-title"> Просмотр товара</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №{{ goodNumber }}
         </div>
@@ -226,7 +226,7 @@ const responsiveOptions = ref([
         <fin-button
             icon="pi pi-times"
             @click="emit('close-sidebar')"
-            label="Отменить"
+            label="Закрыть"
             severity="warning"
             class="p-button-lg"
         />
