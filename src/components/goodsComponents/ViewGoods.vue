@@ -102,9 +102,8 @@ async function saveFn() {
   const formData = new FormData()
   formData.append('name', createValues.nameProduct)
   formData.append('vendor_code', createValues.vendorCode)
-  formData.append('unit_id', createValues.selectUnit.id)
+  formData.append('unit_id', createValues.selectUnit.code)
   formData.append('good_group_id', createValues.selectedGoodGroup.id)
-  formData.append('goods', productsInfo.value)
   formData.append('description', createValues.comments)
   formData.append('location', createValues.selectLocation.code)
 
