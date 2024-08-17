@@ -27,6 +27,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
+const imgURL = import.meta.env.VITE_IMG_URL;
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
@@ -51,6 +52,7 @@ const addFn = async () => {
     sum: sum.value,
     good_id: selectedProducts.value.code,
     name: selectedProducts.value.products,
+    img: selectedProducts.value.img,
     created: true,
     deleted: false,
     updated: false
@@ -96,6 +98,7 @@ const getIdProducts = async (inputValue) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
+    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
   }));
 };
 
@@ -119,7 +122,6 @@ const getGood = async () => {
     const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
-    const imgURL = import.meta.env.VITE_IMG_URL;
 
     goods.value = items.map((item) => ({
       good_id: item.good.id,

@@ -241,7 +241,7 @@ getProducts();
           <div class="flex items-center gap-[10px]">
             <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0"
                  class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            <img v-else :src="'http://testtask.taskpro.tj/test/public'+ slotProps?.data?.images[0]?.image" alt=""
+            <img v-else :src="imgURL+ slotProps?.data?.images[0]?.image" alt=""
                  class="w-[32px] h-[32px] object-cover rounded-[8px]">
             {{ slotProps.data?.name }}
           </div>
