@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {computed, reactive, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Dropdown from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
@@ -41,14 +41,11 @@ const createValues = reactive({
 const rules = reactive({
   nameProduct: {required},
   vendorCode: {required},
-  // selectLocation: {required},
   selectedGoodGroup: {required},
   selectUnit: {required},
 });
 const fileInput = ref()
 const imagePreview = ref([])
-const imageRef = ref(null)
-
 
 const v$ = useVuelidate(rules, createValues);
 
@@ -109,14 +106,13 @@ async function saveFn() {
   formData.append('good_group_id', createValues.selectedGoodGroup.id)
   formData.append('goods', productsInfo.value)
   formData.append('description', createValues.comments)
-  formData.append('location', createValues.selectLocation)
+  formData.append('location', createValues.selectLocation.code)
 
   if (imageRefs.value.length > 0) {
     for (const file of imageRefs.value) {
       formData.append('add_images[]', file);
     }
   }
-  console.log(formData)
   if (result) {
     try {
       const res = await useAxios(`/good/${props.productId}`, {
@@ -148,10 +144,13 @@ async function getGood() {
     createValues.nameProduct = res.result.name
     createValues.vendorCode = res.result.vendor_code
     createValues.selectedGoodGroup = res.result.good_group
-    createValues.selectUnit = res.result.storage
+    createValues.selectUnit = res.result.unit
     createValues.comments = res.result.description
     if (res.result?.location) {
-      createValues.selectLocation = {name: res.result?.location}
+      createValues.selectLocation = {
+        name: res.result?.location.name,
+        code:res.result.location.id
+      }
     }
     if (res.result.images?.length > 0) {
       imagePreview.value = res.result.images.map((el) => {
@@ -167,7 +166,7 @@ async function getGood() {
 }
 
 getGood()
-
+const reversedImgeRefs = computed(() => [...imagePreview.value].reverse());
 const selectImage = (event) => {
   const files = event.target.files;
   for (const file of files) {
@@ -245,7 +244,7 @@ const responsiveOptions = ref([
         />
 
         <div v-if="imagePreview?.length !== 0">
-          <Carousel :value="imagePreview" :numVisible="1" :page="1" :showIndicators="false"
+          <Carousel :value="reversedImgeRefs" :numVisible="1" :page="0" :showIndicators="false"
                     :responsiveOptions="responsiveOptions">
             <template #item="slotProps">
               <img :src="slotProps.data" @click="onPickFile" alt=""
@@ -262,7 +261,6 @@ const responsiveOptions = ref([
               v-model="createValues.selectedGoodGroup"
               :options="goodGroupList"
               :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
-
               optionLabel="name"
               class="w-full"
           >
@@ -290,14 +288,16 @@ const responsiveOptions = ref([
           <label for="dd-city">Ед. изм.</label>
         </FloatLabel>
         <FloatLabel class="col-span-3">
-          <!--          :class="{ 'p-invalid': v$.selectLocation.$error }"-->
           <Dropdown
               v-model="createValues.selectLocation"
-
               :options="locationList"
               optionLabel="name"
               class="w-full"
-          />
+          >
+            <template #value>
+              {{ createValues.selectLocation?.name }}
+            </template>
+          </Dropdown>
           <label for="dd-city">Местоположение</label>
         </FloatLabel>
 
