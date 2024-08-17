@@ -134,6 +134,10 @@ const sortData = (field, index) => {
   products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
   openUp.value[index] = !openUp.value[index];
 };
+function closeView() {
+  openViewPurchase.value=false
+  getProducts();
+}
 watch(selectedStorage, () => {
   getProducts();
 });
@@ -331,7 +335,7 @@ getProducts();
       position="right"
       class="create-purchase-sidebar"
   >
-    <add-goods :product-id="selectedProductId" @close-sidebar="openViewPurchase=false" @close-dialog="closeFn"/>
+    <add-goods :product-id="selectedProductId" @close-sidebar="closeView" @close-dialog="closeFn"/>
   </Sidebar>
 
   <Sidebar

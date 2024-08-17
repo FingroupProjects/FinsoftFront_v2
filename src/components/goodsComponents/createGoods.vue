@@ -175,9 +175,6 @@ const responsiveOptions = ref([
     <div class="header">
       <div>
         <div class="header-title">Добавление товара</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
-        </div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -190,7 +187,7 @@ const responsiveOptions = ref([
         <fin-button
             icon="pi pi-times"
             @click="emit('close-sidebar')"
-            label="Отменить"
+            label="Закрыть"
             severity="warning"
             class="p-button-lg"
         />
