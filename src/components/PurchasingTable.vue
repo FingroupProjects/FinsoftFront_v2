@@ -13,7 +13,7 @@ import formatNumber from '../constants/formatNumber.js'
 
 const v$ = useVuelidate();
 
-const emit = defineEmits(["postGoods"]);
+const emit = defineEmits(["postGoods",'editModal']);
 
 const goods = ref([]);
 const selectedProducts = ref();
@@ -27,6 +27,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
+const editModalOpen = ref(true)
 const imgURL = import.meta.env.VITE_IMG_URL;
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
@@ -89,10 +90,10 @@ const confirmDeleteProduct = (index) => {
     getAllSum.value = 0
     getAllProduct.value = 0
   }
+  emit('editModal',editModalOpen.value)
 };
 
 const getIdProducts = async (inputValue) => {
-
   const res = await useAxios(`good?search=${inputValue?.srcElement.value}`);
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
@@ -114,6 +115,7 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
+  emit('editModal',editModalOpen.value)
 };
 
 const getGood = async () => {

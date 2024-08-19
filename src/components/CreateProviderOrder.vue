@@ -12,6 +12,7 @@ import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
+import Dialog from "primevue/dialog";
 
 const emit = defineEmits(["closeDialog",'close-sidebar']);
 
@@ -36,6 +37,7 @@ const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
+const openInfoModal = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -122,6 +124,13 @@ function getProducts(products) {
 }
 findStorage()
 
+function infoModal() {
+ openInfoModal.value = true
+  // emit('close-sidebar')
+}
+function infoModalClose() {
+  emit('close-sidebar')
+}
 watchEffect(() => {
   if (
     createValues.selectedCounterparty &&
@@ -167,7 +176,7 @@ watch(createValues, (newValue) => {
         />
         <fin-button
           icon="pi pi-times"
-          @click="emit('close-sidebar')"
+          @click="infoModal"
           label="Отменить"
           severity="warning"
           class="p-button-lg"
@@ -269,6 +278,26 @@ watch(createValues, (newValue) => {
     Автор: {{ userName.name }}
   </div>
   <Toast />
+  <Dialog
+      v-model:visible="openInfoModal"
+      :style="{ width: '424px' }"
+      :modal="true"
+      :closable="false"
+  >
+    <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
+      Вы действительно хотите удалить документ?
+    </div>
+    <template #footer>
+      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="saveFn"/>
+      <fin-button
+          label="Отменить"
+          icon="pi pi-times"
+          class="w-full"
+          severity="warning"
+          @click="infoModalClose"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <style lang="scss">
