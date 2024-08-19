@@ -38,7 +38,7 @@ const selectedCounterparty = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
-const createOpenModal = ref(false)
+const createOpenModal = ref(false);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([

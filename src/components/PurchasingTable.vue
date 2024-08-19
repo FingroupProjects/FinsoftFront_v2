@@ -78,12 +78,10 @@ const addFn = async () => {
 const confirmDeleteProduct = (index) => {
   postProducts.value.splice(index, 1);
   getAllSum.value = goods.value.reduce((total, el) => {
-    console.log(total)
     return el?.sum -total;
   }, 0);
 
   getAllProduct.value = goods.value.reduce((total, el) => {
-    console.log(total)
     return el?.amount -total;
   }, 0);
   if (goods.value.length === 0){
