@@ -70,7 +70,7 @@ const selectPage = ref({
 const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
-  createOpenModal.value =true
+  createOpenModal.value = true
   selectedProductId.value = product.id
 };
 
@@ -91,13 +91,14 @@ async function getProducts(filters = {}) {
     ...filters,
   };
 
-  const res = await useAxios(`/document/provider/purchase`, { params });
+  const res = await useAxios(`/document/provider/purchase`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
   return products.value;
 }
-function getProductMethods(){
+
+function getProductMethods() {
   selectedProduct.value = null
   getProducts()
 }
@@ -132,11 +133,14 @@ const getSeverity = (status, deleted) => {
 function closeFn(id) {
   selectedProductId.value = id
   createOpenModal.value = true
+  getProducts();
 }
+
 function createOpen() {
   visibleRight.value = true
   createOpenModal.value = false
 }
+
 const sortData = (field, index) => {
   products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
   openUp.value[index] = !openUp.value[index];
@@ -147,6 +151,9 @@ watch(selectedStorage, () => {
 watch(selectedCounterparty, () => {
   getProducts();
 });
+watch(visibleRight, (newValue) => {
+  if (newValue === false) getProducts()
+})
 getProducts();
 </script>
 
@@ -154,31 +161,31 @@ getProducts();
   <header-purchase header-title="Покупка товаров"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
-      <InputIcon class="pi pi-search" />
+      <InputIcon class="pi pi-search"/>
       <InputText
-        class="w-full"
-        @input="getProducts"
-        v-model="search"
-        placeholder="Поиск"
+          class="w-full"
+          @input="getProducts"
+          v-model="search"
+          placeholder="Поиск"
       />
     </IconField>
     <Dropdown
-      v-model="selectedStorage"
-      optionLabel="name"
-      placeholder="Склад"
-      @click="findStorage"
-      :loading="loadingStorage"
-      :options="storage"
-      class="w-full col-span-2"
+        v-model="selectedStorage"
+        optionLabel="name"
+        placeholder="Склад"
+        @click="findStorage"
+        :loading="loadingStorage"
+        :options="storage"
+        class="w-full col-span-2"
     />
     <Dropdown
-      v-model="selectedCounterparty"
-      :loading="loadingCounterparty"
-      @click="findCounterparty"
-      :options="counterparty"
-      optionLabel="name"
-      placeholder="Поставщик"
-      class="w-full col-span-2"
+        v-model="selectedCounterparty"
+        :loading="loadingCounterparty"
+        @click="findCounterparty"
+        :options="counterparty"
+        optionLabel="name"
+        placeholder="Поставщик"
+        class="w-full col-span-2"
     />
     <div class="flex gap-4 col-span-2">
       <fin-button
@@ -186,14 +193,14 @@ getProducts();
           severity="primary"
           class="w-[46px]"
       >
-        <img src="@/assets/img/menu.svg" alt="" />
+        <img src="@/assets/img/menu.svg" alt=""/>
       </fin-button>
       <fin-button
-        @click="createOpen"
-        severity="success"
-        icon="pi pi-plus"
-        class="w-[80%]"
-        label="Создать"
+          @click="createOpen"
+          severity="success"
+          icon="pi pi-plus"
+          class="w-[80%]"
+          label="Создать"
       />
     </div>
   </div>
@@ -226,10 +233,9 @@ getProducts();
           ></i>
         </template>
         <template #body="slotProps">
-          <span
-              class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden"
-          >{{ slotProps.data?.doc_number }}</span
-          >
+          <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
+            {{ slotProps.data?.doc_number }}
+          </span>
         </template>
       </Column>
 
@@ -398,9 +404,9 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase  @updateFilters="handleFiltersUpdate"  />
+    <filter-purchase @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
-  <Toast />
+  <Toast/>
 </template>
 <style lang="scss">
 .paginator-dropdown {
@@ -471,17 +477,17 @@ getProducts();
   }
 }
 
-.create-purchase-sidebar{
+.create-purchase-sidebar {
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
 
-.create-purchase{
+.create-purchase {
   width: 1154px !important;
   border-top-left-radius: 30px;
 }
 
-.filters-purchase{
+.filters-purchase {
   width: 546px !important;
   border-top-left-radius: 30px;
 }
@@ -536,7 +542,8 @@ getProducts();
 .p-paginator {
   justify-content: end !important;
 }
-.p-select:not(.p-disabled).p-focus{
+
+.p-select:not(.p-disabled).p-focus {
   border-color: #3935E7 !important;
 }
 </style>
