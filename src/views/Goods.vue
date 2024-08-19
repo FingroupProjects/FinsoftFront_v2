@@ -30,13 +30,15 @@ const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
 const selectedProduct = ref();
-const selectedProductId = ref()
-const search = ref('')
+const selectedProductId = ref();
+const search = ref('');
 const selectedStatus = ref();
-const first = ref(1)
-const visibleFilter = ref(false)
-const openViewPurchase = ref(false)
-const metaKey = ref(true)
+const first = ref(1);
+const visibleFilter = ref(false);
+const openViewPurchase = ref(false);
+const metaKey = ref(true);
+const createOpenModal = ref(false);
+
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const statusList = ref([
@@ -77,7 +79,8 @@ const selectPage = ref({
 
 const onRowClick = (event) => {
   const product = event.data;
-  openViewPurchase.value = true;
+  createOpenModal.value = true;
+  visibleRight.value = true;
   selectedProductId.value = product.id
 };
 
@@ -127,18 +130,24 @@ const getSeverity = (status) => {
 
 function closeFn(id) {
   selectedProductId.value = id
-  visibleRight.value = false
-  openViewPurchase.value = true
+  createOpenModal.value = true
 }
 
 const sortData = (field, index) => {
   products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
   openUp.value[index] = !openUp.value[index];
 };
+
 function closeView() {
-  openViewPurchase.value=false
+  visibleRight.value = false
   getProducts();
 }
+
+function createOpen() {
+  visibleRight.value = true
+  createOpenModal.value = false
+}
+
 watch(selectedStorage, () => {
   getProducts();
 });
@@ -186,7 +195,7 @@ getProducts();
         <img src="@/assets/img/menu.svg" alt=""/>
       </fin-button>
       <fin-button
-          @click="visibleRight = true"
+          @click="createOpen"
           severity="success"
           icon="pi pi-plus"
           class="w-[80%]"
@@ -196,7 +205,7 @@ getProducts();
   </div>
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
     <MethodsGoods @get-product="getProductMethods" :select-products="selectedProduct"
-                     v-if="!(!selectedProduct || !selectedProduct.length)"/>
+                  v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         scrollable
         scrollHeight="660px"
@@ -327,18 +336,12 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <create-goods @close-dialog="closeFn" @close-sidebar="visibleRight = false"/>
+      <add-goods v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
+                 @close-dialog="closeFn"/>
+      <create-goods v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
+
     </Sidebar>
   </div>
-
-  <Sidebar
-      v-model:visible="openViewPurchase"
-      :show-close-icon="false"
-      position="right"
-      class="create-purchase-sidebar"
-  >
-    <add-goods :product-id="selectedProductId" @close-sidebar="closeView" @close-dialog="closeFn"/>
-  </Sidebar>
 
   <Sidebar
       v-model:visible="visibleFilter"

@@ -7,8 +7,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '../constants/formatNumber.js'
-import Select from "primevue/dropdown";
+import formatNumber from '../constants/formatNumber.js';
 
 const emit = defineEmits(["postGoods"]);
 
