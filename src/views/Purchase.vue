@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {ref, watch,onMounted} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -398,6 +398,7 @@ watch(selectedCounterparty, () => {
         :show-close-icon="false"
         position="right"
         class="create-purchase"
+        :dismissable="false"
     >
       <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId" :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
