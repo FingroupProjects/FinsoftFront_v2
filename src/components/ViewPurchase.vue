@@ -263,7 +263,6 @@ watch(productsInfo, (newVal) => {
   }
   initialValue.value = newVal;
 }, {deep: true});
-
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
