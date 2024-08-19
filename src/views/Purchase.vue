@@ -18,6 +18,7 @@ import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
+import Dialog from "primevue/dialog";
 
 const {
   findStorage,
@@ -39,6 +40,8 @@ const first = ref(1)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
+const openInfoModal = ref(false);
+const editFn = ref(false)
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -145,16 +148,19 @@ const sortData = (field, index) => {
   products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
   openUp.value[index] = !openUp.value[index];
 };
+
+async function closeFnVl() {
+  visibleRight.value = false
+}
+
 watch(selectedStorage, () => {
   getProducts();
 });
 watch(selectedCounterparty, () => {
   getProducts();
 });
-watch(visibleRight, (newValue) => {
-  if (newValue === false) getProducts()
-})
-getProducts();
+
+ getProducts();
 </script>
 
 <template>
@@ -393,8 +399,8 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <view-purchase v-if="createOpenModal" :productId="selectedProductId"/>
-      <CreatePurchase v-else @close-sidebar="visibleRight=false" @close-dialog="closeFn"/>
+      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId" :openModalClose="openInfoModal"/>
+      <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -407,6 +413,7 @@ getProducts();
     <filter-purchase @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
+
 </template>
 <style lang="scss">
 .paginator-dropdown {
