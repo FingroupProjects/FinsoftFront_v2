@@ -437,7 +437,6 @@ watch(productsInfo, (newVal) => {
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
       :modal="true"
-      :closable="false"
   >
     <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
       Хотите сохранить измения?
@@ -456,6 +455,10 @@ watch(productsInfo, (newVal) => {
 </template>
 
 <style lang="scss">
+.p-dialog-close-button{
+  position: absolute !important;
+  right: 0;
+}
 .rounded-close-btn {
   border-radius: 8px 0 0 8px;
   position: absolute;

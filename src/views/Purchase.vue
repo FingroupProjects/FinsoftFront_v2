@@ -41,7 +41,9 @@ const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
 const openInfoModal = ref(false);
-const editFn = ref(false)
+const sortDesc = ref('asc');
+const orderBy = ref('id');
+
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -85,13 +87,14 @@ const handleFiltersUpdate = (filters) => {
 async function getProducts(filters = {}) {
   const params = {
     itemsPerPage: selectPage.value.count,
-    orderBy: 'id',
+    orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
     storage_id: selectedStorage.value?.code,
     counterparty_id: selectedCounterparty.value?.code,
     page: first.value + 1,
     ...filters,
+    sort:sortDesc.value
   };
 
   const res = await useAxios(`/document/provider/purchase`, {params});
@@ -145,14 +148,19 @@ function createOpen() {
 }
 
 const sortData = (field, index) => {
-  products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
-  openUp.value[index] = !openUp.value[index];
+  orderBy.value = field
+  openUp.value[index] = !openUp.value[index]
+  if (sortDesc.value === 'asc') sortDesc.value = 'desc'
+  else sortDesc.value = 'asc'
+  getProducts()
 };
 
 async function closeFnVl() {
   visibleRight.value = false
 }
-
+function srt() {
+  console.log('sss')
+}
 watch(selectedStorage, () => {
   getProducts();
 });
@@ -165,6 +173,7 @@ watch(selectedCounterparty, () => {
 
 <template>
   <header-purchase header-title="Покупка товаров"/>
+
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search"/>
@@ -210,6 +219,7 @@ watch(selectedCounterparty, () => {
       />
     </div>
   </div>
+
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
     <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
@@ -222,15 +232,12 @@ watch(selectedCounterparty, () => {
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
-        @sort="sortData('code')"
     >
       <Column selectionMode="multiple"></Column>
       <Column field="code" :sortable="true" header="№">
-        <template #header>
-        </template>
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('id',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -248,7 +255,7 @@ watch(selectedCounterparty, () => {
       <Column field="name" :sortable="true" header="Дата">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('date',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -293,7 +300,7 @@ watch(selectedCounterparty, () => {
       <Column field="price" :sortable="true" header="Сумма">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('price',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -308,7 +315,7 @@ watch(selectedCounterparty, () => {
       <Column field="storage" :sortable="true" header="Склад">
         <template #sorticon="{data,index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('storage',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -323,7 +330,7 @@ watch(selectedCounterparty, () => {
       <Column field="status" :sortable="true" header="Статус">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('status',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -341,7 +348,7 @@ watch(selectedCounterparty, () => {
       <Column field="inventoryStatus" :sortable="true" header="Автор">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('inventoryStatus',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -353,10 +360,10 @@ watch(selectedCounterparty, () => {
           {{ slotProps.data?.author?.name }}
         </template>
       </Column>
-      <Column field="rating" :sortable="true" header="Валюта">
+      <Column field="currency" :sortable="true" header="Валюта">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('currency',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -392,6 +399,7 @@ watch(selectedCounterparty, () => {
       />
     </div>
   </div>
+
   <div class="create-purchase-sidebar">
     <Sidebar
         v-model:visible="visibleRight"
@@ -413,6 +421,7 @@ watch(selectedCounterparty, () => {
   >
     <filter-purchase @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
+
   <Toast/>
 
 </template>

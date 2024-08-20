@@ -38,7 +38,8 @@ const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
-
+const initialValue = ref(null);
+const isModal = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -127,10 +128,17 @@ function getProducts(products) {
 findStorage()
 
 async function infoModalClose() {
-  const result = await v$.value.$validate();
-  if (result && productsInfo.value?.length > 0) openInfoModal.value = true
+  if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
+watch(createValues, (newVal) => {
+  if (initialValue.value !== null) {
+    // This will only execute after the initial value is set
+    isModal.value = true;
+  }
+  initialValue.value = newVal;
+}, {deep: true});
 
 watchEffect(() => {
   if (
@@ -285,7 +293,6 @@ watch(createValues, (newValue) => {
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
       :modal="true"
-      :closable="false"
   >
     <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
       Хотите сохранить измения?
