@@ -47,6 +47,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
+  comment:''
 });
 
 const v$ = useVuelidate();
@@ -98,6 +99,7 @@ const getView = async () => {
       postDate: item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
+      comment:item.comment
     };
 
   } catch (e) {
@@ -107,7 +109,8 @@ const getView = async () => {
 
 const updateView = async () => {
   const result = await v$.value.$validate();
-
+  openInfoModal.value = false
+  changeValue.value = false
   if (result) {
     try {
       const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
@@ -127,6 +130,7 @@ const updateView = async () => {
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        comment: viewDocument.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
           price: parseFloat(product.price),
@@ -385,7 +389,7 @@ watch(productsInfo, (newVal) => {
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea class="w-full" v-model="comments" style="min-height: 20px" rows="2" cols="20"/>
+        <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
       <div class="col-span-12">

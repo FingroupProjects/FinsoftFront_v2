@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch,onMounted} from "vue";
+import {ref, watch, onMounted} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -94,7 +94,7 @@ async function getProducts(filters = {}) {
     counterparty_id: selectedCounterparty.value?.code,
     page: first.value + 1,
     ...filters,
-    sort:sortDesc.value
+    sort: sortDesc.value
   };
 
   const res = await useAxios(`/document/provider/purchase`, {params});
@@ -158,9 +158,11 @@ const sortData = (field, index) => {
 async function closeFnVl() {
   visibleRight.value = false
 }
+
 function srt() {
   console.log('sss')
 }
+
 watch(selectedStorage, () => {
   getProducts();
 });
@@ -168,7 +170,7 @@ watch(selectedCounterparty, () => {
   getProducts();
 });
 
- getProducts();
+getProducts();
 </script>
 
 <template>
@@ -231,19 +233,21 @@ watch(selectedCounterparty, () => {
         dataKey="id"
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
-        @row-click="onRowClick"
     >
       <Column selectionMode="multiple"></Column>
-      <Column field="code" :sortable="true" header="№">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('id',index)"
+      <Column field="code" :sortable="true">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('id',index)">
+            № <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
@@ -252,91 +256,111 @@ watch(selectedCounterparty, () => {
         </template>
       </Column>
 
-      <Column field="name" :sortable="true" header="Дата">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('date',index)"
+      <Column field="name" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('date',index)">
+            Дата <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
-      <Column field="category" :sortable="true" header="Поставщик">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('counterparty.name',index)"
+      <Column field="category" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('counterparty.name',index)">
+            Поставщик <i
+
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
+
         </template>
         <template #body="slotProps">
           {{ slotProps.data.counterparty?.name }}
         </template>
       </Column>
-      <Column field="image" v-if="!hasOrganization" :sortable="true" header="Организация">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('organization.name',index)"
+      <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('organization.name',index)">
+            Организация <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data.organization?.name }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="Сумма">
-        <template #sorticon="{data, index}">
-          <i
-              @click="sortData(products[0].sum, index)"
-              :class="{
-                  'pi pi-arrow-down': openUp[index],
-                  'pi pi-arrow-up': !openUp[index],
-                  'text-[#808BA0] text-[5px]': true
-                  }"
-          ></i>
-        </template>
-        <template #body="slotProps">
-                 {{ slotProps.data.sum }}
-        </template>
-      </Column>
-      <Column field="storage" :sortable="true" header="Склад">
-        <template #sorticon="{data,index}">
-          <i
-              @click="sortData('storage.name',index)"
+      <Column field="price" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('sum',index)">
+            Сумма <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.sum }}
+        </template>
+      </Column>
+      <Column field="storage" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('storage.name',index)">
+            Склад <i
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data.storage?.name }}
         </template>
       </Column>
-      <Column field="status" :sortable="true" header="Статус">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('deleted_at',index)"
+      <Column field="status" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('active',index)">
+            Статус <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           <Tag
@@ -345,31 +369,37 @@ watch(selectedCounterparty, () => {
           />
         </template>
       </Column>
-      <Column field="inventoryStatus" :sortable="true" header="Автор">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('author.name',index)"
+      <Column field="inventoryStatus" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('author.name',index)">
+            Автор <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data?.author?.name }}
         </template>
       </Column>
-      <Column field="currency" :sortable="true" header="Валюта">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('currency.name',index)"
+      <Column field="currency" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('currency.name',index)">
+            Валюта <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data?.currency?.name }}
@@ -408,7 +438,8 @@ watch(selectedCounterparty, () => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId" :openModalClose="openInfoModal"/>
+      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+                     :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
