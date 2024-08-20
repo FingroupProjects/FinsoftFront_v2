@@ -270,7 +270,7 @@ watch(selectedCounterparty, () => {
       <Column field="category" :sortable="true" header="Поставщик">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('counterparty.name',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -285,7 +285,7 @@ watch(selectedCounterparty, () => {
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="Организация">
         <template #sorticon="{index}">
           <i
-              @click="sortData('code',index)"
+              @click="sortData('organization.name',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -298,24 +298,24 @@ watch(selectedCounterparty, () => {
         </template>
       </Column>
       <Column field="price" :sortable="true" header="Сумма">
-        <template #sorticon="{index}">
+        <template #sorticon="{data, index}">
           <i
-              @click="sortData('price',index)"
+              @click="sortData(products[0].sum, index)"
               :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
+                  'pi pi-arrow-down': openUp[index],
+                  'pi pi-arrow-up': !openUp[index],
+                  'text-[#808BA0] text-[5px]': true
+                  }"
           ></i>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.sum }}
+                 {{ slotProps.data.sum }}
         </template>
       </Column>
       <Column field="storage" :sortable="true" header="Склад">
         <template #sorticon="{data,index}">
           <i
-              @click="sortData('storage',index)"
+              @click="sortData('storage.name',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -330,7 +330,7 @@ watch(selectedCounterparty, () => {
       <Column field="status" :sortable="true" header="Статус">
         <template #sorticon="{index}">
           <i
-              @click="sortData('status',index)"
+              @click="sortData('deleted_at',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -348,7 +348,7 @@ watch(selectedCounterparty, () => {
       <Column field="inventoryStatus" :sortable="true" header="Автор">
         <template #sorticon="{index}">
           <i
-              @click="sortData('inventoryStatus',index)"
+              @click="sortData('author.name',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -363,7 +363,7 @@ watch(selectedCounterparty, () => {
       <Column field="currency" :sortable="true" header="Валюта">
         <template #sorticon="{index}">
           <i
-              @click="sortData('currency',index)"
+              @click="sortData('currency.name',index)"
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
