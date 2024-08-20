@@ -86,7 +86,7 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate();
-
+  openInfoModal.value = false
   if (result) {
     try {
       const res = await useAxios(`/document/provider/purchase`, {
