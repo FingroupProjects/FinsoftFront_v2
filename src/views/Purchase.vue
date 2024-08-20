@@ -159,10 +159,6 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-function srt() {
-  console.log('sss')
-}
-
 watch(selectedStorage, () => {
   getProducts();
 });
@@ -225,6 +221,7 @@ getProducts();
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
     <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
+
     <DataTable
         scrollable
         scrollHeight="660px"
@@ -233,9 +230,10 @@ getProducts();
         dataKey="id"
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
+        @row-click="onRowClick"
     >
       <Column selectionMode="multiple"></Column>
-      <Column field="code" :sortable="true">
+      <Column field="code" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('id',index)">
             № <i
