@@ -47,6 +47,11 @@ const routes = [
                 name: 'warehouses',
                 component: () => import('@/views/Goods.vue'),
             },
+            {
+                path: '/finance',
+                name: 'finance',
+                component: () => import('@/views/Finance.vue'),
+            },
         ]
     },
     {

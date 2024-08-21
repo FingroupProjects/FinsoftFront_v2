@@ -73,7 +73,7 @@ export default [
                 data:[
                     {
                         label: 'Приход средств',
-                        route: '/'
+                        route: '/finance'
                     },
                     {
                         label: 'Расход средств',
