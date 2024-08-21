@@ -24,9 +24,9 @@ const {
   findOrganization,
   organization,
   loadingOrganization,
-  findOrganizationBill,
-  billList,
-  loadingBill
+  employeeList,
+  loadingEmployee,
+  findEmployee,
 } = useStaticApi();
 
 const initialValue = ref(null);
@@ -35,10 +35,9 @@ const isModal = ref(false);
 const financeDate = reactive({
   datetime24h: new Date,
   cashRegisterId: "",
-  organizationBillId: "",
+  balanceArticleId: "",
   comments: "",
   selectedOrganization: "",
-
   sum: '',
   base: '',
   getUser: ''
@@ -47,7 +46,7 @@ const rules = reactive({
   datetime24h: {required},
   cashRegisterId: {required},
   selectedOrganization: {required},
-  organizationBillId: {required},
+  balanceArticleId: {required},
   sum: {required},
   base: {required},
   getUser: {required},
@@ -62,14 +61,14 @@ async function saveFn() {
   const result = await v$.value.$validate();
   if (result) {
     try {
-      const res = await useAxios(`/cash-store/withdrawal`, {
+      const res = await useAxios(`/cash-store/other-expenses`, {
         method: "POST",
         data: {
           date: moment(financeDate.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
           organization_id: financeDate.selectedOrganization.code,
           cash_register_id: financeDate.cashRegisterId.code,
           operation_type_id: '1',
-          organization_bill_id: financeDate.organizationBillId.code,
+          balance_article_id: financeDate.balanceArticleId.code,
           sum: financeDate.sum,
           basis: financeDate.base,
           type: 'PKO',
@@ -144,19 +143,19 @@ watchEffect(() => {
 
     <FloatLabel class="col-span-6">
       <Dropdown
-          v-model="financeDate.organizationBillId"
-          :class="{ 'p-invalid': v$.organizationBillId.$error }"
-          @click="findOrganizationBill"
-          :loading="loadingBill"
-          :options="billList"
+          v-model="financeDate.balanceArticleId"
+          :class="{ 'p-invalid': v$.balanceArticleId.$error }"
+          @click="findEmployee"
+          :loading="loadingEmployee"
+          :options="employeeList"
           optionLabel="name"
           class="w-full"
       >
         <template #value>
-          {{ financeDate.organizationBillId?.name }}
+          {{ financeDate.balanceArticleId?.name }}
         </template>
       </Dropdown>
-      <label for="dd-city">Банковский счет</label>
+      <label for="dd-city">Статья дохода</label>
     </FloatLabel>
 
     <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
@@ -189,4 +188,3 @@ watchEffect(() => {
     </div>
   </div>
 </template>
-

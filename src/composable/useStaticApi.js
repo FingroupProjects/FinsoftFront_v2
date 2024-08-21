@@ -10,6 +10,12 @@ export const useStaticApi = () => {
   const loadingOrganization = ref(false);
   const counterparty = ref([]);
   const loadingCounterparty = ref(false);
+  const cashRegisterList = ref([]);
+  const loadingCash = ref(false);
+  const loadingBill = ref(false);
+  const billList = ref([]);
+  const employeeList = ref([]);
+  const loadingEmployee = ref(false);
 
   const findStorage = async () => {
     try {
@@ -86,6 +92,56 @@ export const useStaticApi = () => {
       loadingCounterparty.value = false;
     }
   };
+  const findCashRegister = async () => {
+    try {
+      loadingCash.value = true;
+      const res = await useAxios(`/cashRegister`);
+      return (cashRegisterList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingCash.value = false;
+    }
+  };
+
+  const findOrganizationBill = async () => {
+    try {
+      loadingBill.value = true;
+      const res = await useAxios(`/organizationBill`);
+      return (billList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingBill.value = false;
+    }
+  };
+
+  const findEmployee = async () => {
+    try {
+      loadingEmployee.value = true;
+      const res = await useAxios(`/employee?itemsPerPage=10`);
+      return (employeeList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingEmployee.value = false;
+    }
+  };
 
   return {
     storage,
@@ -100,5 +156,14 @@ export const useStaticApi = () => {
     counterparty,
     loadingCounterparty,
     loadingOrganization,
+    findCashRegister,
+    cashRegisterList,
+    loadingCash,
+    findOrganizationBill,
+    billList,
+    loadingBill,
+    findEmployee,
+    employeeList,
+    loadingEmployee
   };
 };

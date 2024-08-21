@@ -1,48 +1,57 @@
 <script setup>
-import { ref, computed } from 'vue';
+import {ref, computed} from 'vue';
 import FinanceTabs from '@/components/finance/FinanceTabs.vue';
 import FinancePc from "@/components/finance/FinancePc.vue";
+import FinanceTabsCass from "@/components/finance/FinanceTabsCass.vue";
+import FinanceInvestment from "@/components/finance/FinanceInvestment.vue";
+import FinanceCreditReceive from "@/components/finance/FinanceCreditReceive.vue";
+import FinanceProviderRefound from "@/components/finance/FinanceProviderRefound.vue";
+import FinanceAccountablePersonRefund from "@/components/finance/FinanceAccountablePersonRefund.vue";
+import FinanceOtherExpenses from "@/components/finance/FinanceOtherExpenses.vue";
+import FinanceOtherIncomes from "@/components/finance/FinanceOtherIncomes.vue";
 
+const userName = {
+  name: localStorage.getItem("user_name"),
+};
 const item = ref([
   {
     name: 'Оплата от клиента',
-    code:0
+    code: 0
   },
   {
     name: 'Снятие Р/С',
-    code:1
+    code: 1
   },
   {
     name: 'Получение с другой касса',
-    code:2
+    code: 2
   },
   {
     name: 'Вложение',
-    code:3
+    code: 3
   },
   {
     name: 'Получение кредита',
-    code:4
+    code: 4
   },
   {
     name: 'Возврат от поставщика',
-    code:5
+    code: 5
   },
   {
     name: 'Возврат от подотчетника',
-    code:6
+    code: 6
   },
   {
     name: 'Прочие доходы',
-    code:7
+    code: 7
   },
   {
     name: 'Прочие приходы',
     code: 8
   },
 ]);
-
-const activeTabIndex = ref(null);
+const activeTabIndex = ref(0);
 
 const openTab = (index) => {
   activeTabIndex.value = index;
@@ -52,7 +61,9 @@ const activeTab = computed(() => {
   if (activeTabIndex.value !== null) {
     return item.value[activeTabIndex.value];
   }
-  return null;
+  return {
+    code:0
+  };
 });
 </script>
 
@@ -81,16 +92,29 @@ const activeTab = computed(() => {
           {{ items.name }}
         </div>
       </div>
-       <FinanceTabs v-if="activeTab?.code ===0" />
+      <FinanceTabs v-if="activeTab?.code ===0"/>
       <FinancePc v-if="activeTab?.code ===1"/>
+      <FinanceTabsCass v-if="activeTab?.code ===2"/>
+      <FinanceInvestment v-if="activeTab?.code ===3"/>
+      <FinanceCreditReceive v-if="activeTab?.code ===4"/>
+      <FinanceProviderRefound v-if="activeTab?.code ===5"/>
+      <finance-accountable-person-refund v-if="activeTab?.code ===6"/>
+      <finance-other-expenses v-if="activeTab?.code ===7"/>
+      <finance-other-incomes v-if="activeTab?.code ===8"/>
+
+      <div class="text-[20px] font-[600] absolute bottom-[40px]">
+        Автор: {{ userName.name }}
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.active-tab{
+.active-tab {
   background: #ECF1FB;
   color: #3935E7 !important;
   border-right: 2px solid #3935E7;
+  border-bottom-left-radius: 10px;
+  border-top-left-radius: 10px;
 }
 </style>

@@ -18,7 +18,6 @@ import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import Dialog from "primevue/dialog";
 
 const {
   findStorage,
