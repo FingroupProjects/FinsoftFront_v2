@@ -10,8 +10,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
-import moment from "moment/moment.js";
-import formatInputAmount from "@/constants/formatInput.js";
+
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -20,9 +19,10 @@ const toast = useToast();
 const {
   findCurrency,
   currency,
-  findCashRegister,
-  cashRegisterList,
-  loadingCash,
+  loading,
+  findStorage,
+  storage,
+  loadingStorage,
   findOrganization,
   organization,
   findCounterparty,
@@ -33,42 +33,72 @@ const {
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
+const productsInfo = ref();
 const isCurrencyFetched = ref(false);
+const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false);
+const item = ref([
+  {
+    name: 'Оплата от клиента',
+  },
+  {
+    name: 'Снятие Р/С',
+  },
+  {
+    name: 'Получение с другой касса',
+  },
+  {
+    name: 'Вложение',
+  },
+  {
+    name: 'Получение кредита',
+  },
 
-const financeDate = reactive({
+  {
+    name: 'Возврат от поставщика',
+  },
+  {
+    name: 'Возврат от подотчетника',
+  },
+  {
+    name: 'Прочие доходы',
+  },
+  {
+    name: 'Прочие приходы',
+  },
+
+])
+const createValues = reactive({
   datetime24h: new Date,
-  cashRegisterId: "",
+  selectCurrency: "",
+  selectedStorage: "",
   selectedAgreement: "",
   comments: "",
   selectedOrganization: "",
   selectedCounterparty: "",
-  sum:'',
-  base:'',
-  getUser:''
 });
 const rules = reactive({
   datetime24h: {required},
-  cashRegisterId: {required},
+  selectCurrency: {required},
+  selectedStorage: {required},
   selectedOrganization: {required},
   selectedCounterparty: {required},
   selectedAgreement: {required},
-  sum: {required},
-  base: {required},
-  getUser: {required},
 });
-
+const userName = {
+  name: localStorage.getItem("user_name"),
+};
 const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-const v$ = useVuelidate(rules, financeDate);
+const v$ = useVuelidate(rules, createValues);
 
 async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.selectedCounterparty.code}`
+        `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
     );
     return (agreementList.value = res.result.data.map((el) => {
       return {
@@ -83,46 +113,12 @@ async function getAgreement() {
   }
 }
 
-async function saveFn() {
-  const result = await v$.value.$validate();
-  if (result) {
-    try {
-      const res = await useAxios(`/cash-store/client-payment`, {
-        method: "POST",
-        data: {
-          date: moment(financeDate.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-          organization_id: financeDate.selectedOrganization.code,
-          counterparty_id: financeDate.selectedCounterparty.code,
-          counterparty_agreement_id: financeDate.selectedAgreement.code,
-          cash_register_id: financeDate.cashRegisterId.code,
-          operation_type_id:'1',
-          sum: financeDate.sum,
-          basis:financeDate.base,
-          type: 'PKO',
-          sender: financeDate.getUser,
-        },
-      });
-      toast.add({
-        severity: "success",
-        summary: "Success Message",
-        detail: "Message Content",
-        life: 3000,
-      });
-      emit("closeDialog", res.result.id);
-    } catch (e) {
-      console.log(e);
-      toast.add({
-        severity: "error",
-        summary: "Error Message",
-        detail: e.response.data.message,
-        life: 3000,
-      });
-    }
-  }
-}
+findStorage()
 
-watch(financeDate, (newVal) => {
+
+watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
+    // This will only execute after the initial value is set
     isModal.value = true;
   }
   initialValue.value = newVal;
@@ -130,26 +126,27 @@ watch(financeDate, (newVal) => {
 
 watchEffect(() => {
   if (
-      financeDate.selectedCounterparty &&
-      financeDate.selectedCounterparty.agreement &&
-      financeDate.selectedCounterparty.agreement.length > 0
+      createValues.selectedCounterparty &&
+      createValues.selectedCounterparty.agreement &&
+      createValues.selectedCounterparty.agreement.length > 0
   ) {
-    financeDate.selectedAgreement = {
-      name: financeDate.selectedCounterparty.agreement[0].name,
-      code: financeDate.selectedCounterparty.agreement[0].id,
+    createValues.selectedAgreement = {
+      name: createValues.selectedCounterparty.agreement[0].name,
+      code: createValues.selectedCounterparty.agreement[0].id,
     };
   } else {
-    financeDate.selectedAgreement = null;
+    createValues.selectedAgreement = null;
   }
-  if (hasOrganization === true) financeDate.selectedOrganization = {
+  if (hasOrganization === true) createValues.selectedOrganization = {
     name: organizationHas.name,
     code: organizationHas.id
   }
+  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 });
-watch(financeDate, (newValue) => {
+watch(createValues, (newValue) => {
   if (newValue.selectedAgreement && !isCurrencyFetched.value) {
     findCurrency(newValue.selectedAgreement).then(() => {
-      financeDate.selectCurrency = currency.value[0];
+      createValues.selectCurrency = currency.value[0];
     });
     isCurrencyFetched.value = true;
   }
@@ -161,7 +158,7 @@ watch(financeDate, (newValue) => {
     <FloatLabel class="col-span-6">
       <DatePicker
           showIcon
-          v-model="financeDate.datetime24h"
+          v-model="createValues.datetime24h"
           :class="{ 'p-invalid': v$.datetime24h.$error }"
           showTime
           hourFormat="24"
@@ -174,9 +171,22 @@ watch(financeDate, (newValue) => {
       <label for="dd-city">Дата</label>
     </FloatLabel>
 
+    <FloatLabel class="col-span-6">
+      <Dropdown
+          v-model="createValues.selectedStorage"
+          :class="{ 'p-invalid': v$.selectedStorage.$error }"
+          @click="findStorage"
+          :loading="loadingStorage"
+          :options="storage"
+          optionLabel="name"
+          class="w-full"
+      />
+      <label for="dd-city">Автор</label>
+    </FloatLabel>
+
     <FloatLabel class="col-span-6" v-if="!hasOrganization">
       <Dropdown
-          v-model="financeDate.selectedOrganization"
+          v-model="createValues.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
           @click="findOrganization"
@@ -186,63 +196,60 @@ watch(financeDate, (newValue) => {
       />
       <label for="dd-city">Организация</label>
     </FloatLabel>
-    <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
-
     <FloatLabel class="col-span-6">
       <Dropdown
-          v-model="financeDate.selectedCounterparty"
+          v-model="createValues.selectedCounterparty"
           :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
           @click="findCounterparty"
-          :loading="loadingCounterparty"
           :options="counterparty"
+          :loading="loadingCounterparty"
           optionLabel="name"
           class="w-full"
-      >
-        <template #value>
-          {{ financeDate.selectedCounterparty?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Контрагент</label>
+      />
+      <label for="dd-city">Поставщик</label>
     </FloatLabel>
 
     <FloatLabel class="col-span-12">
       <Dropdown
-          v-model="financeDate.selectedAgreement"
-          :class="{ 'p-invalid': v$.selectedAgreement.$error }"
-          @click="getAgreement"
-          :loading="loadingAgreement"
-          :options="agreementList"
+          v-model="createValues.selectCurrency"
+          :class="{ 'p-invalid': v$.selectCurrency.$error }"
+          @click="findCurrency(createValues.selectedAgreement)"
+          :loading="loading"
+          :options="currency"
           optionLabel="name"
           class="w-full"
       >
-        <template #value>{{ financeDate.selectedAgreement?.name }}</template>
+        <template #value>
+          {{ createValues.selectCurrency?.name }}
+        </template>
       </Dropdown>
-      <label for="dd-city">Договор</label>
+      <label for="dd-city">Банковский счет</label>
     </FloatLabel>
+
     <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
-      <fin-input v-model="financeDate.base" class="col-span-6" placeholder="Основание"/>
+      <fin-input class="col-span-6" placeholder="Основание"/>
       <FloatLabel class="col-span-6">
         <Dropdown
-            v-model="financeDate.cashRegisterId"
-            :class="{ 'p-invalid': v$.cashRegisterId.$error }"
-            @click="findCashRegister"
-            :loading="loadingCash"
-            :options="cashRegisterList"
+            v-model="createValues.selectedStorage"
+            :class="{ 'p-invalid': v$.selectedStorage.$error }"
+            @click="findStorage"
+            :loading="loadingStorage"
+            :options="storage"
             optionLabel="name"
             class="w-full"
         />
         <label for="dd-city">Касса</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="financeDate.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
+        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
       <div class="col-span-12 p-[26px] bg-[#ECF1FB] mt-[26px] rounded-[10px]">
         <div class="w-full input-finance-sum">
-          <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text" size="large" class="w-full" placeholder="Сумма"/>
+          <InputText type="text" size="large" class="w-full" placeholder="Сумма"/>
         </div>
 
-        <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
+        <fin-button icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
                     label="Провести операцию"/>
       </div>
     </div>

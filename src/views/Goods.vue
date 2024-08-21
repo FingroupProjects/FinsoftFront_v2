@@ -35,9 +35,10 @@ const search = ref('');
 const selectedStatus = ref();
 const first = ref(1);
 const visibleFilter = ref(false);
-const openViewPurchase = ref(false);
 const metaKey = ref(true);
 const createOpenModal = ref(false);
+const sortDesc = ref('asc');
+const orderBy = ref('id');
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
@@ -93,12 +94,13 @@ const handleFiltersUpdate = (filters) => {
 async function getProducts(filters = {}) {
   const params = {
     itemsPerPage: selectPage.value.count,
-    orderBy: 'id',
     perPage: first.value,
     search: search.value,
     storage_id: selectedStorage.value?.code,
     deleted: selectedStatus.value?.code,
     page: first.value + 1,
+    orderBy: orderBy.value,
+    sort: sortDesc.value,
     ...filters,
   };
 
@@ -114,6 +116,13 @@ function getProductMethods() {
   getProducts()
 }
 
+const sortData = (field, index) => {
+  orderBy.value = field
+  openUp.value[index] = !openUp.value[index]
+  if (sortDesc.value === 'asc') sortDesc.value = 'desc'
+  else sortDesc.value = 'asc'
+  getProducts()
+};
 const getSeverity = (status) => {
   if (status == null) {
     return {
@@ -132,11 +141,6 @@ function closeFn(id) {
   selectedProductId.value = id
   createOpenModal.value = true
 }
-
-const sortData = (field, index) => {
-  products.value.sort((a, b) => (a[field] > b[field] ? 1 : -1));
-  openUp.value[index] = !openUp.value[index];
-};
 
 function closeView() {
   visibleRight.value = false
@@ -215,36 +219,39 @@ getProducts();
         tableStyle="min-width:100%"
         :metaKeySelection="metaKey"
         @row-click="onRowClick"
-        @sort="sortData('code')"
     >
       <Column selectionMode="multiple"></Column>
-      <Column field="code" :sortable="true" header="№">
-        <template #header>
-        </template>
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
+      <Column field="code" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('id',index)">
+            № <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
         </template>
       </Column>
-      <Column field="category" :sortable="true" header="Наименование">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
+      <Column field="category" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('name',index)">
+            Наименование <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           <div class="flex items-center gap-[10px]">
@@ -256,49 +263,57 @@ getProducts();
           </div>
         </template>
       </Column>
-      <Column field="image" v-if="!hasOrganization" :sortable="true" header="Артикул">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
+      <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('vendor_code',index)">
+            Артикул <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data?.vendor_code }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="Категория">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
+      <Column field="price" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('goodGroup.name',index)">
+            Категория <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
           {{ slotProps.data?.goodGroup?.name }}
         </template>
       </Column>
-      <Column field="status" :sortable="true" header="Статус">
-        <template #sorticon="{index}">
-          <i
-              @click="sortData('code',index)"
+      <Column field="status" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('active',index)">
+            Статус <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
             'text-[#808BA0] text-[5px]': true
           }"
           ></i>
+          </div>
+        </template>
+        <template #sorticon="">
         </template>
         <template #body="slotProps">
-
           <Tag
               :value="getSeverity(slotProps.data?.deleted_at).name"
               :severity="getSeverity(slotProps.data?.deleted_at).status"

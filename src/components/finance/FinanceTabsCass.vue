@@ -35,7 +35,7 @@ const isModal = ref(false);
 const financeDate = reactive({
   datetime24h: new Date,
   cashRegisterId: "",
-  organizationBillId: "",
+  senderCashRegisterId: "",
   comments: "",
   selectedOrganization: "",
 
@@ -47,7 +47,7 @@ const rules = reactive({
   datetime24h: {required},
   cashRegisterId: {required},
   selectedOrganization: {required},
-  organizationBillId: {required},
+  senderCashRegisterId: {required},
   sum: {required},
   base: {required},
   getUser: {required},
@@ -62,14 +62,14 @@ async function saveFn() {
   const result = await v$.value.$validate();
   if (result) {
     try {
-      const res = await useAxios(`/cash-store/withdrawal`, {
+      const res = await useAxios(`/cash-store/another-cash-register`, {
         method: "POST",
         data: {
           date: moment(financeDate.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
           organization_id: financeDate.selectedOrganization.code,
           cash_register_id: financeDate.cashRegisterId.code,
           operation_type_id: '1',
-          organization_bill_id: financeDate.organizationBillId.code,
+          sender_cash_register_id: financeDate.senderCashRegisterId.code,
           sum: financeDate.sum,
           basis: financeDate.base,
           type: 'PKO',
@@ -144,8 +144,8 @@ watchEffect(() => {
 
     <FloatLabel class="col-span-6">
       <Dropdown
-          v-model="financeDate.organizationBillId"
-          :class="{ 'p-invalid': v$.organizationBillId.$error }"
+          v-model="financeDate.senderCashRegisterId"
+          :class="{ 'p-invalid': v$.senderCashRegisterId.$error }"
           @click="findOrganizationBill"
           :loading="loadingBill"
           :options="billList"
@@ -153,10 +153,10 @@ watchEffect(() => {
           class="w-full"
       >
         <template #value>
-          {{ financeDate.organizationBillId?.name }}
+          {{ financeDate.senderCashRegisterId?.name }}
         </template>
       </Dropdown>
-      <label for="dd-city">Банковский счет</label>
+      <label for="dd-city">Касса отправителя</label>
     </FloatLabel>
 
     <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
@@ -189,4 +189,3 @@ watchEffect(() => {
     </div>
   </div>
 </template>
-
