@@ -18,6 +18,9 @@ import Toast from "primevue/toast";
 import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
+import Dialog from "primevue/dialog";
+import FinanceCreate from "@/components/finance/FinanceCreate.vue";
+import MethodsFinance from "@/components/finance/MethodsFinance.vue";
 
 const {
   findStorage,
@@ -96,7 +99,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/document/provider/purchase`, {params});
+  const res = await useAxios(`/cash-store/pko`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -218,8 +221,8 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
-                     v-if="!(!selectedProduct || !selectedProduct.length)"/>
+    <MethodsFinance @get-product="getProductMethods" :select-products="selectedProduct"
+                    v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
         scrollable
@@ -435,9 +438,8 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
-                     :openModalClose="openInfoModal"/>
-      <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <FinanceCreate/>
+
     </Sidebar>
   </div>
 
