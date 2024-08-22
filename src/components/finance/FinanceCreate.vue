@@ -9,48 +9,17 @@ import FinanceProviderRefound from "@/components/finance/FinanceProviderRefound.
 import FinanceAccountablePersonRefund from "@/components/finance/FinanceAccountablePersonRefund.vue";
 import FinanceOtherExpenses from "@/components/finance/FinanceOtherExpenses.vue";
 import FinanceOtherIncomes from "@/components/finance/FinanceOtherIncomes.vue";
+import {useFinanceStore} from "@/store/finance.js";
+import {useAxios} from "@/composable/useAxios.js";
+
+const emit = defineEmits(['open-view','close-sidebar']);
+
+const store = useFinanceStore()
 
 const userName = {
   name: localStorage.getItem("user_name"),
 };
-const item = ref([
-  {
-    name: 'Оплата от клиента',
-    code: 0
-  },
-  {
-    name: 'Снятие Р/С',
-    code: 1
-  },
-  {
-    name: 'Получение с другой касса',
-    code: 2
-  },
-  {
-    name: 'Вложение',
-    code: 3
-  },
-  {
-    name: 'Получение кредита',
-    code: 4
-  },
-  {
-    name: 'Возврат от поставщика',
-    code: 5
-  },
-  {
-    name: 'Возврат от подотчетника',
-    code: 6
-  },
-  {
-    name: 'Прочие доходы',
-    code: 7
-  },
-  {
-    name: 'Прочие приходы',
-    code: 8
-  },
-]);
+const item = ref([]);
 const activeTabIndex = ref(0);
 
 const openTab = (index) => {
@@ -62,9 +31,43 @@ const activeTab = computed(() => {
     return item.value[activeTabIndex.value];
   }
   return {
-    code:0
+    code: 0
   };
 });
+
+async function fetchOperating() {
+  try {
+    const res = await useAxios(
+        `/operationTypes?type=PKO`
+    );
+    return (item.value = res.result.map((el) => {
+      return {
+        name: el.title_ru,
+        code: el.id,
+        type: el.type
+      };
+    }));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+fetchOperating()
+
+function openModal() {
+  if (store.isModal) store.openInfoModal = true
+  else emit('close-sidebar')
+}
+
+function closeFn() {
+  emit('close-sidebar')
+  store.isModal = false
+  store.openInfoModal = false
+}
+function postMethod(id){
+  emit('open-view',id)
+}
+
 </script>
 
 <template>
@@ -77,6 +80,7 @@ const activeTab = computed(() => {
             label="Отменить"
             severity="warning"
             class="p-button-lg"
+            @click="openModal"
         />
       </div>
     </div>
@@ -92,19 +96,30 @@ const activeTab = computed(() => {
           {{ items.name }}
         </div>
       </div>
-      <FinanceTabs v-if="activeTab?.code ===0"/>
-      <FinancePc v-if="activeTab?.code ===1"/>
-      <FinanceTabsCass v-if="activeTab?.code ===2"/>
-      <FinanceInvestment v-if="activeTab?.code ===3"/>
-      <FinanceCreditReceive v-if="activeTab?.code ===4"/>
-      <FinanceProviderRefound v-if="activeTab?.code ===5"/>
-      <finance-accountable-person-refund v-if="activeTab?.code ===6"/>
-      <finance-other-expenses v-if="activeTab?.code ===7"/>
-      <finance-other-incomes v-if="activeTab?.code ===8"/>
+      <FinanceTabs v-if="activeTab?.code ===1" @close-sidebar="closeFn" @close-dialog="postMethod"
+                   :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <FinancePc v-if="activeTab?.code ===2" @close-sidebar="closeFn" @close-dialog="postMethod"
+                 :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <FinanceTabsCass v-if="activeTab?.code ===3" @close-sidebar="closeFn" @close-dialog="postMethod"
+                       :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <FinanceInvestment v-if="activeTab?.code ===4" @close-sidebar="closeFn" @close-dialog="postMethod"
+                         :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <FinanceCreditReceive v-if="activeTab?.code ===5" @close-sidebar="closeFn" @close-dialog="postMethod"
+                            :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <FinanceProviderRefound v-if="activeTab?.code ===6" @close-sidebar="closeFn" @close-dialog="postMethod"
+                              :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <finance-accountable-person-refund v-if="activeTab?.code ===7" @close-sidebar="closeFn"
+                                         @close-dialog="postMethod" :operation-type="activeTab?.code"
+                                         :type="activeTab.type"/>
+      <finance-other-expenses v-if="activeTab?.code ===8" @close-sidebar="closeFn" @close-dialog="postMethod"
+                              :operation-type="activeTab?.code" :type="activeTab.type"/>
+      <finance-other-incomes v-if="activeTab?.code ===9" @close-sidebar="closeFn" @close-dialog="postMethod"
+                             :operation-type="activeTab?.code" :type="activeTab.type"/>
 
       <div class="text-[20px] font-[600] absolute bottom-[40px]">
         Автор: {{ userName.name }}
       </div>
+
     </div>
   </div>
 </template>

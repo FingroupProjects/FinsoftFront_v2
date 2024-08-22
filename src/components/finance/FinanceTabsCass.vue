@@ -12,9 +12,16 @@ import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import moment from "moment/moment.js";
 import formatInputAmount from "@/constants/formatInput.js";
+import Dialog from "primevue/dialog";
+import {useFinanceStore} from "@/store/finance.js";
+
+const store = useFinanceStore()
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-
+const props = defineProps({
+  operationType:'',
+  type:''
+})
 const toast = useToast();
 
 const {
@@ -24,13 +31,9 @@ const {
   findOrganization,
   organization,
   loadingOrganization,
-  findOrganizationBill,
-  billList,
-  loadingBill
 } = useStaticApi();
 
 const initialValue = ref(null);
-const isModal = ref(false);
 
 const financeDate = reactive({
   datetime24h: new Date,
@@ -38,7 +41,6 @@ const financeDate = reactive({
   senderCashRegisterId: "",
   comments: "",
   selectedOrganization: "",
-
   sum: '',
   base: '',
   getUser: ''
@@ -68,12 +70,13 @@ async function saveFn() {
           date: moment(financeDate.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
           organization_id: financeDate.selectedOrganization.code,
           cash_register_id: financeDate.cashRegisterId.code,
-          operation_type_id: '1',
+          operation_type_id: props.operationType,
           sender_cash_register_id: financeDate.senderCashRegisterId.code,
           sum: financeDate.sum,
           basis: financeDate.base,
-          type: 'PKO',
+          type: props.type,
           sender: financeDate.getUser,
+          comment:financeDate.comments
         },
       });
       toast.add({
@@ -97,7 +100,7 @@ async function saveFn() {
 
 watch(financeDate, (newVal) => {
   if (initialValue.value !== null) {
-    isModal.value = true;
+    store.isModal = true;
   }
   initialValue.value = newVal;
 }, {deep: true});
@@ -146,9 +149,9 @@ watchEffect(() => {
       <Dropdown
           v-model="financeDate.senderCashRegisterId"
           :class="{ 'p-invalid': v$.senderCashRegisterId.$error }"
-          @click="findOrganizationBill"
-          :loading="loadingBill"
-          :options="billList"
+          @click="findCashRegister"
+          :loading="loadingCash"
+          :options="cashRegisterList"
           optionLabel="name"
           class="w-full"
       >
@@ -188,4 +191,24 @@ watchEffect(() => {
       </div>
     </div>
   </div>
+
+  <Dialog
+      v-model:visible="store.openInfoModal"
+      :style="{ width: '424px' }"
+      :modal="true"
+  >
+    <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
+      Хотите сохранить измения?
+    </div>
+    <template #footer>
+      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="saveFn"/>
+      <fin-button
+          label="Отменить"
+          icon="pi pi-times"
+          class="w-full"
+          severity="warning"
+          @click="emit('close-sidebar')"
+      />
+    </template>
+  </Dialog>
 </template>
