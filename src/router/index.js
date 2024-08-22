@@ -86,6 +86,8 @@ const routes = [
                 path: '/movement',
                 name: 'movement',
                 component: () => import('@/views/Movement.vue'),
+            },
+            {
                 path: '/finance',
                 name: 'finance',
                 component: () => import('@/views/Finance.vue'),
