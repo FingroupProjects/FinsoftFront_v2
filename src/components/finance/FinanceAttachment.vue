@@ -9,12 +9,13 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
-import {useToast} from "primevue/usetoast";
+import Dialog from "primevue/dialog";
+import {useFinanceStore} from "@/store/finance.js";
 
+const store = useFinanceStore()
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
-const toast = useToast();
 
 const {
   findCurrency,
@@ -33,42 +34,9 @@ const {
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
-const productsInfo = ref();
 const isCurrencyFetched = ref(false);
-const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false);
-const item = ref([
-  {
-    name: 'Оплата от клиента',
-  },
-  {
-    name: 'Снятие Р/С',
-  },
-  {
-    name: 'Получение с другой касса',
-  },
-  {
-    name: 'Вложение',
-  },
-  {
-    name: 'Получение кредита',
-  },
-
-  {
-    name: 'Возврат от поставщика',
-  },
-  {
-    name: 'Возврат от подотчетника',
-  },
-  {
-    name: 'Прочие доходы',
-  },
-  {
-    name: 'Прочие приходы',
-  },
-
-])
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -119,7 +87,7 @@ findStorage()
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
     // This will only execute after the initial value is set
-    isModal.value = true;
+    store.isModal = true;
   }
   initialValue.value = newVal;
 }, {deep: true});
@@ -254,6 +222,25 @@ watch(createValues, (newValue) => {
       </div>
     </div>
   </div>
+  <Dialog
+      v-model:visible="store.openInfoModal"
+      :style="{ width: '424px' }"
+      :modal="true"
+  >
+    <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
+      Хотите сохранить измения?
+    </div>
+    <template #footer>
+      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="saveFn"/>
+      <fin-button
+          label="Отменить"
+          icon="pi pi-times"
+          class="w-full"
+          severity="warning"
+          @click="emit('close-sidebar')"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <style lang="scss">

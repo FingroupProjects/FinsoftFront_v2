@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, onMounted} from "vue";
+import {ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -8,19 +8,16 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import Dialog from "primevue/dialog";
 import FinanceCreate from "@/components/finance/FinanceCreate.vue";
 import MethodsFinance from "@/components/finance/MethodsFinance.vue";
+import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
 
 const {
   findStorage,
@@ -79,6 +76,7 @@ const onRowClick = (event) => {
   visibleRight.value = true;
   createOpenModal.value = true
   selectedProductId.value = product.id
+  console.log(selectedProductId.value)
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -287,9 +285,7 @@ getProducts();
           ></i>
           </div>
         </template>
-        <template #sorticon="{index}">
-
-        </template>
+        <template #sorticon="{index}"></template>
         <template #body="slotProps">
           {{ slotProps.data.counterparty?.name }}
         </template>
@@ -333,7 +329,7 @@ getProducts();
       <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('storage.name',index)">
-            Склад <i
+            Тип операции <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -345,7 +341,7 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.storage?.name }}
+          {{ slotProps.data?.operationType?.name }}
         </template>
       </Column>
       <Column field="status" :sortable="true" header="">
@@ -390,7 +386,7 @@ getProducts();
       <Column field="currency" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('currency.name',index)">
-            Валюта <i
+            организация Билл <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -402,7 +398,7 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.currency?.name }}
+          {{ slotProps.data?.organizationBill?.name }}
         </template>
       </Column>
     </DataTable>
@@ -438,7 +434,9 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <FinanceCreate/>
+
+      <FinanceViewTabs v-if="createOpenModal" :operation-type-id="selectedProductId" @close-sidebar="visibleRight = false"/>
+      <FinanceCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
 
     </Sidebar>
   </div>

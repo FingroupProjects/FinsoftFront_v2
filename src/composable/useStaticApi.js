@@ -18,7 +18,8 @@ export const useStaticApi = () => {
   const billList = ref([]);
   const employeeList = ref([]);
   const loadingEmployee = ref(false);
-
+  const balanceList = ref([]);
+  const loadingBalance = ref(false);
   const findStorage = async () => {
     try {
       loadingStorage.value = true;
@@ -162,6 +163,23 @@ export const useStaticApi = () => {
     }
   };
 
+  const findBalance = async () => {
+    try {
+      loadingBalance.value = true;
+      const res = await useAxios(`/cash-store/balance-article`);
+      return (balanceList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingBalance.value = false;
+    }
+  };
+
   return {
     storage,
     findCurrency,
@@ -185,6 +203,10 @@ export const useStaticApi = () => {
     loadingBill,
     findEmployee,
     employeeList,
-    loadingEmployee
+    loadingEmployee,
+    findBalance,
+    balanceList,
+    loadingBalance
+
   };
 };
