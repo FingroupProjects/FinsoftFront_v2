@@ -76,7 +76,25 @@ const addFn = async () => {
   clearInputValues();
 };
 
-const confirmDeleteProduct = (index) => {
+const confirmDeleteProduct = async (index) => {
+    try {
+      const response = await useAxios(`/document/delete-document-goods/${index}`, {
+        method: "POST",
+      });
+      toast.add({
+        severity: "success",
+        summary: "Success",
+        detail: "Products deleted successfully.",
+        life: 3000,
+      });
+    } catch (error) {
+      toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: error.message || 'An error occurred during deletion.', // Provide more detailed error message if available
+        life: 3000,
+      });
+    }
   postProducts.value.splice(index, 1);
   goods.value.splice(index, 1);
   getAllSum.value = goods.value.reduce((total, el) => {
@@ -232,9 +250,9 @@ onMounted(async () => {
       </Column>
       <Column field="sum" header="Сумма"></Column>
       <Column field="quantity" header="">
-        <template #body="{ index }">
+        <template #body="slotProps">
           <i
-              @click="confirmDeleteProduct(index)"
+              @click="confirmDeleteProduct(slotProps.data.good_id)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>

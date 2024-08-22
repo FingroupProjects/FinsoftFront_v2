@@ -20,28 +20,27 @@ import MethodsFinance from "@/components/finance/MethodsFinance.vue";
 import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
 
 const {
-  findStorage,
-  storage,
-  loadingStorage,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
+  loadingUser,
+  findUsers,
+  userList,
+  findOperationPko,
+  operationPkoList,
+  loadingOperationPko
 } = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref();
-const selectedStorage = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
-const selectedCounterparty = ref();
+const selectOperationPko = ref();
 const first = ref(1)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
-const openInfoModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
+const selectUser = ref('')
 
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
@@ -90,8 +89,8 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    storage_id: selectedStorage.value?.code,
-    counterparty_id: selectedCounterparty.value?.code,
+    selectUser: selectUser.value?.code,
+    counterparty_id: selectOperationPko.value?.code,
     page: first.value + 1,
     ...filters,
     sort: sortDesc.value
@@ -159,10 +158,10 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch(selectedStorage, () => {
+watch(selectUser, () => {
   getProducts();
 });
-watch(selectedCounterparty, () => {
+watch(selectOperationPko, () => {
   getProducts();
 });
 
@@ -183,21 +182,21 @@ getProducts();
       />
     </IconField>
     <Dropdown
-        v-model="selectedStorage"
+        v-model="selectUser"
         optionLabel="name"
-        placeholder="Склад"
-        @click="findStorage"
-        :loading="loadingStorage"
-        :options="storage"
+        placeholder="Автор"
+        @click="findUsers"
+        :loading="loadingUser"
+        :options="userList"
         class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedCounterparty"
-        :loading="loadingCounterparty"
-        @click="findCounterparty"
-        :options="counterparty"
+        v-model="selectOperationPko"
+        :loading="loadingOperationPko"
+        @click="findOperationPko"
+        :options="operationPkoList"
         optionLabel="name"
-        placeholder="Поставщик"
+        placeholder="Операции"
         class="w-full col-span-2"
     />
     <div class="flex gap-4 col-span-2">
@@ -270,24 +269,6 @@ getProducts();
         </template>
         <template #body="slotProps">
           {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
-        </template>
-      </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('counterparty.name',index)">
-            Поставщик <i
-
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}"></template>
-        <template #body="slotProps">
-          {{ slotProps.data.counterparty?.name }}
         </template>
       </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
@@ -383,24 +364,6 @@ getProducts();
           {{ slotProps.data?.author?.name }}
         </template>
       </Column>
-      <Column field="currency" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('currency.name',index)">
-            организация Билл <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data?.organizationBill?.name }}
-        </template>
-      </Column>
     </DataTable>
     <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
       <span class="paginator-text"> Элементов на странице: </span>
@@ -435,7 +398,8 @@ getProducts();
         :dismissable="false"
     >
 
-      <FinanceViewTabs v-if="createOpenModal" :operation-type-id="selectedProductId" @close-sidebar="visibleRight = false"/>
+      <FinanceViewTabs v-if="createOpenModal" :operation-type-id="selectedProductId"
+                       @close-sidebar="visibleRight = false"/>
       <FinanceCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
 
     </Sidebar>
