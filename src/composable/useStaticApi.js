@@ -20,6 +20,11 @@ export const useStaticApi = () => {
   const loadingEmployee = ref(false);
   const balanceList = ref([]);
   const loadingBalance = ref(false);
+  const userList = ref([]);
+  const loadingUser = ref(false);
+  const operationPkoList = ref([]);
+  const loadingOperationPko = ref(false)
+
   const findStorage = async () => {
     try {
       loadingStorage.value = true;
@@ -180,6 +185,40 @@ export const useStaticApi = () => {
     }
   };
 
+  const findUsers = async () => {
+    try {
+      loadingUser.value = true;
+      const res = await useAxios(`/user`);
+      return (userList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingUser.value = false;
+    }
+  };
+
+  const findOperationPko = async () => {
+    try {
+      loadingOperationPko.value = true;
+      const res = await useAxios(`/operationTypes?type=PKO`);
+      return (operationPkoList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingOperationPko.value = false;
+    }
+  };
+
   return {
     storage,
     findCurrency,
@@ -206,7 +245,13 @@ export const useStaticApi = () => {
     loadingEmployee,
     findBalance,
     balanceList,
-    loadingBalance
+    loadingBalance,
+    findUsers,
+    userList,
+    loadingUser,
+    findOperationPko,
+    operationPkoList,
+    loadingOperationPko
 
   };
 };
