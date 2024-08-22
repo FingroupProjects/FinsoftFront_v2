@@ -26,11 +26,14 @@ const {
   storage,
   loadingStorage,
   findOrganization,
+  findStatus,
   organization,
+  status,
   findCounterparty,
   counterparty,
   loadingCounterparty,
   loadingOrganization,
+  loadingStatus,
 } = useStaticApi();
 
 const agreementList = ref([]);
@@ -48,6 +51,7 @@ const createValues = reactive({
   comments: "",
   selectedOrganization: "",
   selectedCounterparty: "",
+  selectedStatus: ""
 });
 const rules = reactive({
   datetime24h: {required},
@@ -56,6 +60,7 @@ const rules = reactive({
   selectedOrganization: {required},
   selectedCounterparty: {required},
   selectedAgreement: {required},
+  selectedStatus: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -89,7 +94,7 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`/document/provider/return`, {
+      const res = await useAxios(`/document/client/order`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
@@ -99,6 +104,7 @@ async function saveFn() {
           storage_id: createValues.selectedStorage.code,
           currency_id: createValues.selectCurrency.code,
           comment: createValues.comments,
+          order_status_id: createValues.selectedStatus.code,
           goods: productsInfo.value,
         },
       });
@@ -173,7 +179,7 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание возврата товаров</div>
+        <div class="header-title">Создание заявки товаров</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №32151
         </div>
@@ -211,7 +217,18 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Дата</label>
       </FloatLabel>
-
+      <FloatLabel class="col-span-4" v-if="!hasOrganization">
+        <Dropdown
+            v-model="createValues.selectedStatus"
+            :options="status"
+            :class="{ 'p-invalid': v$.selectedStatus.$error }"
+            @click="findStatus"
+            :loading="loadingStatus"
+            optionLabel="name"
+            class="w-full"
+        />
+        <label for="dd-city">Статус</label>
+      </FloatLabel>
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
             v-model="createValues.selectedOrganization"
@@ -234,7 +251,7 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
         />
-        <label for="dd-city">Поставщик</label>
+        <label for="dd-city">Клиент</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown

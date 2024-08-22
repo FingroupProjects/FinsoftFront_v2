@@ -50,15 +50,15 @@ export default [
                 data:[
                     {
                         label: 'Продажа клиентам',
-                        route: '/'
+                        route: '/clientSale'
                     },
                     {
                         label: 'Возврат от клиентов',
-                        route: '/'
+                        route: '/clientReturn'
                     },
                     {
                         label: 'Заказ клиентов',
-                        route: '/'
+                        route: '/clientOrder'
                     }
                 ]
             }
@@ -107,7 +107,7 @@ export default [
                 data:[
                     {
                         label:'Банковские счета',
-                        route: '/'
+                        route: '/organizationBill'
                     },
                     {
                         label:'Кассы',
@@ -134,11 +134,15 @@ export default [
                 data:[
                     {
                         label: 'Оприходование',
-                        route: '/'
+                        route: '/posting'
                     },
                     {
                         label: 'Списание',
-                        route: '/'
+                        route: '/writeOff'
+                    },
+                    {
+                        label:'Перемещение товаров',
+                        route:'/movement'
                     },
                     {
                         label: 'Инвентаризация',
@@ -155,10 +159,6 @@ export default [
                     },
                     {
                         label:'Движения товаров',
-                        route:'/'
-                    },
-                    {
-                        label:'Перемещение товаров',
                         route:'/'
                     }
                 ]

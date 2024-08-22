@@ -1,7 +1,7 @@
 <script setup>
-import {onMounted, ref, watch, watchEffect} from 'vue';
+import {onMounted, ref, watch, watchEffect, computed} from 'vue';
 import Select from "primevue/dropdown";
-import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
+import PurchasingTable from "@/components/PurchasingTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
@@ -13,22 +13,34 @@ import moment from "moment";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
+import Dialog from "primevue/dialog";
+import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
 import ProviderReturnTable from "@/components/ProviderReturnTable.vue";
 
+const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
-  productId:{
+  productId: {
     required: true,
+  },
+  openModalClose: {
+    type: Boolean,
+    default: false
   }
 });
 
-const status = ref('Не проведен')
-const productsInfo = ref()
+const status = ref('Не проведен');
+const productsInfo = ref();
 const toast = useToast();
-const visibleMovement = ref(false)
-const visibleHistory = ref(false)
-const approved = ref(false)
+const visibleMovement = ref(false);
+const visibleHistory = ref(false);
+const approved = ref(false);
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
+const comments = ref('');
+const openInfoModal = ref(false);
+const agreementList = ref([]);
+const changeValue = ref(false);
+const initialValue = ref(null);
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -37,7 +49,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
-  comment: null
+  comment: ''
 });
 
 const v$ = useVuelidate();
@@ -52,7 +64,7 @@ const {
   findCounterparty,
   counterparty
 } = useStaticApi()
-const agreementList = ref([]);
+
 const userName = {
   name: localStorage.getItem("user_name"),
 };
@@ -74,24 +86,11 @@ async function getAgreement() {
   }
 }
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const options = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  return date.toLocaleString('en-GB', options).replace(',', '');
-};
-
 const getView = async () => {
   try {
     const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
+
     viewDocument.value = {
       organizationName: item.organization,
       author: item.author,
@@ -99,11 +98,12 @@ const getView = async () => {
       counterpartyAgreementName: item.counterpartyAgreement,
       storageName: item.storage,
       date: new Date(item.date),
-      postDate:item.date,
+      postDate: item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
       comment: item.comment
     };
+
 
   } catch (e) {
     console.error('Error fetching data:', e);
@@ -112,7 +112,8 @@ const getView = async () => {
 
 const updateView = async () => {
   const result = await v$.value.$validate();
-
+  openInfoModal.value = false
+  changeValue.value = false
   if (result) {
     try {
       const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
@@ -145,17 +146,16 @@ const updateView = async () => {
 
       console.log('Data to be sent:', data);
 
-      // Send the update request
       const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
 
-      toast.add({ severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500 });
+      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
       console.log('Response:', res);
     } catch (e) {
       console.error(e);
-      toast.add({ severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500 });
+      toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
     }
   }
 };
@@ -175,36 +175,35 @@ const approve = async () => {
   try {
     const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
-      data:{
-        ids:[`${props.productId}`]
+      data: {
+        ids: [`${props.productId}`]
       }
     });
-    toast.add({ severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500 });
+    toast.add({severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500});
     approved.value = true
     status.value = 'Проведен'
-  }catch (e) {
+  } catch (e) {
     console.error(e)
-    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500 });
+    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500});
   }
 }
 
-const unApprove = async () =>{
-  try{
+const unApprove = async () => {
+  try {
     const res = await useAxios(`/document/provider/return/unApprove`, {
       method: 'POST',
-      data:{
-        ids:[`${props.productId}`]
+      data: {
+        ids: [`${props.productId}`]
       }
     });
     approved.value = false
     status.value = 'Не проведен'
-    toast.add({ severity: 'success', summary: 'Проведение отменено!', detail: 'Документ не проведен!', life: 1500 });
-  }catch (e){
+    toast.add({severity: 'success', summary: 'Проведение отменено!', detail: 'Документ не проведен!', life: 1500});
+  } catch (e) {
     console.error(e)
-    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось отменить одобрение документа', life: 1500 });
+    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось отменить одобрение документа', life: 1500});
   }
 }
-
 const openDocumentPrint = (productId) => {
   const url = `#/documents/${productId}`;
   window.open(url, '_blank');
@@ -216,15 +215,24 @@ function getProducts(products) {
 
 onMounted(async () => {
   await getView();
-
 });
 
 findStorage();
+
+function infoModalClose(value) {
+  if (changeValue.value) openInfoModal.value = true
+  else emit('close-sidebar')
+}
+
+function changeModal() {
+  changeValue.value = true
+}
+
 watchEffect(() => {
-    if (viewDocument.value.counterpartyName &&
-        viewDocument.value.counterpartyName.agreement &&
-        viewDocument.value.counterpartyName.agreement.length > 0) {
-     viewDocument.value.counterpartyAgreementName = {
+  if (viewDocument.value.counterpartyName &&
+      viewDocument.value.counterpartyName.agreement &&
+      viewDocument.value.counterpartyName.agreement.length > 0) {
+    viewDocument.value.counterpartyAgreementName = {
       name: viewDocument.value.counterpartyName.agreement[0].name,
       code: viewDocument.value.counterpartyName.agreement[0].id,
     };
@@ -232,13 +240,14 @@ watchEffect(() => {
     viewDocument.counterpartyAgreementName = null;
   }
   if (hasOrganization === true) viewDocument.organizationName = {
-    name:organizationHas.name,
-    code:organizationHas.id
+    name: organizationHas.name,
+    code: organizationHas.id
   }
   if (storage.value.length === 1) viewDocument.storageName = storage.value[0]
 });
-watch(viewDocument.value, (newValue) => {
 
+watch(viewDocument.value, (newValue) => {
+  console.log(newValue)
   if (newValue.counterpartyAgreementName && !isCurrencyFetched.value) {
 
     findCurrency(newValue.counterpartyAgreementName).then(() => {
@@ -246,17 +255,34 @@ watch(viewDocument.value, (newValue) => {
     });
     isCurrencyFetched.value = true;
   }
-},{deep:true});
+}, {deep: true});
+
+watch(viewDocument, (newVal) => {
+  if (initialValue.value !== null) {
+    // This will only execute after the initial value is set
+    changeValue.value = true;
+  }
+  initialValue.value = newVal;
+}, {deep: true});
+
+watch(productsInfo, (newVal) => {
+  if (initialValue.value !== null) {
+    // This will only execute after the initial value is set
+    changeValue.value = true;
+  }
+  initialValue.value = newVal;
+}, {deep: true});
 </script>
 <template>
+  <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
+      class="pi pi-times text-[#808BA0]"></i></button>
   <div class="edit-purchase">
     <Toast/>
     <div class="header">
-
       <div class="flex gap-[16px] pt-2">
         <div>
-          <div class="header-title">Закупка</div>
-          <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{viewDocument.doc_number}}</div>
+          <div class="header-title">Заявка товаров</div>
+          <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{ viewDocument.doc_number }}</div>
         </div>
 
         <FloatLabel class="col-span-4">
@@ -266,7 +292,7 @@ watch(viewDocument.value, (newValue) => {
               class="w-full p-focus active-approve"
               disabled
           >
-            <template #value >
+            <template #value>
               <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
             </template>
 
@@ -275,27 +301,29 @@ watch(viewDocument.value, (newValue) => {
         </FloatLabel>
 
         <fin-button v-if="approved === false" @click="approve()"
-          icon="pi pi-arrow-right bold" label="Провести"
-          severity="secondary" class="p-button-lg btn-approve"
-          :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
+                    icon="pi pi-arrow-right bold" label="Провести"
+                    severity="secondary" class="p-button-lg btn-approve"
+                    :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
         />
 
         <fin-button v-if="approved === true"
-          @click="unApprove()" icon="pi pi-arrow-right"
-          label="Отменить проведение" severity="secondary"
-          class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
+                    @click="unApprove()" icon="pi pi-arrow-right"
+                    label="Отменить проведение" severity="secondary"
+                    class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
         />
 
         <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" severity="success" class="p-button-lg"/>
       </div>
       <div class="flex gap-[16px] pt-2">
-        <fin-button @click="visibleMovement = true"  icon="pi pi-arrow-right-arrow-left" severity="warning" class="p-button-lg btn-movement w-[158px]">
+        <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
+                    class="p-button-lg btn-movement w-[158px]">
           <img src="../assets/img/img.png" alt="" class="w-[20px]"/>
           Движение
         </fin-button>
       </div>
     </div>
-    <div v-if="isOpen" class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
+    <div v-if="isOpen"
+         class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
 
       <FloatLabel class="col-span-4">
         <DatePicker
@@ -324,7 +352,7 @@ watch(viewDocument.value, (newValue) => {
         >
           <template #value>
             {{ viewDocument.organizationName?.name }}
-            </template>
+          </template>
         </Select>
         <label for="dd-city">Организация</label>
       </FloatLabel>
@@ -332,49 +360,53 @@ watch(viewDocument.value, (newValue) => {
       <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.counterpartyName" class="w-full"
                 :options="counterparty" @click="findCounterparty" option-label="name">
-        <template #value>
-          {{ viewDocument.counterpartyName?.name }}
-        </template>
-      </Select>
+          <template #value>
+            {{ viewDocument.counterpartyName?.name }}
+          </template>
+        </Select>
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
                 :options="agreementList" @click="getAgreement" option-label="name">
-        <template #value>
-          {{ viewDocument.counterpartyAgreementName?.name }}
-        </template>
-      </Select>
+          <template #value>
+            {{ viewDocument.counterpartyAgreementName?.name }}
+          </template>
+        </Select>
         <label for="dd-city">Договор</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
                 @click="findStorage">
-        <template #value>
-          {{ viewDocument.storageName?.name }}
-        </template>
-      </Select>
+          <template #value>
+            {{ viewDocument.storageName?.name }}
+          </template>
+        </Select>
         <label for="dd-city">Склад</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
                 @click="findCurrency">
-        <template #value>
-          {{ viewDocument.currencyName?.name }}
-        </template>
-      </Select>
+          <template #value>
+            {{ viewDocument.currencyName?.name }}
+          </template>
+        </Select>
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea class="w-full" style="min-height: 20px" v-model="viewDocument.comment" rows="2" cols="20" />
+        <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
-      <div  class="col-span-12">
-        <button @click="isOpen = false" class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
+      <div class="col-span-12">
+        <button @click="isOpen = false"
+                class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i
+            class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
       </div>
     </div>
     <div v-if="isOpen === false" class="border-y py-5 mt-[30px] col-span-12">
-      <button @click="isOpen = true" class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть <i class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
+      <button @click="isOpen = true"
+              class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть <i
+          class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
     </div>
     <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
       <div class="header-title">Товары</div>
@@ -388,20 +420,20 @@ watch(viewDocument.value, (newValue) => {
       </fin-button>
     </div>
   </div>
-    <provider-return-table :productId="productId" @post-goods="getProducts"/>
+  <provider-return-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>
 
-    <Sidebar
-        v-model:visible="visibleMovement"
-        :show-close-icon="false"
-        position="right"
-        class="drower-movement"
-    >
-      <shopping-movement :productId="productId"  :number-agreement="viewDocument.doc_number"/>
-    </Sidebar>
+  <Sidebar
+      v-model:visible="visibleMovement"
+      :show-close-icon="false"
+      position="right"
+      class="drower-movement"
+  >
+    <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
+  </Sidebar>
   <Sidebar
       v-model:visible="visibleHistory"
       :show-close-icon="false"
@@ -410,32 +442,68 @@ watch(viewDocument.value, (newValue) => {
   >
     <history-purchase :productId="productId"/>
   </Sidebar>
+  <Dialog
+      v-model:visible="openInfoModal"
+      :style="{ width: '424px' }"
+      :modal="true"
+  >
+    <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
+      Хотите сохранить измения?
+    </div>
+    <template #footer>
+      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="updateView"/>
+      <fin-button
+          label="Отменить"
+          icon="pi pi-times"
+          class="w-full"
+          severity="warning"
+          @click="emit('close-sidebar')"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <style lang="scss">
+.p-dialog-close-button {
+  position: absolute !important;
+  right: 0;
+}
 
-.view-doc{
-  .p-select-option .p-focus{
+.rounded-close-btn {
+  border-radius: 8px 0 0 8px;
+  position: absolute;
+  left: -15px;
+  z-index: 3333;
+}
+
+.view-doc {
+  .p-select-option .p-focus {
     background-color: #3935E7 !important;
     color: white !important;
   }
-  .p-select-open{
+
+  .p-select-open {
     border-color: #3935E7 !important;
   }
-  .p-select-option:hover{
+
+  .p-select-option:hover {
     background-color: #ededed !important;
   }
-  .p-inputwrapper-focus{
+
+  .p-inputwrapper-focus {
     border-color: #3935E7 !important;
   }
-  .p-datepicker-input{
+
+  .p-datepicker-input {
     border: 0;
   }
-  .p-select:hover{
-    border-color: #3935E7  !important;
+
+  .p-select:hover {
+    border-color: #3935E7 !important;
   }
 }
-.icon-history{
+
+.icon-history {
   margin-left: 780px !important;
   background-color: white !important;
   color: #3935E7 !important;
@@ -443,15 +511,14 @@ watch(viewDocument.value, (newValue) => {
   width: 160px !important;
   height: 31px !important;
 }
-.icon-print{
 
+.icon-print {
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
   width: 150px !important;
   height: 31px !important;
 }
-
 
 .edit-purchase {
   .p-select {
@@ -461,6 +528,7 @@ watch(viewDocument.value, (newValue) => {
     height: 46px;
     align-items: center;
   }
+
   .p-inputtext {
     border: 1px solid #DCDFE3;
     border-radius: 10px !important;
@@ -474,43 +542,46 @@ watch(viewDocument.value, (newValue) => {
     gap: 10px !important;
   }
 
-  .btn-movement:hover{
+  .btn-movement:hover {
     color: #3935E7 !important;
   }
-  .btn-approve:hover{
+
+  .btn-approve:hover {
     color: #17A825 !important;
     border-color: #17A825 !important;
     font-weight: bold !important;
     background-color: #fff !important;
   }
+
   .btn-approve .p-button-label {
     font-weight: 600;
   }
-  .btn-un-approve .p-button-label{
+
+  .btn-un-approve .p-button-label {
     font-weight: 600;
   }
 
-  .btn-un-approve{
+  .btn-un-approve {
     color: #C1790C !important;
     border-color: #C1790C !important;
     font-weight: bold !important;
     background-color: #fff !important;
   }
-  .active-approve{
+
+  .active-approve {
     background-color: #fff !important;
   }
-
 }
+
 .drower-movement {
   width: 850px !important;
   border-top-left-radius: 30px;
 }
 
-
-
 .header {
   display: flex;
   justify-content: space-between;
+
   &-title {
     font-family: Manrope, sans-serif;
     font-weight: 600;
@@ -518,10 +589,12 @@ watch(viewDocument.value, (newValue) => {
     line-height: 20px;
     color: var(--fin-text-header);
   }
+
   &-text {
     font-family: Manrope, sans-serif;
   }
 }
+
 .filter-form {
   border-top: 1px dashed #DCDFE3;
   border-bottom: 1px dashed #DCDFE3;

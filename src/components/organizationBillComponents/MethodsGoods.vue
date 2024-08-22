@@ -18,7 +18,7 @@ const copyProducts = async () => {
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   try {
-    const res = await useAxios(`/goods/copy/${id.value[0]}`, {
+    const res = await useAxios(`/organizationBill/copy/${id.value[0]}`, {
       method: "POST",
     });
     emit('getProduct')
@@ -44,8 +44,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
   console.log(props.selectProducts[0])
   const endpoint = props.selectProducts[0].deleted_at
-      ?  '/goods/massRestore'
-      : '/goods/massDelete';
+      ?  '/organizationBill/massRestore'
+      : '/organizationBill/massDelete';
 
   try {
     const response = await useAxios(endpoint, {
@@ -84,7 +84,7 @@ const deleteProduct = async () => {
         :closable="false"
     >
       <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
-        Вы действительно хотите удалить документ?
+        Вы действительно хотите удалить запись?
       </div>
       <template #footer>
         <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="deleteProduct"/>
@@ -104,7 +104,7 @@ const deleteProduct = async () => {
         :modal="true"
     >
       <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
-        Вы действительно хотите дублировать документ?
+        Вы действительно хотите дублировать запись?
       </div>
       <template #footer>
         <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="copyProducts"/>

@@ -120,7 +120,7 @@ const onRowEditSave = (event) => {
 
 const getGood = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`);
+    const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
 

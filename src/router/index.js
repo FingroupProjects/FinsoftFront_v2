@@ -40,7 +40,37 @@ const routes = [
             {
                 path: '/clientSale',
                 name: 'clientSale',
-                component: () => import('@/views/ProviderReturn.vue'),
+                component: () => import('@/views/ClientSale.vue'),
+            },
+            {
+                path: '/clientReturn',
+                name: 'clientReturn',
+                component: () => import('@/views/ClientReturn.vue'),
+            },
+            {
+                path: '/clientOrder',
+                name: 'clientOrder',
+                component: () => import('@/views/ClientOrder.vue'),
+            },
+            {
+                path: '/writeOff',
+                name: 'writeOff',
+                component: () => import('@/views/WriteOff.vue'),
+            },
+            {
+                path: '/posting',
+                name: 'posting',
+                component: () => import('@/views/Posting.vue'),
+            },
+            {
+                path: '/counterparty',
+                name: 'counterparty',
+                component: () => import('@/views/Counterparty.vue'),
+            },
+            {
+                path: '/organizationBill',
+                name: 'organizationBill',
+                component: () => import('@/views/OrganizationBill.vue'),
             },
             {
                 path: '/warehouses',
@@ -48,6 +78,14 @@ const routes = [
                 component: () => import('@/views/Goods.vue'),
             },
             {
+                path: '/inventarization',
+                name: 'inventarization',
+                component: () => import('@/views/Inventarization.vue'),
+            },
+            {
+                path: '/movement',
+                name: 'movement',
+                component: () => import('@/views/Movement.vue'),
                 path: '/finance',
                 name: 'finance',
                 component: () => import('@/views/Finance.vue'),

@@ -13,7 +13,7 @@ import formatNumber from '../constants/formatNumber.js'
 
 const v$ = useVuelidate();
 
-const emit = defineEmits(["postGoods",'editModal']);
+const emit = defineEmits(["postGoods", 'editModal']);
 
 const goods = ref([]);
 const selectedProducts = ref();
@@ -33,7 +33,7 @@ const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
 const props = defineProps({
-  productId:{
+  productId: {
     required: true,
   }
 });
@@ -70,7 +70,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
 
-    emit("postGoods", { goods: postProducts.value });
+    emit("postGoods", {goods: postProducts.value});
   }
 
   clearInputValues();
@@ -80,17 +80,17 @@ const confirmDeleteProduct = (index) => {
   postProducts.value.splice(index, 1);
   goods.value.splice(index, 1);
   getAllSum.value = goods.value.reduce((total, el) => {
-    return el?.sum -total;
+    return el?.sum - total;
   }, 0);
 
   getAllProduct.value = goods.value.reduce((total, el) => {
-    return el?.amount -total;
+    return el?.amount - total;
   }, 0);
-  if (goods.value.length === 0){
+  if (goods.value.length === 0) {
     getAllSum.value = 0
     getAllProduct.value = 0
   }
-  emit('editModal',editModalOpen.value)
+  emit('editModal', editModalOpen.value)
 };
 
 const getIdProducts = async (inputValue) => {
@@ -98,12 +98,12 @@ const getIdProducts = async (inputValue) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
-    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
+    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url)
   }));
 };
 
 const onRowEditSave = (event) => {
-  const { newData, index } = event;
+  const {newData, index} = event;
   const oldProduct = goods.value[index];
   newData.sum = Number((newData.price * newData.amount).toFixed(2));
   goods.value.splice(index, 1, newData);
@@ -115,12 +115,13 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal',editModalOpen.value)
+  emit('editModal', editModalOpen.value)
 };
+
 
 const getGood = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`);
+    const res = await useAxios(`/inventoryOperation/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
 
@@ -130,7 +131,7 @@ const getGood = async () => {
       amount: item.amount,
       price: item.price,
       sum: item.price * item.price,
-      img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
+      img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
       created: false,
       updated: false,
       deleted: false,
@@ -147,7 +148,7 @@ const getGood = async () => {
 };
 
 watchEffect(() => {
-  sum.value = Number((amount.value*price.value).toFixed(2))
+  sum.value = Number((amount.value * price.value).toFixed(2))
 });
 
 onMounted(async () => {
@@ -171,9 +172,9 @@ onMounted(async () => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во" />
-      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
-      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" />
+      <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во"/>
+      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена"/>
+      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма"/>
       <fin-button
           icon="pi pi-plus"
           @click="addFn"
@@ -254,7 +255,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Кол-во
           </div>
-          {{formatNumber(getAllProduct) }}
+          {{ formatNumber(getAllProduct) }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
@@ -266,7 +267,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Сумма
           </div>
-          {{formatNumber(getAllSum)  }}
+          {{ formatNumber(getAllSum) }}
         </div>
       </div>
     </div>

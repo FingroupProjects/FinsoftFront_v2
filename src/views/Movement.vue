@@ -8,19 +8,17 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-
-
-
+import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
+import ViewPurchase from "@/components/ViewPurchase.vue";
+import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import MethodsClientSale from "@/components/MethodsClientSale.vue";
-import ViewClientSale from "@/components/ViewClientSale.vue";
-import CreateSale from "@/components/CreateSale.vue";
+import Dialog from "primevue/dialog";
 
 const {
   findStorage,
@@ -99,7 +97,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/document/client/purchase`, {params});
+  const res = await useAxios(`/document/movement`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -172,7 +170,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Продажа клиентам"/>
+  <header-purchase header-title="Покупка товаров"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -193,15 +191,7 @@ getProducts();
         :options="storage"
         class="w-full col-span-2"
     />
-    <Dropdown
-        v-model="selectedCounterparty"
-        :loading="loadingCounterparty"
-        @click="findCounterparty"
-        :options="counterparty"
-        optionLabel="name"
-        placeholder="Клиент"
-        class="w-full col-span-2"
-    />
+
     <div class="flex gap-4 col-span-2">
       <fin-button
           @click="visibleFilter = true"
@@ -221,8 +211,8 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsClientSale @get-product="getProductMethods" :select-products="selectedProduct"
-                           v-if="!(!selectedProduct || !selectedProduct.length)"/>
+    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+                     v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
         scrollable
@@ -271,29 +261,10 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
+          {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
         </template>
       </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('counterparty.name',index)">
-            Клиент <i
 
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.counterparty?.name }}
-        </template>
-      </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('organization.name',index)">
@@ -312,10 +283,10 @@ getProducts();
           {{ slotProps.data.organization?.name }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="">
+      <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('sum',index)">
-            Сумма <i
+          <div class="w-full h-full" @click="sortData('storage.name',index)">
+            Склад получатель <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -327,13 +298,13 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.sum }}
+          {{ slotProps.data.storage?.name }}
         </template>
       </Column>
       <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('storage.name',index)">
-            Склад <i
+            Склад отправитель <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -387,24 +358,7 @@ getProducts();
           {{ slotProps.data?.author?.name }}
         </template>
       </Column>
-      <Column field="currency" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('currency.name',index)">
-            Валюта <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data?.currency?.name }}
-        </template>
-      </Column>
+
     </DataTable>
     <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
       <span class="paginator-text"> Элементов на странице: </span>
@@ -438,9 +392,9 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-client-sale v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
-                            :openModalClose="openInfoModal"/>
-      <CreateSale v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+                     :openModalClose="openInfoModal"/>
+      <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
