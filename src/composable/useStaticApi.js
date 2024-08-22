@@ -9,7 +9,9 @@ export const useStaticApi = () => {
   const loadingStorage = ref(false);
   const loadingOrganization = ref(false);
   const counterparty = ref([]);
+  const status = ref([]);
   const loadingCounterparty = ref(false);
+  const loadStatus = ref(false);
 
   const findStorage = async () => {
     try {
@@ -68,7 +70,24 @@ export const useStaticApi = () => {
       loadingOrganization.value = false;
     }
   };
+  const findStatus = async () => {
+    try {
+      loadStatus.value = true;
+      const res = await useAxios(`/document/client/order/statuses`);
 
+      return (status.value = res.result.map((el) => {
+        return {
+          name: el.name,
+          code: el.id
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+
+      loadStatus.value = false;
+    }
+  };
   const findCounterparty = async () => {
     try {
       loadingCounterparty.value = true;
@@ -98,7 +117,9 @@ export const useStaticApi = () => {
     organization,
     findCounterparty,
     counterparty,
+    findStatus,
     loadingCounterparty,
     loadingOrganization,
+    status,
   };
 };

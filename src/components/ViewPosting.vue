@@ -14,7 +14,7 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
-import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
+import WriteOffTable from "@/components/WriteOffTable.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -37,7 +37,6 @@ const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
 const comments = ref('');
 const openInfoModal = ref(false);
-const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
 const viewDocument = ref({
@@ -71,34 +70,18 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
-async function getAgreement() {
-  try {
-    const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/${viewDocument.counterpartyName?.code}`)
-    return agreementList.value = res.result.data.map(el => {
-      return {
-        name: el.name,
-        code: el.id
-      }
-    })
-  } catch (e) {
-    console.log(e)
-  }
-}
 
 const getView = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`)
+    const res = await useAxios(`/inventoryOperation/show/${props.productId}`)
     const item = res.result;
 
     viewDocument.value = {
       organizationName: item.organization,
       author: item.author,
-      counterpartyName: item.counterparty,
-      counterpartyAgreementName: item.counterpartyAgreement,
       storageName: item.storage,
       date: new Date(item.date),
       postDate: item.date,
-      currencyName: item.currency,
       doc_number: item.doc_number,
       comment:item.comment
     };
@@ -126,12 +109,9 @@ const updateView = async () => {
 
       const data = {
         organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code,
-        counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
         storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
-        currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
-        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
-        comment: viewDocument.comment,
+        comment: viewDocument.value.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
           price: parseFloat(product.price),
@@ -139,12 +119,13 @@ const updateView = async () => {
           created: product.created || false,
           updated: product.updated || false,
           deleted: product.deleted || false
-        }))
+        })),
+        status: "posting"
       };
 
       console.log('Data to be sent:', data);
 
-      const res = await useAxios(`/document/provider/order/update/${props.productId}`, {
+      const res = await useAxios(`/inventoryOperation/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
@@ -161,7 +142,7 @@ const updateView = async () => {
 // Fetch existing goods
 const fetchExistingGoods = async () => {
   try {
-    const response = await useAxios(`/document/${props.productId}`);
+    const response = await useAxios(`/document/show/${props.productId}`);
     return response.data.goods || [];
   } catch (error) {
     console.error('Error fetching existing goods:', error);
@@ -171,7 +152,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/approve`, {
+    const res = await useAxios(`/inventoryOperation/approve`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -188,7 +169,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/unApprove`, {
+    const res = await useAxios(`/inventoryOperation/unApprove`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -225,16 +206,7 @@ function changeModal() {
   changeValue.value= true
 }
 watchEffect(() => {
-  if (viewDocument.value.counterpartyName &&
-      viewDocument.value.counterpartyName.agreement &&
-      viewDocument.value.counterpartyName.agreement.length > 0) {
-    viewDocument.value.counterpartyAgreementName = {
-      name: viewDocument.value.counterpartyName.agreement[0].name,
-      code: viewDocument.value.counterpartyName.agreement[0].id,
-    };
-  } else {
-    viewDocument.counterpartyAgreementName = null;
-  }
+
   if (hasOrganization === true) viewDocument.organizationName = {
     name: organizationHas.name,
     code: organizationHas.id
@@ -277,7 +249,7 @@ watch(productsInfo, (newVal) => {
     <div class="header">
       <div class="flex gap-[16px] pt-2">
         <div>
-          <div class="header-title">Заявка товаров</div>
+          <div class="header-title">Списание</div>
           <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{ viewDocument.doc_number }}</div>
         </div>
 
@@ -354,24 +326,6 @@ watch(productsInfo, (newVal) => {
       </FloatLabel>
 
       <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.counterpartyName" class="w-full"
-                :options="counterparty" @click="findCounterparty" option-label="name">
-          <template #value>
-            {{ viewDocument.counterpartyName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Поставщик</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
-                :options="agreementList" @click="getAgreement" option-label="name">
-          <template #value>
-            {{ viewDocument.counterpartyAgreementName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Договор</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
                 @click="findStorage">
           <template #value>
@@ -380,15 +334,7 @@ watch(productsInfo, (newVal) => {
         </Select>
         <label for="dd-city">Склад</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                @click="findCurrency">
-          <template #value>
-            {{ viewDocument.currencyName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
+
       <FloatLabel class="col-span-12 mt-[10px]">
         <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
         <label for="dd-city">Комментарий</label>
@@ -416,7 +362,7 @@ watch(productsInfo, (newVal) => {
       </fin-button>
     </div>
   </div>
-  <provider-order-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
+  <write-off-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}

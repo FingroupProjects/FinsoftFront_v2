@@ -1,20 +1,20 @@
 <script setup>
-import { reactive, ref, watchEffect, watch } from "vue";
+import {reactive, ref, watchEffect, watch} from "vue";
 import DatePicker from "primevue/datepicker";
-import { useStaticApi } from "@/composable/useStaticApi.js";
-import { useAxios } from "@/composable/useAxios.js";
+import {useStaticApi} from "@/composable/useStaticApi.js";
+import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
 import moment from "moment";
-import { useVuelidate } from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
-import { useToast } from "primevue/usetoast";
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
+import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
 
-const emit = defineEmits(["closeDialog",'close-sidebar']);
+const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
@@ -37,7 +37,9 @@ const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
-const openInfoModal = ref(false)
+const openInfoModal = ref(false);
+const initialValue = ref(null);
+const isModal = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -48,12 +50,12 @@ const createValues = reactive({
   selectedCounterparty: "",
 });
 const rules = reactive({
-  datetime24h: { required },
-  selectCurrency: { required },
-  selectedStorage: { required },
-  selectedOrganization: { required },
-  selectedCounterparty: { required },
-  selectedAgreement: { required },
+  datetime24h: {required},
+  selectCurrency: {required},
+  selectedStorage: {required},
+  selectedOrganization: {required},
+  selectedCounterparty: {required},
+  selectedAgreement: {required},
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -67,7 +69,7 @@ async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-      `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
+        `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
     );
     return (agreementList.value = res.result.data.map((el) => {
       return {
@@ -84,7 +86,7 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate();
-
+  openInfoModal.value = false
   if (result) {
     try {
       const res = await useAxios(`/document/provider/order`, {
@@ -106,13 +108,13 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog",res.result.id);
+      emit("closeDialog", res.result.id);
     } catch (e) {
       console.log(e);
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e,
+        detail: e.response.data.message,
         life: 3000,
       });
     }
@@ -122,20 +124,27 @@ async function saveFn() {
 function getProducts(products) {
   productsInfo.value = products;
 }
+
 findStorage()
 
-function infoModal() {
- openInfoModal.value = true
-  // emit('close-sidebar')
+async function infoModalClose() {
+  if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
+  else emit('close-sidebar')
 }
-function infoModalClose() {
-  emit('close-sidebar')
-}
+
+watch(createValues, (newVal) => {
+  if (initialValue.value !== null) {
+    // This will only execute after the initial value is set
+    isModal.value = true;
+  }
+  initialValue.value = newVal;
+}, {deep: true});
+
 watchEffect(() => {
   if (
-    createValues.selectedCounterparty &&
-    createValues.selectedCounterparty.agreement &&
-    createValues.selectedCounterparty.agreement.length > 0
+      createValues.selectedCounterparty &&
+      createValues.selectedCounterparty.agreement &&
+      createValues.selectedCounterparty.agreement.length > 0
   ) {
     createValues.selectedAgreement = {
       name: createValues.selectedCounterparty.agreement[0].name,
@@ -145,8 +154,8 @@ watchEffect(() => {
     createValues.selectedAgreement = null;
   }
   if (hasOrganization === true) createValues.selectedOrganization = {
-    name:organizationHas.name,
-    code:organizationHas.id
+    name: organizationHas.name,
+    code: organizationHas.id
   }
   if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 });
@@ -164,75 +173,78 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание заказа поставщику</div>
+        <div class="header-title">Создание заявки товаров</div>
+        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
+          №32151
+        </div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
-          icon="pi pi-save"
-          @click="saveFn"
-          label="Сохранить"
-          severity="success"
-          class="p-button-lg"
+            icon="pi pi-save"
+            @click="saveFn"
+            label="Сохранить"
+            severity="success"
+            class="p-button-lg"
         />
         <fin-button
-          icon="pi pi-times"
-          @click="infoModal"
-          label="Отменить"
-          severity="warning"
-          class="p-button-lg"
+            icon="pi pi-times"
+            @click="infoModalClose"
+            label="Отменить"
+            severity="warning"
+            class="p-button-lg"
         />
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
       <FloatLabel class="col-span-4">
-      <DatePicker
-        showIcon
-        v-model="createValues.datetime24h"
-        :class="{ 'p-invalid': v$.datetime24h.$error }"
-        showTime
-        hourFormat="24"
-        dateFormat="dd.mm.yy,"
-        fluid
-        hideOnDateTimeSelect
-        iconDisplay="input"
-        class="w-full"
-      />
+        <DatePicker
+            showIcon
+            v-model="createValues.datetime24h"
+            :class="{ 'p-invalid': v$.datetime24h.$error }"
+            showTime
+            hourFormat="24"
+            dateFormat="dd.mm.yy,"
+            fluid
+            hideOnDateTimeSelect
+            iconDisplay="input"
+            class="w-full"
+        />
         <label for="dd-city">Дата</label>
       </FloatLabel>
 
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
-          v-model="createValues.selectedOrganization"
-          :options="organization"
-          :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-          @click="findOrganization"
-          :loading="loadingOrganization"
-          optionLabel="name"
-          class="w-full"
+            v-model="createValues.selectedOrganization"
+            :options="organization"
+            :class="{ 'p-invalid': v$.selectedOrganization.$error }"
+            @click="findOrganization"
+            :loading="loadingOrganization"
+            optionLabel="name"
+            class="w-full"
         />
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
-          v-model="createValues.selectedCounterparty"
-          :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-          @click="findCounterparty"
-          :options="counterparty"
-          :loading="loadingCounterparty"
-          optionLabel="name"
-          class="w-full"
+            v-model="createValues.selectedCounterparty"
+            :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
+            @click="findCounterparty"
+            :options="counterparty"
+            :loading="loadingCounterparty"
+            optionLabel="name"
+            class="w-full"
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
-          v-model="createValues.selectedAgreement"
-          :class="{ 'p-invalid': v$.selectedAgreement.$error }"
-          @click="getAgreement"
-          :loading="loadingAgreement"
-          :options="agreementList"
-          optionLabel="name"
-          class="w-full"
+            v-model="createValues.selectedAgreement"
+            :class="{ 'p-invalid': v$.selectedAgreement.$error }"
+            @click="getAgreement"
+            :loading="loadingAgreement"
+            :options="agreementList"
+            optionLabel="name"
+            class="w-full"
         >
           <template #value>{{ createValues.selectedAgreement?.name }}</template>
         </Dropdown>
@@ -240,26 +252,26 @@ watch(createValues, (newValue) => {
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
-          v-model="createValues.selectedStorage"
-          :class="{ 'p-invalid': v$.selectedStorage.$error }"
-          @click="findStorage"
-          :loading="loadingStorage"
-          :options="storage"
-          optionLabel="name"
-          class="w-full"
+            v-model="createValues.selectedStorage"
+            :class="{ 'p-invalid': v$.selectedStorage.$error }"
+            @click="findStorage"
+            :loading="loadingStorage"
+            :options="storage"
+            optionLabel="name"
+            class="w-full"
         />
         <label for="dd-city">Склад</label>
       </FloatLabel>
 
       <FloatLabel class="col-span-4">
         <Dropdown
-          v-model="createValues.selectCurrency"
-          :class="{ 'p-invalid': v$.selectCurrency.$error }"
-          @click="findCurrency(createValues.selectedAgreement)"
-          :loading="loading"
-          :options="currency"
-          optionLabel="name"
-          class="w-full"
+            v-model="createValues.selectCurrency"
+            :class="{ 'p-invalid': v$.selectCurrency.$error }"
+            @click="findCurrency(createValues.selectedAgreement)"
+            :loading="loading"
+            :options="currency"
+            optionLabel="name"
+            class="w-full"
         >
           <template #value>
             {{ createValues.selectCurrency?.name }}
@@ -268,24 +280,22 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
-      <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20" />
+        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
         <label for="dd-city">Комментарий</label>
       </FloatLabel>
     </div>
   </div>
-  <CreateProduct @postGoods="getProducts" />
+  <CreateProduct @postGoods="getProducts"/>
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>
-  <Toast />
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
       :modal="true"
-      :closable="false"
   >
     <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
-      Вы действительно хотите удалить документ?
+      Хотите сохранить измения?
     </div>
     <template #footer>
       <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="saveFn"/>
@@ -294,7 +304,7 @@ watch(createValues, (newValue) => {
           icon="pi pi-times"
           class="w-full"
           severity="warning"
-          @click="infoModalClose"
+          @click="emit('close-sidebar')"
       />
     </template>
   </Dialog>
@@ -302,18 +312,14 @@ watch(createValues, (newValue) => {
 
 <style lang="scss">
 @import "@/assets/style/colors";
+
 .create-purchases {
-  .p-select {
-    border-color: #dcdfe3;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-    height: 46px;
-    align-items: center;
-  }
-  .p-button-secondary{
+
+  .p-button-secondary {
     color: transparent !important;
     border-color: transparent !important;
   }
+
   .p-invalid {
     border: 1px solid #f2376f !important;
   }
@@ -337,9 +343,8 @@ watch(createValues, (newValue) => {
     width: 100% !important;
   }
 
-
   .p-datepicker {
-    border:none;
+    border: none;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -347,30 +352,32 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
-  .p-button-secondary{
+
+  .p-button-secondary {
     color: $primary-color !important;
     border-color: $primary-color !important;
   }
+
   .p-inputtext {
-    //border-color: white;
     border-radius: 10px;
   }
+
   .p-inputtext:enabled:focus {
     border-color: $primary-color;
     border-radius: 10px;
   }
 }
-.p-inputtext:enabled:hover{
+
+.p-inputtext:enabled:hover {
   border-color: transparent;
 }
-.p-inputtext:enabled:focus{
+
+.p-inputtext:enabled:focus {
   border-color: #DCDFE3 !important;
 }
 
-.p-textarea:enabled:focus{
+.p-textarea:enabled:focus {
   border-color: $primary-color !important;
 }
 

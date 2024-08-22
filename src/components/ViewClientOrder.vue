@@ -15,6 +15,7 @@ import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
 import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
+import ClientOrderTable from "@/components/ClientOrderTable.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -87,7 +88,7 @@ async function getAgreement() {
 
 const getView = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`)
+    const res = await useAxios(`/document/client/order/show/${props.productId}`)
     const item = res.result;
 
     viewDocument.value = {
@@ -171,7 +172,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/approve`, {
+    const res = await useAxios(`/document/client/order/approve`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -188,7 +189,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/unApprove`, {
+    const res = await useAxios(`/document/client/order/unApprove`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -277,7 +278,7 @@ watch(productsInfo, (newVal) => {
     <div class="header">
       <div class="flex gap-[16px] pt-2">
         <div>
-          <div class="header-title">Заявка товаров</div>
+          <div class="header-title">Заказ клиентов</div>
           <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{ viewDocument.doc_number }}</div>
         </div>
 
@@ -360,7 +361,7 @@ watch(productsInfo, (newVal) => {
             {{ viewDocument.counterpartyName?.name }}
           </template>
         </Select>
-        <label for="dd-city">Поставщик</label>
+        <label for="dd-city">Клиент</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
@@ -416,7 +417,7 @@ watch(productsInfo, (newVal) => {
       </fin-button>
     </div>
   </div>
-  <provider-order-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
+  <client-order-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}

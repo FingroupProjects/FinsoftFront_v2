@@ -89,7 +89,7 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`/document/provider/return`, {
+      const res = await useAxios(`/document/client/purchase`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
@@ -173,9 +173,9 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание возврата товаров</div>
+        <div class="header-title">Создание продажи клиентам</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
+
         </div>
       </div>
       <div class="flex gap-[16px]">
@@ -234,7 +234,7 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
         />
-        <label for="dd-city">Поставщик</label>
+        <label for="dd-city">Клиент</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown

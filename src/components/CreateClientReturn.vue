@@ -89,7 +89,7 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`/document/provider/return`, {
+      const res = await useAxios(`/document/client/return`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
@@ -234,7 +234,7 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
         />
-        <label for="dd-city">Поставщик</label>
+        <label for="dd-city">Клиент</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown

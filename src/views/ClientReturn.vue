@@ -8,19 +8,26 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-
-
-
+import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
+import ViewPurchase from "@/components/ViewPurchase.vue";
+import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import MethodsClientSale from "@/components/MethodsClientSale.vue";
-import ViewClientSale from "@/components/ViewClientSale.vue";
-import CreateSale from "@/components/CreateSale.vue";
+import Dialog from "primevue/dialog";
+import MethodsProviderOrder from "@/components/MethodsProviderOrder.vue";
+import ViewProviderOrder from "@/components/ViewProviderOrder.vue";
+import CreateProviderOrder from "@/components/CreateProviderOrder.vue";
+import ViewProviderReturn from "@/components/ViewProviderReturn.vue";
+import CreateProviderReturn from "@/components/CreateProviderReturn.vue";
+import MethodsReturnProvider from "@/components/MethodsReturnProvider.vue";
+import ViewClientReturn from "@/components/ViewClientReturn.vue";
+import CreateClientReturn from "@/components/CreateClientReturn.vue";
+import MethodsReturnClient from "@/components/MethodsReturnClient.vue";
 
 const {
   findStorage,
@@ -99,7 +106,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/document/client/purchase`, {params});
+  const res = await useAxios(`/document/client/return`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -172,7 +179,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Продажа клиентам"/>
+  <header-purchase header-title="Возврат клиентов"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -221,8 +228,8 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsClientSale @get-product="getProductMethods" :select-products="selectedProduct"
-                           v-if="!(!selectedProduct || !selectedProduct.length)"/>
+    <MethodsReturnClient @get-product="getProductMethods" :select-products="selectedProduct"
+                          v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
         scrollable
@@ -438,9 +445,9 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-client-sale v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
-                            :openModalClose="openInfoModal"/>
-      <CreateSale v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <view-client-return v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+                           :openModalClose="openInfoModal"/>
+      <CreateClientReturn v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 

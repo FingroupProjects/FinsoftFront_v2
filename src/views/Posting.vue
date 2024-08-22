@@ -8,27 +8,27 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-
-
-
+import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
+import ViewPurchase from "@/components/ViewPurchase.vue";
+import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import MethodsClientSale from "@/components/MethodsClientSale.vue";
-import ViewClientSale from "@/components/ViewClientSale.vue";
-import CreateSale from "@/components/CreateSale.vue";
+import Dialog from "primevue/dialog";
+import MethodsWriteOff from "@/components/MethodsWriteOff.vue";
+import ViewWriteOff from "@/components/ViewWriteOff.vue";
+import CreateWriteOff from "@/components/CreateWriteOff.vue";
+import ViewPosting from "@/components/ViewPosting.vue";
+import CreatePosting from "@/components/CreatePosting.vue";
 
 const {
   findStorage,
   storage,
   loadingStorage,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
 } = useStaticApi();
 
 const visibleRight = ref(false);
@@ -37,15 +37,24 @@ const selectedStorage = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
-const selectedCounterparty = ref();
 const first = ref(1)
+const selectedStatus = ref();
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
 const openInfoModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
-
+const statusList = ref([
+  {
+    name: 'Активный',
+    code: 1
+  },
+  {
+    name: 'Не активный',
+    code: 0
+  },
+])
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -93,13 +102,13 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     storage_id: selectedStorage.value?.code,
-    counterparty_id: selectedCounterparty.value?.code,
+    active: selectedStatus.value?.code,
     page: first.value + 1,
     ...filters,
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/document/client/purchase`, {params});
+  const res = await useAxios(`/inventoryOperation/posting`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -164,15 +173,14 @@ async function closeFnVl() {
 watch(selectedStorage, () => {
   getProducts();
 });
-watch(selectedCounterparty, () => {
+watch(selectedStatus, () => {
   getProducts();
 });
-
 getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Продажа клиентам"/>
+  <header-purchase header-title="Оприходование товаров"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -194,12 +202,10 @@ getProducts();
         class="w-full col-span-2"
     />
     <Dropdown
-        v-model="selectedCounterparty"
-        :loading="loadingCounterparty"
-        @click="findCounterparty"
-        :options="counterparty"
+        v-model="selectedStatus"
+        :options="statusList"
         optionLabel="name"
-        placeholder="Клиент"
+        placeholder="Статус"
         class="w-full col-span-2"
     />
     <div class="flex gap-4 col-span-2">
@@ -221,8 +227,8 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsClientSale @get-product="getProductMethods" :select-products="selectedProduct"
-                           v-if="!(!selectedProduct || !selectedProduct.length)"/>
+    <MethodsWriteOff @get-product="getProductMethods" :select-products="selectedProduct"
+                     v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
         scrollable
@@ -274,26 +280,7 @@ getProducts();
           {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
         </template>
       </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('counterparty.name',index)">
-            Клиент <i
 
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.counterparty?.name }}
-        </template>
-      </Column>
       <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('organization.name',index)">
@@ -387,24 +374,7 @@ getProducts();
           {{ slotProps.data?.author?.name }}
         </template>
       </Column>
-      <Column field="currency" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('currency.name',index)">
-            Валюта <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data?.currency?.name }}
-        </template>
-      </Column>
+
     </DataTable>
     <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
       <span class="paginator-text"> Элементов на странице: </span>
@@ -438,9 +408,9 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-client-sale v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
-                            :openModalClose="openInfoModal"/>
-      <CreateSale v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <view-posting v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+                     :openModalClose="openInfoModal"/>
+      <CreatePosting v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 

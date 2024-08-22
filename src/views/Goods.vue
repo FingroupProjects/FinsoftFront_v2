@@ -102,7 +102,7 @@ async function getProducts(filters = {}) {
     ...filters,
   };
 
-  const res = await useAxios(`good?search=3412123123`, {params});
+  const res = await useAxios(`good?search=`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;

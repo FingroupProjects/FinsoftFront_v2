@@ -15,6 +15,9 @@ import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
 import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
+import ProviderReturnTable from "@/components/ProviderReturnTable.vue";
+import ClientSale from "@/views/ClientSale.vue";
+import ClientTable from "@/components/ClientTable.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -48,7 +51,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
-  comment:''
+  comment: ''
 });
 
 const v$ = useVuelidate();
@@ -87,7 +90,7 @@ async function getAgreement() {
 
 const getView = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/show/${props.productId}`)
+    const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
 
     viewDocument.value = {
@@ -100,8 +103,9 @@ const getView = async () => {
       postDate: item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
-      comment:item.comment
+      comment: item.comment
     };
+
 
   } catch (e) {
     console.error('Error fetching data:', e);
@@ -131,7 +135,7 @@ const updateView = async () => {
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
-        comment: viewDocument.comment,
+        comment: viewDocument.value.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
           price: parseFloat(product.price),
@@ -144,7 +148,7 @@ const updateView = async () => {
 
       console.log('Data to be sent:', data);
 
-      const res = await useAxios(`/document/provider/order/update/${props.productId}`, {
+      const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
@@ -171,7 +175,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/approve`, {
+    const res = await useAxios(`/document/client/approve`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -188,7 +192,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    const res = await useAxios(`/document/provider/order/unApprove`, {
+    const res = await useAxios(`/document/client/unApprove`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -221,9 +225,11 @@ function infoModalClose(value) {
   if (changeValue.value) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
 function changeModal() {
-  changeValue.value= true
+  changeValue.value = true
 }
+
 watchEffect(() => {
   if (viewDocument.value.counterpartyName &&
       viewDocument.value.counterpartyName.agreement &&
@@ -416,7 +422,7 @@ watch(productsInfo, (newVal) => {
       </fin-button>
     </div>
   </div>
-  <provider-order-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
+  <client-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
@@ -460,10 +466,11 @@ watch(productsInfo, (newVal) => {
 </template>
 
 <style lang="scss">
-.p-dialog-close-button{
+.p-dialog-close-button {
   position: absolute !important;
   right: 0;
 }
+
 .rounded-close-btn {
   border-radius: 8px 0 0 8px;
   position: absolute;
