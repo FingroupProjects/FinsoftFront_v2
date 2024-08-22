@@ -78,15 +78,33 @@ const addFn = async () => {
 
 const confirmDeleteProduct = async (index) => {
     try {
-      const response = await useAxios(`/document/delete-document-goods/${index}`, {
+      const response = await useAxios(`/document/delete-document-goods`, {
         method: "POST",
+        data:{
+          ids: [index],
+        }
       });
+      getGood()
       toast.add({
         severity: "success",
         summary: "Success",
         detail: "Products deleted successfully.",
         life: 3000,
       });
+      postProducts.value.splice(index, 1);
+      goods.value.splice(index, 1);
+      getAllSum.value = goods.value.reduce((total, el) => {
+        return el?.sum -total;
+      }, 0);
+
+      getAllProduct.value = goods.value.reduce((total, el) => {
+        return el?.amount -total;
+      }, 0);
+      if (goods.value.length === 0){
+        getAllSum.value = 0
+        getAllProduct.value = 0
+      }
+      emit('editModal',editModalOpen.value)
     } catch (error) {
       toast.add({
         severity: "error",
@@ -95,20 +113,7 @@ const confirmDeleteProduct = async (index) => {
         life: 3000,
       });
     }
-  postProducts.value.splice(index, 1);
-  goods.value.splice(index, 1);
-  getAllSum.value = goods.value.reduce((total, el) => {
-    return el?.sum -total;
-  }, 0);
 
-  getAllProduct.value = goods.value.reduce((total, el) => {
-    return el?.amount -total;
-  }, 0);
-  if (goods.value.length === 0){
-    getAllSum.value = 0
-    getAllProduct.value = 0
-  }
-  emit('editModal',editModalOpen.value)
 };
 
 const getIdProducts = async (inputValue) => {
