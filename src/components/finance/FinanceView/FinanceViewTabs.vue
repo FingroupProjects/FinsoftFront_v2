@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import { ref, watch, watchEffect} from "vue";
+import {computed, ref, watch, watchEffect} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 
@@ -51,7 +51,7 @@ const approved = ref(false);
 const status = ref('Не проведен');
 const visibleMovement = ref(false);
 const urlsView = ref('/cash-store/client-payment/')
-
+const item = ref([]);
 const financeDate = ref({
   datetime24h: null,
   cashRegisterId: "",
@@ -78,7 +78,7 @@ async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty.code}`
+        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty.code ||financeDate.value.selectedCounterparty.id }`
     );
     return (agreementList.value = res.result.data.map((el) => {
       return {
@@ -224,6 +224,38 @@ watchEffect(() => {
     code: organizationHas.id
   }
 });
+
+const activeTabIndex = ref(0);
+
+const openTab = (index) => {
+  activeTabIndex.value = index;
+};
+async function fetchOperating() {
+  try {
+    const res = await useAxios(
+        `/operationTypes?type=PKO`
+    );
+    return (item.value = res.result.map((el) => {
+      return {
+        name: el.title_ru,
+        code: el.id,
+        type: el.type
+      };
+    }));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+fetchOperating()
+const activeTab = computed(() => {
+  if (activeTabIndex.value !== null) {
+    return item.value[activeTabIndex.value];
+  }
+  return {
+    code: 0
+  };
+});
 </script>
 
 <template>
@@ -271,155 +303,104 @@ watchEffect(() => {
           @click="emit('close-sidebar')"
       />
       <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
-                  class="p-button-lg btn-movement w-[158px]">
-        <img src="@/assets/img/img.png" alt="" class="w-[20px]"/>
+                  class="p-button-lg btn-movement w-[158px] flex gap-2">
+        <img src="@/assets/img/img.png" alt="" class="w-[20px] mr-2"/>
         Движение
       </fin-button>
     </div>
   </div>
   <div class="form grid grid-cols-12 gap-[16px] mt-[20px]">
-    <FloatLabel class="col-span-6">
-      <DatePicker
-          showIcon
-          v-model="financeDate.datetime24h"
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy,"
-          fluid
-          hideOnDateTimeSelect
-          iconDisplay="input"
-          class="w-full"
-      />
-      <label for="dd-city">Дата</label>
-    </FloatLabel>
-
-    <FloatLabel class="col-span-6" v-if="!hasOrganization">
-      <Dropdown
-          v-model="financeDate.selectedOrganization"
-          :options="organization"
-          @click="findOrganization"
-          :loading="loadingOrganization"
-          optionLabel="name"
-          class="w-full"
+    <div class="sidebar-finance col-span-4 border-r">
+      <div
+          class="font-semibold text-[16px] text-[#808BA0] leading-[16px] p-[13px] cursor-pointer"
+          v-for="(items, index) in item"
+          :key="index"
+          :class="{ 'active-tab': financeDate.operationType?.id === items.code }"
+          @click="openTab(index)"
       >
-        <template #value>
-          {{ financeDate.selectedOrganization?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Организация</label>
-    </FloatLabel>
-    <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
-
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType.id === 1 || 4 || 5 || 6">
-      <Dropdown
-          v-model="financeDate.selectedCounterparty"
-          @click="findCounterparty"
-          :loading="loadingCounterparty"
-          :options="counterparty"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.selectedCounterparty?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Контрагент</label>
-    </FloatLabel>
-
-    <FloatLabel class="col-span-12" v-if="financeDate.operationType.id === 1 || 4 || 5 || 6">
-      <Dropdown
-          v-model="financeDate.selectedAgreement"
-          @click="getAgreement"
-          :loading="loadingAgreement"
-          :options="agreementList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>{{ financeDate.selectedAgreement?.name }}</template>
-      </Dropdown>
-      <label for="dd-city">Договор</label>
-    </FloatLabel>
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 2">
-      <Dropdown
-          v-model="financeDate.organizationBillId"
-          @click="findOrganizationBill"
-          :loading="loadingBill"
-          :options="billList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.organizationBillId?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Банковский счет</label>
-    </FloatLabel>
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 3">
-      <Dropdown
-          v-model="financeDate.senderCashRegisterId"
-          @click="findCashRegister"
-          :loading="loadingCash"
-          :options="cashRegisterList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.senderCashRegisterId?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Касса отправителя</label>
-    </FloatLabel>
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 7">
-      <Dropdown
-          v-model="financeDate.employeeId"
-          @click="findEmployee"
-          :loading="loadingEmployee"
-          :options="employeeList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.employeeId?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Сотрудник</label>
-    </FloatLabel>
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 8">
-      <Dropdown
-          v-model="financeDate.balanceArticleId"
-          @click="findBalance"
-          :loading="loadingBalance"
-          :options="balanceList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.balanceArticleId?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Статья дохода</label>
-    </FloatLabel>
-
-    <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 9">
-      <Dropdown
-          v-model="financeDate.balanceArticleId"
-          @click="findBalance"
-          :loading="loadingBalance"
-          :options="balanceList"
-          optionLabel="name"
-          class="w-full"
-      >
-        <template #value>
-          {{ financeDate.balanceArticleId?.name }}
-        </template>
-      </Dropdown>
-      <label for="dd-city">Статья баланса</label>
-    </FloatLabel>
-    <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
-      <fin-input v-model="financeDate.base" class="col-span-6" placeholder="Основание"/>
+        {{ items.name }}
+      </div>
+    </div>
+    <div class="grid grid-cols-12 gap-[16px] col-span-8">
       <FloatLabel class="col-span-6">
+        <DatePicker
+            showIcon
+            v-model="financeDate.datetime24h"
+            showTime
+            hourFormat="24"
+            dateFormat="dd.mm.yy,"
+            fluid
+            hideOnDateTimeSelect
+            iconDisplay="input"
+            class="w-full"
+        />
+        <label for="dd-city">Дата</label>
+      </FloatLabel>
+
+      <FloatLabel class="col-span-6" v-if="!hasOrganization">
         <Dropdown
-            v-model="financeDate.cashRegisterId"
+            v-model="financeDate.selectedOrganization"
+            :options="organization"
+            @click="findOrganization"
+            :loading="loadingOrganization"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.selectedOrganization?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Организация</label>
+      </FloatLabel>
+      <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
+
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
+        <Dropdown
+            v-model="financeDate.selectedCounterparty"
+            @click="findCounterparty"
+            :loading="loadingCounterparty"
+            :options="counterparty"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.selectedCounterparty?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Контрагент</label>
+      </FloatLabel>
+
+      <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
+        <Dropdown
+            v-model="financeDate.selectedAgreement"
+            @click="getAgreement"
+            :loading="loadingAgreement"
+            :options="agreementList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>{{ financeDate.selectedAgreement?.name }}</template>
+        </Dropdown>
+        <label for="dd-city">Договор</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 2">
+        <Dropdown
+            v-model="financeDate.organizationBillId"
+            @click="findOrganizationBill"
+            :loading="loadingBill"
+            :options="billList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.organizationBillId?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Банковский счет</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 3">
+        <Dropdown
+            v-model="financeDate.senderCashRegisterId"
             @click="findCashRegister"
             :loading="loadingCash"
             :options="cashRegisterList"
@@ -427,25 +408,90 @@ watchEffect(() => {
             class="w-full"
         >
           <template #value>
-            {{ financeDate.cashRegisterId?.name }}
+            {{ financeDate.senderCashRegisterId?.name }}
           </template>
         </Dropdown>
-        <label for="dd-city">Касса</label>
+        <label for="dd-city">Касса отправителя</label>
       </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="financeDate.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 7">
+        <Dropdown
+            v-model="financeDate.employeeId"
+            @click="findEmployee"
+            :loading="loadingEmployee"
+            :options="employeeList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.employeeId?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Сотрудник</label>
       </FloatLabel>
-      <div class="col-span-12 p-[26px] bg-[#ECF1FB] mt-[26px] rounded-[10px]">
-        <div class="w-full input-finance-sum">
-          <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text"
-                     size="large" class="w-full" placeholder="Сумма"/>
-        </div>
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 8">
+        <Dropdown
+            v-model="financeDate.balanceArticleId"
+            @click="findBalance"
+            :loading="loadingBalance"
+            :options="balanceList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.balanceArticleId?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Статья дохода</label>
+      </FloatLabel>
 
-        <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
-                    label="Провести операцию"/>
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 9">
+        <Dropdown
+            v-model="financeDate.balanceArticleId"
+            @click="findBalance"
+            :loading="loadingBalance"
+            :options="balanceList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ financeDate.balanceArticleId?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Статья баланса</label>
+      </FloatLabel>
+      <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
+        <fin-input v-model="financeDate.base" class="col-span-6" placeholder="Основание"/>
+        <FloatLabel class="col-span-6">
+          <Dropdown
+              v-model="financeDate.cashRegisterId"
+              @click="findCashRegister"
+              :loading="loadingCash"
+              :options="cashRegisterList"
+              optionLabel="name"
+              class="w-full"
+          >
+            <template #value>
+              {{ financeDate.cashRegisterId?.name }}
+            </template>
+          </Dropdown>
+          <label for="dd-city">Касса</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-12 mt-[10px]">
+          <Textarea v-model="financeDate.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
+          <label for="dd-city">Комментарий</label>
+        </FloatLabel>
+        <div class="col-span-12 p-[26px] bg-[#ECF1FB] mt-[26px] rounded-[10px]">
+          <div class="w-full input-finance-sum">
+            <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text"
+                       size="large" class="w-full" placeholder="Сумма"/>
+          </div>
+
+          <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
+                      label="Провести операцию"/>
+        </div>
       </div>
     </div>
+
   </div>
   <Dialog
       v-model:visible="store.openInfoModal"
@@ -467,27 +513,29 @@ watchEffect(() => {
     </template>
   </Dialog>
 </template>
-
-<style lang="scss">
-.input-finance-sum {
-  .p-inputtext {
-    border-radius: 10px !important;
-    border-color: transparent !important;
-  }
+<style scoped lang="scss">
+.active-tab {
+  background: #ECF1FB;
+  color: #3935E7 !important;
+  border-right: 2px solid #3935E7;
+  border-bottom-left-radius: 10px;
+  border-top-left-radius: 10px;
 }
-
-.p-dialog-close-button {
+</style>
+<style lang="scss">
+.p-dialog-close-button{
   position: absolute !important;
   right: 0;
 }
-
 .rounded-close-btn {
   border-radius: 8px 0 0 8px;
   position: absolute;
   left: -15px;
   z-index: 3333;
 }
-
+.p-select.p-disabled{
+  background: white !important;
+}
 .view-doc {
   .p-select-option .p-focus {
     background-color: #3935E7 !important;
