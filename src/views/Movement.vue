@@ -19,21 +19,22 @@ import ViewPurchase from "@/components/ViewPurchase.vue";
 import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Dialog from "primevue/dialog";
+import MethodsMovement from "@/components/MethodsMovement.vue";
+import CreateMovement from "@/components/CreateMovement.vue";
+import ViewMovement from "@/components/ViewMovement.vue";
 
 const {
   findStorage,
   storage,
   loadingStorage,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
 } = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
 const selectedProduct = ref();
-const selectedProductId = ref()
+const selectedProductId = ref();
+const selectedStatus = ref();
 const search = ref('')
 const selectedCounterparty = ref();
 const first = ref(1)
@@ -43,6 +44,16 @@ const createOpenModal = ref(false);
 const openInfoModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
+const statusList = ref([
+  {
+    name: 'Активный',
+    code: 1
+  },
+  {
+    name: 'Не активный',
+    code: 0
+  },
+])
 
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
@@ -90,8 +101,9 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    storage_id: selectedStorage.value?.code,
+    sender_storage_id: selectedStorage.value?.code,
     counterparty_id: selectedCounterparty.value?.code,
+    active: selectedStatus.value?.code,
     page: first.value + 1,
     ...filters,
     sort: sortDesc.value
@@ -162,15 +174,15 @@ async function closeFnVl() {
 watch(selectedStorage, () => {
   getProducts();
 });
-watch(selectedCounterparty, () => {
+
+watch(selectedStatus, () => {
   getProducts();
 });
-
 getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Покупка товаров"/>
+  <header-purchase header-title="Перемещение"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -185,13 +197,19 @@ getProducts();
     <Dropdown
         v-model="selectedStorage"
         optionLabel="name"
-        placeholder="Склад"
+        placeholder="Склад отправитель"
         @click="findStorage"
         :loading="loadingStorage"
         :options="storage"
         class="w-full col-span-2"
     />
-
+    <Dropdown
+        v-model="selectedStatus"
+        :options="statusList"
+        optionLabel="name"
+        placeholder="Статус"
+        class="w-full col-span-2"
+    />
     <div class="flex gap-4 col-span-2">
       <fin-button
           @click="visibleFilter = true"
@@ -211,7 +229,7 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsMovement @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
@@ -280,12 +298,12 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.organization?.name }}
+          {{ slotProps.data.organization_id?.name }}
         </template>
       </Column>
       <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('storage.name',index)">
+          <div class="w-full h-full" @click="sortData('recipient_storage.name',index)">
             Склад получатель <i
               :class="{
             'pi pi-arrow-down': openUp[index],
@@ -298,12 +316,12 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.storage?.name }}
+          {{ slotProps.data.recipient_storage_id?.name }}
         </template>
       </Column>
       <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('storage.name',index)">
+          <div class="w-full h-full" @click="sortData('sender_storage.name',index)">
             Склад отправитель <i
               :class="{
             'pi pi-arrow-down': openUp[index],
@@ -316,7 +334,7 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.storage?.name }}
+          {{ slotProps.data.sender_storage_id?.name }}
         </template>
       </Column>
       <Column field="status" :sortable="true" header="">
@@ -355,7 +373,7 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.author?.name }}
+          {{ slotProps.data?.author_id?.name }}
         </template>
       </Column>
 
@@ -392,9 +410,9 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+      <view-movement v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
                      :openModalClose="openInfoModal"/>
-      <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <CreateMovement v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 

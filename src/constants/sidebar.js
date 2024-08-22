@@ -146,7 +146,7 @@ export default [
                     },
                     {
                         label: 'Инвентаризация',
-                        route: '/'
+                        route: '/inventarization'
                     }
                 ]
             },
