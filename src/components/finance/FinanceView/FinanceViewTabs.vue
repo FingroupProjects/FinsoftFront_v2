@@ -145,7 +145,7 @@ const approve = async () => {
     const res = await useAxios(`/cash-store/approve`, {
       method: 'POST',
       data: {
-        ids: [`${props.productId}`]
+        ids: [`${props.operationTypeId}`]
       }
     });
     toast.add({severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500});
@@ -161,7 +161,7 @@ const unApprove = async () => {
     const res = await useAxios(`/cash-store/unApprove`, {
       method: 'POST',
       data: {
-        ids: [`${props.productId}`]
+        ids: [`${props.operationTypeId}`]
       }
     });
     approved.value = false
@@ -180,7 +180,7 @@ const getView = async () => {
     financeDate.value = {
       datetime24h: new Date(item.date),
       selectedOrganization: item.organization,
-      getUser: item.sender,
+      getUser: item.sender_text,
       selectedCounterparty: item.counterparty,
       selectedAgreement: item.counterpartyAgreement,
       sum: item.sum,
@@ -193,7 +193,7 @@ const getView = async () => {
       employeeId:item.employee,
       balanceArticleId:item.balance_article
     };
-
+    getAgreement()
   } catch (e) {
     console.error('Error fetching data:', e);
   }
@@ -303,7 +303,7 @@ const activeTab = computed(() => {
           @click="emit('close-sidebar')"
       />
       <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
-                  class="p-button-lg btn-movement w-[158px] flex gap-2">
+                  class="p-button-lg w-[158px] flex gap-2">
         <img src="@/assets/img/img.png" alt="" class="w-[20px] mr-2"/>
         Движение
       </fin-button>
@@ -322,7 +322,7 @@ const activeTab = computed(() => {
       </div>
     </div>
     <div class="grid grid-cols-12 gap-[16px] col-span-8">
-      <FloatLabel class="col-span-6">
+      <FloatLabel class="col-span-6 datePicker">
         <DatePicker
             showIcon
             v-model="financeDate.datetime24h"
