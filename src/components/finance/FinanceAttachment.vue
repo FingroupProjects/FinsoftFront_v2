@@ -123,7 +123,7 @@ watch(createValues, (newValue) => {
 
 <template>
   <div class="form grid grid-cols-12 gap-[16px] col-span-8 ">
-    <FloatLabel class="col-span-6">
+    <FloatLabel class="col-span-6 datePicker">
       <DatePicker
           showIcon
           v-model="createValues.datetime24h"

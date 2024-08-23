@@ -7,7 +7,7 @@
           :class="{ 'border-error': props.error,
           'hover:border-border' : props.disabled,
          'pl-10': props.email, 'h-[40px] text-sm pt-5' : props.size === 'sm',
-          'h-[48px] text-base pt-6 ' : props.size === 'md',
+          'h-[46px] text-base pt-6 ' : props.size === 'md',
           'pl-[30px]' : props.searchible,
           'hover:border-secondary': !props.disabled,
         }"
@@ -17,7 +17,7 @@
           :type="type"
           autocomplete="off"
           class="block px-2.5 pb-3 w-full border text-secondary
-          bg-transparent rounded-lg border-1 border-border appearance-none  focus:outline-none focus:ring-0 focus:border-primary peer "
+          bg-transparent rounded-[10px] border-1 border-border appearance-none  focus:outline-none focus:ring-0 focus:border-primary peer "
           placeholder=" "
           @focus="$emit('focus')"
           @input="moneyMask"

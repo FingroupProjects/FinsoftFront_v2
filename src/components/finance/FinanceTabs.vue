@@ -163,8 +163,8 @@ watch(financeDate, (newValue) => {
 </script>
 
 <template>
-  <div class="form grid grid-cols-12 gap-[16px] col-span-8 ">
-    <FloatLabel class="col-span-6">
+  <div class="form grid grid-cols-12 gap-[16px] col-span-8">
+    <FloatLabel class="col-span-6 datePicker">
       <DatePicker
           showIcon
           v-model="financeDate.datetime24h"
@@ -192,7 +192,7 @@ watch(financeDate, (newValue) => {
       />
       <label for="dd-city">Организация</label>
     </FloatLabel>
-    <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
+    <fin-input v-model="financeDate.getUser" class="col-span-6 "  placeholder="Получатель"/>
 
     <FloatLabel class="col-span-6">
       <Dropdown
@@ -279,6 +279,15 @@ watch(financeDate, (newValue) => {
   .p-inputtext {
     border-radius: 10px !important;
     border-color: transparent !important;
+  }
+}
+.datePicker{
+  .p-inputtext {
+    border-radius: 10px !important;
+    height: 46px;
+  }
+  .p-datepicker-input-icon-container{
+    top: 37%;
   }
 }
 </style>
