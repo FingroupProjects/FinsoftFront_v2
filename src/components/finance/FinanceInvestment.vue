@@ -166,7 +166,7 @@ watch(financeDate, (newValue) => {
 
 <template>
   <div class="form grid grid-cols-12 gap-[16px] col-span-8 ">
-    <FloatLabel class="col-span-6">
+    <FloatLabel class="col-span-6 datePicker">
       <DatePicker
           showIcon
           v-model="financeDate.datetime24h"
