@@ -147,7 +147,7 @@ watchEffect(() => {
       />
       <label for="dd-city">Организация</label>
     </FloatLabel>
-    <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
+    <fin-input v-model="financeDate.getUser" class="col-span-6" :error="v$.getUser.$error" placeholder="Получатель"/>
 
     <FloatLabel class="col-span-6">
       <Dropdown
@@ -167,7 +167,7 @@ watchEffect(() => {
     </FloatLabel>
 
     <div class="col-span-12 grid grid-cols-12 gap-[16px] border border-dashed p-[10px] rounded-[10px]">
-      <fin-input v-model="financeDate.base" class="col-span-6" placeholder="Основание"/>
+      <fin-input v-model="financeDate.base" class="col-span-6" :error="v$.base.$error" placeholder="Основание"/>
       <FloatLabel class="col-span-6">
         <Dropdown
             v-model="financeDate.cashRegisterId"
@@ -190,8 +190,8 @@ watchEffect(() => {
                      size="large" class="w-full" placeholder="Сумма"/>
         </div>
 
-        <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
-                    label="Провести операцию"/>
+        <fin-button @click="saveFn" class="mt-[26px] w-full" icon-pos="left" severity="success"
+                    label="Сохранить"/>
       </div>
     </div>
   </div>
