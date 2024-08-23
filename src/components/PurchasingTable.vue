@@ -5,15 +5,12 @@ import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/dropdown";
-import {useVuelidate} from "@vuelidate/core";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
 
-const v$ = useVuelidate();
-
-const emit = defineEmits(["postGoods",'editModal']);
+const emit = defineEmits(["postGoods", 'editModal']);
 
 const goods = ref([]);
 const selectedProducts = ref();
@@ -29,11 +26,12 @@ const editingRows = ref([]);
 const newProduct = ref();
 const editModalOpen = ref(true)
 const imgURL = import.meta.env.VITE_IMG_URL;
+
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
 };
 const props = defineProps({
-  productId:{
+  productId: {
     required: true,
   }
 });
@@ -70,49 +68,32 @@ const addFn = async () => {
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
 
-    emit("postGoods", { goods: postProducts.value });
+    emit("postGoods", {goods: postProducts.value});
   }
 
   clearInputValues();
 };
 
-const confirmDeleteProduct = async (index) => {
-    try {
-      const response = await useAxios(`/document/delete-document-goods`, {
-        method: "POST",
-        data:{
-          ids: [index],
-        }
-      });
-      getGood()
-      toast.add({
-        severity: "success",
-        summary: "Success",
-        detail: "Products deleted successfully.",
-        life: 3000,
-      });
-      postProducts.value.splice(index, 1);
-      goods.value.splice(index, 1);
-      getAllSum.value = goods.value.reduce((total, el) => {
-        return el?.sum -total;
-      }, 0);
-
-      getAllProduct.value = goods.value.reduce((total, el) => {
-        return el?.amount -total;
-      }, 0);
-      if (goods.value.length === 0){
-        getAllSum.value = 0
-        getAllProduct.value = 0
+const confirmDeleteProduct = async (index,indexProduct) => {
+  postProducts.value.splice(indexProduct, 1)
+  goods.value.splice(indexProduct, 1)
+  getAllProduct.value = goods.value.reduce((total, el) => {
+    return el?.amount - total;
+  }, 0);
+  if (goods.value.length === 0) {
+    getAllSum.value = 0
+    getAllProduct.value = 0
+  }
+  emit('editModal', editModalOpen.value)
+  try {
+    const response = await useAxios(`/document/delete-document-goods`, {
+      method: "POST",
+      data: {
+        ids: [index],
       }
-      emit('editModal',editModalOpen.value)
-    } catch (error) {
-      toast.add({
-        severity: "error",
-        summary: "Error",
-        detail: error.message || 'An error occurred during deletion.', // Provide more detailed error message if available
-        life: 3000,
-      });
-    }
+    });
+    // await getGood()
+  } catch (error) {}
 
 };
 
@@ -121,12 +102,12 @@ const getIdProducts = async (inputValue) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
-    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
+    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url)
   }));
 };
 
 const onRowEditSave = (event) => {
-  const { newData, index } = event;
+  const {newData, index} = event;
   const oldProduct = goods.value[index];
   newData.sum = Number((newData.price * newData.amount).toFixed(2));
   goods.value.splice(index, 1, newData);
@@ -138,7 +119,7 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal',editModalOpen.value)
+  emit('editModal', editModalOpen.value)
 };
 
 const getGood = async () => {
@@ -153,7 +134,7 @@ const getGood = async () => {
       amount: item.amount,
       price: item.price,
       sum: item.price * item.price,
-      img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg',import.meta.url),
+      img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
       created: false,
       updated: false,
       deleted: false,
@@ -170,7 +151,7 @@ const getGood = async () => {
 };
 
 watchEffect(() => {
-  sum.value = Number((amount.value*price.value).toFixed(2))
+  sum.value = Number((amount.value * price.value).toFixed(2))
 });
 
 onMounted(async () => {
@@ -181,31 +162,31 @@ onMounted(async () => {
 
 <template>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
-      <FloatLabel class="col-span-6">
-        <Select
-            v-model="selectedProducts"
-            :options="productsId"
-            optionLabel="products"
-            class="w-full h-[47px] rounded-[10px]"
-            editable
-            @keyup="getIdProducts"
-        >
-        </Select>
-        <label for="">Поиск по Id, наименованию, штрих коду</label>
-      </FloatLabel>
-      <div class="col-span-6 flex gap-[16px]">
-        <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во" />
-        <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена" />
-        <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" />
-        <fin-button
-            icon="pi pi-plus"
-            @click="addFn"
-            label="Добавить"
-            severity="success"
-            class="p-button-lg"
-        />
-      </div>
+    <FloatLabel class="col-span-6">
+      <Select
+          v-model="selectedProducts"
+          :options="productsId"
+          optionLabel="products"
+          class="w-full h-[47px] rounded-[10px]"
+          editable
+          @keyup="getIdProducts"
+      >
+      </Select>
+      <label for="">Поиск по Id, наименованию, штрих коду</label>
+    </FloatLabel>
+    <div class="col-span-6 flex gap-[16px]">
+      <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во"/>
+      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена"/>
+      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма"/>
+      <fin-button
+          icon="pi pi-plus"
+          @click="addFn"
+          label="Добавить"
+          severity="success"
+          class="p-button-lg"
+      />
     </div>
+  </div>
 
   <div class="purchase-table-header" v-if="goods.length > 0">
     <DataTable
@@ -255,9 +236,9 @@ onMounted(async () => {
       </Column>
       <Column field="sum" header="Сумма"></Column>
       <Column field="quantity" header="">
-        <template #body="slotProps">
+        <template #body="{data,index}">
           <i
-              @click="confirmDeleteProduct(slotProps.data.good_id)"
+              @click="confirmDeleteProduct(data.good_id,index)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>
@@ -277,7 +258,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Кол-во
           </div>
-            {{formatNumber(getAllProduct) }}
+          {{ formatNumber(getAllProduct) }}
         </div>
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
@@ -289,7 +270,7 @@ onMounted(async () => {
           <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
             Сумма
           </div>
-          {{formatNumber(getAllSum)  }}
+          {{ formatNumber(getAllSum) }}
         </div>
       </div>
     </div>
