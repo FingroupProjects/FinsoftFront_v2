@@ -187,8 +187,5 @@ onMounted(() => {
   .p-datepicker-input-icon-container {
     margin-top: -12px !important;
   }
-
 }
-
-
 </style>

@@ -34,7 +34,6 @@ const visibleHistory = ref(false);
 const approved = ref(false);
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
-const comments = ref('');
 const openInfoModal = ref(false);
 const agreementList = ref([]);
 const changeValue = ref(false);
