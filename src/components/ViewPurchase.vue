@@ -46,7 +46,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
-  comment:''
+  comment: ''
 });
 
 const v$ = useVuelidate();
@@ -85,6 +85,7 @@ async function getAgreement() {
 
 const getView = async () => {
   try {
+
     const res = await useAxios(`/document/show/${props.productId}`)
     const item = res.result;
 
@@ -98,7 +99,7 @@ const getView = async () => {
       postDate: item.date,
       currencyName: item.currency,
       doc_number: item.doc_number,
-      comment:item.comment
+      comment: item.comment
     };
 
   } catch (e) {
@@ -123,12 +124,12 @@ const updateView = async () => {
       });
 
       const data = {
-        organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code,
-        counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
-        storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
+        organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
+        counterparty_id: viewDocument.value.counterpartyName?.id || viewDocument.value.counterpartyName?.code,
+        storage_id: viewDocument.value.storageName?.id || viewDocument.value.storageName?.code,
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
-        currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
-        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
+        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.comment,
         goods: newOrUpdatedGoods.map(product => ({
           good_id: product.good_id,
@@ -140,15 +141,12 @@ const updateView = async () => {
         }))
       };
 
-      console.log('Data to be sent:', data);
-
       const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      console.log('Response:', res);
       emit('close-sidebar')
     } catch (e) {
       console.error(e);
@@ -170,6 +168,7 @@ const fetchExistingGoods = async () => {
 
 const approve = async () => {
   try {
+    await updateView()
     const res = await useAxios(`/document/provider/approve`, {
       method: 'POST',
       data: {
@@ -187,6 +186,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
+    await updateView()
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data: {
@@ -220,9 +220,11 @@ function infoModalClose(value) {
   if (changeValue.value) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
 function changeModal() {
-  changeValue.value= true
+  changeValue.value = true
 }
+
 watchEffect(() => {
   if (viewDocument.value.counterpartyName &&
       viewDocument.value.counterpartyName.agreement &&
@@ -459,10 +461,11 @@ watch(productsInfo, (newVal) => {
 </template>
 
 <style lang="scss">
-.p-dialog-close-button{
+.p-dialog-close-button {
   position: absolute !important;
   right: 0;
 }
+
 .rounded-close-btn {
   border-radius: 8px 0 0 8px;
   position: absolute;

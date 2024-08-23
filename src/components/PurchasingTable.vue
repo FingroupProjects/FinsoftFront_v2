@@ -129,7 +129,7 @@ const getGood = async () => {
     const sum = res.result.sum;
 
     goods.value = items.map((item) => ({
-      good_id: item.good.id,
+      good_id: item.id,
       name: item.good.name,
       amount: item.amount,
       price: item.price,
