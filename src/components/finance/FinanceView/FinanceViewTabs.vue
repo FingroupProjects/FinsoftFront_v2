@@ -302,8 +302,8 @@ const activeTab = computed(() => {
           class="p-button-lg"
           @click="emit('close-sidebar')"
       />
-      <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
-                  class="p-button-lg w-[158px] flex gap-2">
+      <fin-button @click="visibleMovement = true"  severity="warning"
+                  class="p-button-lg flex gap-2">
         <img src="@/assets/img/img.png" alt="" class="w-[20px] mr-2"/>
         Движение
       </fin-button>
