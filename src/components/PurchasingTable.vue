@@ -74,11 +74,9 @@ const addFn = async () => {
   clearInputValues();
 };
 
-const confirmDeleteProduct = async (index) => {
-  postProducts.value.splice(index, 1)
-  goods.value.splice(index, 1)
-  productsId.value.splice(index, 1)
-  console.log(goods.value)
+const confirmDeleteProduct = async (index,indexProduct) => {
+  postProducts.value.splice(indexProduct, 1)
+  goods.value.splice(indexProduct, 1)
   getAllProduct.value = goods.value.reduce((total, el) => {
     return el?.amount - total;
   }, 0);
@@ -95,8 +93,6 @@ const confirmDeleteProduct = async (index) => {
       }
     });
     // await getGood()
-
-
   } catch (error) {}
 
 };
@@ -240,9 +236,9 @@ onMounted(async () => {
       </Column>
       <Column field="sum" header="Сумма"></Column>
       <Column field="quantity" header="">
-        <template #body="slotProps">
+        <template #body="{data,index}">
           <i
-              @click="confirmDeleteProduct(slotProps.data.good_id)"
+              @click="confirmDeleteProduct(data.good_id,index)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>

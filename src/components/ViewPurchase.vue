@@ -149,6 +149,7 @@ const updateView = async () => {
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
       console.log('Response:', res);
+      emit('close-sidebar')
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
