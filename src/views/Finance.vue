@@ -8,7 +8,6 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
@@ -18,6 +17,7 @@ import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import FinanceCreate from "@/components/finance/FinanceCreate.vue";
 import MethodsFinance from "@/components/finance/MethodsFinance.vue";
 import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
+import FinanceFilter from "@/components/finance/FinanceFilter.vue";
 
 const {
   loadingUser,
@@ -90,7 +90,7 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     selectUser: selectUser.value?.code,
-    counterparty_id: selectOperationPko.value?.code,
+    operation_type_id: selectOperationPko.value?.code,
     page: first.value + 1,
     ...filters,
     sort: sortDesc.value
@@ -154,10 +154,6 @@ const sortData = (field, index) => {
   getProducts()
 };
 
-async function closeFnVl() {
-  visibleRight.value = false
-}
-
 watch(selectUser, () => {
   getProducts();
 });
@@ -166,6 +162,8 @@ watch(selectOperationPko, () => {
 });
 
 getProducts();
+findOperationPko();
+findUsers()
 </script>
 
 <template>
@@ -185,7 +183,6 @@ getProducts();
         v-model="selectUser"
         optionLabel="name"
         placeholder="Автор"
-        @click="findUsers"
         :loading="loadingUser"
         :options="userList"
         class="w-full col-span-2"
@@ -193,7 +190,6 @@ getProducts();
     <Dropdown
         v-model="selectOperationPko"
         :loading="loadingOperationPko"
-        @click="findOperationPko"
         :options="operationPkoList"
         optionLabel="name"
         placeholder="Операции"
@@ -309,7 +305,7 @@ getProducts();
       </Column>
       <Column field="storage" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('storage.name',index)">
+          <div class="w-full h-full" @click="sortData('operationType.name',index)">
             Тип операции <i
               :class="{
             'pi pi-arrow-down': openUp[index],
@@ -411,7 +407,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <FinanceFilter @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
 
   <Toast/>
