@@ -193,7 +193,7 @@ watch(financeDate, (newValue) => {
       />
       <label for="dd-city">Организация</label>
     </FloatLabel>
-    <fin-input v-model="financeDate.getUser" class="col-span-6" :error="v$.getUser.$error" placeholder="Получатель"/>
+    <fin-input v-model="financeDate.getUser" class="col-span-6" :error="v$.getUser.$error" placeholder="Вноситель"/>
 
     <FloatLabel class="col-span-6">
       <Dropdown
