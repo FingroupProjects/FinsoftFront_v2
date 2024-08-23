@@ -250,8 +250,8 @@ watch(financeDate, (newValue) => {
           <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text" size="large" class="w-full" placeholder="Сумма"/>
         </div>
 
-        <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
-                    label="Провести операцию"/>
+        <fin-button @click="saveFn" class="mt-[26px] w-full" icon-pos="left" severity="success"
+                    label="Сохранить"/>
       </div>
     </div>
   </div>

@@ -206,9 +206,9 @@ export const useStaticApi = () => {
     try {
       loadingOperationPko.value = true;
       const res = await useAxios(`/operationTypes?type=PKO`);
-      return (operationPkoList.value = res.result.data.map((el) => {
+      return (operationPkoList.value = res.result.map((el) => {
         return {
-          name: el.name,
+          name: el.title_ru,
           code: el.id,
         };
       }));

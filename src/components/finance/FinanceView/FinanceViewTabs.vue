@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {computed, ref, watch, watchEffect} from "vue";
+import {computed, ref, watch, watchEffect,onMounted} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 
@@ -50,7 +50,10 @@ const initialValue = ref(null);
 const approved = ref(false);
 const status = ref('Не проведен');
 const visibleMovement = ref(false);
-const urlsView = ref('/cash-store/client-payment/')
+const changeValue = ref(false);
+const openInfoModal = ref(false)
+const urlsView = ref('/cash-store/client-payment/');
+const selectAgreement = ref('')
 const item = ref([]);
 const financeDate = ref({
   datetime24h: null,
@@ -64,10 +67,10 @@ const financeDate = ref({
   getUser: '',
   docNumber: '',
   operationType: '',
-  organizationBillId:'',
-  senderCashRegisterId:'',
-  employeeId:'',
-  balanceArticleId:''
+  organizationBillId: '',
+  senderCashRegisterId: '',
+  employeeId: '',
+  balanceArticleId: ''
 });
 
 const organizationJson = localStorage.getItem('organization');
@@ -78,49 +81,53 @@ async function getAgreement() {
   try {
     loadingAgreement.value = true;
     const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty.code ||financeDate.value.selectedCounterparty.id }`
+        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty?.code || financeDate.value.selectedCounterparty?.id}`
     );
-    return (agreementList.value = res.result.data.map((el) => {
+    agreementList.value = res.result.data.map((el) => {
       return {
         name: el.name,
         code: el.id,
       };
-    }));
+    })
+    selectAgreement.value = agreementList.value[0]
+
   } catch (e) {
     console.log(e);
   } finally {
     loadingAgreement.value = false;
+    openInfoModal.value = false
+    changeValue.value = false
   }
 }
-
 async function saveFn() {
-  if (financeDate.value.operationType?.id === 2) urlsView.value ='/cash-store/withdrawal/'
-  if (financeDate.value.operationType?.id === 3) urlsView.value ='/cash-store/another-cash-register/'
-  if (financeDate.value.operationType?.id === 4) urlsView.value ='/cash-store/investment/'
-  if (financeDate.value.operationType?.id === 5) urlsView.value ='/cash-store/credit-receive/'
-  if (financeDate.value.operationType?.id === 6) urlsView.value ='/cash-store/provider-refund/'
-  if (financeDate.value.operationType?.id === 7) urlsView.value ='/cash-store/other-expenses/'
-  if (financeDate.value.operationType?.id === 8) urlsView.value ='/cash-store/other-incomes/'
-
+  if (financeDate.value.operationType?.id === 2) urlsView.value = '/cash-store/withdrawal/'
+  if (financeDate.value.operationType?.id === 3) urlsView.value = '/cash-store/another-cash-register/'
+  if (financeDate.value.operationType?.id === 4) urlsView.value = '/cash-store/investment/'
+  if (financeDate.value.operationType?.id === 5) urlsView.value = '/cash-store/credit-receive/'
+  if (financeDate.value.operationType?.id === 6) urlsView.value = '/cash-store/provider-refund/'
+  if (financeDate.value.operationType?.id === 7) urlsView.value = '/cash-store/other-expenses/'
+  if (financeDate.value.operationType?.id === 8) urlsView.value = '/cash-store/other-incomes/'
+  openInfoModal.value = false
+  changeValue.value = false
   try {
-    const res = await useAxios(`${urlsView}${props.operationTypeId}`, {
+    const res = await useAxios(`${urlsView.value}${props.operationTypeId}`, {
       method: "PATCH",
       data: {
         date: moment(financeDate.value.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-        organization_id: financeDate.value.selectedOrganization.code ||financeDate.value.selectedOrganization.id,
-        counterparty_id: financeDate.value.selectedCounterparty.code || financeDate.value.selectedCounterparty.id,
-        counterparty_agreement_id: financeDate.value.selectedAgreement.code,
-        cash_register_id: financeDate.value.cashRegisterId.code ||financeDate.value.cashRegisterId.id,
+        organization_id: financeDate.value.selectedOrganization?.code || financeDate.value.selectedOrganization?.id,
+        counterparty_id: financeDate.value.selectedCounterparty?.code || financeDate.value.selectedCounterparty?.id,
+        counterparty_agreement_id: selectAgreement.value.code,
+        cash_register_id: financeDate.value.cashRegisterId?.code || financeDate.value.cashRegisterId?.id,
         operation_type_id: financeDate.value.operationType?.id,
         sum: financeDate.value.sum,
         basis: financeDate.value.base,
         type: financeDate.value.operationType?.type || 'PKO',
         sender: financeDate.value.getUser,
 
-        organizationBill:financeDate.value.organizationBillId.code || financeDate.value.organizationBillId.id,
-        senderCashRegister:financeDate.value.senderCashRegisterId.code ||financeDate.value.senderCashRegisterId.id,
-        employee:financeDate.value.employeeId.code || financeDate.value.employeeId.id,
-        balance_article:financeDate.value.balanceArticleId.code || financeDate.value.balanceArticleId,
+        organizationBill: financeDate.value.organizationBillId?.code || financeDate.value.organizationBillId?.id,
+        senderCashRegister: financeDate.value.senderCashRegisterId?.code || financeDate.value.senderCashRegisterId?.id,
+        employee: financeDate.value.employeeId?.code || financeDate.value.employeeId?.id,
+        balance_article: financeDate.value.balanceArticleId?.code || financeDate.value.balanceArticleId,
       },
     });
     toast.add({
@@ -174,6 +181,7 @@ const unApprove = async () => {
 }
 const getView = async () => {
   try {
+
     const res = await useAxios(`/cash-store/show/${props.operationTypeId}`)
     const item = res.result;
 
@@ -182,29 +190,24 @@ const getView = async () => {
       selectedOrganization: item.organization,
       getUser: item.sender_text,
       selectedCounterparty: item.counterparty,
-      selectedAgreement: item.counterpartyAgreement,
+
       sum: item.sum,
       cashRegisterId: item.cashRegister,
       base: item.basis,
       comments: item.comment,
       docNumber: item.doc_number,
       operationType: item.operationType,
-      organizationBillId:item?.organizationBill,
-      employeeId:item.employee,
-      balanceArticleId:item.balance_article
+      organizationBillId: item?.organizationBill,
+      employeeId: item.employee,
+      balanceArticleId: item.balance_article
+
     };
-    getAgreement()
+   await getAgreement()
   } catch (e) {
     console.error('Error fetching data:', e);
   }
 };
 getView()
-watch(financeDate, (newVal) => {
-  if (initialValue.value !== null) {
-    store.isModal = true;
-  }
-  initialValue.value = newVal;
-}, {deep: true});
 
 watchEffect(() => {
   if (
@@ -212,12 +215,12 @@ watchEffect(() => {
       financeDate.value.selectedCounterparty.agreement &&
       financeDate.value.selectedCounterparty.agreement.length > 0
   ) {
-    financeDate.value.selectedAgreement = {
+    selectAgreement.value = {
       name: financeDate.value.selectedCounterparty.agreement[0].name,
       code: financeDate.value.selectedCounterparty.agreement[0].id,
     };
   } else {
-    financeDate.value.selectedAgreement = null;
+    selectAgreement.value = null;
   }
   if (hasOrganization === true) financeDate.value.selectedOrganization = {
     name: organizationHas.name,
@@ -230,6 +233,7 @@ const activeTabIndex = ref(0);
 const openTab = (index) => {
   activeTabIndex.value = index;
 };
+
 async function fetchOperating() {
   try {
     const res = await useAxios(
@@ -248,17 +252,23 @@ async function fetchOperating() {
 }
 
 fetchOperating()
-const activeTab = computed(() => {
-  if (activeTabIndex.value !== null) {
-    return item.value[activeTabIndex.value];
+
+function infoModalClose(value) {
+  if (changeValue.value) openInfoModal.value = true
+  else emit('close-sidebar')
+}
+
+watch(financeDate, (newVal) => {
+  if (initialValue.value !== null) {
+    changeValue.value = true;
   }
-  return {
-    code: 0
-  };
-});
+  initialValue.value = newVal;
+}, {deep: true});
 </script>
 
 <template>
+  <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
+      class="pi pi-times text-[#808BA0]"></i></button>
   <div class="header">
     <div class="flex gap-[16px] pt-2">
       <div>
@@ -295,14 +305,7 @@ const activeTab = computed(() => {
 
     </div>
     <div class="flex gap-[16px] pt-2">
-      <fin-button
-          icon="pi pi-times"
-          label="Отменить"
-          severity="warning"
-          class="p-button-lg"
-          @click="emit('close-sidebar')"
-      />
-      <fin-button @click="visibleMovement = true"  severity="warning"
+      <fin-button @click="visibleMovement = true" severity="warning"
                   class="p-button-lg flex gap-2">
         <img src="@/assets/img/img.png" alt="" class="w-[20px] mr-2"/>
         Движение
@@ -372,14 +375,16 @@ const activeTab = computed(() => {
 
       <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
         <Dropdown
-            v-model="financeDate.selectedAgreement"
-            @click="getAgreement"
+            v-model="selectAgreement"
+
             :loading="loadingAgreement"
             :options="agreementList"
             optionLabel="name"
             class="w-full"
         >
-          <template #value>{{ financeDate.selectedAgreement?.name }}</template>
+          <template #value>
+            {{ selectAgreement?.name }}
+          </template>
         </Dropdown>
         <label for="dd-city">Договор</label>
       </FloatLabel>
@@ -486,15 +491,16 @@ const activeTab = computed(() => {
                        size="large" class="w-full" placeholder="Сумма"/>
           </div>
 
-          <fin-button @click="saveFn" icon="pi pi-arrow-right" class="mt-[26px] w-full" icon-pos="left" severity="success"
-                      label="Провести операцию"/>
+          <fin-button @click="saveFn" class="mt-[26px] w-full" icon-pos="left"
+                      severity="success"
+                      label="Сохранить"/>
         </div>
       </div>
     </div>
 
   </div>
   <Dialog
-      v-model:visible="store.openInfoModal"
+      v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
       :modal="true"
   >
@@ -523,19 +529,22 @@ const activeTab = computed(() => {
 }
 </style>
 <style lang="scss">
-.p-dialog-close-button{
+.p-dialog-close-button {
   position: absolute !important;
   right: 0;
 }
+
 .rounded-close-btn {
   border-radius: 8px 0 0 8px;
   position: absolute;
   left: -15px;
   z-index: 3333;
 }
-.p-select.p-disabled{
+
+.p-select.p-disabled {
   background: white !important;
 }
+
 .view-doc {
   .p-select-option .p-focus {
     background-color: #3935E7 !important;
