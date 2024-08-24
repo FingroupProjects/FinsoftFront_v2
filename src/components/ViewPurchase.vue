@@ -147,7 +147,7 @@ const updateView = async () => {
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      emit('close-sidebar')
+      //
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
@@ -269,6 +269,10 @@ watch(productsInfo, (newVal) => {
   }
   initialValue.value = newVal;
 }, {deep: true});
+async function saveFnDialog() {
+ await updateView()
+  emit('close-sidebar')
+}
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
@@ -448,7 +452,7 @@ watch(productsInfo, (newVal) => {
       Хотите сохранить измения?
     </div>
     <template #footer>
-      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="updateView"/>
+      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="saveFnDialog"/>
       <fin-button
           label="Отменить"
           icon="pi pi-times"
