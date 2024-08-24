@@ -93,7 +93,7 @@ async function getProducts(filters = {}) {
     search: search.value,
     storage_id: selectedStorage.value?.code,
     counterparty_id: selectedCounterparty.value?.code,
-    page: first.value + 1,
+    page: first.value,
     ...filters,
     sort: sortDesc.value
   };
