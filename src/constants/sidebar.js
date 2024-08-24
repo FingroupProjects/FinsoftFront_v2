@@ -111,15 +111,15 @@ export default [
                     },
                     {
                         label:'Кассы',
-                        route: '/'
+                        route: '/cashRegister'
                     },
                     {
                         label:'Валюта',
-                        route: '/'
+                        route: '/currency'
                     },
                     {
                         label:'Виды цен',
-                        route: '/'
+                        route: '/priceType'
                     },
                 ]
             }

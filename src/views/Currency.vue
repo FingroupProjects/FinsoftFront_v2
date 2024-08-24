@@ -13,22 +13,19 @@ import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import AddGoods from "@/components/goodsComponents/ViewGoods.vue";
 import CreateGoods from "@/components/goodsComponents/createGoods.vue";
 import MethodsGoods from "@/components/goodsComponents/MethodsGoods.vue";
 
 const {
-  findStorage,
-  storage,
-  loadingStorage,
+  findCurrency,
+  currency,
+  loadingCurrency,
 } = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref();
-const selectedStorage = ref(null);
+const selectedCurrency = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref();
 const search = ref('');
@@ -39,7 +36,15 @@ const metaKey = ref(true);
 const createOpenModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
-
+import moment from "moment";
+import CreateOrganizationBill from "@/components/organizationBillComponents/CreateOrganizationBill.vue";
+import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
+import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
+import FilterOrganizationBill from "@/components/organizationBillComponents/FilterOrganizationBill.vue";
+import MethodsCashRegister from "@/components/cashRegister/MethodsCashRegister.vue";
+import ViewCashRegisters from "@/components/cashRegister/ViewCashRegisters.vue";
+import CreateCashRegister from "@/components/cashRegister/CreateCashRegister.vue";
+import CreateCurrency from "@/components/currency/createCurrency.vue";
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const statusList = ref([
@@ -96,7 +101,7 @@ async function getProducts(filters = {}) {
     itemsPerPage: selectPage.value.count,
     perPage: first.value,
     search: search.value,
-    storage_id: selectedStorage.value?.code,
+    currency_id: selectedCurrency.value?.code,
     deleted: selectedStatus.value?.code,
     page: first.value + 1,
     orderBy: orderBy.value,
@@ -104,7 +109,7 @@ async function getProducts(filters = {}) {
     ...filters,
   };
 
-  const res = await useAxios(`good?search=`, {params});
+  const res = await useAxios(`currency?search=`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -152,7 +157,7 @@ function createOpen() {
   createOpenModal.value = false
 }
 
-watch(selectedStorage, () => {
+watch(selectedCurrency, () => {
   getProducts();
 });
 watch(selectedStatus, () => {
@@ -162,7 +167,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Товары"/>
+  <header-purchase header-title="Валюты"/>
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
       <InputIcon class="pi pi-search"/>
@@ -170,16 +175,16 @@ getProducts();
           class="w-full"
           @input="getProducts"
           v-model="search"
-          placeholder="Поиск по названию, артикулу, штрих-коду"
+          placeholder="Поиск по названию"
       />
     </IconField>
     <Dropdown
-        v-model="selectedStorage"
+        v-model="selectedCurrency"
         optionLabel="name"
-        placeholder="Категория"
-        @click="findStorage"
-        :loading="loadingStorage"
-        :options="storage"
+        placeholder="Валюта"
+        @click="findCurrency"
+        :loading="loadingCurrency"
+        :options="currency"
         class="w-full col-span-2"
     />
     <Dropdown
@@ -208,7 +213,7 @@ getProducts();
     </div>
   </div>
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsGoods @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsCashRegister  @get-product="getProductMethods" :select-products="selectedProduct"
                   v-if="!(!selectedProduct || !selectedProduct.length)"/>
     <DataTable
         scrollable
@@ -252,21 +257,16 @@ getProducts();
           </div>
         </template>
         <template #sorticon="{index}">
+
         </template>
         <template #body="slotProps">
-          <div class="flex items-center gap-[10px]">
-            <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0"
-                 class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            <img v-else :src="imgURL+ slotProps?.data?.images[0]?.image" alt=""
-                 class="w-[32px] h-[32px] object-cover rounded-[8px]">
-            {{ slotProps.data?.name }}
-          </div>
+          {{ slotProps.data.name }}
         </template>
       </Column>
-      <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
+      <Column field="image"  :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('vendor_code',index)">
-            Артикул <i
+          <div class="w-full h-full" @click="sortData('date',index)">
+            Дата <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -278,13 +278,13 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.vendor_code }}
+          {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY") }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="">
+      <Column field="category" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('goodGroup.name',index)">
-            Категория <i
+          <div class="w-full h-full" @click="sortData('name',index)">
+            Актуальный курс <i
               :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -294,14 +294,34 @@ getProducts();
           </div>
         </template>
         <template #sorticon="{index}">
+
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.goodGroup?.name }}
+          {{ slotProps.data.last_exchange_rate?.value }}
+        </template>
+      </Column>
+      <Column field="category" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" @click="sortData('name',index)">
+            Символьный код <i
+              :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+          ></i>
+          </div>
+        </template>
+        <template #sorticon="{index}">
+
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.symbol_code }}
         </template>
       </Column>
       <Column field="status" :sortable="true" header="">
         <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('active',index)">
+          <div class="w-full h-full" @click="sortData('deleted_at',index)">
             Статус <i
               :class="{
             'pi pi-arrow-down': openUp[index],
@@ -351,9 +371,9 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <add-goods v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
+      <view-cash-registers v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
                  @close-dialog="closeFn"/>
-      <create-goods v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
+      <CreateCurrency v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
 
     </Sidebar>
   </div>
@@ -364,7 +384,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-organization-bill @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
 </template>
