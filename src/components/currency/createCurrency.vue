@@ -17,10 +17,7 @@ const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
-const goodGroupList = ref([]);
-const listUnit = ref([]);
-const imageRefs = ref([]);
-const locationList = ref([]);
+const openInfoModal = ref()
 const createValues = reactive({
   name: "",
   symbol_code: "",
@@ -93,12 +90,12 @@ async function saveFn() {
         />
       </div>
     </div>
-    <div class="grid grid-cols-12 mt-[30px] gap-[26px]">
-      <div class="form w-full col-span-8 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.name"/>
-        <fin-input placeholder="Символьный код" class="col-span-12" v-model="createValues.symbol_code"/>
-        <fin-input placeholder="Цифровой код" class="col-span-12" v-model="createValues.digital_code"/>
-        <fin-input placeholder="Цифровой код" class="col-span-12" v-model="createValues.multiplicity"/>
+    <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
+      <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
+        <fin-input placeholder="Название" class="col-span-5" v-model="createValues.name"/>
+        <fin-input placeholder="Символьный код" class="col-span-5" v-model="createValues.symbol_code"/>
+        <fin-input placeholder="Цифровой код" class="col-span-5" v-model="createValues.digital_code"/>
+        <fin-input placeholder="Кратность" class="col-span-5" v-model="createValues.multiplicity"/>
       </div>
     </div>
 
