@@ -13,6 +13,7 @@ import emptyImg from '@/assets/img/emptyImg.svg';
 import QsCodeAdd from "@/components/goodsComponents/QsCodeAdd.vue";
 import KitGoods from "@/components/goodsComponents/KitGoods.vue";
 import Carousel from "primevue/carousel";
+import Loader from "@/components/ui/Loader.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -29,6 +30,7 @@ const listUnit = ref([]);
 const locationList = ref([]);
 const goodNumber = ref();
 const imageRefs = ref([]);
+const loading = ref(true);
 const createValues = reactive({
   nameProduct: '',
   vendorCode: "",
@@ -143,15 +145,15 @@ async function getGood() {
     createValues.nameProduct = res.result.name
     createValues.vendorCode = res.result.vendor_code
     createValues.selectedGoodGroup = res.result.good_group
-    createValues.selectUnit ={
-      name:res.result.unit.name,
-      code:res.result.unit.id
+    createValues.selectUnit = {
+      name: res.result.unit.name,
+      code: res.result.unit.id
     }
     createValues.comments = res.result.description
     if (res.result?.location) {
       createValues.selectLocation = {
         name: res.result?.location.name,
-        code:res.result.location.id
+        code: res.result.location.id
       }
     }
     if (res.result.images?.length > 0) {
@@ -165,6 +167,8 @@ async function getGood() {
     goodNumber.value = res.result.id
   } catch (e) {
     console.log(e);
+  } finally {
+    loading.value = false
   }
 }
 
@@ -210,110 +214,113 @@ const responsiveOptions = ref([
 </script>
 
 <template>
-  <div class="create-purchases">
-    <div class="header">
-      <div>
-        <div class="header-title"> Просмотр товара</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №{{ goodNumber }}
+  <Loader v-if="loading"/>
+  <div v-else>
+    <div class="create-purchases">
+      <div class="header">
+        <div>
+          <div class="header-title"> Просмотр товара</div>
+          <div class="header-text text-[#808BA0] font-semibold text-[16px]">
+            №{{ goodNumber }}
+          </div>
+        </div>
+        <div class="flex gap-[16px]">
+          <fin-button
+              icon="pi pi-save"
+              @click="saveFn"
+              label="Сохранить"
+              severity="success"
+              class="p-button-lg"
+          />
+          <fin-button
+              icon="pi pi-times"
+              @click="emit('close-sidebar')"
+              label="Закрыть"
+              severity="warning"
+              class="p-button-lg"
+          />
         </div>
       </div>
-      <div class="flex gap-[16px]">
-        <fin-button
-            icon="pi pi-save"
-            @click="saveFn"
-            label="Сохранить"
-            severity="success"
-            class="p-button-lg"
-        />
-        <fin-button
-            icon="pi pi-times"
-            @click="emit('close-sidebar')"
-            label="Закрыть"
-            severity="warning"
-            class="p-button-lg"
-        />
-      </div>
-    </div>
-    <div class="mt-[30px] grid grid-cols-12 gap-[26px]">
-      <div class="relative col-span-4">
-        <input
-            accept="image/*"
-            type="file"
-            @change="selectImage"
-            style="display: none"
-            ref="fileInput"
-            multiple
-        />
+      <div class="mt-[30px] grid grid-cols-12 gap-[26px]">
+        <div class="relative col-span-4">
+          <input
+              accept="image/*"
+              type="file"
+              @change="selectImage"
+              style="display: none"
+              ref="fileInput"
+              multiple
+          />
 
-        <div v-if="imagePreview?.length !== 0">
-          <Carousel :value="reversedImgeRefs" :numVisible="1" :page="0" :showIndicators="false"
-                    :responsiveOptions="responsiveOptions">
-            <template #item="slotProps">
-              <img :src="slotProps.data" @click="onPickFile" alt=""
-                   class="w-[210px] rounded-[16px] m-auto h-[210px] object-cover"/>
-            </template>
-          </Carousel>
+          <div v-if="imagePreview?.length !== 0">
+            <Carousel :value="reversedImgeRefs" :numVisible="1" :page="0" :showIndicators="false"
+                      :responsiveOptions="responsiveOptions">
+              <template #item="slotProps">
+                <img :src="slotProps.data" @click="onPickFile" alt=""
+                     class="w-[210px] rounded-[16px] m-auto h-[210px] object-cover"/>
+              </template>
+            </Carousel>
+          </div>
+        </div>
+        <div class="form w-full grid grid-cols-12 col-span-8 gap-[16px] create-goods">
+          <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
+
+          <FloatLabel class="col-span-3">
+            <Dropdown
+                v-model="createValues.selectedGoodGroup"
+                :options="goodGroupList"
+                :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
+                optionLabel="name"
+                class="w-full"
+            >
+              <template #value>
+                {{ createValues.selectedGoodGroup?.name }}
+              </template>
+            </Dropdown>
+            <label for="dd-city">Категория</label>
+          </FloatLabel>
+          <fin-input class="col-span-3" placeholder="Артикул" v-model="createValues.vendorCode">
+
+          </fin-input>
+          <FloatLabel class="col-span-3">
+            <Dropdown
+                v-model="createValues.selectUnit"
+                :class="{ 'p-invalid': v$.selectUnit.$error }"
+                :options="listUnit"
+                optionLabel="name"
+                class="w-full"
+            >
+              <template #value>
+                {{ createValues.selectUnit?.name }}
+              </template>
+            </Dropdown>
+            <label for="dd-city">Ед. изм.</label>
+          </FloatLabel>
+          <FloatLabel class="col-span-3">
+            <Dropdown
+                v-model="createValues.selectLocation"
+                :options="locationList"
+                optionLabel="name"
+                class="w-full"
+            >
+              <template #value>
+                {{ createValues.selectLocation?.name }}
+              </template>
+            </Dropdown>
+            <label for="dd-city">Местоположение</label>
+          </FloatLabel>
+
+          <FloatLabel class="col-span-12 mt-[10px]">
+            <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
+            <label for="dd-city">Описание</label>
+          </FloatLabel>
         </div>
       </div>
-      <div class="form w-full grid grid-cols-12 col-span-8 gap-[16px] create-goods">
-        <fin-input placeholder="Введите название..." class="col-span-12" v-model="createValues.nameProduct"/>
-
-        <FloatLabel class="col-span-3">
-          <Dropdown
-              v-model="createValues.selectedGoodGroup"
-              :options="goodGroupList"
-              :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
-              optionLabel="name"
-              class="w-full"
-          >
-            <template #value>
-              {{ createValues.selectedGoodGroup?.name }}
-            </template>
-          </Dropdown>
-          <label for="dd-city">Категория</label>
-        </FloatLabel>
-        <fin-input class="col-span-3" placeholder="Артикул" v-model="createValues.vendorCode">
-
-        </fin-input>
-        <FloatLabel class="col-span-3">
-          <Dropdown
-              v-model="createValues.selectUnit"
-              :class="{ 'p-invalid': v$.selectUnit.$error }"
-              :options="listUnit"
-              optionLabel="name"
-              class="w-full"
-          >
-            <template #value>
-              {{ createValues.selectUnit?.name }}
-            </template>
-          </Dropdown>
-          <label for="dd-city">Ед. изм.</label>
-        </FloatLabel>
-        <FloatLabel class="col-span-3">
-          <Dropdown
-              v-model="createValues.selectLocation"
-              :options="locationList"
-              optionLabel="name"
-              class="w-full"
-          >
-            <template #value>
-              {{ createValues.selectLocation?.name }}
-            </template>
-          </Dropdown>
-          <label for="dd-city">Местоположение</label>
-        </FloatLabel>
-
-        <FloatLabel class="col-span-12 mt-[10px]">
-          <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-          <label for="dd-city">Описание</label>
-        </FloatLabel>
-      </div>
     </div>
-
+    <qs-code-add :product-id="props.productId"/>
+    <kit-goods :product-id="props.productId"/>
   </div>
-  <qs-code-add :product-id="props.productId"/>
-  <kit-goods :product-id="props.productId"/>
+
   <Toast/>
 </template>
 

@@ -36,7 +36,7 @@ const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
-const first = ref(1)
+const first = ref(0)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
@@ -162,6 +162,7 @@ const sortData = (field, index) => {
 };
 
 async function closeFnVl() {
+  await getProducts();
   visibleRight.value = false
 }
 
@@ -447,7 +448,7 @@ getProducts();
     >
       <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
                      :openModalClose="openInfoModal"/>
-      <CreatePurchase v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
+      <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
