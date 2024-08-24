@@ -118,7 +118,6 @@ async function getProducts(filters = {}) {
   } finally {
     loading.value = false
   }
-
 }
 
 function getProductMethods() {

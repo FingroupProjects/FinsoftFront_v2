@@ -80,10 +80,13 @@ const confirmDeleteProduct = async (index,indexProduct) => {
   getAllProduct.value = goods.value.reduce((total, el) => {
     return el?.amount - total;
   }, 0);
-  if (goods.value.length === 0) {
-    getAllSum.value = 0
-    getAllProduct.value = 0
-  }
+  getAllSum.value =  goods.value.reduce((total, el) => {
+    return el?.sum - total;
+  }, 0);
+  // if (goods.value.length === 0) {
+  //   getAllSum.value = 0
+  //   getAllProduct.value = 0
+  // }
   emit('editModal', editModalOpen.value)
   try {
     const response = await useAxios(`/document/delete-document-goods`, {
@@ -133,7 +136,7 @@ const getGood = async () => {
       name: item.good.name,
       amount: item.amount,
       price: item.price,
-      sum: item.price * item.price,
+      sum: item.amount * item.price,
       img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
       created: false,
       updated: false,
