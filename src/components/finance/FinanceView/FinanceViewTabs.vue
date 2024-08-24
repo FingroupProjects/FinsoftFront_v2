@@ -4,18 +4,15 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {computed, ref, watch, watchEffect,onMounted} from "vue";
+import {ref, watch, watchEffect} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
-
 import {useToast} from "primevue/usetoast";
 import moment from "moment/moment.js";
 import formatInputAmount from "@/constants/formatInput.js";
 import Dialog from "primevue/dialog";
-import {useFinanceStore} from "@/store/finance.js";
 import Select from "primevue/dropdown";
 
-const store = useFinanceStore()
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
   operationTypeId: '',
@@ -99,6 +96,7 @@ async function getAgreement() {
     changeValue.value = false
   }
 }
+
 async function saveFn() {
   if (financeDate.value.operationType?.id === 2) urlsView.value = '/cash-store/withdrawal/'
   if (financeDate.value.operationType?.id === 3) urlsView.value = '/cash-store/another-cash-register/'
@@ -116,7 +114,7 @@ async function saveFn() {
         date: moment(financeDate.value.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
         organization_id: financeDate.value.selectedOrganization?.code || financeDate.value.selectedOrganization?.id,
         counterparty_id: financeDate.value.selectedCounterparty?.code || financeDate.value.selectedCounterparty?.id,
-        counterparty_agreement_id: selectAgreement.value.code,
+        counterparty_agreement_id: selectAgreement.value?.code,
         cash_register_id: financeDate.value.cashRegisterId?.code || financeDate.value.cashRegisterId?.id,
         operation_type_id: financeDate.value.operationType?.id,
         sum: financeDate.value.sum,
@@ -149,6 +147,7 @@ async function saveFn() {
 
 const approve = async () => {
   try {
+    await saveFn()
     const res = await useAxios(`/cash-store/approve`, {
       method: 'POST',
       data: {
@@ -165,6 +164,7 @@ const approve = async () => {
 }
 const unApprove = async () => {
   try {
+    await saveFn()
     const res = await useAxios(`/cash-store/unApprove`, {
       method: 'POST',
       data: {
@@ -202,7 +202,7 @@ const getView = async () => {
       balanceArticleId: item.balance_article
 
     };
-   await getAgreement()
+    await getAgreement()
   } catch (e) {
     console.error('Error fetching data:', e);
   }
@@ -355,7 +355,7 @@ watch(financeDate, (newVal) => {
         </Dropdown>
         <label for="dd-city">Организация</label>
       </FloatLabel>
-      <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Получатель"/>
+      <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Вноситель"/>
 
       <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
         <Dropdown

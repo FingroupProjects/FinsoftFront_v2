@@ -196,7 +196,7 @@ getCounterparties();
           severity="success"
           icon="pi pi-plus"
           class="w-[80%]"
-          label="Доабвить"
+          label="Добавить"
       />
     </div>
   </div>
