@@ -49,10 +49,58 @@ const imgURL = import.meta.env.VITE_IMG_URL;
 
 const v$ = useVuelidate(rules, createValues);
 
+async function unitList() {
+  try {
+    const res = await useAxios(`/unit`);
+    return listUnit.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+unitList()
+
+async function locationGet() {
+  try {
+    const res = await useAxios(`/location`);
+    return locationList.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+locationGet()
+
+async function goodGroupGet() {
+  try {
+    const res = await useAxios(`/good-group`);
+    return goodGroupList.value = res.result.data.map(item => {
+      return {
+        code: item.id,
+        name: item.name,
+      }
+    })
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+goodGroupGet()
+
 async function saveFn() {
   const result = await v$.value.$validate();
   const formData = new FormData()
-  formData.append('', createValues.nameProduct)
+  formData.append('name', createValues.nameProduct)
   formData.append('vendor_code', createValues.vendorCode)
   formData.append('unit_id', createValues.selectUnit.code)
   formData.append('good_group_id', createValues.selectedGoodGroup.id)

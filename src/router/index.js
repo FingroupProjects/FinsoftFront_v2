@@ -73,6 +73,21 @@ const routes = [
                 component: () => import('@/views/OrganizationBill.vue'),
             },
             {
+                path: '/cashRegister',
+                name: 'cashRegister',
+                component: () => import('@/views/CashRegister.vue'),
+            },
+            {
+                path: '/priceType',
+                name: 'cashRegister',
+                component: () => import('@/views/PriceType.vue'),
+            },
+            {
+                path: '/currency',
+                name: 'currency',
+                component: () => import('@/views/Currency.vue'),
+            },
+            {
                 path: '/warehouses',
                 name: 'warehouses',
                 component: () => import('@/views/Goods.vue'),
