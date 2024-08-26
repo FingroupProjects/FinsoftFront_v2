@@ -3,7 +3,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import {onMounted, ref} from "vue";
-
+import moment from "moment";
 
 const historyCteatedData = ref({})
 const historyUpdatedData = ref([])
@@ -13,19 +13,7 @@ const props = defineProps({
     required: true,
   },
 });
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const options = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  return date.toLocaleString('en-GB', options).replace(',', '');
-};
+
 
 const getHistory = async () => {
   try {
@@ -36,13 +24,13 @@ const getHistory = async () => {
         historyCteatedData.value = {
           status: item.status,
           userName: item.user.name,
-          date: formatDate(item.date),
+          date: item.date,
         }
       } else if (item.status === "Изменен") {
         historyUpdatedData.value.push({
           status: item.status,
           userName: item.user.name,
-          date: formatDate(item.date),
+          date: item.date,
           body: item.changes[0].body,
           goods: item.changes[0].goods,
         });
@@ -64,8 +52,8 @@ const getGoodsHistory = async () => {
       type: good.type,
       priceEditValue: good.body?.Цена?.new_value,
       previousValue: good.body?.Цена?.previous_value,
-      colValueEdit:good.body?.Количество?.new_value,
-      colPreviousValueEdit:good.body?.Количество?.previous_value,
+      colValueEdit: good.body?.Количество?.new_value,
+      colPreviousValueEdit: good.body?.Количество?.previous_value,
     }));
   }).flat();
 };
@@ -86,7 +74,9 @@ onMounted(async () => {
       <div class="text-[#000000] font-semibold text-[20px] leading-[20px]">{{ historyCteatedData.status }}</div>
       <div class="flex gap-[20px]">
         <div class="text-[#000000] font-semibold text-[15px] leading-[15px]">{{ historyCteatedData.userName }}</div>
-        <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">{{ historyCteatedData.date }}</div>
+        <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">
+          {{ moment(new Date(historyCteatedData.date)).format(" D.MM.YYYY h:mm") }}
+        </div>
       </div>
     </div>
     <div v-for="item in historyUpdatedData" class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
@@ -94,7 +84,9 @@ onMounted(async () => {
         <div class="text-[#000000] font-semibold text-[18px] leading-[20px]">Изменен</div>
         <div class="flex gap-[20px]">
           <div class="text-[#141C30] font-semibold text-[15px] leading-[15px]">{{ item.userName }}</div>
-          <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">{{ item.date }}</div>
+          <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">
+            {{ moment(new Date(item.date)).format(" D.MM.YYYY h:mm") }}
+          </div>
         </div>
       </div>
 
@@ -111,7 +103,9 @@ onMounted(async () => {
         <div class="text-[#000000] font-semibold text-[20px] leading-[18px]">Изменен</div>
         <div class="flex gap-[20px]">
           <div class="text-[#000000] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.userName }}</div>
-          <div class="text-[#808BA0] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.date }}</div>
+          <div class="text-[#808BA0] font-semibold text-[15px] leading-[20px]">
+            {{ moment(new Date(historyCteatedData.date)).format(" D.MM.YYYY h:mm") }}
+          </div>
         </div>
       </div>
       <div class="mt-[10px]">
@@ -136,8 +130,10 @@ onMounted(async () => {
               <span style="color: green">
                 <span v-if="slotProps.data.type === 'Создан'"
                       style="color: #808ba0;">0&lt;</span>{{ slotProps.data.amount }}
-                    <span v-if="slotProps.data.type === 'Изменен'"
-                          style="color: #808ba0;">{{slotProps.data.colPreviousValueEdit}}&lt;</span>{{ slotProps.data.colValueEdit }}
+                    <span v-if="slotProps.data.type === 'Изменен' && slotProps.data.colValueEdit"
+                          style="color: #808ba0;">{{ slotProps.data.colPreviousValueEdit }}&lt;</span>{{
+                  slotProps.data.colValueEdit
+                }}
               </span>
             </template>
           </Column>
@@ -146,7 +142,7 @@ onMounted(async () => {
               <span style="color: green">
                 <span v-if="slotProps.data.type === 'Создан'"
                       style="color: #808ba0;">0&lt;</span>{{ slotProps.data.price }}
-                  <span v-if="slotProps.data.type === 'Изменен'"
+                  <span v-if="slotProps.data.type === 'Изменен' && slotProps.data.priceEditValue"
                         style="color: #808ba0;">{{
                       slotProps.data.previousValue
                     }}&lt;</span>{{ slotProps.data.priceEditValue }}
