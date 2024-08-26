@@ -9,6 +9,7 @@ import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
+import Loader from "@/components/ui/Loader.vue";
 
 const emit = defineEmits(["postGoods", 'editModal']);
 
@@ -23,6 +24,7 @@ const getAllSum = ref(0);
 const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
+const loader = ref(true);
 const newProduct = ref();
 const editModalOpen = ref(true)
 const imgURL = import.meta.env.VITE_IMG_URL;
@@ -127,6 +129,7 @@ const onRowEditSave = (event) => {
 
 const getGood = async () => {
   try {
+
     const res = await useAxios(`/document/show/${props.productId}`);
     const items = res.result.goods;
     const sum = res.result.sum;
@@ -151,6 +154,9 @@ const getGood = async () => {
   } catch (error) {
     console.log(error);
   }
+  finally {
+    loader.value = false
+  }
 };
 
 watchEffect(() => {
@@ -164,7 +170,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
+  <Loader v-if="loader"/>
+  <div v-else class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-6">
       <Select
           v-model="selectedProducts"

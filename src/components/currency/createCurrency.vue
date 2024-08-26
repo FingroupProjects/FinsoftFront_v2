@@ -1,19 +1,14 @@
 <script setup>
 import {reactive, computed, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
-import Dropdown from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
-import FloatLabel from "primevue/floatlabel";
-import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
-import emptyImg from '@/assets/img/emptyImg.svg';
-import Carousel from 'primevue/carousel';
-import moment from "moment/moment.js";
-
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
+import { minLength, maxLength, numeric, integer, between } from '@vuelidate/validators';
+
 
 const toast = useToast();
 
@@ -25,11 +20,26 @@ const createValues = reactive({
   multiplicity: ""
 });
 const rules = reactive({
-  name: {required},
-  symbol_code: {required},
-  digital_code: {required},
-  multiplicity: {required},
+  name: {
+    required,
+    minLength: minLength(3),
+    maxLength: maxLength(25)
+  },
+  symbol_code: {
+    required,
+    maxLength: maxLength(3)
+  },
+  digital_code: {
+    required,
+    numeric,
+    between: between(10, 999)
+  },
+  multiplicity: {
+    required,
+    integer
+  }
 });
+
 const v$ = useVuelidate(rules, createValues);
 
 async function saveFn() {

@@ -89,6 +89,7 @@ async function getExchangeRates() {
   try {
     const res = await useAxios(`/currencyRate/${props.productId}`);
     currencyRateList.value = res.result.data
+      console.log(currencyRateList.value)
   } catch (e) {
     console.log(e);
   }
@@ -147,7 +148,7 @@ getExchangeRates()
       </Column>
       <Column field="data" header="Дата создания">
         <template #body="{data}">
-          {{ moment(new Date(data?.created_at)).format(" D.MM.YYYY h:mm") }}
+          {{ moment(new Date(data?.date)).format("D.MM.YYYY h:mm") }}
         </template>
       </Column>
       <Column field="quantity" header="">

@@ -227,6 +227,10 @@ function getProducts(products) {
 
 onMounted(async () => {
   await getView();
+  findOrganization()
+  findCounterparty()
+  findStorage()
+
 });
 
 findStorage();
