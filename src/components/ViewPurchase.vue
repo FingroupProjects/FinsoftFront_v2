@@ -48,7 +48,7 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
-  comment: ''
+  comments: ''
 });
 
 const v$ = useVuelidate();
@@ -105,7 +105,7 @@ const getView = async () => {
     postDate: item.date,
     currencyName: item.currency,
     doc_number: item.doc_number,
-    comment: item.comment
+    comments: item.comment
   };
 };
 
@@ -116,15 +116,6 @@ const updateView = async () => {
   if (result) {
     loaderSave.value = true
     try {
-      const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
-
-      const existingGoods = await fetchExistingGoods();
-      const existingGoodsMap = new Map(existingGoods.map(good => [good.good_id, good]));
-
-      const newOrUpdatedGoods = goodsArray.filter(product => {
-        const existingGood = existingGoodsMap.get(product.good_id);
-        return !existingGood || (existingGood.price !== product.price || existingGood.amount !== product.amount);
-      });
 
       const data = {
         organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
@@ -133,7 +124,7 @@ const updateView = async () => {
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
-        comment: viewDocument.comment,
+        comment: viewDocument.value.comments,
         goods:productsInfo.value
       };
 
@@ -398,7 +389,7 @@ async function saveFnDialog() {
           <label for="dd-city">Валюта</label>
         </FloatLabel>
         <FloatLabel class="col-span-12 mt-[10px]">
-          <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
+          <Textarea class="w-full" v-model="viewDocument.comments" style="min-height: 20px" rows="2" cols="20"/>
           <label for="dd-city">Комментарий</label>
         </FloatLabel>
         <div class="col-span-12">

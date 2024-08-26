@@ -59,14 +59,14 @@ const addFn = async () => {
     goods.value.push(product);
     postProducts.value.push({
       amount: product.amount,
-      good_id: selectedProducts.value.code,
+      good_id: selectedProducts.value?.code,
       price: product.price,
     });
     getAllSum.value += Number(product.sum);
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
 
-    emit("postGoods", {goods: postProducts.value});
+    emit("postGoods", postProducts.value);
   }
 
   clearInputValues();
@@ -110,21 +110,23 @@ const onRowEditSave = (event) => {
 
   postProducts.value.splice(index, 1, {
     amount: newData.amount,
-    good_id: newData.good_id || oldProduct.good_id,
+    id: oldProduct.id,
+    good_id: oldProduct.good_id,
     price: newData.price,
   });
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
   emit('editModal', editModalOpen.value);
-  emit("postGoods",postProducts.value);
+  emit("postGoods", postProducts.value);
 };
 
 const getGood = async () => {
   const items = props.infoGoods.goods;
-
+  console.log(items)
   goods.value = items.map((item) => ({
-    good_id: item.id,
+    id: item.id,
+    good_id: item.good.id,
     name: item.good.name,
     amount: item.amount,
     price: item.price,
@@ -233,7 +235,7 @@ watchEffect(() => {
       <Column field="quantity" header="">
         <template #body="{data,index}">
           <i
-              @click="confirmDeleteProduct(data.good_id,index)"
+              @click="confirmDeleteProduct(data.id,index)"
               class="pi pi-trash text-[#808BA0] cursor-pointer"
           ></i>
         </template>
