@@ -125,7 +125,7 @@ const updateView = async () => {
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comments,
-        goods:productsInfo.value
+        goods: productsInfo.value
       };
 
       const res = await useAxios(`/document/update/${props.productId}`, {
@@ -141,17 +141,6 @@ const updateView = async () => {
     } finally {
       loaderSave.value = false
     }
-  }
-};
-
-// Fetch existing goods
-const fetchExistingGoods = async () => {
-  try {
-    const response = await useAxios(`/document/${props.productId}`);
-    return response.data.goods || [];
-  } catch (error) {
-    console.error('Error fetching existing goods:', error);
-    return [];
   }
 };
 
@@ -200,11 +189,16 @@ function getProducts(products) {
 }
 
 onMounted(async () => {
-  await getView();
-  findOrganization()
-  findCounterparty()
-  findStorage()
-
+  try {
+    await Promise.all([
+      getView(),
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
 });
 
 findStorage();
@@ -358,7 +352,7 @@ async function saveFnDialog() {
 
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" @click="findCounterparty" option-label="name">
+                  :options="counterparty" option-label="name">
             <template #value>
               {{ viewDocument.counterpartyName?.name }}
             </template>

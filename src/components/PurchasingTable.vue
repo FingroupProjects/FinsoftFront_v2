@@ -76,10 +76,11 @@ const confirmDeleteProduct = async (index, indexProduct) => {
   postProducts.value.splice(indexProduct, 1)
   goods.value.splice(indexProduct, 1)
   getAllProduct.value = goods.value.reduce((total, el) => {
-    return el?.amount - total;
+    return total + (el?.amount || 0);
   }, 0);
+
   getAllSum.value = goods.value.reduce((total, el) => {
-    return el?.sum - total;
+    return total + (el?.sum || 0);
   }, 0);
   emit('editModal', editModalOpen.value)
   try {
@@ -87,6 +88,9 @@ const confirmDeleteProduct = async (index, indexProduct) => {
       method: "POST",
       data: {
         ids: [index],
+      },
+      headers: {
+        'permission': 1
       }
     });
   } catch (error) {
