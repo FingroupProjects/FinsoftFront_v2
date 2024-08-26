@@ -11,6 +11,9 @@ import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
 
 const emit = defineEmits(["postGoods", 'editModal']);
+const props = defineProps({
+  infoGoods: Object
+});
 
 const goods = ref([]);
 const selectedProducts = ref();
@@ -24,24 +27,19 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
-const editModalOpen = ref(true)
-const imgURL = import.meta.env.VITE_IMG_URL;
-
-const validateProduct = (product) => {
-  return product.amount && product.price && product.sum;
-};
-const props = defineProps({
-  productId: {
-    required: true,
-  }
-});
-
+const editModalOpen = ref(true);
 const clearInputValues = () => {
   newProduct.value = {};
   amount.value = "";
   price.value = "";
   sum.value = "";
   selectedProducts.value = null;
+};
+
+const imgURL = import.meta.env.VITE_IMG_URL;
+
+const validateProduct = (product) => {
+  return product.amount && product.price && product.sum;
 };
 
 const addFn = async () => {
@@ -74,19 +72,15 @@ const addFn = async () => {
   clearInputValues();
 };
 
-const confirmDeleteProduct = async (index,indexProduct) => {
+const confirmDeleteProduct = async (index, indexProduct) => {
   postProducts.value.splice(indexProduct, 1)
   goods.value.splice(indexProduct, 1)
   getAllProduct.value = goods.value.reduce((total, el) => {
     return el?.amount - total;
   }, 0);
-  getAllSum.value =  goods.value.reduce((total, el) => {
+  getAllSum.value = goods.value.reduce((total, el) => {
     return el?.sum - total;
   }, 0);
-  // if (goods.value.length === 0) {
-  //   getAllSum.value = 0
-  //   getAllProduct.value = 0
-  // }
   emit('editModal', editModalOpen.value)
   try {
     const response = await useAxios(`/document/delete-document-goods`, {
@@ -95,9 +89,8 @@ const confirmDeleteProduct = async (index,indexProduct) => {
         ids: [index],
       }
     });
-    // await getGood()
-  } catch (error) {}
-
+  } catch (error) {
+  }
 };
 
 const getIdProducts = async (inputValue) => {
@@ -114,6 +107,7 @@ const onRowEditSave = (event) => {
   const oldProduct = goods.value[index];
   newData.sum = Number((newData.price * newData.amount).toFixed(2));
   goods.value.splice(index, 1, newData);
+
   postProducts.value.splice(index, 1, {
     amount: newData.amount,
     good_id: newData.good_id || oldProduct.good_id,
@@ -122,15 +116,13 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal', editModalOpen.value)
+  emit('editModal', editModalOpen.value);
+  emit("postGoods",postProducts.value);
 };
 
 const getGood = async () => {
-  try {
 
-    const res = await useAxios(`/document/show/${props.productId}`);
-    const items = res.result.goods;
-    const sum = res.result.sum;
+  const items = props.infoGoods.goods;
 
     goods.value = items.map((item) => ({
       good_id: item.id,
@@ -148,20 +140,21 @@ const getGood = async () => {
       return total + el?.amount;
     }, 0);
     getAllSum.value = sum
-    console.log(getAllSum)
-  } catch (error) {
-    console.log(error);
-  }
+
 };
 
 watchEffect(() => {
-  sum.value = Number((amount.value * price.value).toFixed(2))
+  sum.value = Number((amount.value * price.value).toFixed(2));
+
 });
 
 onMounted(async () => {
   await getIdProducts();
-  await getGood();
+
 });
+watchEffect(() => {
+  getGood();
+})
 </script>
 
 <template>
@@ -193,7 +186,7 @@ onMounted(async () => {
     </div>
   </div>
 
-  <div class="purchase-table-header" v-if="goods.length > 0">
+  <div class="purchase-table-header" v-if="goods?.length > 0">
     <DataTable
         :value="goods"
         scrollable

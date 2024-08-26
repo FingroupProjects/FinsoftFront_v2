@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, onMounted} from "vue";
+import {ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -44,6 +44,7 @@ const openInfoModal = ref(false);
 const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
+const dateInfo = ref(null)
 
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
@@ -77,6 +78,7 @@ const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
   createOpenModal.value = true
+  dateInfo.value = product
   selectedProductId.value = product.id
 };
 
@@ -142,8 +144,8 @@ const getSeverity = (status, deleted) => {
   }
 };
 
-function closeFn(id) {
-  selectedProductId.value = id
+function closeFn(result) {
+  dateInfo.value = result
   createOpenModal.value = true
   getProducts();
 }
@@ -446,8 +448,8 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
-                     :openModalClose="openInfoModal"/>
+
+      <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo" :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
