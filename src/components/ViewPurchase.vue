@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch, watchEffect, computed} from 'vue';
+import {onMounted, ref, watch, watchEffect} from 'vue';
 import Select from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
@@ -14,7 +14,6 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
-import Loader from "@/components/ui/Loader.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -24,7 +23,8 @@ const props = defineProps({
   openModalClose: {
     type: Boolean,
     default: false
-  }
+  },
+  date: Object
 });
 
 const status = ref('');
@@ -39,7 +39,6 @@ const openInfoModal = ref(false);
 const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
-const loaderView = ref(true);
 const loaderSave = ref(false)
 const viewDocument = ref({
   organizationName: '',
@@ -87,36 +86,27 @@ async function getAgreement() {
 }
 
 const getView = async () => {
-  try {
+  const item = props.date
 
-    const res = await useAxios(`/document/show/${props.productId}`)
-    const item = res.result;
-
-    if (item.active) {
-      approved.value = true;
-      status.value = 'Проведен';
-    } else {
-      approved.value = false;
-      status.value = 'Не проведен';
-    }
-    viewDocument.value = {
-      organizationName: item.organization,
-      author: item.author,
-      counterpartyName: item.counterparty,
-      counterpartyAgreementName: item.counterpartyAgreement,
-      storageName: item.storage,
-      date: new Date(item.date),
-      postDate: item.date,
-      currencyName: item.currency,
-      doc_number: item.doc_number,
-      comment: item.comment
-    };
-
-  } catch (e) {
-    console.error('Error fetching data:', e);
-  } finally {
-    loaderView.value = false
+  if (item.active) {
+    approved.value = true;
+    status.value = 'Проведен';
+  } else {
+    approved.value = false;
+    status.value = 'Не проведен';
   }
+  viewDocument.value = {
+    organizationName: item.organization,
+    author: item.author,
+    counterpartyName: item.counterparty,
+    counterpartyAgreementName: item.counterpartyAgreement,
+    storageName: item.storage,
+    date: new Date(item.date),
+    postDate: item.date,
+    currencyName: item.currency,
+    doc_number: item.doc_number,
+    comment: item.comment
+  };
 };
 
 const updateView = async () => {
@@ -144,14 +134,7 @@ const updateView = async () => {
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.comment,
-        goods: newOrUpdatedGoods.map(product => ({
-          good_id: product.good_id,
-          price: parseFloat(product.price),
-          amount: parseInt(product.amount, 10),
-          created: product.created || false,
-          updated: product.updated || false,
-          deleted: product.deleted || false
-        }))
+        goods:productsInfo.value
       };
 
       const res = await useAxios(`/document/update/${props.productId}`, {
@@ -231,7 +214,7 @@ onMounted(async () => {
 
 findStorage();
 
-function infoModalClose(value) {
+function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
   else emit('close-sidebar')
 }
@@ -241,6 +224,7 @@ function changeModal() {
 }
 
 watchEffect(() => {
+
   if (viewDocument.value.counterpartyName &&
       viewDocument.value.counterpartyName.agreement &&
       viewDocument.value.counterpartyName.agreement.length > 0) {
@@ -271,7 +255,6 @@ watch(viewDocument.value, (newValue) => {
 
 watch(viewDocument, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     changeValue.value = true;
   }
   initialValue.value = newVal;
@@ -279,7 +262,6 @@ watch(viewDocument, (newVal) => {
 
 watch(productsInfo, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     changeValue.value = true;
   }
   initialValue.value = newVal;
@@ -293,8 +275,7 @@ async function saveFnDialog() {
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
       class="pi pi-times text-[#808BA0]"></i></button>
-  <Loader v-if="loaderView"/>
-  <div v-else>
+  <div>
     <div class="edit-purchase">
       <Toast/>
       <div class="header">
@@ -444,7 +425,7 @@ async function saveFnDialog() {
         </fin-button>
       </div>
     </div>
-    <purchasing-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
+    <purchasing-table :info-goods="props.date" @post-goods="getProducts" @editModal="changeModal"/>
 
     <div class="text-[20px] font-[600] absolute bottom-[40px]">
       Автор: {{ userName.name }}
@@ -477,7 +458,8 @@ async function saveFnDialog() {
       Хотите сохранить измения?
     </div>
     <template #footer>
-      <fin-button label="Подтвердить" class="w-full" :loading="loaderSave" severity="success" icon="pi pi-check" @click="saveFnDialog"/>
+      <fin-button label="Подтвердить" class="w-full" :loading="loaderSave" severity="success" icon="pi pi-check"
+                  @click="saveFnDialog"/>
       <fin-button
           label="Отменить"
           icon="pi pi-times"
