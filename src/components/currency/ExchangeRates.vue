@@ -7,18 +7,24 @@ import moment from "moment";
 import {useAxios} from "@/composable/useAxios.js";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
+import FloatLabel from "primevue/floatlabel";
+import DatePicker from "primevue/datepicker";
 
 const props = defineProps({
   productId: {
     required: true,
+  },
+  multiplicity: {
+    required: true
   }
 });
 const toast = useToast();
 
 const coleVo = ref("");
+const date = ref("");
 const editingRows = ref([]);
 const newProduct = ref();
-const barCodeList = ref([]);
+const currencyRateList = ref([]);
 
 const clearInputValues = () => {
   newProduct.value = {};
@@ -27,7 +33,7 @@ const clearInputValues = () => {
 
 const confirmDeleteProduct = async (index) => {
   try {
-    const res = await useAxios(`/barcode/${index}`,{
+    const res = await useAxios(`/currencyRate/${index}`,{
       method: "DELETE",
     });
 
@@ -37,7 +43,7 @@ const confirmDeleteProduct = async (index) => {
       detail: "Message Content",
       life: 3000,
     });
-    getBarcode()
+    getExchangeRates()
   } catch (e) {
     console.log(e);
     toast.add({
@@ -51,14 +57,15 @@ const confirmDeleteProduct = async (index) => {
 
 async function postMethod() {
   try {
-    const res = await useAxios(`/barcode`, {
+
+    const res = await useAxios(`/currencyRate/add/${props.productId}`, {
       method: "POST",
       data: {
-        "barcode": coleVo.value,
-        "good_id": props.productId
+        "date": moment(date.value).format("DD-MM-YYYY"),
+        "value": coleVo.value
       },
     });
-    getBarcode()
+
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -66,6 +73,7 @@ async function postMethod() {
       life: 3000,
     });
     clearInputValues();
+    getExchangeRates()
   } catch (e) {
     console.log(e);
     toast.add({
@@ -77,26 +85,42 @@ async function postMethod() {
   }
 }
 
-async function getBarcode() {
+async function getExchangeRates() {
   try {
-    const res = await useAxios(`/barcode/${props.productId}`);
-    barCodeList.value = res.result.data
+    const res = await useAxios(`/currencyRate/${props.productId}`);
+    currencyRateList.value = res.result.data
+      console.log(currencyRateList.value)
   } catch (e) {
     console.log(e);
   }
 }
 
-getBarcode()
+getExchangeRates()
 </script>
 
 <template>
   <div class="flex items-center mt-[30px] gap-[21px]">
-    <div class="header-title">Штрих-коды</div>
+    <div class="header-title">Курсы валют</div>
   </div>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
-    <div class="col-span-5 flex gap-[16px]">
-      <fin-input v-model="coleVo" class="w-full" :model-value="formatInputAmount(coleVo)"
-                 placeholder="Введите номер штрих-кода"/>
+    <div class="col-span-8 flex gap-[16px]">
+      <fin-input v-model="coleVo" class="" :model-value="formatInputAmount(coleVo)"
+                 placeholder="Курс валют"/>
+
+      <FloatLabel class="col-span-5">
+        <DatePicker
+            showIcon
+            v-model="date"
+            dateFormat="dd.mm.yy"
+            iconDisplay="input"
+            class="w-full"
+        >
+        </DatePicker>
+        <label for="dd-city">Дата</label>
+      </FloatLabel>
+      <fin-input disabled class="" :model-value="props.multiplicity"
+                 placeholder="Кратность"/>
+
       <fin-button
           icon="pi pi-save"
           @click="postMethod"
@@ -104,11 +128,12 @@ getBarcode()
           severity="success"
           class="p-button-lg"
       />
+
     </div>
   </div>
-  <div class="table-create dropdown-status" v-if="barCodeList.length > 0">
+  <div class="table-create dropdown-status" v-if="currencyRateList.length > 0">
     <DataTable
-        :value="barCodeList"
+        :value="currencyRateList"
         scrollable
         scrollHeight="280px"
         class="mt-[21px]"
@@ -116,17 +141,14 @@ getBarcode()
         editMode="row"
         tableStyle="min-width: 50rem"
     >
-      <Column field="coleVo" header="Наименование">
-        <template #body="{ data }">
-          <div class="flex items-center gap-[10px]">
-            <img src="@/assets/img/shtirxImg.svg" alt="" class="me-2">
-            <div>{{ data.barcode }}</div>
-          </div>
+      <Column field="data" header="Дата создания">
+        <template #body="{data}">
+          {{ data.value }}
         </template>
       </Column>
       <Column field="data" header="Дата создания">
         <template #body="{data}">
-          {{ moment(new Date(data?.created_at)).format(" D.MM.YYYY h:mm") }}
+          {{ moment(new Date(data?.date)).format("D.MM.YYYY h:mm") }}
         </template>
       </Column>
       <Column field="quantity" header="">

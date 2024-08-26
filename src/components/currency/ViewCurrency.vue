@@ -1,18 +1,35 @@
 <script setup>
-import {reactive, computed, ref} from "vue";
+import {computed, reactive, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
+import Dropdown from "primevue/dropdown";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
+import FloatLabel from "primevue/floatlabel";
+import Textarea from 'primevue/textarea';
 import FinInput from "@/components/ui/Inputs.vue";
-const emit = defineEmits(["closeDialog", 'close-sidebar']);
-import { minLength, maxLength, numeric, integer, between } from '@vuelidate/validators';
+import emptyImg from '@/assets/img/emptyImg.svg';
+import QsCodeAdd from "@/components/goodsComponents/QsCodeAdd.vue";
+import KitGoods from "@/components/goodsComponents/KitGoods.vue";
+import Carousel from "primevue/carousel";
+import ExchangeRates from "@/components/currency/ExchangeRates.vue";
 
+const emit = defineEmits(["closeDialog", 'close-sidebar']);
+
+const props = defineProps({
+  productId: {
+    required: true,
+  }
+});
 
 const toast = useToast();
 
-const openInfoModal = ref()
+const goodGroupList = ref([]);
+const listUnit = ref([]);
+const locationList = ref([]);
+const id = ref();
+const imageRefs = ref([]);
 const createValues = reactive({
   name: "",
   symbol_code: "",
@@ -20,35 +37,25 @@ const createValues = reactive({
   multiplicity: ""
 });
 const rules = reactive({
-  name: {
-    required,
-    minLength: minLength(3),
-    maxLength: maxLength(25)
-  },
-  symbol_code: {
-    required,
-    maxLength: maxLength(3)
-  },
-  digital_code: {
-    required,
-    numeric,
-    between: between(10, 999)
-  },
-  multiplicity: {
-    required,
-    integer
-  }
+  name: {required},
+  symbol_code: {required},
+  digital_code: {required},
+  multiplicity: {required},
 });
+const fileInput = ref()
+const imagePreview = ref([])
+const imgURL = import.meta.env.VITE_IMG_URL;
 
 const v$ = useVuelidate(rules, createValues);
 
+
 async function saveFn() {
   const result = await v$.value.$validate();
-  openInfoModal.value = false
+
   if (result) {
     try {
-      const res = await useAxios(`currency`, {
-        method: "POST",
+      const res = await useAxios(`currency/${props.productId}`, {
+        method: "PATCH",
         data: {
           digital_code: createValues.digital_code,
           symbol_code: createValues.symbol_code,
@@ -75,13 +82,32 @@ async function saveFn() {
   }
 }
 
+async function getGood() {
+  try {
+    const res = await useAxios(`/currency/${props.productId}`);
+    createValues.name = res.result.name
+    createValues.digital_code = res.result.digital_code
+    createValues.symbol_code = res.result.symbol_code
+    createValues.multiplicity = res.result.multiplicity
+    
+    id.value = res.result.id
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+getGood()
+
 </script>
 
 <template>
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Добавление валюты</div>
+        <div class="header-title"> Просмотр товара</div>
+        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
+          №{{ id }}
+        </div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -110,21 +136,7 @@ async function saveFn() {
     </div>
 
   </div>
-  <div class="grid grid-cols-12 w-[29%] items-center mt-[30px]">
-    <div class="text-qs-code col-span-6">
-      Курсы валют
-    </div>
-    <fin-button
-        icon="pi pi-save"
-        label="Добавить"
-        severity="success"
-        class="col-span-6"
-    />
-    <div class="dissipation-qs-code col-span-12 mt-4">
-      Вы пока не добавили ни одного курса
-    </div>
-  </div>
-  <hr class="mt-[30px]">
+  <exchange-rates :product-id="props.productId" :multiplicity="createValues.multiplicity" />
   <Toast/>
 </template>
 
