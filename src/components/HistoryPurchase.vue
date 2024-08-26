@@ -13,7 +13,6 @@ const props = defineProps({
     required: true,
   },
 });
-
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const options = {
@@ -28,19 +27,19 @@ const formatDate = (dateString) => {
   return date.toLocaleString('en-GB', options).replace(',', '');
 };
 
-const getHistory = async () =>{
-  try{
+const getHistory = async () => {
+  try {
     const res = await useAxios(`/document/changeHistory/${props.productId}`);
     const item = res.result;
-    item.history.forEach(item=>{
-      if(item.status === 'Создан'){
+    item.history.forEach(item => {
+      if (item.status === 'Создан') {
         historyCteatedData.value = {
           status: item.status,
           userName: item.user.name,
           date: formatDate(item.date),
         }
       }
-      if(item.status === "Изменен"){
+      if (item.status === "Изменен") {
         historyUpdatedData.value.push({
           status: item.status,
           userName: item.user.name,
@@ -51,8 +50,7 @@ const getHistory = async () =>{
       }
     })
 
-    console.log('history',historyUpdatedData);
-  }catch(error){
+  } catch (error) {
     console.error(error)
   }
 }
@@ -61,15 +59,14 @@ const getGoodsHistory = () => {
   goodsHistory.value = historyUpdatedData.value.map((item) => {
     return item.goods.map((good) => ({
       good: good.good,
-      price:  good.body.price,
+      price: good.body.price,
       amount: good.body.amount,
       type: good.type,
     }));
   }).flat();
-  console.log(goodsHistory.value);
 };
 
-onMounted(async ()=>{
+onMounted(async () => {
   await getHistory();
   await getGoodsHistory();
 })
@@ -80,20 +77,19 @@ onMounted(async ()=>{
   <div>
     <div class="ml-5 -mt-2">
       <p class="text-[20px] font-semibold text-[#141C30]">История закупки</p>
-      <p class="text-[#808BA0] text-[16px]">№32151</p>
     </div>
     <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]">
-      <div class="text-[#000000] font-semibold text-[20px] leading-[20px]">{{historyCteatedData.status}}</div>
+      <div class="text-[#000000] font-semibold text-[20px] leading-[20px]">{{ historyCteatedData.status }}</div>
       <div class="flex gap-[20px]">
-        <div class="text-[#000000] font-semibold text-[15px] leading-[15px]">{{historyCteatedData.userName}}</div>
+        <div class="text-[#000000] font-semibold text-[15px] leading-[15px]">{{ historyCteatedData.userName }}</div>
         <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">{{ historyCteatedData.date }}</div>
       </div>
     </div>
     <div class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
       <div class="flex justify-between items-center">
-        <div class="text-[#000000] font-semibold text-[20px] leading-[18px]">{{historyCteatedData.status}}</div>
-        <div class="flex gap-[20px]" >
-          <div class="text-[#000000] font-semibold text-[15px] leading-[20px]">{{historyCteatedData.userName}}</div>
+        <div class="text-[#000000] font-semibold text-[20px] leading-[18px]">{{ historyCteatedData.status }}</div>
+        <div class="flex gap-[20px]">
+          <div class="text-[#000000] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.userName }}</div>
           <div class="text-[#808BA0] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.date }}</div>
         </div>
       </div>
@@ -131,18 +127,20 @@ onMounted(async ()=>{
 
       </div>
     </div>
-    <div  v-for="item in historyUpdatedData"  class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
+    <div v-for="item in historyUpdatedData" class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
       <div class=" flex justify-between items-center">
         <div class="text-[#000000] font-semibold text-[18px] leading-[20px]">Изменен</div>
-        <div class="flex gap-[20px]" >
-          <div class="text-[#141C30] font-semibold text-[15px] leading-[15px]">{{item.userName}}</div>
+        <div class="flex gap-[20px]">
+          <div class="text-[#141C30] font-semibold text-[15px] leading-[15px]">{{ item.userName }}</div>
           <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">{{ item.date }}</div>
         </div>
       </div>
 
       <div class="flex gap-[10px]" v-for="(data, key) in item.body">
-        <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{key}}:</div>
-        <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{data.new_value}} > {{data.previous_value}}</div>
+        <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{ key }}:</div>
+        <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{ data.new_value }} >
+          {{ data.previous_value }}
+        </div>
       </div>
 
     </div>
