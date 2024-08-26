@@ -108,7 +108,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.result.id);
+      emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
       toast.add({
