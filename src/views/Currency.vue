@@ -22,7 +22,7 @@ const {
   currency,
   loadingCurrency,
 } = useStaticApi();
-
+const loader = ref(true)
 const visibleRight = ref(false);
 const products = ref();
 const selectedCurrency = ref(null);
@@ -30,21 +30,19 @@ const selectedProduct = ref();
 const selectedProductId = ref();
 const search = ref('');
 const selectedStatus = ref();
-const first = ref(1);
+const first = ref(0);
 const visibleFilter = ref(false);
 const metaKey = ref(true);
 const createOpenModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 import moment from "moment";
-import CreateOrganizationBill from "@/components/organizationBillComponents/CreateOrganizationBill.vue";
-import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
-import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
 import FilterOrganizationBill from "@/components/organizationBillComponents/FilterOrganizationBill.vue";
 import MethodsCashRegister from "@/components/cashRegister/MethodsCashRegister.vue";
-import ViewCashRegisters from "@/components/cashRegister/ViewCashRegisters.vue";
-import CreateCashRegister from "@/components/cashRegister/CreateCashRegister.vue";
 import CreateCurrency from "@/components/currency/createCurrency.vue";
+import ViewCurrency from "@/components/currency/ViewCurrency.vue";
+import Loader from "@/components/ui/Loader.vue";
+
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const statusList = ref([
@@ -103,17 +101,23 @@ async function getProducts(filters = {}) {
     search: search.value,
     currency_id: selectedCurrency.value?.code,
     deleted: selectedStatus.value?.code,
-    page: first.value + 1,
+    page: first.value ,
     orderBy: orderBy.value,
     sort: sortDesc.value,
     ...filters,
   };
 
-  const res = await useAxios(`currency?search=`, {params});
 
-  pagination.value.totalPages = Number(res.result.pagination.total_pages);
-  products.value = res.result.data;
-  return products.value;
+  try {
+    const res = await useAxios(`currency?search=`, {params});
+    pagination.value.totalPages = Number(res.result.pagination.total_pages);
+    products.value = res.result.data;
+    return products.value;
+  } catch (e) {
+
+  } finally {
+    loader.value = false
+  }
 }
 
 function getProductMethods() {
@@ -168,200 +172,204 @@ getProducts();
 
 <template>
   <header-purchase header-title="Валюты"/>
-  <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
-    <IconField class="col-span-6">
-      <InputIcon class="pi pi-search"/>
-      <InputText
-          class="w-full"
-          @input="getProducts"
-          v-model="search"
-          placeholder="Поиск по названию"
-      />
-    </IconField>
-    <Dropdown
-        v-model="selectedCurrency"
-        optionLabel="name"
-        placeholder="Валюта"
-        @click="findCurrency"
-        :loading="loadingCurrency"
-        :options="currency"
-        class="w-full col-span-2"
-    />
-    <Dropdown
-        v-model="selectedStatus"
-        :options="statusList"
-        optionLabel="name"
-        placeholder="Статус"
-        class="w-full col-span-2"
-    />
-    <div class="flex gap-4 col-span-2">
-      <fin-button
-          @click="visibleFilter = true "
-          severity="primary"
-          class="w-[46px]"
+  <Loader v-if="loader"/>
+  <div v-else>
 
-      >
-        <img src="@/assets/img/menu.svg" alt=""/>
-      </fin-button>
-      <fin-button
-          @click="createOpen"
-          severity="success"
-          icon="pi pi-plus"
-          class="w-[80%]"
-          label="Добавить"
-      />
-    </div>
-  </div>
-  <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsCashRegister  @get-product="getProductMethods" :select-products="selectedProduct"
-                  v-if="!(!selectedProduct || !selectedProduct.length)"/>
-    <DataTable
-        scrollable
-        scrollHeight="660px"
-        v-model:selection="selectedProduct"
-        :value="products"
-        dataKey="id"
-        tableStyle="min-width:100%"
-        :metaKeySelection="metaKey"
-        @row-click="onRowClick"
-    >
-      <Column selectionMode="multiple"></Column>
-      <Column field="code" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('id',index)">
-            № <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
-        </template>
-      </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('name',index)">
-            Наименование <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.name }}
-        </template>
-      </Column>
-      <Column field="image"  :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('date',index)">
-            Дата <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY") }}
-        </template>
-      </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('name',index)">
-            Актуальный курс <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.last_exchange_rate?.value }}
-        </template>
-      </Column>
-      <Column field="category" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('name',index)">
-            Символьный код <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="{index}">
-
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.symbol_code }}
-        </template>
-      </Column>
-      <Column field="status" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" @click="sortData('deleted_at',index)">
-            Статус <i
-              :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-          ></i>
-          </div>
-        </template>
-        <template #sorticon="">
-        </template>
-        <template #body="slotProps">
-          <Tag
-              :value="getSeverity(slotProps.data?.deleted_at).name"
-              :severity="getSeverity(slotProps.data?.deleted_at).status"
-          />
-        </template>
-      </Column>
-    </DataTable>
-    <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
-      <span class="paginator-text"> Элементов на странице: </span>
+    <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
+      <IconField class="col-span-6">
+        <InputIcon class="pi pi-search"/>
+        <InputText
+            class="w-full"
+            @input="getProducts"
+            v-model="search"
+            placeholder="Поиск по названию"
+        />
+      </IconField>
       <Dropdown
-          v-model="selectPage"
-          @update:model-value="getProducts"
-          :options="pageCounts"
-      >
-        <template #value="slotProps">{{ slotProps.value.count }}</template>
-        <template #option="slotProps">
-          {{ slotProps.option.count }}
-        </template>
-      </Dropdown>
-      <Paginator
-          :rows="1"
-          :totalRecords="Number(pagination.totalPages)"
-          v-model:first="first"
-          @page="getProducts"
-          :rowsPerPageOptions="[10, 20, 30]"
-          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          currentPageReportTemplate="{first} / {totalRecords}"
+          v-model="selectedCurrency"
+          optionLabel="name"
+          placeholder="Валюта"
+          @click="findCurrency"
+          :loading="loadingCurrency"
+          :options="currency"
+          class="w-full col-span-2"
       />
+      <Dropdown
+          v-model="selectedStatus"
+          :options="statusList"
+          optionLabel="name"
+          placeholder="Статус"
+          class="w-full col-span-2"
+      />
+      <div class="flex gap-4 col-span-2">
+        <fin-button
+            @click="visibleFilter = true "
+            severity="primary"
+            class="w-[46px]"
+
+        >
+          <img src="@/assets/img/menu.svg" alt=""/>
+        </fin-button>
+        <fin-button
+            @click="createOpen"
+            severity="success"
+            icon="pi pi-plus"
+            class="w-[80%]"
+            label="Добавить"
+        />
+      </div>
+    </div>
+    <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
+      <MethodsCashRegister @get-product="getProductMethods" :select-products="selectedProduct"
+                           v-if="!(!selectedProduct || !selectedProduct.length)"/>
+      <DataTable
+          scrollable
+          scrollHeight="660px"
+          v-model:selection="selectedProduct"
+          :value="products"
+          dataKey="id"
+          tableStyle="min-width:100%"
+          :metaKeySelection="metaKey"
+          @row-click="onRowClick"
+      >
+        <Column selectionMode="multiple"></Column>
+        <Column field="code" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('id',index)">
+              № <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
+          </template>
+        </Column>
+        <Column field="category" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('name',index)">
+              Наименование <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.name }}
+          </template>
+        </Column>
+        <Column field="image" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('date',index)">
+              Дата <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY") }}
+          </template>
+        </Column>
+        <Column field="category" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('name',index)">
+              Актуальный курс <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.last_exchange_rate?.value }}
+          </template>
+        </Column>
+        <Column field="category" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('name',index)">
+              Символьный код <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.symbol_code }}
+          </template>
+        </Column>
+        <Column field="status" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('deleted_at',index)">
+              Статус <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="">
+          </template>
+          <template #body="slotProps">
+            <Tag
+                :value="getSeverity(slotProps.data?.deleted_at).name"
+                :severity="getSeverity(slotProps.data?.deleted_at).status"
+            />
+          </template>
+        </Column>
+      </DataTable>
+      <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
+        <span class="paginator-text"> Элементов на странице: </span>
+        <Dropdown
+            v-model="selectPage"
+            @update:model-value="getProducts"
+            :options="pageCounts"
+        >
+          <template #value="slotProps">{{ slotProps.value.count }}</template>
+          <template #option="slotProps">
+            {{ slotProps.option.count }}
+          </template>
+        </Dropdown>
+        <Paginator
+            :rows="1"
+            :totalRecords="Number(pagination.totalPages)"
+            v-model:first="first"
+            @page="getProducts"
+            :rowsPerPageOptions="[10, 20, 30]"
+            template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="{first} / {totalRecords}"
+        />
+      </div>
     </div>
   </div>
   <div class="create-purchase-sidebar">
@@ -371,8 +379,8 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <view-cash-registers v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
-                 @close-dialog="closeFn"/>
+      <view-currency v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
+                     @close-dialog="closeFn"/>
       <CreateCurrency v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
 
     </Sidebar>
