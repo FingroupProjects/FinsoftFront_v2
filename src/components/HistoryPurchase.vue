@@ -38,8 +38,7 @@ const getHistory = async () => {
           userName: item.user.name,
           date: formatDate(item.date),
         }
-      }
-      if (item.status === "Изменен") {
+      } else if (item.status === "Изменен") {
         historyUpdatedData.value.push({
           status: item.status,
           userName: item.user.name,
@@ -55,13 +54,18 @@ const getHistory = async () => {
   }
 }
 
-const getGoodsHistory = () => {
+const getGoodsHistory = async () => {
+  console.log(historyUpdatedData.value)
   goodsHistory.value = historyUpdatedData.value.map((item) => {
     return item.goods.map((good) => ({
       good: good.good,
       price: good.body.price,
       amount: good.body.amount,
       type: good.type,
+      priceEditValue: good.body?.Цена?.new_value,
+      previousValue: good.body?.Цена?.previous_value,
+      colValueEdit:good.body?.Количество?.new_value,
+      colPreviousValueEdit:good.body?.Количество?.previous_value,
     }));
   }).flat();
 };
@@ -85,48 +89,6 @@ onMounted(async () => {
         <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">{{ historyCteatedData.date }}</div>
       </div>
     </div>
-    <div class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
-      <div class="flex justify-between items-center">
-        <div class="text-[#000000] font-semibold text-[20px] leading-[18px]">{{ historyCteatedData.status }}</div>
-        <div class="flex gap-[20px]">
-          <div class="text-[#000000] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.userName }}</div>
-          <div class="text-[#808BA0] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.date }}</div>
-        </div>
-      </div>
-      <div class="mt-[10px]">
-        <DataTable class="font-semibold" :value="goodsHistory" tableStyle="min-width: 10px; height: 100px;">
-          <Column class="font-semibold" header="Товар">
-            <template #body="slotProps">
-              <div style="display: flex; align-items: center;">
-                <i v-if="!slotProps.data.photo" class="pi pi-image" style="margin-right: 10px;"></i>
-                <img v-else :src="slotProps.data.image" class="image-good">
-                <span class="ml-[10px] font-semibold">{{ slotProps.data.good }}</span>
-              </div>
-            </template>
-          </Column>
-          <Column header="Статус" style="width: 100px; font-size: 15px; font-weight: 600;">
-            <template #body="slotProps">
-              <span>{{ slotProps.data.type }}</span>
-            </template>
-          </Column>
-          <Column header="Кол-во" style="width: 100px; font-size: 15px; font-weight: 600;">
-            <template #body="slotProps">
-      <span style="color: green">
-        <span v-if="slotProps.data.type === 'Создан'" style="color: #808ba0;">0&lt;</span>{{ slotProps.data.amount }}
-      </span>
-            </template>
-          </Column>
-          <Column header="Цена" style="width: 100px; font-size: 15px; font-weight: 600;">
-            <template #body="slotProps">
-      <span style="color: green">
-        <span v-if="slotProps.data.type === 'Создан'" style="color: #808ba0;">0&lt;</span>{{ slotProps.data.price }}
-      </span>
-            </template>
-          </Column>
-        </DataTable>
-
-      </div>
-    </div>
     <div v-for="item in historyUpdatedData" class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]">
       <div class=" flex justify-between items-center">
         <div class="text-[#000000] font-semibold text-[18px] leading-[20px]">Изменен</div>
@@ -143,6 +105,57 @@ onMounted(async () => {
         </div>
       </div>
 
+    </div>
+    <div class="rounded-[10px]  p-[18px] mt-[16px] bg-[#F6F6F6]" v-if="goodsHistory.length !== 0">
+      <div class="flex justify-between items-center">
+        <div class="text-[#000000] font-semibold text-[20px] leading-[18px]">Изменен</div>
+        <div class="flex gap-[20px]">
+          <div class="text-[#000000] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.userName }}</div>
+          <div class="text-[#808BA0] font-semibold text-[15px] leading-[20px]">{{ historyCteatedData.date }}</div>
+        </div>
+      </div>
+      <div class="mt-[10px]">
+        <DataTable class="font-semibold" :value="goodsHistory"
+                   tableStyle="min-width: 10px; height: 100px;">
+          <Column class="font-semibold" header="Товар">
+            <template #body="slotProps">
+              <div style="display: flex; align-items: center;">
+                <i v-if="!slotProps.data.photo" class="pi pi-image" style="margin-right: 10px;"></i>
+                <img v-else :src="slotProps.data.image" class="image-good" alt=""/>
+                <span class="ml-[10px] font-semibold">{{ slotProps.data.good }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="Статус" style="width: 100px; font-size: 15px; font-weight: 600;">
+            <template #body="slotProps">
+              <span>{{ slotProps.data.type }}</span>
+            </template>
+          </Column>
+          <Column header="Кол-во" style="width: 100px; font-size: 15px; font-weight: 600;">
+            <template #body="slotProps">
+              <span style="color: green">
+                <span v-if="slotProps.data.type === 'Создан'"
+                      style="color: #808ba0;">0&lt;</span>{{ slotProps.data.amount }}
+                    <span v-if="slotProps.data.type === 'Изменен'"
+                          style="color: #808ba0;">{{slotProps.data.colPreviousValueEdit}}&lt;</span>{{ slotProps.data.colValueEdit }}
+              </span>
+            </template>
+          </Column>
+          <Column header="Цена" style="width: 100px; font-size: 15px; font-weight: 600;">
+            <template #body="slotProps">
+              <span style="color: green">
+                <span v-if="slotProps.data.type === 'Создан'"
+                      style="color: #808ba0;">0&lt;</span>{{ slotProps.data.price }}
+                  <span v-if="slotProps.data.type === 'Изменен'"
+                        style="color: #808ba0;">{{
+                      slotProps.data.previousValue
+                    }}&lt;</span>{{ slotProps.data.priceEditValue }}
+              </span>
+            </template>
+          </Column>
+        </DataTable>
+
+      </div>
     </div>
   </div>
 </template>

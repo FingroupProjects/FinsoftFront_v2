@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -125,7 +125,17 @@ function getProducts(products) {
   productsInfo.value = products;
 }
 
-findStorage()
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
@@ -217,7 +227,6 @@ watch(createValues, (newValue) => {
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
@@ -228,7 +237,6 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectedCounterparty"
             :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-            @click="findCounterparty"
             :options="counterparty"
             :loading="loadingCounterparty"
             optionLabel="name"
@@ -254,7 +262,6 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectedStorage"
             :class="{ 'p-invalid': v$.selectedStorage.$error }"
-            @click="findStorage"
             :loading="loadingStorage"
             :options="storage"
             optionLabel="name"
