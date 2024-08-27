@@ -107,14 +107,12 @@ onMounted(async () => {
             <div class="text-[#808BA0] font-semibold text-[15px] leading-[15px]">
               {{ moment(new Date(item?.date)).format(" D.MM.YYYY h:mm") }}
             </div>
-
           </div>
-
         </div>
         <div class="flex gap-[10px]" v-for="(data, key) in item.body">
           <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{ key }}:</div>
-          <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]">{{ data?.new_value }} >
-            {{ data?.previous_value }}
+          <div class="text-[#141C30] mt-3 font-semibold text-[15px] leading-[15px]"> {{ data?.previous_value }} >
+            {{ data?.new_value }}
           </div>
         </div>
         <div class="mt-[10px]" v-if="item.goods.length > 0">
@@ -152,18 +150,13 @@ onMounted(async () => {
                 <span v-if="slotProps.data.type === 'Создан'"
                       style="color: #808ba0;">0&lt;</span>{{ slotProps.data.body?.Цена?.new_value }}
                   <span v-if="slotProps.data.type === 'Изменен' && slotProps.data.body?.Цена?.new_value"
-                        style="color: #808ba0;">&lt;</span>{{ slotProps.data.body.Цена?.previous_value}}
+                        style="color: #808ba0;">&lt;</span>{{ slotProps.data.body.Цена?.previous_value }}
               </span>
               </template>
             </Column>
           </DataTable>
-
         </div>
       </div>
-
-
-
-
     </div>
   </div>
 </template>
