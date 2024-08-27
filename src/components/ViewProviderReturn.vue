@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch, watchEffect, computed} from 'vue';
+import {onMounted, ref, watch, watchEffect} from 'vue';
 import Select from "primevue/dropdown";
 import PurchasingTable from "@/components/PurchasingTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
@@ -14,8 +14,6 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
-import ProviderOrderTable from "@/components/ProviderOrderTable.vue";
-import ProviderReturnTable from "@/components/ProviderReturnTable.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -25,10 +23,11 @@ const props = defineProps({
   openModalClose: {
     type: Boolean,
     default: false
-  }
+  },
+  data: Object
 });
 
-const status = ref('Не проведен');
+const status = ref('');
 const productsInfo = ref();
 const toast = useToast();
 const visibleMovement = ref(false);
@@ -36,11 +35,11 @@ const visibleHistory = ref(false);
 const approved = ref(false);
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
-const comments = ref('');
 const openInfoModal = ref(false);
 const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
+const loaderSave = ref(false)
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -87,27 +86,27 @@ async function getAgreement() {
 }
 
 const getView = async () => {
-  try {
-    const res = await useAxios(`/document/show/${props.productId}`)
-    const item = res.result;
+  const item = props.data
 
-    viewDocument.value = {
-      organizationName: item.organization,
-      author: item.author,
-      counterpartyName: item.counterparty,
-      counterpartyAgreementName: item.counterpartyAgreement,
-      storageName: item.storage,
-      date: new Date(item.date),
-      postDate: item.date,
-      currencyName: item.currency,
-      doc_number: item.doc_number,
-      comment: item.comment
-    };
-
-
-  } catch (e) {
-    console.error('Error fetching data:', e);
+  if (item.active) {
+    approved.value = true;
+    status.value = 'Проведен';
+  } else {
+    approved.value = false;
+    status.value = 'Не проведен';
   }
+  viewDocument.value = {
+    organizationName: item.organization,
+    author: item.author,
+    counterpartyName: item.counterparty,
+    counterpartyAgreementName: item.counterpartyAgreement,
+    storageName: item.storage,
+    date: new Date(item.date),
+    postDate: item.date,
+    currencyName: item.currency,
+    doc_number: item.doc_number,
+    comment: item.comment
+  };
 };
 
 const updateView = async () => {
@@ -115,36 +114,19 @@ const updateView = async () => {
   openInfoModal.value = false
   changeValue.value = false
   if (result) {
+    loaderSave.value = true
     try {
-      const goodsArray = (productsInfo.value && Array.isArray(productsInfo.value.goods)) ? productsInfo.value.goods : [];
-
-      const existingGoods = await fetchExistingGoods();
-      const existingGoodsMap = new Map(existingGoods.map(good => [good.good_id, good]));
-
-      const newOrUpdatedGoods = goodsArray.filter(product => {
-        const existingGood = existingGoodsMap.get(product.good_id);
-        return !existingGood || (existingGood.price !== product.price || existingGood.amount !== product.amount);
-      });
 
       const data = {
-        organization_id: viewDocument.value.organizationName.id || viewDocument.value.organizationName.code,
-        counterparty_id: viewDocument.value.counterpartyName.id || viewDocument.value.counterpartyName.code,
-        storage_id: viewDocument.value.storageName.id || viewDocument.value.storageName.code,
+        organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
+        counterparty_id: viewDocument.value.counterpartyName?.id || viewDocument.value.counterpartyName?.code,
+        storage_id: viewDocument.value.storageName?.id || viewDocument.value.storageName?.code,
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
-        currency_id: viewDocument.value.currencyName.id || viewDocument.value.currencyName.code,
-        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName.id || viewDocument.value.counterpartyAgreementName.code,
+        currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
+        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comment,
-        goods: newOrUpdatedGoods.map(product => ({
-          good_id: product.good_id,
-          price: parseFloat(product.price),
-          amount: parseInt(product.amount, 10),
-          created: product.created || false,
-          updated: product.updated || false,
-          deleted: product.deleted || false
-        }))
+        goods: productsInfo.value
       };
-
-      console.log('Data to be sent:', data);
 
       const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
@@ -152,27 +134,19 @@ const updateView = async () => {
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      console.log('Response:', res);
+      //
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
+    } finally {
+      loaderSave.value = false
     }
-  }
-};
-
-// Fetch existing goods
-const fetchExistingGoods = async () => {
-  try {
-    const response = await useAxios(`/document/${props.productId}`);
-    return response.data.goods || [];
-  } catch (error) {
-    console.error('Error fetching existing goods:', error);
-    return [];
   }
 };
 
 const approve = async () => {
   try {
+    await updateView()
     const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
       data: {
@@ -190,6 +164,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
+    await updateView()
     const res = await useAxios(`/document/provider/return/unApprove`, {
       method: 'POST',
       data: {
@@ -205,7 +180,7 @@ const unApprove = async () => {
   }
 }
 const openDocumentPrint = (productId) => {
-  const url = `#/documents/${productId}`;
+  const url = `/documents/${productId}`;
   window.open(url, '_blank');
 };
 
@@ -214,12 +189,20 @@ function getProducts(products) {
 }
 
 onMounted(async () => {
-  await getView();
+  try {
+    await Promise.all([
+      getView(),
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
 });
 
-findStorage();
 
-function infoModalClose(value) {
+function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
   else emit('close-sidebar')
 }
@@ -229,6 +212,7 @@ function changeModal() {
 }
 
 watchEffect(() => {
+
   if (viewDocument.value.counterpartyName &&
       viewDocument.value.counterpartyName.agreement &&
       viewDocument.value.counterpartyName.agreement.length > 0) {
@@ -259,7 +243,6 @@ watch(viewDocument.value, (newValue) => {
 
 watch(viewDocument, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     changeValue.value = true;
   }
   initialValue.value = newVal;
@@ -267,164 +250,176 @@ watch(viewDocument, (newVal) => {
 
 watch(productsInfo, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     changeValue.value = true;
   }
   initialValue.value = newVal;
 }, {deep: true});
+
+async function saveFnDialog() {
+  await updateView()
+  emit('close-sidebar')
+}
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
       class="pi pi-times text-[#808BA0]"></i></button>
-  <div class="edit-purchase">
-    <Toast/>
-    <div class="header">
-      <div class="flex gap-[16px] pt-2">
-        <div>
-          <div class="header-title">Заявка товаров</div>
-          <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{ viewDocument.doc_number }}</div>
+  <div>
+    <div class="edit-purchase">
+      <Toast/>
+      <div class="header">
+        <div class="flex gap-[16px] pt-2">
+          <div>
+            <div class="header-title">Возврат товаров</div>
+            <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{
+                viewDocument.doc_number
+              }}
+            </div>
+          </div>
+
+          <FloatLabel class="col-span-4">
+            <Select
+                v-model="status"
+                placeholder="Организация"
+                class="w-full p-focus active-approve"
+                disabled
+            >
+              <template #value>
+                <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
+              </template>
+
+            </Select>
+            <label for="dd-city">Статус</label>
+          </FloatLabel>
+
+          <fin-button v-if="approved === false" @click="approve()"
+                      icon="pi pi-arrow-right bold" label="Провести"
+                      severity="secondary" class="p-button-lg btn-approve"
+                      :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
+          />
+
+          <fin-button v-if="approved === true"
+                      @click="unApprove()" icon="pi pi-arrow-right"
+                      label="Отменить проведение" severity="secondary"
+                      class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
+          />
+
+          <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" :loading="loaderSave" severity="success"
+                      class="p-button-lg"/>
         </div>
+        <div class="flex gap-[16px] pt-2">
+          <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
+                      class="p-button-lg btn-movement w-[158px]">
+            <img src="@/assets/img/img.png" alt="" class="w-[20px]"/>
+            Движение
+          </fin-button>
+        </div>
+      </div>
+      <div v-if="isOpen"
+           class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
 
         <FloatLabel class="col-span-4">
-          <Select
-              v-model="status"
-              placeholder="Организация"
-              class="w-full p-focus active-approve"
-              disabled
+          <DatePicker
+              showIcon
+              v-model="viewDocument.date"
+              showTime
+              hourFormat="24"
+              dateFormat="dd.mm.yy,"
+              fluid
+              hideOnDateTimeSelect
+              iconDisplay="input"
+              class="w-full"
           >
-            <template #value>
-              <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
-            </template>
 
-          </Select>
-          <label for="dd-city">Статус</label>
+          </DatePicker>
+          <label for="dd-city">Дата</label>
         </FloatLabel>
 
-        <fin-button v-if="approved === false" @click="approve()"
-                    icon="pi pi-arrow-right bold" label="Провести"
-                    severity="secondary" class="p-button-lg btn-approve"
-                    :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
-        />
+        <FloatLabel class="col-span-4" v-if="!hasOrganization">
+          <Select
+              v-model="viewDocument.organizationName"
+              class="w-full"
+              :options="organization"
+              option-label="name"
+              @click="findOrganization"
+          >
+            <template #value>
+              {{ viewDocument.organizationName?.name }}
+            </template>
+          </Select>
+          <label for="dd-city">Организация</label>
+        </FloatLabel>
 
-        <fin-button v-if="approved === true"
-                    @click="unApprove()" icon="pi pi-arrow-right"
-                    label="Отменить проведение" severity="secondary"
-                    class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
-        />
-
-        <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" severity="success" class="p-button-lg"/>
+        <FloatLabel class="col-span-4">
+          <Select v-model="viewDocument.counterpartyName" class="w-full"
+                  :options="counterparty" option-label="name">
+            <template #value>
+              {{ viewDocument.counterpartyName?.name }}
+            </template>
+          </Select>
+          <label for="dd-city">Поставщик</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
+                  :options="agreementList" @click="getAgreement" option-label="name">
+            <template #value>
+              {{ viewDocument.counterpartyAgreementName?.name }}
+            </template>
+          </Select>
+          <label for="dd-city">Договор</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
+                  @click="findStorage">
+            <template #value>
+              {{ viewDocument.storageName?.name }}
+            </template>
+          </Select>
+          <label for="dd-city">Склад</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
+                  @click="findCurrency">
+            <template #value>
+              {{ viewDocument.currencyName?.name }}
+            </template>
+          </Select>
+          <label for="dd-city">Валюта</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-12 mt-[10px]">
+          <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
+          <label for="dd-city">Комментарий</label>
+        </FloatLabel>
+        <div class="col-span-12">
+          <button @click="isOpen = false"
+                  class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i
+              class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
+        </div>
       </div>
-      <div class="flex gap-[16px] pt-2">
-        <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
-                    class="p-button-lg btn-movement w-[158px]">
-          <img src="../assets/img/img.png" alt="" class="w-[20px]"/>
-          Движение
+      <div v-if="isOpen === false" class="border-y py-5 mt-[30px] col-span-12">
+        <button @click="isOpen = true"
+                class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть
+          <i
+              class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
+      </div>
+      <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
+        <div class="header-title">Товары</div>
+        <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
+          <i class="pi pi-history mb-[1px] "></i>
+          <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
+        </fin-button>
+        <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
+          <i class="pi pi-print mb-[1px ]"></i>
+          <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
         </fin-button>
       </div>
     </div>
-    <div v-if="isOpen"
-         class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
+    <purchasing-table :info-goods="props.data" @post-goods="getProducts" @editModal="changeModal"/>
 
-      <FloatLabel class="col-span-4">
-        <DatePicker
-            showIcon
-            v-model="viewDocument.date"
-            showTime
-            hourFormat="24"
-            dateFormat="dd.mm.yy,"
-            fluid
-            hideOnDateTimeSelect
-            iconDisplay="input"
-            class="w-full"
-        >
-
-        </DatePicker>
-        <label for="dd-city">Дата</label>
-      </FloatLabel>
-
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Select
-            v-model="viewDocument.organizationName"
-            class="w-full"
-            :options="organization"
-            option-label="name"
-            @click="findOrganization"
-        >
-          <template #value>
-            {{ viewDocument.organizationName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Организация</label>
-      </FloatLabel>
-
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.counterpartyName" class="w-full"
-                :options="counterparty" @click="findCounterparty" option-label="name">
-          <template #value>
-            {{ viewDocument.counterpartyName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Поставщик</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
-                :options="agreementList" @click="getAgreement" option-label="name">
-          <template #value>
-            {{ viewDocument.counterpartyAgreementName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Договор</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
-                @click="findStorage">
-          <template #value>
-            {{ viewDocument.storageName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Склад</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                @click="findCurrency">
-          <template #value>
-            {{ viewDocument.currencyName?.name }}
-          </template>
-        </Select>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
-      </FloatLabel>
-      <div class="col-span-12">
-        <button @click="isOpen = false"
-                class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i
-            class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
-      </div>
-    </div>
-    <div v-if="isOpen === false" class="border-y py-5 mt-[30px] col-span-12">
-      <button @click="isOpen = true"
-              class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть <i
-          class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
-    </div>
-    <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
-      <div class="header-title">Товары</div>
-      <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
-        <i class="pi pi-history mb-[1px] "></i>
-        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
-      </fin-button>
-      <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
-        <i class="pi pi-print mb-[1px ]"></i>
-        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
-      </fin-button>
+    <div class="text-[20px] font-[600] absolute bottom-[40px]">
+      Автор: {{ userName.name }}
     </div>
   </div>
-  <provider-return-table :productId="productId" @post-goods="getProducts" @editModal="changeModal"/>
 
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
-  </div>
 
   <Sidebar
       v-model:visible="visibleMovement"
@@ -451,7 +446,8 @@ watch(productsInfo, (newVal) => {
       Хотите сохранить измения?
     </div>
     <template #footer>
-      <fin-button label="Подтвердить" class="w-full" severity="success" icon="pi pi-check" @click="updateView"/>
+      <fin-button label="Подтвердить" class="w-full" :loading="loaderSave" severity="success" icon="pi pi-check"
+                  @click="saveFnDialog"/>
       <fin-button
           label="Отменить"
           icon="pi pi-times"

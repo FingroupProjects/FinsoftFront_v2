@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -108,7 +108,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.result.id);
+      emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -125,7 +125,17 @@ function getProducts(products) {
   productsInfo.value = products;
 }
 
-findStorage()
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
@@ -134,7 +144,6 @@ async function infoModalClose() {
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     isModal.value = true;
   }
   initialValue.value = newVal;
@@ -174,9 +183,7 @@ watch(createValues, (newValue) => {
     <div class="header">
       <div>
         <div class="header-title">Создание возврата товаров</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
-        </div>
+
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -217,7 +224,6 @@ watch(createValues, (newValue) => {
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
@@ -228,7 +234,6 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectedCounterparty"
             :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-            @click="findCounterparty"
             :options="counterparty"
             :loading="loadingCounterparty"
             optionLabel="name"
@@ -254,7 +259,6 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectedStorage"
             :class="{ 'p-invalid': v$.selectedStorage.$error }"
-            @click="findStorage"
             :loading="loadingStorage"
             :options="storage"
             optionLabel="name"
