@@ -1,5 +1,5 @@
 <script setup>
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import FinanceTabs from '@/components/finance/FinanceTabs.vue';
 import FinancePc from "@/components/finance/FinancePc.vue";
 import FinanceTabsCass from "@/components/finance/FinanceTabsCass.vue";
@@ -12,7 +12,7 @@ import FinanceOtherIncomes from "@/components/finance/FinanceOtherIncomes.vue";
 import {useFinanceStore} from "@/store/finance.js";
 import {useAxios} from "@/composable/useAxios.js";
 
-const emit = defineEmits(['open-view','close-sidebar']);
+const emit = defineEmits(['open-view', 'close-sidebar']);
 
 const store = useFinanceStore()
 
@@ -64,10 +64,10 @@ function closeFn() {
   store.isModal = false
   store.openInfoModal = false
 }
-function postMethod(id){
-  emit('open-view',id)
-}
 
+function postMethod(id) {
+  emit('open-view', id)
+}
 </script>
 
 <template>

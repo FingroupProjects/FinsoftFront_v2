@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watchEffect} from "vue";
+import {onMounted, ref, watch, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
@@ -9,16 +9,17 @@ import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../constants/formatNumber.js'
+import {usePurchaseStore} from "@/store/pruchase.js";
 
-const emit = defineEmits(["postGoods", 'editModal']);
+const emit = defineEmits([ 'editModal']);
 const props = defineProps({
-  infoGoods: Object
-});
-
+      infoGoods: Object
+    },
+);
+const store = usePurchaseStore();
 const goods = ref([]);
 const selectedProducts = ref();
 const addInput = ref(false);
-const postProducts = ref([]);
 const amount = ref("");
 const price = ref("");
 const sum = ref("");
@@ -28,6 +29,9 @@ const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
 const editModalOpen = ref(true);
+
+const imgURL = import.meta.env.VITE_IMG_URL;
+
 const clearInputValues = () => {
   newProduct.value = {};
   amount.value = "";
@@ -35,8 +39,6 @@ const clearInputValues = () => {
   sum.value = "";
   selectedProducts.value = null;
 };
-
-const imgURL = import.meta.env.VITE_IMG_URL;
 
 const validateProduct = (product) => {
   return product.amount && product.price && product.sum;
@@ -57,23 +59,20 @@ const addFn = async () => {
 
   if (validateProduct(product)) {
     goods.value.push(product);
-    postProducts.value.push({
+    store.postGoods.push({
       amount: product.amount,
       good_id: selectedProducts.value?.code,
       price: product.price,
-    });
+    })
     getAllSum.value += Number(product.sum);
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
-
-    emit("postGoods", postProducts.value);
   }
-
   clearInputValues();
 };
 
 const confirmDeleteProduct = async (index, indexProduct) => {
-  postProducts.value.splice(indexProduct, 1)
+  store.postGoods.splice(indexProduct, 1)
   goods.value.splice(indexProduct, 1)
   getAllProduct.value = goods.value.reduce((total, el) => {
     return total + (el?.amount || 0);
@@ -112,7 +111,7 @@ const onRowEditSave = (event) => {
   newData.sum = Number((newData.price * newData.amount).toFixed(2));
   goods.value.splice(index, 1, newData);
 
-  postProducts.value.splice(index, 1, {
+  store.postGoods.splice(index, 1, {
     amount: newData.amount,
     id: oldProduct.id,
     good_id: oldProduct.good_id,
@@ -122,14 +121,12 @@ const onRowEditSave = (event) => {
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
   emit('editModal', editModalOpen.value);
-  emit("postGoods", postProducts.value);
 };
 
 const getGood = async () => {
 
   const items = props.infoGoods.goods;
 
-  console.log(items)
   goods.value = items.map((item) => ({
     id: item.id,
     good_id: item.good.id,
