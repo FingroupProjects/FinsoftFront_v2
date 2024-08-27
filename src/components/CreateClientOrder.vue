@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -26,14 +26,14 @@ const {
   storage,
   loadingStorage,
   findOrganization,
-  findStatus,
   organization,
-  status,
   findCounterparty,
   counterparty,
   loadingCounterparty,
   loadingOrganization,
-  loadingStatus,
+  findStatus,
+  statusList,
+  loadStatus
 } = useStaticApi();
 
 const agreementList = ref([]);
@@ -50,8 +50,8 @@ const createValues = reactive({
   selectedAgreement: "",
   comments: "",
   selectedOrganization: "",
+  selectedStatus: "",
   selectedCounterparty: "",
-  selectedStatus: ""
 });
 const rules = reactive({
   datetime24h: {required},
@@ -104,8 +104,8 @@ async function saveFn() {
           storage_id: createValues.selectedStorage.code,
           currency_id: createValues.selectCurrency.code,
           comment: createValues.comments,
-          order_status_id: createValues.selectedStatus.code,
           goods: productsInfo.value,
+          order_status_id: createValues.selectedStatus.code
         },
       });
       toast.add({
@@ -114,7 +114,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.result.id);
+      emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -131,7 +131,18 @@ function getProducts(products) {
   productsInfo.value = products;
 }
 
-findStorage()
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findStorage(),
+        findStatus()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
@@ -179,10 +190,8 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание заявки товаров</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
-        </div>
+        <div class="header-title">Создание заказа клиента</div>
+
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -217,41 +226,40 @@ watch(createValues, (newValue) => {
         />
         <label for="dd-city">Дата</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Dropdown
-            v-model="createValues.selectedStatus"
-            :options="status"
-            :class="{ 'p-invalid': v$.selectedStatus.$error }"
-            @click="findStatus"
-            :loading="loadingStatus"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">Статус</label>
-      </FloatLabel>
+
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
         />
         <label for="dd-city">Организация</label>
       </FloatLabel>
+
+      <FloatLabel class="col-span-4" >
+        <Dropdown
+            v-model="createValues.selectedStatus"
+            :options="statusList"
+            :class="{ 'p-invalid': v$.selectedStatus.$error }"
+            :loading="loadStatus"
+            optionLabel="name"
+            class="w-full"
+        />
+        <label for="dd-city">Статус заказа</label>
+      </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
             v-model="createValues.selectedCounterparty"
             :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-            @click="findCounterparty"
             :options="counterparty"
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
         />
-        <label for="dd-city">Клиент</label>
+        <label for="dd-city">Поставщик</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
@@ -271,7 +279,6 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectedStorage"
             :class="{ 'p-invalid': v$.selectedStorage.$error }"
-            @click="findStorage"
             :loading="loadingStorage"
             :options="storage"
             optionLabel="name"

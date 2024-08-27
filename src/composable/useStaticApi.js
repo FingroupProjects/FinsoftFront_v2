@@ -9,7 +9,7 @@ export const useStaticApi = () => {
   const loadingStorage = ref(false);
   const loadingOrganization = ref(false);
   const counterparty = ref([]);
-  const status = ref([]);
+  const statusList = ref([]);
   const loadingCounterparty = ref(false);
   const loadStatus = ref(false);
   const cashRegisterList = ref([]);
@@ -87,7 +87,7 @@ export const useStaticApi = () => {
       loadStatus.value = true;
       const res = await useAxios(`/document/client/order/statuses`);
 
-      return (status.value = res.result.map((el) => {
+      return (statusList.value = res.result.map((el) => {
         return {
           name: el.name,
           code: el.id
@@ -233,7 +233,7 @@ export const useStaticApi = () => {
     findStatus,
     loadingCounterparty,
     loadingOrganization,
-    status,
+    statusList,
     findCashRegister,
     cashRegisterList,
     loadingCash,
@@ -251,7 +251,8 @@ export const useStaticApi = () => {
     loadingUser,
     findOperationPko,
     operationPkoList,
-    loadingOperationPko
+    loadingOperationPko,
+    loadStatus
 
   };
 };

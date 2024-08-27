@@ -184,9 +184,7 @@ watch(createValues, (newValue) => {
     <div class="header">
       <div>
         <div class="header-title">Создание закупки</div>
-        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
-          №32151
-        </div>
+        
       </div>
       <div class="flex gap-[16px]">
         <fin-button
