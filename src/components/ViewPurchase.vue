@@ -164,7 +164,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    await updateView()
+  //  await updateView()
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data: {

@@ -134,7 +134,7 @@ const updateView = async () => {
         order_status_id: viewDocument.value.orderStatusName?.id || viewDocument.value.orderStatusName?.code
       };
 
-      const res = await useAxios(`/document/client/order/${props.productId}`, {
+      const res = await useAxios(`/document/client/update-order/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
