@@ -31,7 +31,7 @@ const {
 const visibleRight = ref(false);
 const products = ref();
 const selectedProduct = ref();
-const selectedProductId = ref()
+const selectedProductInfo = ref()
 const search = ref('')
 const selectOperationPko = ref();
 const first = ref(1)
@@ -74,8 +74,8 @@ const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
   createOpenModal.value = true
-  selectedProductId.value = product.id
-  console.log(selectedProductId.value)
+  selectedProductInfo.value = product
+
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -136,7 +136,7 @@ const getSeverity = (status, deleted) => {
 };
 
 function closeFn(id) {
-  selectedProductId.value = id
+  selectedProductInfo.value = id
   createOpenModal.value = true
   getProducts();
 }
@@ -394,7 +394,10 @@ findUsers()
         :dismissable="false"
     >
 
-      <FinanceViewTabs v-if="createOpenModal" :operation-type-id="selectedProductId"
+      <FinanceViewTabs v-if="createOpenModal"
+                       :operation-list="operationPkoList"
+                       :allDate="selectedProductInfo"
+                       :operation-type-id="selectedProductInfo.id"
                        @close-sidebar="visibleRight = false"/>
       <FinanceCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
 

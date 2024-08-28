@@ -16,8 +16,13 @@ import Select from "primevue/dropdown";
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
   operationTypeId: '',
-  type: ''
+  type: '',
+  allDate: Object,
+  operationList: {
+    type: Array
+  }
 })
+
 const toast = useToast();
 
 const {
@@ -48,7 +53,8 @@ const approved = ref(false);
 const status = ref('Не проведен');
 const visibleMovement = ref(false);
 const changeValue = ref(false);
-const openInfoModal = ref(false)
+const openInfoModal = ref(false);
+const activeTabIndex = ref(0);
 const urlsView = ref('/cash-store/client-payment/');
 const selectAgreement = ref('')
 const item = ref([]);
@@ -180,34 +186,39 @@ const unApprove = async () => {
   }
 }
 const getView = async () => {
-  try {
 
-    const res = await useAxios(`/cash-store/show/${props.operationTypeId}`)
-    const item = res.result;
+  const item = props.allDate;
 
-    financeDate.value = {
-      datetime24h: new Date(item.date),
-      selectedOrganization: item.organization,
-      getUser: item.sender_text,
-      selectedCounterparty: item.counterparty,
+  financeDate.value = {
+    datetime24h: new Date(item.date),
+    selectedOrganization: item.organization,
+    getUser: item.sender_text,
+    selectedCounterparty: item.counterparty,
 
-      sum: item.sum,
-      cashRegisterId: item.cashRegister,
-      base: item.basis,
-      comments: item.comment,
-      docNumber: item.doc_number,
-      operationType: item.operationType,
-      organizationBillId: item?.organizationBill,
-      employeeId: item.employee,
-      balanceArticleId: item.balance_article
+    sum: item.sum,
+    cashRegisterId: item.cashRegister,
+    base: item.basis,
+    comments: item.comment,
+    docNumber: item.doc_number,
+    operationType: item.operationType,
+    organizationBillId: item?.organizationBill,
+    employeeId: item.employee,
+    balanceArticleId: item.balance_article
 
-    };
-    await getAgreement()
-  } catch (e) {
-    console.error('Error fetching data:', e);
-  }
+  };
+  await getAgreement()
 };
+
 getView()
+
+const openTab = (index) => {
+  activeTabIndex.value = index;
+};
+
+function infoModalClose() {
+  if (changeValue.value) openInfoModal.value = true
+  else emit('close-sidebar')
+}
 
 watchEffect(() => {
   if (
@@ -227,36 +238,6 @@ watchEffect(() => {
     code: organizationHas.id
   }
 });
-
-const activeTabIndex = ref(0);
-
-const openTab = (index) => {
-  activeTabIndex.value = index;
-};
-
-async function fetchOperating() {
-  try {
-    const res = await useAxios(
-        `/operationTypes?type=PKO`
-    );
-    return (item.value = res.result.map((el) => {
-      return {
-        name: el.title_ru,
-        code: el.id,
-        type: el.type
-      };
-    }));
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-fetchOperating()
-
-function infoModalClose(value) {
-  if (changeValue.value) openInfoModal.value = true
-  else emit('close-sidebar')
-}
 
 watch(financeDate, (newVal) => {
   if (initialValue.value !== null) {
@@ -316,7 +297,7 @@ watch(financeDate, (newVal) => {
     <div class="sidebar-finance col-span-4 border-r">
       <div
           class="font-semibold text-[16px] text-[#808BA0] leading-[16px] p-[13px] cursor-pointer"
-          v-for="(items, index) in item"
+          v-for="(items, index) in props.operationList"
           :key="index"
           :class="{ 'active-tab': financeDate.operationType?.id === items.code }"
           @click="openTab(index)"

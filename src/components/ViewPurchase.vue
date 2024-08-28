@@ -14,6 +14,7 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
+import {usePurchaseStore} from "@/store/pruchase.js";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -26,6 +27,8 @@ const props = defineProps({
   },
   date: Object
 });
+
+const store = usePurchaseStore()
 
 const status = ref('');
 const productsInfo = ref();
@@ -116,7 +119,6 @@ const updateView = async () => {
   if (result) {
     loaderSave.value = true
     try {
-
       const data = {
         organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
         counterparty_id: viewDocument.value.counterpartyName?.id || viewDocument.value.counterpartyName?.code,
@@ -125,7 +127,7 @@ const updateView = async () => {
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comments,
-        goods: productsInfo.value
+        goods: store.postGoods
       };
 
       const res = await useAxios(`/document/update/${props.productId}`, {
@@ -140,6 +142,7 @@ const updateView = async () => {
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
     } finally {
       loaderSave.value = false
+      store.postGoods = []
     }
   }
 };
@@ -164,7 +167,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-  //  await updateView()
+    //  await updateView()
     const res = await useAxios(`/document/provider/unApprove`, {
       method: 'POST',
       data: {
@@ -183,10 +186,6 @@ const openDocumentPrint = (productId) => {
   const url = `/documents/${productId}`;
   window.open(url, '_blank');
 };
-
-function getProducts(products) {
-  productsInfo.value = products;
-}
 
 onMounted(async () => {
   try {
@@ -210,6 +209,11 @@ function infoModalClose() {
 
 function changeModal() {
   changeValue.value = true
+}
+
+async function saveFnDialog() {
+  await updateView()
+  emit('close-sidebar')
 }
 
 watchEffect(() => {
@@ -256,10 +260,7 @@ watch(productsInfo, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-async function saveFnDialog() {
-  await updateView()
-  emit('close-sidebar')
-}
+
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
@@ -414,7 +415,7 @@ async function saveFnDialog() {
         </fin-button>
       </div>
     </div>
-    <purchasing-table :info-goods="props.date" @post-goods="getProducts" @editModal="changeModal"/>
+    <purchasing-table :info-goods="props.date" @editModal="changeModal"/>
 
     <div class="text-[20px] font-[600] absolute bottom-[40px]">
       Автор: {{ userName.name }}
