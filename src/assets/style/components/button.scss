@@ -3,12 +3,12 @@
   color: var(--text);
   text-align: center;
   justify-content: center;
-  height: 40px !important;
+  height: 40px;
   font-weight: 600;
   transition: none;
   font-family: Mulish, sans-serif;
   line-height: 20px !important;
-  border-radius: 10px !important;
+  border-radius: 14px !important;
   &:focus {
     box-shadow: none;
   }
@@ -69,7 +69,12 @@
     font-size: 18px !important;
     line-height: 28px !important;
   }
-
+  &-3xl {
+    height: 70px !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    line-height: 28px !important;
+  }
 
   &-icon-md {
     min-width: 40px !important;

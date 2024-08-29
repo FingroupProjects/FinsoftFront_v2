@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {reactive, ref, watch, watchEffect} from "vue";
+import {onMounted, reactive, ref, watch, watchEffect} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
@@ -116,6 +116,17 @@ watchEffect(() => {
     code: organizationHas.id
   }
 });
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findOrganizationBill(),
+      findCashRegister(),
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 </script>
 
 <template>
@@ -141,7 +152,6 @@ watchEffect(() => {
           v-model="financeDate.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-          @click="findOrganization"
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
@@ -154,7 +164,6 @@ watchEffect(() => {
       <Dropdown
           v-model="financeDate.organizationBillId"
           :class="{ 'p-invalid': v$.organizationBillId.$error }"
-          @click="findOrganizationBill"
           :loading="loadingBill"
           :options="billList"
           optionLabel="name"
@@ -173,7 +182,6 @@ watchEffect(() => {
         <Dropdown
             v-model="financeDate.cashRegisterId"
             :class="{ 'p-invalid': v$.cashRegisterId.$error }"
-            @click="findCashRegister"
             :loading="loadingCash"
             :options="cashRegisterList"
             optionLabel="name"

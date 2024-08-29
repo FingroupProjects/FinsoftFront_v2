@@ -187,19 +187,6 @@ const openDocumentPrint = (productId) => {
   window.open(url, '_blank');
 };
 
-onMounted(async () => {
-  try {
-    await Promise.all([
-      getView(),
-      findOrganization(),
-      findCounterparty(),
-      findStorage()
-    ]);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-});
-
 findStorage();
 
 function infoModalClose() {
@@ -260,7 +247,18 @@ watch(productsInfo, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-
+onMounted(async () => {
+  try {
+    await Promise.all([
+      getView(),
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i

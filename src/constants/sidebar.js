@@ -38,6 +38,15 @@ export default [
                         route: '/counterparty'
                     }
                 ]
+            },
+            {
+                title: 'Справочники',
+                data: [
+                    {
+                        label: 'РМК',
+                        route: '/for-sale'
+                    }
+                ]
             }
         ]
     },
