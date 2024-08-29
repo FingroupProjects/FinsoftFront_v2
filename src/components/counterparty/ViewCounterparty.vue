@@ -1,59 +1,54 @@
 <script setup>
-import {reactive, computed, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
+import CounterpartyAgreements from "@/components/counterparty/CounterpartyAgreements.vue";
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-import { minLength, maxLength, numeric, integer, between } from '@vuelidate/validators';
 
+const props = defineProps({
+  productId: {
+    required: true,
+  },
+  openModalClose: {
+    type: Boolean,
+    default: false
+  },
+  data: Object
+});
 
 const toast = useToast();
 
-const openInfoModal = ref()
+const id = ref();
 const createValues = reactive({
   name: "",
-  symbol_code: "",
-  digital_code: "",
-  multiplicity: ""
+  address: "",
+  phone: "",
+  email: ""
 });
 const rules = reactive({
-  name: {
-    required,
-    minLength: minLength(3),
-    maxLength: maxLength(25)
-  },
-  symbol_code: {
-    required,
-    maxLength: maxLength(3)
-  },
-  digital_code: {
-    required,
-    numeric,
-    between: between(10, 999)
-  },
-  multiplicity: {
-    required,
-    integer
-  }
+  name: {required},
+  phone: {required}
 });
-
 const v$ = useVuelidate(rules, createValues);
+
 
 async function saveFn() {
   const result = await v$.value.$validate();
-  openInfoModal.value = false
+
   if (result) {
     try {
-      const res = await useAxios(`currency`, {
-        method: "POST",
+      const res = await useAxios(`counterparty/${props.productId}`, {
+        method: "PATCH",
         data: {
-          digital_code: createValues.digital_code,
-          symbol_code: createValues.symbol_code,
           name: createValues.name,
-          multiplicity: createValues.multiplicity
+          address: createValues.address,
+          phone: createValues.phone,
+          email: createValues.email,
+          roles: []
         },
       });
       toast.add({
@@ -62,7 +57,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.result.id);
+      emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -75,13 +70,32 @@ async function saveFn() {
   }
 }
 
+async function getGood() {
+    const item = props.data
+
+    createValues.name = item.name
+    createValues.address = item.address
+    createValues.phone = item.phone
+    createValues.email = item.email
+
+    id.value = item.id
+}
+
+onMounted(async () => {
+     await getGood()
+});
+
+
 </script>
 
 <template>
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Добавление валюты</div>
+        <div class="header-title"> Просмотр контрагента</div>
+        <div class="header-text text-[#808BA0] font-semibold text-[16px]">
+          №{{ id }}
+        </div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -102,29 +116,16 @@ async function saveFn() {
     </div>
     <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Название" class="col-span-5" v-model="createValues.name"/>
-        <fin-input :class="{ 'p-invalid': v$.symbol_code.$error }" placeholder="Символьный код" class="col-span-5" v-model="createValues.symbol_code"/>
-        <fin-input :class="{ 'p-invalid': v$.digital_code.$error }" placeholder="Цифровой код" class="col-span-5" v-model="createValues.digital_code"/>
-        <fin-input :class="{ 'p-invalid': v$.multiplicity.$error }" placeholder="Кратность" class="col-span-5" v-model="createValues.multiplicity"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
+        <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
+        <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
+        <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
       </div>
     </div>
+  <CounterpartyAgreements :productId="props.productId" :data="props.data"></CounterpartyAgreements>
 
   </div>
-  <div class="grid grid-cols-12 w-[29%] items-center mt-[30px]">
-    <div class="text-qs-code col-span-6">
-      Курсы валют
-    </div>
-    <fin-button
-        icon="pi pi-save"
-        label="Добавить"
-        severity="success"
-        class="col-span-6"
-    />
-    <div class="dissipation-qs-code col-span-12 mt-4">
-      Вы пока не добавили ни одного курса
-    </div>
-  </div>
-  <hr class="mt-[30px]">
+
   <Toast/>
 </template>
 
@@ -143,10 +144,6 @@ async function saveFn() {
   line-height: 15px;
   color: #808BA0;
   font-weight: 600;
-}
-
-.p-invalid {
-  border: 1px solid #f2376f !important;
 }
 
 .img-goods {

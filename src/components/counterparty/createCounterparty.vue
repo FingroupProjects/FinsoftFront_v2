@@ -6,8 +6,9 @@ import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
+
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-import { minLength, maxLength, numeric, integer, between } from '@vuelidate/validators';
+import {minLength, maxLength} from '@vuelidate/validators';
 
 
 const toast = useToast();
@@ -15,9 +16,10 @@ const toast = useToast();
 const openInfoModal = ref()
 const createValues = reactive({
   name: "",
-  symbol_code: "",
-  digital_code: "",
-  multiplicity: ""
+  address: "",
+  phone: "",
+  email: "",
+  roles: []
 });
 const rules = reactive({
   name: {
@@ -25,19 +27,9 @@ const rules = reactive({
     minLength: minLength(3),
     maxLength: maxLength(25)
   },
-  symbol_code: {
-    required,
-    maxLength: maxLength(3)
+  phone: {
+    required
   },
-  digital_code: {
-    required,
-    numeric,
-    between: between(10, 999)
-  },
-  multiplicity: {
-    required,
-    integer
-  }
 });
 
 const v$ = useVuelidate(rules, createValues);
@@ -47,13 +39,14 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`currency`, {
+      const res = await useAxios(`counterparty`, {
         method: "POST",
         data: {
-          digital_code: createValues.digital_code,
-          symbol_code: createValues.symbol_code,
+          address: createValues.address,
+          phone: createValues.phone,
           name: createValues.name,
-          multiplicity: createValues.multiplicity
+          email: createValues.email,
+          roles: [1]
         },
       });
       toast.add({
@@ -81,7 +74,7 @@ async function saveFn() {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Добавление валюты</div>
+        <div class="header-title">Добавление контрагента</div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -102,28 +95,15 @@ async function saveFn() {
     </div>
     <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Название" class="col-span-5" v-model="createValues.name"/>
-        <fin-input :class="{ 'p-invalid': v$.symbol_code.$error }" placeholder="Символьный код" class="col-span-5" v-model="createValues.symbol_code"/>
-        <fin-input :class="{ 'p-invalid': v$.digital_code.$error }" placeholder="Цифровой код" class="col-span-5" v-model="createValues.digital_code"/>
-        <fin-input :class="{ 'p-invalid': v$.multiplicity.$error }" placeholder="Кратность" class="col-span-5" v-model="createValues.multiplicity"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
+        <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
+        <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
+        <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
       </div>
     </div>
 
   </div>
-  <div class="grid grid-cols-12 w-[29%] items-center mt-[30px]">
-    <div class="text-qs-code col-span-6">
-      Курсы валют
-    </div>
-    <fin-button
-        icon="pi pi-save"
-        label="Добавить"
-        severity="success"
-        class="col-span-6"
-    />
-    <div class="dissipation-qs-code col-span-12 mt-4">
-      Вы пока не добавили ни одного курса
-    </div>
-  </div>
+
   <hr class="mt-[30px]">
   <Toast/>
 </template>
@@ -143,10 +123,6 @@ async function saveFn() {
   line-height: 15px;
   color: #808BA0;
   font-weight: 600;
-}
-
-.p-invalid {
-  border: 1px solid #f2376f !important;
 }
 
 .img-goods {

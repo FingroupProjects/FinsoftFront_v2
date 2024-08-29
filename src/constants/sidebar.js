@@ -35,7 +35,7 @@ export default [
                 data: [
                     {
                         label: 'Конрагенты',
-                        route: '/'
+                        route: '/counterparty'
                     }
                 ]
             }

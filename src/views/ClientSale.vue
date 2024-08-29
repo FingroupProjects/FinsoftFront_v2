@@ -8,23 +8,17 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
-import MethodsProviderOrder from "@/components/MethodsProviderOrder.vue";
-import ViewProviderOrder from "@/components/ViewProviderOrder.vue";
-import CreateProviderOrder from "@/components/CreateProviderOrder.vue";
-import MethodsClientSale from "@/components/MethodsClientSale.vue";
-import ViewClientSale from "@/components/ViewClientSale.vue";
-import CreateSale from "@/components/CreateSale.vue";
+import MethodsClientSale from "@/components/clientSale/MethodsClientSale.vue";
+import ViewClientSale from "@/components/clientSale/ViewClientSale.vue";
+import CreateSale from "@/components/clientSale/CreateSale.vue";
 
 const {
   findStorage,

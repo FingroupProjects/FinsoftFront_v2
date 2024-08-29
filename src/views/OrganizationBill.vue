@@ -8,14 +8,11 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import CreateGoods from "@/components/goodsComponents/createGoods.vue";
-import MethodsGoods from "@/components/goodsComponents/MethodsGoods.vue";
 
 const {
   findCurrency,
@@ -41,7 +38,6 @@ import CreateOrganizationBill from "@/components/organizationBillComponents/Crea
 import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
 import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
 import FilterOrganizationBill from "@/components/organizationBillComponents/FilterOrganizationBill.vue";
-import ViewPurchase from "@/components/ViewPurchase.vue";
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const dataInfo = ref(null)
