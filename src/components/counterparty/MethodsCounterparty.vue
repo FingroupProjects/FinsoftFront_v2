@@ -18,7 +18,7 @@ const copyProducts = async () => {
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   try {
-    const res = await useAxios(`/goods/copy/${id.value[0]}`, {
+    const res = await useAxios(`/counterparty/copy/${id.value[0]}`, {
       method: "POST",
     });
     emit('getProduct')
@@ -44,8 +44,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
   console.log(props.selectProducts[0])
   const endpoint = props.selectProducts[0].deleted_at
-      ?  '/goods/massRestore'
-      : '/goods/massDelete';
+      ?  '/counterparty/massRestore'
+      : '/counterparty/massDelete';
 
   try {
     const response = await useAxios(endpoint, {

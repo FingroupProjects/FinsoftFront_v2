@@ -116,10 +116,12 @@ onMounted(async () => {
     </div>
     <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
+
         <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
         <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
         <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
         <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
+
       </div>
     </div>
   <CounterpartyAgreements :productId="props.productId" :data="props.data"></CounterpartyAgreements>
