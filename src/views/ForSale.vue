@@ -7,6 +7,7 @@ import Listbox from 'primevue/listbox';
 import OverlayPanel from 'primevue/overlaypanel';
 import {useAxios} from "@/composable/useAxios.js";
 import FastGoods from "@/ForSale/FastGoods.vue";
+import formatPrice from "../constants/formatNumber.js";
 
 const openFastGoods = ref(false);
 
@@ -15,8 +16,11 @@ const listGoods = ref();
 const productsId = ref([]);
 const searchTerm = ref('');
 const listPostGoods = ref([]);
+const getAllSum = ref(0);
 const imgURL = import.meta.env.VITE_IMG_URL;
-
+const userName = {
+  name: localStorage.getItem("user_name"),
+};
 const getIdProducts = async (event) => {
   const inputValue = event?.target.value || '';
   searchTerm.value = inputValue; // Store the search term
@@ -35,6 +39,9 @@ getIdProducts();
 
 function deleteFn(i) {
   listPostGoods.value.splice(i, 1)
+  getAllSum.value = listPostGoods.value.reduce((total, el) => {
+    return total + (el?.price || 0);
+  }, 0)
 }
 
 const highlightMatch = (name, term) => {
@@ -43,17 +50,19 @@ const highlightMatch = (name, term) => {
   return name.replace(regex, '<span class="text-[#3935E7]">$1</span>');
 };
 
-const decrementCount = (count) => {
-  console.log(count--)
-  if (count > 1) {
-    count--; // Decrement only if count is greater than 1
-  }
-};
+function getFastProducts(products) {
+  listPostGoods.value = [...products]
+  if (products.length > 0) openFastGoods.value = false
+}
+
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
 
     listGoods.value.hide();
+    getAllSum.value = listPostGoods.value.reduce((total, el) => {
+      return total + (el?.price || 0);
+    }, 0)
   }
 })
 </script>
@@ -62,16 +71,10 @@ watch(selectedGoods, (newValue) => {
   <div class="grid grid-cols-12 gap-[14px]">
     <div class="bg-[#fff] col-span-8 px-[30px] py-[24px] rounded-[16px] for-sale h-[100vh] overflow-y-scroll">
       <div>
-        <div class="header-component flex gap-3">
-          <div class="font-semibold text-[26px] leading-[26px] text-[#000]">
-            Продажа
-          </div>
-          <div class="font-semibold text-[20px] leading-[20px] text-[#808BA0]">
-            №32151
-          </div>
+        <div class="header-component font-semibold text-[26px] leading-[26px] text-[#000]">
+          Продажа
         </div>
         <div class="filter-goods grid grid-cols-12 mt-4 gap-4">
-
           <IconField class="col-span-9">
             <InputIcon class="pi pi-search "/>
             <InputText
@@ -112,16 +115,19 @@ watch(selectedGoods, (newValue) => {
           </div>
           <TransitionGroup name="fade" tag="div">
             <div
-                class="rounded-[16px] h-[77px] bg-[#fff] shadow-goods py-[15px] px-[12px] flex justify-between items-center mt-5"
+                class="rounded-[16px] h-[77px] bg-[#fff] shadow-goods py-[15px] px-[12px] grid grid-cols-12 w-full justify-center  mt-5"
                 v-for="(infoGoods,index) in listPostGoods" :key="index">
-              <img src="@/assets/img/exampleImg.svg" alt="" class="w-[50px] h-[50px] rounded-[14px]">
-              <div class="text-[20px] leading-[20px] text-[#000] font-medium">
-                {{ infoGoods.products }}
-                <div class="mt-2.5 text-[16px] leading-4 text-[#808BA0]">
-                  {{ infoGoods.vendorCode }}
+              <div class="flex gap-[15px] col-span-4">
+                <img src="@/assets/img/exampleImg.svg" alt="" class="w-[50px] h-[50px] rounded-[14px]">
+                <div class="text-[20px] leading-[20px] text-[#000] font-medium">
+                  {{ infoGoods.products }}
+                  <div class="mt-2.5 text-[16px] leading-4 text-[#808BA0]">
+                    {{ infoGoods.vendorCode }}
+                  </div>
                 </div>
               </div>
-              <div class="flex p-[10px] gap-[15px] items-center bg-[#F2F2F2] rounded-[90px]">
+              <div
+                  class="flex p-[10px] gap-[15px] items-center bg-[#F2F2F2]  rounded-[90px] col-span-3 w-[139px] mt-[-7px]">
                 <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
                         @click="infoGoods.count > 1 ? infoGoods.count-- : null"><i
                     class="pi pi-minus text-[#3935E7]"></i></button>
@@ -130,28 +136,32 @@ watch(selectedGoods, (newValue) => {
                     class="pi pi-plus text-[#3935E7]"></i>
                 </button>
               </div>
-              <div>
-                <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Цена</div>
-                <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">{{ infoGoods.price }}</div>
-              </div>
-              <div>
-                <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Сумма</div>
-                <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">
-                  {{ infoGoods.price * infoGoods.count }}
+              <div class="flex gap-[48px] col-span-5 justify-end">
+                <div>
+                  <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Цена</div>
+                  <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">
+                    {{ formatPrice(infoGoods.price) }}
+                  </div>
                 </div>
-              </div>
-              <div @click="deleteFn(index)">
-                <i v-ripple class="pi pi-trash text-[#808BA0] cursor-pointer relative right-[10px] text-[18px]"></i>
+                <div>
+                  <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Сумма</div>
+                  <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">
+                    {{ formatPrice(infoGoods.price * infoGoods.count) }}
+                  </div>
+                </div>
+                <div @click="deleteFn(index)" class="flex justify-center items-center">
+                  <i v-ripple class="pi pi-trash text-[#808BA0] cursor-pointer relative right-[10px] text-[18px]"></i>
+                </div>
               </div>
             </div>
           </TransitionGroup>
         </div>
       </div>
-      <div class=" left-[17.2%] fixed bottom-[0px] w-[53.6%] bg-white">
+      <div class=" left-[15%] fixed bottom-[0px] w-[55.3%] bg-white">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
           <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
           <div class="">
-            Кассир: Махмаджуб И.И.
+            Кассир: {{userName.name }}
           </div>
         </div>
 
@@ -181,12 +191,13 @@ watch(selectedGoods, (newValue) => {
       <div class="border-t border-dashed py-[24px] mt-[24px] flex flex-col gap-[16px]">
         <div class="flex justify-between items-center">
           <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Предытог</div>
-          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">154 495.94 <span
+          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">{{ formatPrice(getAllSum) }} <span
               class="text-[16px]">сум</span></div>
         </div>
         <div class="flex justify-between">
           <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Товаров в чеке</div>
-          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">2 <span class="text-[16px]">ед</span>
+          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">{{ listPostGoods.length }} <span
+              class="text-[16px]">ед</span>
           </div>
         </div>
         <div class="flex justify-between">
@@ -198,14 +209,14 @@ watch(selectedGoods, (newValue) => {
       </div>
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">290 942.00 <span
+        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(getAllSum) }} <span
             class="text-[24px]">сум</span></div>
       </div>
       <fin-button icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full" severity="success"
                   label="Внести деньги"/>
     </div>
   </div>
-  <FastGoods :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
+  <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
 
 </template>
 
