@@ -102,10 +102,10 @@ async function saveFn() {
     </div>
     <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input placeholder="Название" class="col-span-5" v-model="createValues.name"/>
-        <fin-input placeholder="Символьный код" class="col-span-5" v-model="createValues.symbol_code"/>
-        <fin-input placeholder="Цифровой код" class="col-span-5" v-model="createValues.digital_code"/>
-        <fin-input placeholder="Кратность" class="col-span-5" v-model="createValues.multiplicity"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Название" class="col-span-5" v-model="createValues.name"/>
+        <fin-input :class="{ 'p-invalid': v$.symbol_code.$error }" placeholder="Символьный код" class="col-span-5" v-model="createValues.symbol_code"/>
+        <fin-input :class="{ 'p-invalid': v$.digital_code.$error }" placeholder="Цифровой код" class="col-span-5" v-model="createValues.digital_code"/>
+        <fin-input :class="{ 'p-invalid': v$.multiplicity.$error }" placeholder="Кратность" class="col-span-5" v-model="createValues.multiplicity"/>
       </div>
     </div>
 
@@ -143,6 +143,10 @@ async function saveFn() {
   line-height: 15px;
   color: #808BA0;
   font-weight: 600;
+}
+
+.p-invalid {
+  border: 1px solid #f2376f !important;
 }
 
 .img-goods {

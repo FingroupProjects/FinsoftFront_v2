@@ -8,15 +8,15 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import CreatePurchase from "@/components/CreatePurchase.vue";
+import CreatePurchase from "@/components/purchase/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
+import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
+import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
 

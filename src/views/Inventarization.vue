@@ -8,18 +8,16 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
+import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Dialog from "primevue/dialog";
-import CreateInventarization from "@/components/CreateInventarization.vue";
+import CreateInventarization from "@/components/inventarization/CreateInventarization.vue";
 
 const {
   findStorage,

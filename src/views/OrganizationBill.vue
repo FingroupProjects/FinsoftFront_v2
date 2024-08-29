@@ -8,14 +8,11 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import CreateGoods from "@/components/goodsComponents/createGoods.vue";
-import MethodsGoods from "@/components/goodsComponents/MethodsGoods.vue";
 
 const {
   findCurrency,
@@ -43,6 +40,7 @@ import MethodsOrganizationBill from "@/components/organizationBillComponents/Met
 import FilterOrganizationBill from "@/components/organizationBillComponents/FilterOrganizationBill.vue";
 const imgURL = import.meta.env.VITE_IMG_URL;
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+const dataInfo = ref(null)
 const statusList = ref([
   {
     name: 'Активный',
@@ -83,6 +81,7 @@ const onRowClick = (event) => {
   const product = event.data;
   createOpenModal.value = true;
   visibleRight.value = true;
+  dataInfo.value = product
   selectedProductId.value = product.id
 };
 
@@ -140,6 +139,7 @@ const getSeverity = (status) => {
 
 function closeFn(id) {
   selectedProductId.value = id
+  dataInfo.value = id
   createOpenModal.value = true
 }
 
@@ -147,7 +147,6 @@ function closeView() {
   visibleRight.value = false
   getProducts();
 }
-
 function createOpen() {
   visibleRight.value = true
   createOpenModal.value = false
@@ -347,7 +346,7 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <view-organization-bill v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
+      <view-organization-bill :product-id="dataInfo.id"  :date="dataInfo"  v-if="createOpenModal"  @close-sidebar="closeView"
                  @close-dialog="closeFn"/>
       <CreateOrganizationBill v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
 
