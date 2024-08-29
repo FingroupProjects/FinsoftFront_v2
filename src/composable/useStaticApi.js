@@ -23,7 +23,9 @@ export const useStaticApi = () => {
   const userList = ref([]);
   const loadingUser = ref(false);
   const operationPkoList = ref([]);
+  const priceTypes = ref([]);
   const loadingOperationPko = ref(false)
+  const loadPriceType = ref(false)
 
   const findStorage = async () => {
     try {
@@ -218,6 +220,22 @@ export const useStaticApi = () => {
       loadingOperationPko.value = false;
     }
   };
+  const findPriceType = async () => {
+    try {
+      loadPriceType.value = true;
+      const res = await useAxios(`/priceType`);
+      return (priceTypes.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadPriceType.value = false;
+    }
+  };
 
   return {
     storage,
@@ -252,7 +270,9 @@ export const useStaticApi = () => {
     findOperationPko,
     operationPkoList,
     loadingOperationPko,
-    loadStatus
-
+    loadStatus,
+    findPriceType,
+    loadPriceType,
+    priceTypes
   };
 };

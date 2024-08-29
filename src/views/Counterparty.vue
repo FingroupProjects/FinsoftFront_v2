@@ -19,6 +19,7 @@ import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
 import ViewCounterparty from "@/components/counterparty/ViewCounterparty.vue";
 import CreateCounterparty from "@/components/counterparty/createCounterparty.vue";
+import MethodsCounterparty from "@/components/counterparty/MethodsCounterparty.vue";
 const {
   findStorage,
   storage,
@@ -215,7 +216,7 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsCounterparty @get-product="getProductMethods" :select-products="selectedProduct"
                        v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -231,7 +232,7 @@ getProducts();
         <Column selectionMode="multiple"></Column>
         <Column field="name" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('counterparty.name',index)">
+            <div class="w-full h-full" @click="sortData('name',index)">
               Наименование <i
 
                 :class="{
@@ -267,9 +268,9 @@ getProducts();
             {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
           </template>
         </Column>
-        <Column field="date" :sortable="true" header="">
+        <Column field="address" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('date',index)">
+            <div class="w-full h-full" @click="sortData('address',index)">
               Адрес <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -306,7 +307,7 @@ getProducts();
         </Column>
         <Column field="status" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('active',index)">
+            <div class="w-full h-full" @click="sortData('deleted_at',index)">
               Статус <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
