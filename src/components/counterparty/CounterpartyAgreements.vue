@@ -7,11 +7,12 @@ import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
 import {useAxios} from "@/composable/useAxios.js";
 import {useToast} from "primevue/usetoast";
-import moment from "moment/moment.js";
 import Tag from "primevue/tag";
 import FinInput from "@/components/ui/Inputs.vue";
 import {required} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
+import {useStaticApi} from "@/composable/useStaticApi.js";
+import DatePicker from "primevue/datepicker";
 
 const props = defineProps({
   productId: {
@@ -22,42 +23,72 @@ const props = defineProps({
 
 const toast = useToast();
 
-const coleVo = ref("");
-const selectUnit = ref();
 const getCPList = ref([]);
 const createValues = reactive({
   name: "",
-  address: "",
-  phone: "",
-  email: ""
+  date: "",
+  comment: "",
+  organization: "",
+  contact_number: "",
+  contract_person: "",
+  currency: "",
+  payment: "",
+  priceType: ""
 });
 const rules = reactive({
   name: {required},
-  phone: {required}
+  currency: {required},
+  payment: {required},
+  priceType: {required},
+  date: {required},
+  contact_number: {required},
+  contract_person: {required}
 });
 const v$ = useVuelidate(rules, createValues);
 
 
 const clearInputValues = () => {
-  selectUnit.value = {};
-  coleVo.value = "";
+  createValues.date = ""
+  createValues.name = ""
+  createValues.comment = ""
+  createValues.organization = ""
+  createValues.contact_number = ""
+  createValues.contract_person = ""
+  createValues.currency = ""
+  createValues.payment = ""
+  createValues.priceType = ""
 };
+const {
+  findOrganization,
+  organization,
+  loadingOrganization,
+  findCurrency,
+  currency,
+  loading,
+    findPriceType,
+    loadPriceType,
+    priceTypes
+
+} = useStaticApi();
 
 async function addCpAgreement() {
+  const result = await v$.value.$validate();
+  console.log(result)
+  if(!result) return
   try {
     const res = await useAxios(`/cpAgreement`, {
       method: "POST",
       data: {
-            "name": coleVo.value,
-            "contract_number": selectUnit.value.code,
-            "date": selectUnit.value.code,
-            "organization_id": selectUnit.value.code,
+            "name": createValues.name,
+            "contract_number": createValues.contact_number,
+            "date": createValues.date,
+            "organization_id": createValues.organization.code,
             "counterparty_id": props.productId,
-            "contact_person": coleVo.value,
-            "currency_id": "das",
-            "payment_id": "d",
-            "comment": "fs",
-            "price_type_id": "d"
+            "contact_person": createValues.contract_person,
+            "currency_id": createValues.currency.code,
+            "payment_id": createValues.payment.code,
+            "comment": createValues.comment,
+            "price_type_id": createValues.priceType.code
       },
     });
 
@@ -67,7 +98,8 @@ async function addCpAgreement() {
       detail: "Message Content",
       life: 3000,
     });
-    clearInputValues();
+
+    getAgreements()
   } catch (e) {
     console.log(e);
     toast.add({
@@ -77,9 +109,16 @@ async function addCpAgreement() {
       life: 3000,
     });
   }
+  finally {
+    clearInputValues();
+  }
 }
 
-
+onMounted(function (){
+  findCurrency()
+  findOrganization()
+  findPriceType()
+});
 const confirmDelete = async (index) => {
   try {
     const res = await useAxios(`/counterparty/${index}`,{
@@ -115,7 +154,7 @@ onMounted(async () => {
 async function getAgreements() {
   try {
     const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/${props.productId}`);
-    return getCPList.value = res
+    return getCPList.value = res.result.data
   } catch (e) {
     console.log(e);
   }
@@ -130,17 +169,95 @@ async function getAgreements() {
     <div class="header-title">Договоры контрагента</div>
   </div>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
+    <FloatLabel class="col-span-4">
+      <DatePicker
+          showIcon
+          v-model="createValues.date"
+          dateFormat="dd.mm.yy"
+          :class="{ 'p-invalid': v$.date.$error }"
+          iconDisplay="input"
+          class="w-full"
+      >
+      </DatePicker>
+      <label for="dd-city">Дата</label>
+    </FloatLabel>
+        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-4" v-model="createValues.name"/>
+        <fin-input :class="{ 'p-invalid': v$.contract_person.$error }" placeholder="Контакная лицо" class="col-span-4" v-model="createValues.contract_person"/>
+        <fin-input :class="{ 'p-invalid': v$.contact_number.$error }" placeholder="Номер контракта" class="col-span-4" v-model="createValues.contact_number"/>
+    <FloatLabel class="col-span-4">
+      <Dropdown
+          v-model="createValues.organization"
+          :class="{ 'p-invalid': v$.currency.$error }"
+          @click="findOrganization"
+          :loading="loading"
+          :options="organization"
+          optionLabel="name"
+          class="w-full"
+      >
+        <template #value>
+          {{ createValues.organization?.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Организация</label>
+    </FloatLabel>
+    <FloatLabel class="col-span-4">
+      <Dropdown
+          v-model="createValues.currency"
+          :class="{ 'p-invalid': v$.currency.$error }"
+          @click="findCurrency"
+          :loading="loading"
+          :options="currency"
+          optionLabel="name"
+          class="w-full"
+      >
+        <template #value>
+          {{ createValues.currency?.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Валюта</label>
+    </FloatLabel>
+    <FloatLabel class="col-span-4">
+      <Dropdown
+          v-model="createValues.payment"
+          :class="{ 'p-invalid': v$.payment.$error }"
+          @click="findCurrency"
+          :loading="loading"
+          :options="currency"
+          optionLabel="name"
+          class="w-full"
+      >
+        <template #value>
+          {{ createValues.payment?.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Валюта</label>
+    </FloatLabel>
+    <FloatLabel class="col-span-4">
+      <Dropdown
+          v-model="createValues.priceType"
+          :class="{ 'p-invalid': v$.priceType.$error }"
+          @click="findPriceType"
+          :loading="loadPriceType"
+          :options="priceTypes"
+          optionLabel="name"
+          class="w-full"
+      >
+        <template #value>
+          {{ createValues.priceType?.name }}
+        </template>
+      </Dropdown>
+      <label for="dd-city">Тип цены</label>
+    </FloatLabel>
+    <fin-button
+        icon="pi pi-save"
+        @click="addCpAgreement"
+        label="Добавить"
+        severity="success"
+        class="p-button-lg"
+    />
 
-    <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
-      <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
-        <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
-        <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
-        <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
-      </div>
-    </div>
   </div>
-  <div v-if="getCPList.length > 0" class="table-create dropdown-status">
+  <div  class="table-create dropdown-status">
     <DataTable
         scrollable
         scrollHeight="660px"
@@ -268,6 +385,10 @@ async function getAgreements() {
     height: 3px !important;
   }
 }
+.p-invalid {
+  border: 1px solid #f2376f !important;
+}
+
 </style>
 
 <style scoped lang="scss">
