@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {reactive, ref, watch, watchEffect} from "vue";
+import {onMounted, reactive, ref, watch, watchEffect} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
@@ -19,8 +19,8 @@ const store = useFinanceStore()
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
-  operationType:'',
-  type:''
+  operationType: '',
+  type: ''
 })
 
 const toast = useToast();
@@ -51,9 +51,9 @@ const financeDate = reactive({
   comments: "",
   selectedOrganization: "",
   selectedCounterparty: "",
-  sum:'',
-  base:'',
-  getUser:''
+  sum: '',
+  base: '',
+  getUser: ''
 });
 const rules = reactive({
   datetime24h: {required},
@@ -102,12 +102,12 @@ async function saveFn() {
           counterparty_id: financeDate.selectedCounterparty.code,
           counterparty_agreement_id: financeDate.selectedAgreement.code,
           cash_register_id: financeDate.cashRegisterId.code,
-          operation_type_id:props.operationType,
+          operation_type_id: props.operationType,
           sum: financeDate.sum,
-          basis:financeDate.base,
+          basis: financeDate.base,
           type: props.type,
           sender: financeDate.getUser,
-          comment:financeDate.comments
+          comment: financeDate.comments
         },
       });
       toast.add({
@@ -162,6 +162,17 @@ watch(financeDate, (newValue) => {
     isCurrencyFetched.value = true;
   }
 });
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findCashRegister(),
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 </script>
 
 <template>
@@ -187,7 +198,6 @@ watch(financeDate, (newValue) => {
           v-model="financeDate.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-          @click="findOrganization"
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
@@ -200,7 +210,6 @@ watch(financeDate, (newValue) => {
       <Dropdown
           v-model="financeDate.selectedCounterparty"
           :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-          @click="findCounterparty"
           :loading="loadingCounterparty"
           :options="counterparty"
           optionLabel="name"
@@ -233,7 +242,6 @@ watch(financeDate, (newValue) => {
         <Dropdown
             v-model="financeDate.cashRegisterId"
             :class="{ 'p-invalid': v$.cashRegisterId.$error }"
-            @click="findCashRegister"
             :loading="loadingCash"
             :options="cashRegisterList"
             optionLabel="name"
@@ -247,7 +255,8 @@ watch(financeDate, (newValue) => {
       </FloatLabel>
       <div class="col-span-12 p-[26px] bg-[#ECF1FB] mt-[26px] rounded-[10px]">
         <div class="w-full input-finance-sum">
-          <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text" size="large" class="w-full" placeholder="Сумма"/>
+          <InputText v-model="financeDate.sum" :model-value="formatInputAmount(financeDate.sum)" type="text"
+                     size="large" class="w-full" placeholder="Сумма"/>
         </div>
 
         <fin-button @click="saveFn" class="mt-[26px] w-full" icon-pos="left" severity="success"

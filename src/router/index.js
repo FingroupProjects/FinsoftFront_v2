@@ -107,6 +107,11 @@ const routes = [
                 name: 'finance',
                 component: () => import('@/views/Finance.vue'),
             },
+            {
+                path: '/for-sale',
+                name: 'for-sale',
+                component: () => import('@/views/ForSale.vue'),
+            },
         ]
     },
     {
@@ -118,7 +123,8 @@ const routes = [
             layout: 'main'
         },
         props: true // Allows passing route params as props to the component
-    }
+    },
+
 ]
 
 const router = createRouter({
