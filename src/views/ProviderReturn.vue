@@ -8,22 +8,18 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
-import CreatePurchase from "@/components/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
-import MethodsProviderOrder from "@/components/MethodsProviderOrder.vue";
-import ViewProviderOrder from "@/components/ViewProviderOrder.vue";
-import CreateProviderOrder from "@/components/CreateProviderOrder.vue";
-import ViewProviderReturn from "@/components/ViewProviderReturn.vue";
-import CreateProviderReturn from "@/components/CreateProviderReturn.vue";
+import MethodsProviderOrder from "@/components/providerOrder/MethodsProviderOrder.vue";
+import ViewProviderReturn from "@/components/providerReturn/ViewProviderReturn.vue";
+import CreateProviderReturn from "@/components/providerReturn/CreateProviderReturn.vue";
+import MethodsReturnProvider from "@/components/providerReturn/MethodsReturnProvider.vue";
 
 const {
   findStorage,
@@ -234,7 +230,7 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsProviderOrder @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsReturnProvider @get-product="getProductMethods" :select-products="selectedProduct"
                             v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable

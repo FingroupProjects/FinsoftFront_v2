@@ -38,6 +38,11 @@ const routes = [
                 component: () => import('@/views/ProviderReturn.vue'),
             },
             {
+                path: '/counterparty',
+                name: 'counterparty',
+                component: () => import('@/views/ProviderReturn.vue'),
+            },
+            {
                 path: '/clientSale',
                 name: 'clientSale',
                 component: () => import('@/views/ClientSale.vue'),

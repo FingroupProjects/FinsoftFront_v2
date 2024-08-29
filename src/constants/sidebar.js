@@ -35,6 +35,15 @@ export default [
                 data: [
                     {
                         label: 'Конрагенты',
+                        route: '/counterparty'
+                    }
+                ]
+            },
+            {
+                title: 'Справочники',
+                data: [
+                    {
+                        label: 'РМК',
                         route: '/for-sale'
                     }
                 ]

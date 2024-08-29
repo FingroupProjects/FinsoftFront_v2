@@ -13,8 +13,6 @@ import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import ViewPurchase from "@/components/ViewPurchase.vue";
-import MethodsPurchase from "@/components/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import AddGoods from "@/components/goodsComponents/ViewGoods.vue";
 import CreateGoods from "@/components/goodsComponents/createGoods.vue";
