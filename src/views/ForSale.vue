@@ -18,7 +18,9 @@ const searchTerm = ref('');
 const listPostGoods = ref([]);
 const getAllSum = ref(0);
 const imgURL = import.meta.env.VITE_IMG_URL;
-
+const userName = {
+  name: localStorage.getItem("user_name"),
+};
 const getIdProducts = async (event) => {
   const inputValue = event?.target.value || '';
   searchTerm.value = inputValue; // Store the search term
@@ -159,7 +161,7 @@ watch(selectedGoods, (newValue) => {
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
           <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
           <div class="">
-            Кассир: Махмаджуб И.И.
+            Кассир: {{userName.name }}
           </div>
         </div>
 
