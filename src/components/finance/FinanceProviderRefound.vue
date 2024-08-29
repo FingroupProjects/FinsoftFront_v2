@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {reactive, ref, watch, watchEffect} from "vue";
+import {onMounted, reactive, ref, watch, watchEffect} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
@@ -162,6 +162,18 @@ watch(financeDate, (newValue) => {
     isCurrencyFetched.value = true;
   }
 });
+
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findCashRegister(),
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 </script>
 
 <template>
@@ -187,7 +199,6 @@ watch(financeDate, (newValue) => {
           v-model="financeDate.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-          @click="findOrganization"
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
@@ -200,7 +211,6 @@ watch(financeDate, (newValue) => {
       <Dropdown
           v-model="financeDate.selectedCounterparty"
           :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-          @click="findCounterparty"
           :loading="loadingCounterparty"
           :options="counterparty"
           optionLabel="name"
@@ -233,7 +243,6 @@ watch(financeDate, (newValue) => {
         <Dropdown
             v-model="financeDate.cashRegisterId"
             :class="{ 'p-invalid': v$.cashRegisterId.$error }"
-            @click="findCashRegister"
             :loading="loadingCash"
             :options="cashRegisterList"
             optionLabel="name"

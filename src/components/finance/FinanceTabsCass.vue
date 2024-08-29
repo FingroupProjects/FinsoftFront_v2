@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {reactive, ref, watch, watchEffect} from "vue";
+import {reactive, ref, watch, watchEffect,onMounted} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
@@ -19,8 +19,8 @@ const store = useFinanceStore()
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
-  operationType:'',
-  type:''
+  operationType: '',
+  type: ''
 })
 const toast = useToast();
 
@@ -76,7 +76,7 @@ async function saveFn() {
           basis: financeDate.base,
           type: props.type,
           sender: financeDate.getUser,
-          comment:financeDate.comments
+          comment: financeDate.comments
         },
       });
       toast.add({
@@ -111,6 +111,16 @@ watchEffect(() => {
     code: organizationHas.id
   }
 });
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCashRegister(),
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 </script>
 
 <template>
@@ -136,7 +146,6 @@ watchEffect(() => {
           v-model="financeDate.selectedOrganization"
           :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-          @click="findOrganization"
           :loading="loadingOrganization"
           optionLabel="name"
           class="w-full"
@@ -149,7 +158,6 @@ watchEffect(() => {
       <Dropdown
           v-model="financeDate.senderCashRegisterId"
           :class="{ 'p-invalid': v$.senderCashRegisterId.$error }"
-          @click="findCashRegister"
           :loading="loadingCash"
           :options="cashRegisterList"
           optionLabel="name"
@@ -168,7 +176,6 @@ watchEffect(() => {
         <Dropdown
             v-model="financeDate.cashRegisterId"
             :class="{ 'p-invalid': v$.cashRegisterId.$error }"
-            @click="findCashRegister"
             :loading="loadingCash"
             :options="cashRegisterList"
             optionLabel="name"
