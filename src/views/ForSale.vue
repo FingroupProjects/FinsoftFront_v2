@@ -53,6 +53,10 @@ const highlightMatch = (name, term) => {
 function getFastProducts(products) {
   listPostGoods.value = [...products]
   if (products.length > 0) openFastGoods.value = false
+
+  getAllSum.value = listPostGoods.value.reduce((total, el) => {
+    return total + (el?.price || 0);
+  }, 0)
 }
 
 watch(selectedGoods, (newValue) => {
@@ -61,6 +65,7 @@ watch(selectedGoods, (newValue) => {
 
     listGoods.value.hide();
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
+      console.log(total)
       return total + (el?.price || 0);
     }, 0)
   }
@@ -84,13 +89,13 @@ watch(selectedGoods, (newValue) => {
                 placeholder="Поиск по названию, артикулу, штрих-коду"
             />
           </IconField>
-          <OverlayPanel ref="listGoods" class="w-[36%]">
+          <OverlayPanel ref="listGoods" class="w-[39%]">
             <Listbox v-model="selectedGoods" :options="productsId" optionLabel="name" class="w-full">
               <template #option="slotProps">
                 <div class="flex items-center">
                   <img alt="" :src="slotProps.option.img" class="mr-2" style="width: 50px"/>
                   <div class="font-medium text-[20px] leading-[20px] text-[#000]">
-                    {{ slotProps.option.products }}
+                    <span v-html="highlightMatch(slotProps.option.products, searchTerm)"></span>
                     <div class="font-medium text-[16px] leading-[16px] text-[#808BA0] mt-2.5">
                       <span v-html="highlightMatch(slotProps.option.vendorCode, searchTerm)"></span>
                     </div>
@@ -136,7 +141,7 @@ watch(selectedGoods, (newValue) => {
                     class="pi pi-plus text-[#3935E7]"></i>
                 </button>
               </div>
-              <div class="flex gap-[48px] col-span-5 justify-end">
+              <div class="flex gap-[48px] justify-between col-span-5 w-[95%]">
                 <div>
                   <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Цена</div>
                   <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">

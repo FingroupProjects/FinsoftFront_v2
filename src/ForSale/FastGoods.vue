@@ -6,6 +6,8 @@ import Dialog from "primevue/dialog";
 import IconField from "primevue/iconfield";
 import {useAxios} from "@/composable/useAxios.js";
 import {ref, computed} from "vue";
+import {Swiper, SwiperSlide} from 'swiper/vue';
+import 'swiper/css';
 
 const emit = defineEmits(['close-modal', 'postProducts'])
 const props = defineProps({
@@ -14,10 +16,10 @@ const props = defineProps({
     default: false
   }
 })
-
+const modules = ref([])
 const fastGoodsList = ref([]);
 const checked = ref(Array(fastGoodsList.value.length).fill(false));
-const selectFilter = ref(0);
+const selectFilter = ref(null);
 const filterList = ref([]);
 const filterSelect = ref(null);
 const postProducts = ref([]);
@@ -34,18 +36,23 @@ async function getGoodGroup(event) {
     search: event?.srcElement.value,
   }
   try {
-    const res = await useAxios(`fastGoods${filterSelect.value || ''}`, {params})
-    fastGoodsList.value = res.result.data.map(el => {
-      return {
-        count: el.amount,
-        products: el.name,
-        description: el.description,
-        vendorCode: el.vendor_code,
-        price: el.price,
-        id: el.id,
-        img: el.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
-      }
-    })
+    const res = await useAxios(`fastGoods${filterSelect.value || ''}`, {params});
+
+    const data = Array.isArray(res.result.data) && res.result.data.length > 0
+        ? res.result.data
+        : res.result;
+
+    fastGoodsList.value = data.map(el => ({
+      count: 1,
+      products: el.name,
+      description: el.description,
+      vendorCode: el.vendor_code,
+      price: el.price,
+      id: el.id,
+      img: el.images.length > 0 && el.images[0].image
+          ? imgURL + el.images[0].image
+          : new URL('@/assets/img/exampleImg.svg', import.meta.url),
+    }));
   } catch (e) {
     console.log()
   }
@@ -69,18 +76,18 @@ async function getFilter() {
 }
 
 getFilter()
-const toggleChecked = (index, info) => {
-  // Toggle the checkbox state
-  checked.value[index] = !checked.value[index];
-  const isChecked = checked.value[index]; // Get the new checked state
 
-  // Handle the checkbox change logic directly here
+const toggleChecked = (index, info) => {
+
+  checked.value[index] = !checked.value[index];
+  const isChecked = checked.value[index];
+
   if (isChecked) {
     postProducts.value.push(info);
   } else {
-    const itemIndex = postProducts.value.findIndex(postItem => postItem.id === info.id); // Ensure 'id' matches your data structure
+    const itemIndex = postProducts.value.findIndex(postItem => postItem.id === info.id);
     if (itemIndex !== -1) {
-      postProducts.value.splice(itemIndex, 1); // Remove the item at the found index
+      postProducts.value.splice(itemIndex, 1);
     }
   }
 };
@@ -89,20 +96,20 @@ function handleCheckboxChange(item, isChecked) {
   if (isChecked) {
     postProducts.value.push(item)
   } else {
-    const index = postProducts.value.findIndex(postItem => postItem.id === item.id); // Assuming each item has a unique 'id'
+    const index = postProducts.value.findIndex(postItem => postItem.id === item.id);
     if (index !== -1) {
-      postProducts.value.splice(index, 1); // Remove the item at the found index
+      postProducts.value.splice(index, 1);
     }
   }
 }
 
 const checkedCount = computed(() => {
-  return checked.value.filter(item => item).length; // Count only checked items
+  return checked.value.filter(item => item).length;
 });
 </script>
 
 <template>
-  <Dialog class="fast-goods-header" v-model:visible="props.openFastGoods" modal
+  <Dialog :draggable="false" class="fast-goods-header" v-model:visible="props.openFastGoods" modal
           :style="{ width: '940px', height:'620px' }" scroll :closable="false"
           :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <template #header>
@@ -126,18 +133,27 @@ const checkedCount = computed(() => {
               placeholder="Поиск по названию, артикулу, штрих-коду"
           />
         </IconField>
-        <div class="mt-[26px] flex gap-4 overflow-y-auto w-full">
-          <button
-              v-ripple
-              v-for="(infoFilter, index) in filterList"
-              :key="index"
-              :class="{ active: selectFilter === index }"
-              @click="toggleFilter(index,infoFilter.code,)"
-              class="font-semibold btn-transition text-[18px] leading-[20px] text-[#3935E7] bg-[#ECF1FB] h-[48px] rounded-[90px]
-               px-[20px] py-[12px] min-w-[140px] flex items-center justify-center"
+        <div class="mt-[26px] flex gap-4 overflow-y-auto w-full h-[fit-content] max-h-[400px]">
+          <swiper
+              :slidesPerView="4"
+              :spaceBetween="-50"
+              :modules="modules"
+
           >
-            <span class="truncate">{{ infoFilter.name }}</span>
-          </button>
+            <swiper-slide v-for="(infoFilter, index) in filterList"
+                          :key="index">
+              <button
+                  v-ripple
+                  :class="{ active: selectFilter === index }"
+                  @click="toggleFilter(index,infoFilter.code,)"
+                  class="font-semibold btn-transition text-[18px] w-[200px] leading-[20px] text-[#3935E7] bg-[#ECF1FB] h-[48px] rounded-[90px]
+               px-[20px] py-[12px] flex items-center justify-center"
+              >
+                <span class="truncate">{{ infoFilter.name }}</span>
+              </button>
+            </swiper-slide>
+          </swiper>
+
         </div>
       </div>
     </template>
