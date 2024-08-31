@@ -1,8 +1,7 @@
 <script setup>
 import {ref} from 'vue'
-import InputText from "primevue/inputtext";
+import InputMask from 'primevue/inputmask';
 import IconField from "primevue/iconfield";
-import formatInputAmount from "@/constants/formatInput.js";
 
 const emit = defineEmits(['numbersWallet'])
 
@@ -72,13 +71,9 @@ function pushNumbers() {
 <template>
   <div>
     <IconField class="w-full filter-goods deposit-money">
-      <InputText
-          class="w-full"
-          v-model="searchQuery"
-          :model-value="formatInputAmount(searchQuery)"
-          @keydown="handleKeydown"
-          placeholder="Внесение денег"
-      />
+      <InputMask id="phone" @keydown="handleKeydown" v-model="searchQuery" mask="(999)99 999-9999"
+                 placeholder="Напишите номер" fluid/>
+
     </IconField>
     <div class="grid grid-cols-12 gap-[16px]">
       <div class="mt-[20px] col-span-9 grid grid-cols-12 gap-[16px]">
@@ -123,6 +118,15 @@ function pushNumbers() {
 <style lang="scss">
 .deposit-money {
   .p-inputtext[type=text] {
+    font-size: 24px !important;
+    color: #808BA0;
+    font-family: Manrope, sans-serif;
+    font-weight: 600;
+  }
+  .p-inputtext:last-child {
+    padding-left: 10px !important;
+  }
+  .p-inputtext::placeholder{
     font-size: 24px !important;
     color: #808BA0;
     font-family: Manrope, sans-serif;

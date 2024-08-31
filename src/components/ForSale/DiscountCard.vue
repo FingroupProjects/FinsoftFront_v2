@@ -4,12 +4,13 @@ import {ref} from "vue";
 import Calculate from "@/components/ForSale/Calculate.vue";
 import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
-import {Swiper, SwiperSlide} from "swiper/vue";
+
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
+import PhoneNumber from "@/components/ForSale/PhoneNumber.vue";
 
-const emit = defineEmits(['close-modal', 'postProducts'])
+const emit = defineEmits(['close-modal', 'postInfoUser'])
 const props = defineProps({
   openDepositMoney: {
     type: Boolean,
@@ -20,15 +21,24 @@ const props = defineProps({
     default: 0
   }
 })
-const walletNumbers = ref(0);
-const change = ref(0);
-const postProducts = ref([]);
-const payMethods = ref([]);
 
-function calculateFn(numbers) {
-  walletNumbers.value = Number(numbers)
-  if (walletNumbers.value > props.saleSum) {
-    return change.value = walletNumbers.value - props.saleSum
+const payMethods = ref([]);
+const infoUser = ref();
+
+async function postPhone(numbers) {
+  try {
+    const cleaned = numbers.replace(/\D/g, '');
+
+    if (cleaned) {
+      const res = await useAxios(`discount/+${cleaned}`, {
+        method: "GET",
+      });
+      infoUser.value = res.result
+    } else {
+      console.log('Invalid number format');
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -51,7 +61,7 @@ cardFn()
 
 <template>
   <Dialog :draggable="false" class="fast-goods-header" v-model:visible="props.openDepositMoney" modal
-          :style="{ width: '940px', height:'620px' }" scroll :closable="false"
+          :style="{ width: '940px', height:'554px' }" scroll :closable="false"
           :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <template #header>
       <div class="flex justify-between items-center w-full ">
@@ -62,27 +72,24 @@ cardFn()
             Дисконтная карта
           </div>
         </div>
-        <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="primary"
-                    label="Применить" @click="emit('postProducts',postProducts)"/>
+        <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
+                    label="Применить" @click="emit('postInfoUser',infoUser)"/>
       </div>
     </template>
-    <div class="grid grid-cols-12 gap-[26px]">
-      <Calculate @numbers-wallet="calculateFn" class="col-span-6"/>
+    <div class="grid grid-cols-12 gap-[26px] mt-[6px]">
+      <PhoneNumber @numbers-wallet="postPhone" class="col-span-6"/>
       <div class="col-span-6">
-        <div class=" py-[24px] mt-[5px] flex flex-col gap-[16px]">
-          <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Клиент</div>
-          <IconField class=" filter-goods">
-            <InputIcon>
-              <img src="@/assets/img/IconUser.svg" alt="" class="mt-[-2px]">
-            </InputIcon>
-            <InputText
-                class="w-full"
-                placeholder="Пивоварчиков Геннадий Петрович"
-            />
-          </IconField>
+        <div
+            class="https://chromewebstore.google.com/detail/dimensions/baocaagndhipibgklemoalmkljaimfdj?pli=1flex flex-col gap-[16px]">
+          <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0] mb-[16px]">Клиент</div>
+          <div
+              class="bg-[#F2F2F2] flex items-center gap-[10px] px-[16px] py-[12px] h-[50px] rounded-[12px] text-[#808BA0] text-[18px] font-semibold leading-[18px] mb-[24px]">
+            <img src="@/assets/img/IconUser.svg" alt="">
+            {{ infoUser?.lastname }} {{ infoUser?.name }}
+          </div>
           <div class="flex justify-between items-center border-dashed border-t py-[24px] ">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Накоплено</div>
-            <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(change) }} <span
+            <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ infoUser?.sum || '0.00' }} <span
                 class="text-[24px]">сум</span></div>
           </div>
         </div>
