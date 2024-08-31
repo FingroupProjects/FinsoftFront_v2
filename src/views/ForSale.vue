@@ -1,29 +1,34 @@
 <script setup>
-import {ref, watch} from 'vue';
+import {ref, watch, watchEffect} from 'vue';
 import InputText from "primevue/inputtext";
 import InputIcon from "primevue/inputicon";
 import IconField from "primevue/iconfield";
 import Listbox from 'primevue/listbox';
 import OverlayPanel from 'primevue/overlaypanel';
 import {useAxios} from "@/composable/useAxios.js";
-import FastGoods from "@/ForSale/FastGoods.vue";
+import FastGoods from "@/components/ForSale/FastGoods.vue";
 import formatPrice from "../constants/formatNumber.js";
+import DepositMoney from "@/components/ForSale/DepositMoney.vue";
+import DiscountCard from "@/components/ForSale/DiscountCard.vue";
 
 const openFastGoods = ref(false);
-
 const selectedGoods = ref();
+const openDiscount = ref(false);
 const listGoods = ref();
 const productsId = ref([]);
 const searchTerm = ref('');
 const listPostGoods = ref([]);
 const getAllSum = ref(0);
+const openDeposit = ref(false);
+
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
   name: localStorage.getItem("user_name"),
 };
+
 const getIdProducts = async (event) => {
   const inputValue = event?.target.value || '';
-  searchTerm.value = inputValue; // Store the search term
+  searchTerm.value = inputValue;
 
   const res = await useAxios(`good?search=${inputValue}`);
   productsId.value = res.result.data.map((el) => ({
@@ -59,6 +64,13 @@ function getFastProducts(products) {
   }, 0)
 }
 
+function addCountFn(count) {
+  count++
+  getAllSum.value = listPostGoods.value.reduce((total, el) => {
+    return total + (el?.price || 0);
+  }, 0)
+}
+
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
@@ -69,6 +81,12 @@ watch(selectedGoods, (newValue) => {
       return total + (el?.price || 0);
     }, 0)
   }
+});
+watchEffect(() => {
+  getAllSum.value = listPostGoods.value.reduce((total, el) => {
+    console.log(total)
+    return total + (el?.price*el?.count || 0);
+  }, 0)
 })
 </script>
 
@@ -137,7 +155,8 @@ watch(selectedGoods, (newValue) => {
                         @click="infoGoods.count > 1 ? infoGoods.count-- : null"><i
                     class="pi pi-minus text-[#3935E7]"></i></button>
                 <div class="text-[#000] text-[18px] leading-[18px] text-center">{{ infoGoods.count }}</div>
-                <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white" @click="infoGoods.count++"><i
+                <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
+                        @click="addCountFn(infoGoods.count++)"><i
                     class="pi pi-plus text-[#3935E7]"></i>
                 </button>
               </div>
@@ -166,7 +185,7 @@ watch(selectedGoods, (newValue) => {
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
           <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
           <div class="">
-            Кассир: {{userName.name }}
+            Кассир: {{ userName.name }}
           </div>
         </div>
 
@@ -178,7 +197,7 @@ watch(selectedGoods, (newValue) => {
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">
           Скидка
         </div>
-        <fin-button icon="pi pi-plus" severity="warning" label="Дисконтная"/>
+        <fin-button icon="pi pi-plus" @click="openDiscount= true" severity="warning" label="Дисконтная"/>
       </div>
       <div class="flex gap-4 mt-4">
         <fin-button icon="pi pi-credit-card" class="p-button-2xl w-full" severity="success" label="Дисконтная"/>
@@ -217,11 +236,14 @@ watch(selectedGoods, (newValue) => {
         <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(getAllSum) }} <span
             class="text-[24px]">сум</span></div>
       </div>
-      <fin-button icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full" severity="success"
+      <fin-button @click="openDeposit = true" icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full"
+                  severity="success"
                   label="Внести деньги"/>
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
+  <DepositMoney :sale-sum="getAllSum" :open-deposit-money="openDeposit" @close-modal="openDeposit=false"/>
+  <DiscountCard :sale-sum="getAllSum" :open-deposit-money="openDiscount" @close-modal="openDiscount=false"/>
 
 </template>
 

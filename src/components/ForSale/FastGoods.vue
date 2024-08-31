@@ -103,6 +103,24 @@ function handleCheckboxChange(item, isChecked) {
   }
 }
 
+function closeDialog() {
+  selectFilter.value = null
+  filterSelect.value = null
+  postProducts.value = []
+  checked.value = []
+  emit('close-modal')
+  getGoodGroup()
+}
+
+function postFn() {
+  emit('postProducts', postProducts.value)
+  selectFilter.value = null
+  filterSelect.value = null
+  checked.value = []
+
+  getGoodGroup()
+}
+
 const checkedCount = computed(() => {
   return checked.value.filter(item => item).length;
 });
@@ -115,14 +133,14 @@ const checkedCount = computed(() => {
     <template #header>
       <div class="flex justify-between items-center w-full ">
         <div class="flex gap-5 items-center ">
-          <fin-button @click="emit('close-modal')" icon="pi pi-times" class="p-button-2xl" severity="warning"
+          <fin-button @click="closeDialog" icon="pi pi-times" class="p-button-2xl" severity="warning"
                       label="Отменить"/>
           <div class="font-semibold text-[26px] leading-[26px] text-[#141C30]">
             Быстрые товары: {{ checkedCount }}
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="success"
-                    label="Добавить" @click="emit('postProducts',postProducts)"/>
+                    label="Добавить" @click="postFn"/>
       </div>
       <div class="mt-[26px]">
         <IconField class="w-full filter-goods">
@@ -159,7 +177,7 @@ const checkedCount = computed(() => {
     </template>
     <div>
       <div class="grid grid-cols-12 gap-5">
-        <div class="relative fast-good-checkbox  col-span-3" v-for="(infoFastGoods,index) in fastGoodsList"
+        <div class="relative fast-good-checkbox col-span-3" v-for="(infoFastGoods,index) in fastGoodsList"
              :key="index">
           <div v-ripple @click="toggleChecked(index, infoFastGoods)"
                class="bg-[#F3F3F3] rounded-[16px] overflow-hidden">
