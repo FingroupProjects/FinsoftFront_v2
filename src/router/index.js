@@ -68,6 +68,11 @@ const routes = [
                 component: () => import('@/views/Posting.vue'),
             },
             {
+                path: '/organization',
+                name: 'organization',
+                component: () => import('@/views/Organization.vue'),
+            },
+            {
                 path: '/counterparty',
                 name: 'counterparty',
                 component: () => import('@/views/Counterparty.vue'),

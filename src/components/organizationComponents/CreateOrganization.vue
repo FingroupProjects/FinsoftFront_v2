@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch, onMounted, computed} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -9,18 +9,23 @@ import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
+import Textarea from 'primevue/textarea';
+import Dialog from "primevue/dialog";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
 const {
-  findOrganization,
-  organization,
-  loadingOrganization,
+  findUsers,
+  userList,
+  loadingUser
 } = useStaticApi();
 
+const agreementList = ref([]);
+const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
@@ -28,18 +33,16 @@ const initialValue = ref(null);
 const isModal = ref(false)
 const createValues = reactive({
   name: "",
-  organization: "",
-  login: "",
-  password: "",
-  phone: "",
-  email: ""
+  inn: "",
+  director: "",
+  chief_accountant: "",
+  address: "",
 });
 const rules = reactive({
   name: {required},
-  organization: {required},
-  login: {required},
-  phone: {required},
-  password: {required}
+  inn: {required},
+  director: {required},
+  chief_accountant: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -51,32 +54,19 @@ const v$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
   const result = await v$.value.$validate();
-  openInfoModal.value = false;
-
+  openInfoModal.value = false
   if (result) {
-    const formData = new FormData();
-
-    formData.append("organization_id", createValues.organization.code);
-    formData.append("name", createValues.name);
-    formData.append("login", createValues.login);
-    formData.append("password", createValues.password);
-    formData.append("phone", createValues.phone);
-    formData.append("group_id", 1);
-    formData.append("email", createValues.email);
-
-    if (imageRefs.value.length > 0) {
-      formData.append("image", imageRefs.value[0]);
-    }
-
     try {
-      const res = await useAxios(`user`, {
+      const res = await useAxios(`organization`, {
         method: "POST",
-        data: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
+        data: {
+          name: createValues.name,
+          INN: createValues.inn,
+          chief_accountant_id: createValues.chief_accountant.code,
+          director_id: createValues.director.code,
+          address: createValues.address
         },
       });
-
       toast.add({
         severity: "success",
         summary: "Success Message",
@@ -98,16 +88,13 @@ async function saveFn() {
 
 
 onMounted( function (){
-  findOrganization()
+  findUsers()
 });
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
-const fileInput = ref()
-const imagePreview = ref([]);
-const emptyImg = '';
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
@@ -115,64 +102,19 @@ watch(createValues, (newVal) => {
   }
   initialValue.value = newVal;
 }, {deep: true});
-const reversedImgeRefs = computed(() => [...imagePreview.value].reverse());
-
-watchEffect(() => {
-
-  if (hasOrganization === true) createValues.selectedOrganization = {
-    name: organizationHas.name,
-    code: organizationHas.id
-  }
 
 
-});
-const imageRefs = ref([]);
-const responsiveOptions = ref([
-  {
-    breakpoint: '1400px',
-    numVisible: 2,
-    numScroll: 1
-  },
-  {
-    breakpoint: '1199px',
-    numVisible: 3,
-    numScroll: 1
-  },
-  {
-    breakpoint: '767px',
-    numVisible: 2,
-    numScroll: 1
-  },
-  {
-    breakpoint: '575px',
-    numVisible: 1,
-    numScroll: 1
-  }
-]);
-const onPickFile = () => {
-  fileInput.value.click();
-};
+onMounted(function (){
+  findUsers()
+})
 
-const selectImage = (event) => {
-  const files = event.target.files;
-
-  for (const file of files) {
-    imageRefs.value.push(file);
-    const fileReader = new FileReader();
-    fileReader.addEventListener('load', () => {
-      imagePreview.value.push(fileReader.result);
-    });
-    fileReader.readAsDataURL(file);
-  }
-
-};
 </script>
 
 <template>
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создания пользователя</div>
+        <div class="header-title">Создания организация</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
 
         </div>
@@ -195,54 +137,34 @@ const selectImage = (event) => {
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <div class="relative col-span-3">
-        <input
-            accept="image/*"
-            type="file"
-            @change="selectImage"
-            style="display: none"
-            ref="fileInput"
+      <fin-input v-model="createValues.name" class="col-span-4" :error="v$.name.$error" placeholder="Наименование"/>
+      <fin-input v-model="createValues.inn" class="col-span-4" :error="v$.inn.$error" placeholder="ИНН"/>
+      <FloatLabel class="col-span-4" >
+        <Dropdown
+            v-model="createValues.director"
+            :options="userList"
+            :class="{ 'p-invalid': v$.director.$error }"
+            @click="findUsers"
+            :loading="loadingUser"
+            optionLabel="name"
+            class="w-full"
         />
-        <div v-if="imagePreview.length !== 0">
-          <img
-              :src="imagePreview[0]"
-              @click="onPickFile"
-              alt=""
-              class="w-[200px] m-auto rounded-[16px] h-[200px] object-cover"
-          />
-        </div>
-        <div v-else class="w-[150px] h-[150px] m-auto flex items-center justify-center border border-dashed rounded-[16px]">
-          <button @click="onPickFile" class="text-gray-500">
-            Загрузить изображение
-          </button>
-        </div>
-      </div>
-
-      <!-- Form Fields -->
-      <div class="col-span-9 grid grid-cols-12 gap-[5px]">
-
-      <fin-input v-model="createValues.name"  :class="{ 'p-invalid': v$.name.$error }" class="col-span-4" placeholder="Имя"/>
-
-        <fin-input v-model="createValues.login" :class="{ 'p-invalid': v$.login.$error }"  class="col-span-4"  placeholder="Логин"/>
-
-        <fin-input v-model="createValues.password" :class="{ 'p-invalid': v$.password.$error }"  class="col-span-4"  placeholder="Пароль"/>
-        <FloatLabel :class="{ 'p-invalid': v$.organization.$error }" class="col-span-4">
-          <Dropdown
-              v-model="createValues.organization"
-              :options="organization"
-              :loading="loadingOrganization"
-              optionLabel="name"
-              class="w-full"
-          />
-          <label for="organization">Организация</label>
-        </FloatLabel>
-        <fin-input v-model="createValues.phone" :class="{ 'p-invalid': v$.phone.$error }" class="col-span-4"  placeholder="Телефон"/>
-        <fin-input v-model="createValues.email"  class="col-span-4"  placeholder="Email"/>
-
-      </div>
+        <label for="dd-city">Директор</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4" >
+        <Dropdown
+            v-model="createValues.chief_accountant"
+            :options="userList"
+            :class="{ 'p-invalid': v$.chief_accountant.$error }"
+            @click="findUsers"
+            :loading="loadingUser"
+            optionLabel="name"
+            class="w-full"
+        />
+        <label for="dd-city">Главный бухгалтер</label>
+      </FloatLabel>
+      <fin-input v-model="createValues.address" class="col-span-4"  placeholder="Адрес"/>
     </div>
-
-
   </div>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
@@ -300,10 +222,6 @@ const selectImage = (event) => {
 
   .p-select-list-container {
     width: 100% !important;
-  }
-
-  .p-invalid {
-    border: 1px solid #f2376f !important;
   }
 
   .p-datepicker {
