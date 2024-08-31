@@ -202,22 +202,9 @@ export default [
                         route: '/user'
                     },
                     {
-                        label: 'Контрагенты',
-                        route: '/'
-                    },
-                    {
                         label: 'Мои организации',
-                        route: '/'
+                        route: '/organization'
                     },
-                    {
-                        label: 'Виды цен',
-                        route: '/'
-                    },
-                    {
-                        label: 'Волюты',
-                        route: '/',
-                        component: () => import('@/components/ShoppingMovement.vue'),
-                    }
                 ]
             }
         ]

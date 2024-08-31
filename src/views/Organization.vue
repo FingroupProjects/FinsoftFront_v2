@@ -1,4 +1,4 @@
-<script setup>
+\<script setup>
 import {ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -20,19 +20,18 @@ import MethodsCounterparty from "@/components/counterparty/MethodsCounterparty.v
 import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
 import CreateOrganizationBill from "@/components/organizationBillComponents/CreateOrganizationBill.vue";
 import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
-import MethodsUser from "@/components/userComponents/MethodsUser.vue";
-import ViewUser from "@/components/userComponents/ViewUser.vue";
-import CreateUser from "@/components/userComponents/CreateUser.vue";
+import ViewOrganization from "@/components/organizationComponents/ViewOrganization.vue";
+import CreateOrganization from "@/components/organizationComponents/CreateOrganization.vue";
 
 const {
-  findOrganization,
-  organization,
-  loadingOrganization
+  findCurrency,
+  currency,
+  loading
 } = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref([]);
-const selectedOrganization = ref(null);
+const selectedCurrency = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
@@ -94,14 +93,14 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    currency_id: selectedOrganization.value?.code,
+    currency_id: selectedCurrency.value?.code,
     deleted_at: selectedStatus.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
   };
   try {
-    const res = await useAxios(`/user`, {params});
+    const res = await useAxios(`/organization`, {params});
 
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
@@ -166,7 +165,7 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch(selectedOrganization, () => {
+watch(selectedCurrency, () => {
   getProducts();
 });
 
@@ -178,7 +177,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Пользователи"/>
+  <header-purchase header-title="Организации"/>
   <Loader v-if="loader"/>
   <div v-else>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
@@ -191,21 +190,13 @@ getProducts();
             placeholder="Поиск"
         />
       </IconField>
-      <Dropdown
-          v-model="selectedOrganization"
-          optionLabel="name"
-          placeholder="Организация"
-          @click="findOrganization"
-          :loading="loadingOrganization"
-          :options="organization"
-          class="w-full col-span-2"
-      />
+
       <Dropdown
           v-model="selectedStatus"
           :options="statusList"
           optionLabel="name"
           placeholder="Статус"
-          class="w-full col-span-2"
+          class="w-full col-span-4"
       />
       <div class="flex gap-4 col-span-2">
         <fin-button
@@ -226,7 +217,7 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsUser @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsOrganizationBill @get-product="getProductMethods" :select-products="selectedProduct"
                            v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -260,10 +251,10 @@ getProducts();
             {{ slotProps.data.name }}
           </template>
         </Column>
-        <Column field="name" :sortable="true" header="">
+        <Column field="director" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Логин <i
+            <div class="w-full h-full" @click="sortData('director.name',index)">
+              Директор <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -277,13 +268,13 @@ getProducts();
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.login }}
+            {{ slotProps.data.director.name }}
           </template>
         </Column>
-        <Column field="name" :sortable="true" header="">
+        <Column field="chief_accountant" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Логин <i
+            <div class="w-full h-full" @click="sortData('chief_accountant.name',index)">
+              Главный бухгалтер <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -297,32 +288,14 @@ getProducts();
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.email }}
+            {{ slotProps.data.chief_accountant.name }}
           </template>
         </Column>
-        <Column field="date" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('date',index)">
-              Дата добавления <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
-          </template>
-        </Column>
-
         <Column field="address" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('address',index)">
-              Организация <i
+              Адрес<i
+
                 :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -332,9 +305,10 @@ getProducts();
             </div>
           </template>
           <template #sorticon="{index}">
+
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.organization?.name }}
+            {{ slotProps.data.address }}
           </template>
         </Column>
         <Column field="status" :sortable="true" header="">
@@ -395,9 +369,9 @@ getProducts();
         :dismissable="false"
     >
 
-      <view-user :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-organization :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                          :openModalClose="openInfoModal"/>
-      <CreateUser v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreateOrganization v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 

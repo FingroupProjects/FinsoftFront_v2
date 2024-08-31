@@ -43,18 +43,15 @@ const createValues = reactive({
 });
 const rules = reactive({
   name: {required},
-  lastname: {required},
   organization: {required},
   login: {required},
   phone: {required}
 });
 const fileInput = ref()
-const imagePreview = ref([])
+const imagePreview = ref()
 const imgURL = import.meta.env.VITE_IMG_URL;
 
 const v$ = useVuelidate(rules, createValues);
-
-
 
 async function saveFn() {
   const result = await v$.value.$validate();
@@ -68,8 +65,9 @@ async function saveFn() {
     formData.append("login", createValues.login);
     formData.append("phone", createValues.phone);
     formData.append("group_id", 1);
-    formData.append("email", createValues.email);
-
+    if (createValues.email != null) {
+      formData.append("email", createValues.email);
+    }
     if (imageRefs.value.length > 0) {
       formData.append("image", imageRefs.value[0]);
     }
@@ -103,7 +101,6 @@ async function saveFn() {
 }
 
 async function getUser() {
-
     const item = props.data
     createValues.name = item.name
     createValues.lastname = item.lastname
@@ -112,13 +109,12 @@ async function getUser() {
     createValues.email = item.email
     createValues.phone = item.phone
     createValues.organization = item.organization
-    if (item.images !== null) {
-      imagePreview.value = item.image
-    } else {
-      imagePreview.value.push(emptyImg);
-    }
-    userId.value = item.id
 
+    if (item.image != null) {
+      imagePreview.value = imgURL + item.image
+    }
+
+    userId.value = item.id
 }
 const selectImage = (event) => {
   const files = event.target.files;
@@ -126,7 +122,7 @@ const selectImage = (event) => {
     imageRefs.value.push(file);
     const fileReader = new FileReader();
     fileReader.addEventListener('load', () => {
-      imagePreview.value.push(fileReader.result);
+      imagePreview.value = fileReader.result;
     });
     fileReader.readAsDataURL(file);
   }
@@ -182,7 +178,7 @@ onMounted( function (){
         />
         <div v-if="imagePreview">
           <img
-              :src="imagePreview[0]"
+              :src="imagePreview"
               @click="onPickFile"
               alt=""
               class="w-[200px] m-auto rounded-[16px] h-[200px] object-cover"
