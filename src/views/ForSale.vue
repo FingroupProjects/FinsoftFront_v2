@@ -20,6 +20,8 @@ const searchTerm = ref('');
 const listPostGoods = ref([]);
 const getAllSum = ref(0);
 const openDeposit = ref(false);
+const userInfo = ref(null);
+const payCount = ref(0);
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -41,6 +43,11 @@ const getIdProducts = async (event) => {
   }));
 };
 getIdProducts();
+
+function userInfoFn(info) {
+  userInfo.value = info
+  openDiscount.value = false
+}
 
 function deleteFn(i) {
   listPostGoods.value.splice(i, 1)
@@ -84,9 +91,9 @@ watch(selectedGoods, (newValue) => {
 });
 watchEffect(() => {
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
-    console.log(total)
-    return total + (el?.price*el?.count || 0);
+    return total + (el?.price * el?.count || 0);
   }, 0)
+  payCount.value = getAllSum.value
 })
 </script>
 
@@ -197,21 +204,19 @@ watchEffect(() => {
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">
           Скидка
         </div>
-        <fin-button icon="pi pi-plus" @click="openDiscount= true" severity="warning" label="Дисконтная"/>
+        <fin-button icon="pi pi-plus" severity="warning" label="Дисконтная"/>
       </div>
       <div class="flex gap-4 mt-4">
-        <fin-button icon="pi pi-credit-card" class="p-button-2xl w-full" severity="success" label="Дисконтная"/>
+        <fin-button icon="pi pi-credit-card" @click="openDiscount= true" class="p-button-2xl w-full" severity="warning"
+                    label="Дисконтная"/>
         <fin-button icon="pi pi-percentage" class="p-button-2xl w-full" severity="warning" label="Ручная скидка"/>
       </div>
-      <IconField class="mt-4 filter-goods">
-        <InputIcon>
-          <img src="@/assets/img/IconUser.svg" alt="" class="mt-[-2px]">
-        </InputIcon>
-        <InputText
-            class="w-full"
-            placeholder="Пивоварчиков Геннадий Петрович"
-        />
-      </IconField>
+      <div v-if="userInfo"
+           class="bg-[#F2F2F2] mt-[16px] flex items-center gap-[10px] px-[16px] py-[12px] h-[50px] rounded-[12px]
+              text-[#808BA0] text-[18px] font-semibold leading-[18px] mb-[24px]">
+        <img src="@/assets/img/IconUser.svg" alt="">
+        {{ userInfo?.lastname }} {{ userInfo?.name }}
+      </div>
       <div class="border-t border-dashed py-[24px] mt-[24px] flex flex-col gap-[16px]">
         <div class="flex justify-between items-center">
           <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Предытог</div>
@@ -226,15 +231,19 @@ watchEffect(() => {
         </div>
         <div class="flex justify-between">
           <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Скидка</div>
-          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">0 <span class="text-[16px]">сум</span>
+          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">{{ userInfo?.sum }} <span
+              class="text-[16px]">сум</span>
           </div>
         </div>
 
       </div>
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(getAllSum) }} <span
-            class="text-[24px]">сум</span></div>
+        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{
+            formatPrice(payCount - userInfo?.sum || payCount)
+          }}
+          <span
+              class="text-[24px]">сум</span></div>
       </div>
       <fin-button @click="openDeposit = true" icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full"
                   severity="success"
@@ -242,8 +251,9 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :sale-sum="getAllSum" :open-deposit-money="openDeposit" @close-modal="openDeposit=false"/>
-  <DiscountCard :sale-sum="getAllSum" :open-deposit-money="openDiscount" @close-modal="openDiscount=false"/>
+  <DepositMoney :sale-sum="payCount - userInfo?.sum || payCount" :open-deposit-money="openDeposit" @close-modal="openDeposit=false"/>
+  <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
+                @close-modal="openDiscount=false"/>
 
 </template>
 

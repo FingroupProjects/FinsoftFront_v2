@@ -1,10 +1,11 @@
 <script setup>
 import Dialog from "primevue/dialog";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import Calculate from "@/components/ForSale/Calculate.vue";
 import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {Swiper, SwiperSlide} from "swiper/vue";
+import 'swiper/css';
 
 const emit = defineEmits(['close-modal', 'postProducts'])
 const props = defineProps({
@@ -21,6 +22,8 @@ const modules = ref([])
 const selectFilter = ref(0);
 const walletNumbers = ref(0);
 const change = ref(0);
+const cardPay = ref(0);
+const walletChangeAll = ref(0);
 const selectPayMethods = ref(0);
 const postProducts = ref([]);
 const filterList = ref([
@@ -43,10 +46,18 @@ const toggleFilter = (index) => {
 };
 
 function calculateFn(numbers) {
-  walletNumbers.value = Number(numbers)
-  if (walletNumbers.value > props.saleSum) {
-    return change.value = walletNumbers.value - props.saleSum
+  if (selectFilter.value === 0) {
+    walletNumbers.value = Number(numbers)
+    if (walletNumbers.value > props.saleSum) {
+      return change.value = walletNumbers.value - props.saleSum
+    } else change.value = 0
+  } else {
+    cardPay.value = Number(numbers)
+    if (cardPay.value > props.saleSum) {
+      return change.value = cardPay.value - props.saleSum
+    } else change.value = 0
   }
+  walletChangeAll.value = walletNumbers.value + cardPay.value
 }
 
 function togglePay(index) {
@@ -55,10 +66,11 @@ function togglePay(index) {
 
 async function cardFn() {
   try {
-    const res = await useAxios(`/good-group`)
-    payMethods.value = res.result.data.map(el => {
+    const res = await useAxios(`/cards`)
+    payMethods.value = res.result.map(el => {
       return {
-        name: el.name
+        name: el.name,
+        code: el.id
       }
     })
   } catch (e) {
@@ -67,11 +79,16 @@ async function cardFn() {
 }
 
 cardFn()
+watch(walletChangeAll, (newValue) => {
+  if (newValue > props.saleSum) {
+    change.value = walletChangeAll.value -= props.saleSum
+  }
+})
 </script>
 
 <template>
-  <Dialog :draggable="false" class="fast-goods-header" v-model:visible="props.openDepositMoney" modal
-          :style="{ width: '940px', height:'620px' }" scroll :closable="false"
+  <Dialog :draggable="false" class="fast-goods-header transition-all" v-model:visible="props.openDepositMoney" modal
+          :style="{ width: '940px',   height: selectFilter === 1 ? '710px' : '620px'}" scroll :closable="false"
           :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <template #header>
       <div class="flex justify-between items-center w-full ">
@@ -101,10 +118,10 @@ cardFn()
       </button>
     </div>
     <div class="grid grid-cols-12 gap-[26px]">
-      <div class="col-span-12 flex justify-between gap-[16px] mt-[26px]" v-if="selectFilter === 1">
+      <div class="col-span-12 mt-[26px]" v-if="selectFilter === 1">
         <swiper
             :slidesPerView="4"
-            :spaceBetween="-50"
+            :spaceBetween="-5"
             :modules="modules"
 
         >
@@ -121,11 +138,10 @@ cardFn()
             </button>
           </swiper-slide>
         </swiper>
-
       </div>
-      <Calculate @numbers-wallet="calculateFn" class="col-span-6"/>
-      <div class="col-span-6">
-        <div class=" py-[24px] mt-[5px] flex flex-col gap-[16px]">
+      <Calculate @numbers-wallet="calculateFn" class="col-span-6" :class="{'mt-[26px]' : selectFilter === 0 }"/>
+      <div class="col-span-6" :class="{'mt-[26px]' : selectFilter === 0 }">
+        <div class=" mt-[5px] flex flex-col gap-[16px]">
           <div class="flex justify-between items-center border-b border-dashed border-t pt-[16px] pb-[16px]">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
             <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(props.saleSum) }} <span
@@ -139,7 +155,8 @@ cardFn()
           </div>
           <div class="flex justify-between">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Внесено платежной картой</div>
-            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">0 <span class="text-[16px]">сум</span>
+            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(cardPay) }} <span
+                class="text-[16px]">сум</span>
             </div>
           </div>
           <div class="flex justify-between items-center border-dashed border-t py-[24px] ">

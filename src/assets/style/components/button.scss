@@ -9,14 +9,17 @@
   font-family: Mulish, sans-serif;
   line-height: 20px !important;
   border-radius: 14px !important;
+
   &:focus {
     box-shadow: none;
   }
-  &:enabled:active{
+
+  &:enabled:active {
     background: transparent;
     border-color: var(--border-brand);
     color: var(--border-brand);
   }
+
   &:hover {
     border: 1px solid var(--border-bold) !important;
     background-color: var(--background-neutral-subtle-hovered) !important;
@@ -28,19 +31,22 @@
     background-color: var(--background-neutral) !important;
     border: none !important;
   }
-  &-icon-sm{
+
+  &-icon-sm {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width:46px !important;
+    min-width: 46px !important;
     height: 46px !important;
   }
+
   &-sm {
     min-width: 119px !important;
     height: 32px !important;
     font-size: 14px !important;
     line-height: 20px !important;
   }
+
   &-md {
     min-width: 108px !important;
     height: 40px !important;
@@ -69,6 +75,7 @@
     font-size: 18px !important;
     line-height: 28px !important;
   }
+
   &-3xl {
     height: 70px !important;
     font-weight: 700 !important;
@@ -97,10 +104,29 @@
   }
 
   &-primary {
+    border: 1px solid white !important;
+    background-color: white !important;
+    color: white;
+    box-shadow: none !important;
+
+    &:hover {
+      border: 1px solid white !important;
+      background-color: white !important;
+      color: white !important;
+    }
+
+    &:active {
+      border: 1px solid #17A825 !important;
+      background-color: #17A825 !important;
+    }
+  }
+
+  &-info {
     border: 1px solid #17A825 !important;
     background-color: #17A825 !important;
-    color:white;
+    color: white;
     box-shadow: none !important;
+
     &:hover {
       border: 1px solid #17A825 !important;
       background-color: #17A825 !important;
@@ -113,10 +139,10 @@
     }
   }
 
-  &-success{
+  &-success {
     border: 1px solid #3935E7 !important;
     background-color: #3935E7 !important;
-    color: white!important;
+    color: white !important;
 
     &:hover {
       color: white !important;
@@ -154,6 +180,7 @@
       box-shadow: none !important;
     }
   }
+
   &-danger {
     border: 1px solid var(--background-danger);
     background-color: var(--background-danger) !important;
@@ -174,6 +201,7 @@
     border: 1px solid var(--background-accent-red-subtler) !important;
     background-color: var(--background-accent-red-subtler) !important;
     color: var(--background-danger) !important;
+
     &:focus {
       box-shadow: none !important;
     }
@@ -184,16 +212,20 @@
       color: var(--background-danger) !important;
     }
   }
+
   &-icon-only {
     height: 40px !important;
   }
-  &-icon-only{
+
+  &-icon-only {
     width: 40px !important;
     padding: 5px !important;
   }
+
   &-icon {
     font-size: 20px !important;
   }
+
   &-secondary:enabled:focus {
     box-shadow: none !important;
   }
@@ -203,17 +235,20 @@
     border-color: var(--icon-disabled) !important;
     color: #475569 !important;
   }
+
   &-loading {
     background-color: var(--background-inverse-subtle) !important;
     border-color: var(--background-inverse-subtle) !important;
     color: var(--icon-disabled);
     opacity: 1 !important;
   }
+
   &-text:hover {
     background: transparent !important;
     border-color: transparent !important;
   }
 }
-.pi{
+
+.pi {
   font-size: 14px !important;
 }
