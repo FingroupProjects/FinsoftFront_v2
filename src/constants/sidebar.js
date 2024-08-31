@@ -120,7 +120,7 @@ export default [
                     },
                     {
                         label:'Кассы',
-                        route: '/cashRegister'
+                        route: '/register'
                     },
                     {
                         label:'Валюта',
@@ -181,7 +181,7 @@ export default [
                     },
                     {
                         label:'Ед.Из',
-                        route: '/'
+                        route: '/unit'
                     },
                     {
                         label:'Товары',
@@ -198,12 +198,8 @@ export default [
             {
                 datas:[
                     {
-                        label: 'Единицы измериния',
-                        route: '/purchase'
-                    },
-                    {
                         label: 'Пользователи',
-                        route: '/'
+                        route: '/user'
                     },
                     {
                         label: 'Контрагенты',

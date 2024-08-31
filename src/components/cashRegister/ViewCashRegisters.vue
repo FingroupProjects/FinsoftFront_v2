@@ -19,7 +19,12 @@ const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
   productId: {
     required: true,
-  }
+  },
+  openModalClose: {
+    type: Boolean,
+    default: false
+  },
+  data: Object
 });
 
 const toast = useToast();
@@ -41,9 +46,9 @@ const rules = reactive({
 const v$ = useVuelidate(rules, viewValues);
 const {
   findCurrency,
-    findEmployee,
-    loadingEmployee,
-    employeeList,
+  findEmployee,
+  loadingEmployee,
+  employeeList,
   currency,
   loading,
   findOrganization,
@@ -59,10 +64,10 @@ async function saveFn() {
       const res = await useAxios(`cashRegister/${props.productId}`, {
         method: "PATCH",
         data: {
-          organization_id: viewValues.organization.code,
-          currency_id: viewValues.currency.code,
+          organization_id: viewValues.organization.id,
+          currency_id: viewValues.currency.id,
           comment: viewValues.comments,
-          responsible_person_id: viewValues.responsiblePerson.code,
+          responsible_person_id: viewValues.responsiblePerson.id,
           name: viewValues.name
         },
       });
@@ -86,30 +91,18 @@ async function saveFn() {
 }
 
 async function getGood() {
-  try {
-    const res = await useAxios(`/cashRegister/${props.productId}`);
-    viewValues.name = res.result.name
-    viewValues.currency = {
-      name: res.result.currency.name,
-      code: res.result.currency.id
-    }
-    viewValues.responsiblePerson = {
-      name: res.result.responsiblePerson.name,
-      code: res.result.responsiblePerson.id
-    }
-    viewValues.comments = res.result.description
-    viewValues.organization = {
-      name: res.result?.organization.name,
-      code: res.result.organization.id
-    }
-    id.value = res.result.id
-  } catch (e) {
-    console.log(e);
-  }
+  const item = props.data
+  viewValues.name = item.name
+  viewValues.organization = item.organization
+  viewValues.currency = item.currency
+  viewValues.responsiblePerson = item.responsiblePerson
+  viewValues.comments = item.comment
+
+  id.value = item.id
 }
 
 
-onMounted(function (){
+onMounted(function () {
   getGood()
   findOrganization()
   findCurrency()
@@ -147,7 +140,7 @@ onMounted(function (){
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
       <fin-input v-model="viewValues.name" class="col-span-4" :error="v$.name.$error" placeholder="Наименование"/>
 
-      <FloatLabel class="col-span-4" >
+      <FloatLabel class="col-span-4">
         <Dropdown
             v-model="viewValues.organization"
             :options="organization"

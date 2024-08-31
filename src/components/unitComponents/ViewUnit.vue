@@ -41,19 +41,11 @@ const toast = useToast();
 
 const id = ref();
 const createValues = reactive({
-  datetime24h: new Date,
-  selectCurrency: "",
-  bill_number: "",
-  comments: "",
-  selectedOrganization: "",
   name: ""
 });
 const rules = reactive({
-  datetime24h: {required},
-  selectCurrency: {required},
-  selectedOrganization: {required},
+
   name: {required},
-  bill_number: {required}
 });
 const v$ = useVuelidate(rules, createValues);
 
@@ -62,14 +54,9 @@ async function saveFn() {
   const result = await v$.value.$validate();
   if (result) {
     try {
-      const res = await useAxios(`organizationBill/${props.productId}`, {
+      const res = await useAxios(`unit/${props.productId}`, {
         method: "PATCH",
         data: {
-          date: moment(createValues.datetime24h).format("YYYY-MM-DD"),
-          organization_id: createValues.selectedOrganization.id,
-          currency_id: createValues.selectCurrency.id,
-          comment: createValues.comments,
-          bill_number: createValues.bill_number,
           name: createValues.name
         },
       });
@@ -94,13 +81,8 @@ async function saveFn() {
 
 async function getGood() {
   const item = props.data
-  console.log(item)
+
   createValues.name = item.name
-  createValues.bill_number = item.bill_number
-  createValues.selectCurrency = item.currency
-  createValues.comments = item.comment
-  createValues.date = item.date
-  createValues.selectedOrganization = item.organization
 
   id.value = item.id
 }
@@ -143,57 +125,7 @@ const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
       <fin-input v-model="createValues.name" class="col-span-4" :error="v$.name.$error" placeholder="Наименование"/>
-      <FloatLabel class="col-span-4">
-        <DatePicker
-            showIcon
-            v-model="createValues.datetime24h"
-            :class="{ 'p-invalid': v$.datetime24h.$error }"
-            showTime
-            hourFormat="24"
-            dateFormat="dd.mm.yy,"
-            fluid
-            hideOnDateTimeSelect
-            iconDisplay="input"
-            class="w-full"
-        />
-        <label for="dd-city">Дата</label>
-      </FloatLabel>
 
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectedOrganization"
-            :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            :loading="loadingOrganization"
-            :options="organization"
-            optionLabel="name"
-            class="w-full"
-        >
-          <template #value>
-            {{ createValues.selectedOrganization?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Организация</label>
-      </FloatLabel>
-      <fin-input v-model="createValues.bill_number" class="col-span-4" :error="v$.bill_number.$error" placeholder="Номер счета"/>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectCurrency"
-            :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            :loading="loading"
-            :options="currency"
-            optionLabel="name"
-            class="w-full"
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
-      </FloatLabel>
     </div>
   </div>
 

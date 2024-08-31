@@ -18,14 +18,6 @@ const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
-const {
-  findCurrency,
-  currency,
-  loading,
-  findOrganization,
-  organization,
-  loadingOrganization,
-} = useStaticApi();
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
@@ -35,26 +27,15 @@ const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
 const createValues = reactive({
-  datetime24h: new Date,
-  selectCurrency: "",
-  bill_number: "",
-  comments: "",
-  selectedOrganization: "",
   name: ""
 });
 const rules = reactive({
-  datetime24h: {required},
-  selectCurrency: {required},
-  selectedOrganization: {required},
   name: {required},
-  bill_number: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
 };
-const organizationJson = localStorage.getItem('organization');
-const organizationHas = JSON.parse(organizationJson);
-const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
 const v$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
@@ -62,14 +43,9 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`organizationBill`, {
+      const res = await useAxios(`unit`, {
         method: "POST",
         data: {
-          date: moment(createValues.datetime24h).format("YYYY-MM-DD"),
-          organization_id: createValues.selectedOrganization.code,
-          currency_id: createValues.selectCurrency.code,
-          comment: createValues.comments,
-          bill_number: createValues.bill_number,
           name: createValues.name
         },
       });
@@ -93,11 +69,6 @@ async function saveFn() {
 }
 
 
-onMounted( function (){
-  findOrganization()
-  findCurrency()
-});
-
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
@@ -110,28 +81,13 @@ watch(createValues, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-watchEffect(() => {
-
-  if (hasOrganization === true) createValues.selectedOrganization = {
-    name: organizationHas.name,
-    code: organizationHas.id
-  }
-
-
-});
-
-onMounted(function (){
-  findOrganization()
-  findCurrency()
-})
-
 </script>
 
 <template>
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание банковских счетов организаций</div>
+        <div class="header-title">Создание ед.измерение</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
 
         </div>
@@ -155,55 +111,6 @@ onMounted(function (){
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
       <fin-input v-model="createValues.name" class="col-span-4" :error="v$.name.$error" placeholder="Наименование"/>
-      <FloatLabel class="col-span-4">
-        <DatePicker
-            showIcon
-            v-model="createValues.datetime24h"
-            :class="{ 'p-invalid': v$.datetime24h.$error }"
-            showTime
-            hourFormat="24"
-            dateFormat="dd.mm.yy,"
-            fluid
-            hideOnDateTimeSelect
-            iconDisplay="input"
-            class="w-full"
-        />
-        <label for="dd-city">Дата</label>
-      </FloatLabel>
-
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Dropdown
-            v-model="createValues.selectedOrganization"
-            :options="organization"
-            :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
-            :loading="loadingOrganization"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">Организация</label>
-      </FloatLabel>
-      <fin-input v-model="createValues.bill_number" class="col-span-4" :error="v$.bill_number.$error" placeholder="Номер счета"/>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectCurrency"
-            :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            @click="findCurrency(createValues.selectedAgreement)"
-            :loading="loading"
-            :options="currency"
-            optionLabel="name"
-            class="w-full"
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
-      </FloatLabel>
     </div>
   </div>
 
