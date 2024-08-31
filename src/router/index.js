@@ -73,15 +73,26 @@ const routes = [
                 component: () => import('@/views/Counterparty.vue'),
             },
             {
+                path: '/unit',
+                name: 'unit',
+                component: () => import('@/views/Unit.vue'),
+            },
+            {
+                path: '/user',
+                name: 'user',
+                component: () => import('@/views/User.vue'),
+            },
+            {
                 path: '/organizationBill',
                 name: 'organizationBill',
                 component: () => import('@/views/OrganizationBill.vue'),
             },
             {
-                path: '/cashRegister',
-                name: 'cashRegister',
+                path: '/register',
+                name: 'register',
                 component: () => import('@/views/CashRegister.vue'),
             },
+
             {
                 path: '/priceType',
                 name: 'cashRegister',

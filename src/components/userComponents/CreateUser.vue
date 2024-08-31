@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch, onMounted} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted, computed} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -9,45 +9,37 @@ import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
-import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
-import Textarea from 'primevue/textarea';
-import Dialog from "primevue/dialog";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
 const {
-  findCurrency,
-  currency,
-  loading,
   findOrganization,
   organization,
   loadingOrganization,
 } = useStaticApi();
 
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
 const createValues = reactive({
-  datetime24h: new Date,
-  selectCurrency: "",
-  bill_number: "",
-  comments: "",
-  selectedOrganization: "",
-  name: ""
+  name: "",
+  organization: "",
+  login: "",
+  password: "",
+  phone: "",
+  email: ""
 });
 const rules = reactive({
-  datetime24h: {required},
-  selectCurrency: {required},
-  selectedOrganization: {required},
   name: {required},
-  bill_number: {required}
+  organization: {required},
+  login: {required},
+  phone: {required},
+  password: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -59,20 +51,32 @@ const v$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
   const result = await v$.value.$validate();
-  openInfoModal.value = false
+  openInfoModal.value = false;
+
   if (result) {
+    const formData = new FormData();
+
+    formData.append("organization_id", createValues.organization.code);
+    formData.append("name", createValues.name);
+    formData.append("login", createValues.login);
+    formData.append("password", createValues.password);
+    formData.append("phone", createValues.phone);
+    formData.append("group_id", 1);
+    formData.append("email", createValues.email);
+
+    if (imageRefs.value.length > 0) {
+      formData.append("image", imageRefs.value[0]);
+    }
+
     try {
-      const res = await useAxios(`organizationBill`, {
+      const res = await useAxios(`user`, {
         method: "POST",
-        data: {
-          date: moment(createValues.datetime24h).format("YYYY-MM-DD"),
-          organization_id: createValues.selectedOrganization.code,
-          currency_id: createValues.selectCurrency.code,
-          comment: createValues.comments,
-          bill_number: createValues.bill_number,
-          name: createValues.name
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
       });
+
       toast.add({
         severity: "success",
         summary: "Success Message",
@@ -95,13 +99,15 @@ async function saveFn() {
 
 onMounted( function (){
   findOrganization()
-  findCurrency()
 });
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
+const fileInput = ref()
+const imagePreview = ref([]);
+const emptyImg = '';
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
@@ -109,6 +115,7 @@ watch(createValues, (newVal) => {
   }
   initialValue.value = newVal;
 }, {deep: true});
+const reversedImgeRefs = computed(() => [...imagePreview.value].reverse());
 
 watchEffect(() => {
 
@@ -119,12 +126,46 @@ watchEffect(() => {
 
 
 });
+const imageRefs = ref([]);
+const responsiveOptions = ref([
+  {
+    breakpoint: '1400px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '1199px',
+    numVisible: 3,
+    numScroll: 1
+  },
+  {
+    breakpoint: '767px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '575px',
+    numVisible: 1,
+    numScroll: 1
+  }
+]);
+const onPickFile = () => {
+  fileInput.value.click();
+};
 
-onMounted(function (){
-  findOrganization()
-  findCurrency()
-})
+const selectImage = (event) => {
+  const files = event.target.files;
 
+  for (const file of files) {
+    imageRefs.value.push(file);
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+      imagePreview.value.push(fileReader.result);
+    });
+    fileReader.readAsDataURL(file);
+  }
+
+};
 </script>
 
 <template>
@@ -154,57 +195,53 @@ onMounted(function (){
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <fin-input v-model="createValues.name" class="col-span-4" :error="v$.name.$error" placeholder="Наименование"/>
-      <FloatLabel class="col-span-4">
-        <DatePicker
-            showIcon
-            v-model="createValues.datetime24h"
-            :class="{ 'p-invalid': v$.datetime24h.$error }"
-            showTime
-            hourFormat="24"
-            dateFormat="dd.mm.yy,"
-            fluid
-            hideOnDateTimeSelect
-            iconDisplay="input"
-            class="w-full"
+      <div class="relative col-span-3">
+        <input
+            accept="image/*"
+            type="file"
+            @change="selectImage"
+            style="display: none"
+            ref="fileInput"
         />
-        <label for="dd-city">Дата</label>
-      </FloatLabel>
+        <div v-if="imagePreview.length !== 0">
+          <img
+              :src="imagePreview[0]"
+              @click="onPickFile"
+              alt=""
+              class="w-[200px] m-auto rounded-[16px] h-[200px] object-cover"
+          />
+        </div>
+        <div v-else class="w-[150px] h-[150px] m-auto flex items-center justify-center border border-dashed rounded-[16px]">
+          <button @click="onPickFile" class="text-gray-500">
+            Загрузить изображение
+          </button>
+        </div>
+      </div>
 
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Dropdown
-            v-model="createValues.selectedOrganization"
-            :options="organization"
-            :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
-            :loading="loadingOrganization"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">Организация</label>
-      </FloatLabel>
-      <fin-input v-model="createValues.bill_number" class="col-span-4" :error="v$.bill_number.$error" placeholder="Номер счета"/>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectCurrency"
-            :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            @click="findCurrency(createValues.selectedAgreement)"
-            :loading="loading"
-            :options="currency"
-            optionLabel="name"
-            class="w-full"
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
-      </FloatLabel>
+      <!-- Form Fields -->
+      <div class="col-span-9 grid grid-cols-12 gap-[11px]">
+        <fin-input v-model="createValues.name"  :class="{ 'p-invalid': v$.name.$error }" class="col-span-4" placeholder="Имя"/>
+
+        <fin-input v-model="createValues.login" :class="{ 'p-invalid': v$.login.$error }"  class="col-span-4"  placeholder="Логин"/>
+
+        <fin-input v-model="createValues.password" :class="{ 'p-invalid': v$.password.$error }"  class="col-span-4"  placeholder="Пароль"/>
+        <FloatLabel :class="{ 'p-invalid': v$.organization.$error }" class="col-span-4">
+          <Dropdown
+              v-model="createValues.organization"
+              :options="organization"
+              :loading="loadingOrganization"
+              optionLabel="name"
+              class="w-full"
+          />
+          <label for="organization">Организация</label>
+        </FloatLabel>
+        <fin-input v-model="createValues.phone" :class="{ 'p-invalid': v$.phone.$error }" class="col-span-4"  placeholder="Телефон"/>
+        <fin-input v-model="createValues.email"  class="col-span-4"  placeholder="Email"/>
+
+      </div>
     </div>
+
+
   </div>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
@@ -262,6 +299,10 @@ onMounted(function (){
 
   .p-select-list-container {
     width: 100% !important;
+  }
+
+  .p-invalid {
+    border: 1px solid #f2376f !important;
   }
 
   .p-datepicker {

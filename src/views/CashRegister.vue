@@ -14,15 +14,12 @@ import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import CreateGoods from "@/components/goodsComponents/createGoods.vue";
-import MethodsGoods from "@/components/goodsComponents/MethodsGoods.vue";
-
 const {
   findCurrency,
   currency,
   loadingCurrency,
 } = useStaticApi();
-
+const dataInfo = ref(null)
 const visibleRight = ref(false);
 const products = ref();
 const selectedCurrency = ref(null);
@@ -45,6 +42,7 @@ import MethodsCashRegister from "@/components/cashRegister/MethodsCashRegister.v
 import ViewCashRegisters from "@/components/cashRegister/ViewCashRegisters.vue";
 import CreateCashRegister from "@/components/cashRegister/CreateCashRegister.vue";
 const imgURL = import.meta.env.VITE_IMG_URL;
+const openInfoModal = ref(false);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const statusList = ref([
   {
@@ -86,6 +84,7 @@ const onRowClick = (event) => {
   const product = event.data;
   createOpenModal.value = true;
   visibleRight.value = true;
+  dataInfo.value = product
   selectedProductId.value = product.id
 };
 
@@ -119,7 +118,10 @@ function getProductMethods() {
   selectedProduct.value = null
   getProducts()
 }
-
+async function closeFnVl() {
+  await getProducts();
+  visibleRight.value = false
+}
 const sortData = (field, index) => {
   orderBy.value = field
   openUp.value[index] = !openUp.value[index]
@@ -141,9 +143,11 @@ const getSeverity = (status) => {
   }
 };
 
-function closeFn(id) {
-  selectedProductId.value = id
+function closeFn(result) {
+
   createOpenModal.value = true
+  dataInfo.value = result
+  getProducts()
 }
 
 function closeView() {
@@ -368,8 +372,8 @@ getProducts();
         position="right"
         class="create-purchase"
     >
-      <view-cash-registers v-if="createOpenModal" :product-id="selectedProductId" @close-sidebar="closeView"
-                 @close-dialog="closeFn"/>
+      <view-cash-registers :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+                           :openModalClose="openInfoModal"/>
       <CreateCashRegister v-else @close-dialog="closeFn" @close-sidebar="closeView"/>
 
     </Sidebar>
