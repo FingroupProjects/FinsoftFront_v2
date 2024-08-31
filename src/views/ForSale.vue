@@ -22,6 +22,7 @@ const getAllSum = ref(0);
 const openDeposit = ref(false);
 const userInfo = ref(null);
 const payCount = ref(0);
+const activeDiscount = ref(false);
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -76,6 +77,11 @@ function addCountFn(count) {
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
     return total + (el?.price || 0);
   }, 0)
+}
+
+function openActiveFn() {
+  openDiscount.value = true
+  activeDiscount.value = true
 }
 
 watch(selectedGoods, (newValue) => {
@@ -207,7 +213,8 @@ watchEffect(() => {
         <fin-button icon="pi pi-plus" severity="warning" label="Дисконтная"/>
       </div>
       <div class="flex gap-4 mt-4">
-        <fin-button icon="pi pi-credit-card" @click="openDiscount= true" class="p-button-2xl w-full" severity="warning"
+        <fin-button icon="pi pi-credit-card" :severity="activeDiscount ? 'success' : 'warning'" @click="openActiveFn"
+                    class="p-button-2xl w-full"
                     label="Дисконтная"/>
         <fin-button icon="pi pi-percentage" class="p-button-2xl w-full" severity="warning" label="Ручная скидка"/>
       </div>
@@ -251,7 +258,8 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :sale-sum="payCount - userInfo?.sum || payCount" :open-deposit-money="openDeposit" @close-modal="openDeposit=false"/>
+  <DepositMoney :sale-sum="payCount - userInfo?.sum || payCount" :open-deposit-money="openDeposit"
+                @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="openDiscount=false"/>
 

@@ -64,7 +64,6 @@ function handleKeydown(event) {
 
 function pushNumbers() {
   emit('numbersWallet', searchQuery.value)
-  searchQuery.value = ''
 }
 </script>
 
@@ -72,7 +71,7 @@ function pushNumbers() {
   <div>
     <IconField class="w-full filter-goods deposit-money">
       <InputMask id="phone" @keydown="handleKeydown" v-model="searchQuery" mask="(999)99 999-9999"
-                 placeholder="Напишите номер" fluid/>
+                 placeholder="(___)__ ___-____" fluid/>
 
     </IconField>
     <div class="grid grid-cols-12 gap-[16px]">
