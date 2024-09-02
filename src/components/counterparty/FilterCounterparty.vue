@@ -141,7 +141,19 @@ onMounted(() => {
                 option-value="value"
       />
     </div>
+<<<<<<< HEAD
 
+=======
+    <div class="flex mt-[22px] gap-4">
+      <Dropdown class="w-[225px] font-semibold"
+                v-model="filterValues.currency_id"
+                placeholder="Валюта"
+                :options="currency"
+                option-label="name"
+                option-value="id"
+      />
+    </div>
+>>>>>>> main
     <div class="flex mt-[22px] gap-4">
       <fin-button @click="datas()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
       <fin-button @click="clear()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>

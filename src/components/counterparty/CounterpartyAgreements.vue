@@ -35,6 +35,20 @@ const createValues = reactive({
   payment: "",
   priceType: ""
 });
+const getSeverity = (status) => {
+  if (status == null) {
+    return {
+      status: "success",
+      name: "Активный",
+    };
+  } else {
+    return {
+      status: "warn",
+      name: "Не активный",
+    };
+  }
+};
+
 const rules = reactive({
   name: {required},
   currency: {required},
@@ -91,7 +105,7 @@ async function addCpAgreement() {
             "price_type_id": createValues.priceType.code
       },
     });
-
+    clearInputValues();
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -109,9 +123,6 @@ async function addCpAgreement() {
       life: 3000,
     });
   }
-  finally {
-    clearInputValues();
-  }
 }
 
 onMounted(function (){
@@ -121,8 +132,11 @@ onMounted(function (){
 });
 const confirmDelete = async (index) => {
   try {
-    const res = await useAxios(`/counterparty/${index}`,{
-      method: "DELETE",
+    const res = await useAxios(`/cpAgreement/massDelete`,{
+      method: "POST",
+      data: {
+        ids: [index],
+      },
     });
     toast.add({
       severity: "success",
@@ -293,7 +307,7 @@ async function getAgreements() {
       <Column field="image">
         <template #header="{index}">
           <div class="w-full h-full">
-              Номер телефона
+              Номер контракта
           </div>
         </template>
         <template #sorticon="{index}">
@@ -336,6 +350,29 @@ async function getAgreements() {
         </template>
         <template #body="slotProps">
           {{ slotProps?.data.price_type?.name }}
+        </template>
+      </Column>
+      <Column field="status" :sortable="true" header="">
+        <template #header="{index}">
+          <div class="w-full h-full" >
+            Статус
+          </div>
+        </template>
+        <template #sorticon="">
+        </template>
+        <template #body="slotProps">
+          <Tag
+              :value="getSeverity(slotProps.data?.deleted_at).name"
+              :severity="getSeverity(slotProps.data?.deleted_at).status"
+          />
+        </template>
+      </Column>
+      <Column field="quantity" header="">
+        <template #body="{ data }">
+          <i
+              @click="confirmDelete(data.id)"
+              class="pi pi-trash text-[#808BA0] cursor-pointer"
+          ></i>
         </template>
       </Column>
     </DataTable>

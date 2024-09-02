@@ -20,6 +20,7 @@ import Loader from "@/components/ui/Loader.vue";
 import ViewCounterparty from "@/components/counterparty/ViewCounterparty.vue";
 import CreateCounterparty from "@/components/counterparty/createCounterparty.vue";
 import MethodsCounterparty from "@/components/counterparty/MethodsCounterparty.vue";
+import FilterCounterparty from "@/components/counterparty/FilterCounterparty.vue";
 const {
   findStorage,
   storage,
@@ -149,7 +150,16 @@ const sortData = (field, index) => {
   else sortDesc.value = 'asc'
   getProducts()
 };
-
+const statusList = ref([
+  {
+    name: 'Активный',
+    code: 0
+  },
+  {
+    name: 'Не активный',
+    code: 1
+  },
+])
 async function closeFnVl() {
   await getProducts();
   visibleRight.value = false
@@ -161,7 +171,7 @@ watch(selectedStorage, () => {
 watch(selectedCounterparty, () => {
   getProducts();
 });
-
+const selectedStatus = ref();
 getProducts();
 </script>
 
@@ -180,22 +190,11 @@ getProducts();
         />
       </IconField>
       <Dropdown
-          v-model="selectedStorage"
+          v-model="selectedStatus"
+          :options="statusList"
           optionLabel="name"
-          placeholder="Склад"
-          @click="findStorage"
-          :loading="loadingStorage"
-          :options="storage"
-          class="w-full col-span-2"
-      />
-      <Dropdown
-          v-model="selectedCounterparty"
-          :loading="loadingCounterparty"
-          @click="findCounterparty"
-          :options="counterparty"
-          optionLabel="name"
-          placeholder="Поставщик"
-          class="w-full col-span-2"
+          placeholder="Статус"
+          class="w-full col-span-4"
       />
       <div class="flex gap-4 col-span-2">
         <fin-button
@@ -375,7 +374,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-counterparty @updateFilters="handleFiltersUpdate" ></filter-counterparty>
   </Sidebar>
   <Toast/>
 
