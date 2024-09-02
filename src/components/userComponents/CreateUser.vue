@@ -97,7 +97,7 @@ async function saveFn() {
 }
 
 
-onMounted( function (){
+onMounted(function () {
   findOrganization()
 });
 
@@ -105,9 +105,9 @@ async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
 const fileInput = ref()
 const imagePreview = ref([]);
-const emptyImg = '';
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
@@ -115,16 +115,12 @@ watch(createValues, (newVal) => {
   }
   initialValue.value = newVal;
 }, {deep: true});
-const reversedImgeRefs = computed(() => [...imagePreview.value].reverse());
 
 watchEffect(() => {
-
   if (hasOrganization === true) createValues.selectedOrganization = {
     name: organizationHas.name,
     code: organizationHas.id
   }
-
-
 });
 const imageRefs = ref([]);
 const responsiveOptions = ref([
@@ -195,12 +191,13 @@ const selectImage = (event) => {
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <div class="relative col-span-3">
+      <div class="relative col-span-3 h-[100%] ">
         <input
             accept="image/*"
             type="file"
             @change="selectImage"
             style="display: none"
+            class="h-[100%]"
             ref="fileInput"
         />
         <div v-if="imagePreview.length !== 0">
@@ -208,10 +205,11 @@ const selectImage = (event) => {
               :src="imagePreview[0]"
               @click="onPickFile"
               alt=""
-              class="w-[200px] m-auto rounded-[16px] h-[200px] object-cover"
+              class=" m-auto rounded-[16px] object-cover"
           />
         </div>
-        <div v-else class="w-[150px] h-[150px] m-auto flex items-center justify-center border border-dashed rounded-[16px]">
+        <div v-else
+             class="m-auto flex h-[100%] items-center justify-center border border-dashed rounded-[16px]">
           <button @click="onPickFile" class="text-gray-500">
             Загрузить изображение
           </button>
@@ -219,30 +217,29 @@ const selectImage = (event) => {
       </div>
 
       <!-- Form Fields -->
-      <div class="col-span-9 grid grid-cols-12 gap-[5px]">
+      <div class="col-span-9 grid grid-cols-12 gap-[10px]">
 
-      <fin-input v-model="createValues.name"  :class="{ 'p-invalid': v$.name.$error }" class="col-span-4" placeholder="Имя"/>
-
-        <fin-input v-model="createValues.login" :class="{ 'p-invalid': v$.login.$error }"  class="col-span-4"  placeholder="Логин"/>
-
-        <fin-input v-model="createValues.password" :class="{ 'p-invalid': v$.password.$error }"  class="col-span-4"  placeholder="Пароль"/>
+        <fin-input v-model="createValues.name" :class="{ 'p-invalid': v$.name.$error }" class="col-span-4 "
+                   placeholder="Имя"/>
+        <fin-input v-model="createValues.login" :class="{ 'p-invalid': v$.login.$error }" class="col-span-4"
+                   placeholder="Логин"/>
+        <fin-input v-model="createValues.password" :class="{ 'p-invalid': v$.password.$error }" class="col-span-4"
+                   placeholder="Пароль"/>
         <FloatLabel :class="{ 'p-invalid': v$.organization.$error }" class="col-span-4">
           <Dropdown
               v-model="createValues.organization"
               :options="organization"
               :loading="loadingOrganization"
               optionLabel="name"
-              class="w-full"
+              class="w-full "
           />
           <label for="organization">Организация</label>
         </FloatLabel>
-        <fin-input v-model="createValues.phone" :class="{ 'p-invalid': v$.phone.$error }" class="col-span-4"  placeholder="Телефон"/>
-        <fin-input v-model="createValues.email"  class="col-span-4"  placeholder="Email"/>
-
+        <fin-input v-model="createValues.phone" :class="{ 'p-invalid': v$.phone.$error }" class="col-span-4"
+                   placeholder="Телефон"/>
+        <fin-input v-model="createValues.email" class="col-span-4" placeholder="Email"/>
       </div>
     </div>
-
-
   </div>
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">

@@ -88,7 +88,7 @@ watch(walletChangeAll, (newValue) => {
 
 <template>
   <Dialog :draggable="false" class="fast-goods-header transition-all" v-model:visible="props.openDepositMoney" modal
-          :style="{ width: '940px',   height:'720px'}" scroll :closable="false"
+          :style="{ width: '940px',   height:selectFilter === 0 ? '620px' : '720px'}" scroll :closable="false"
           :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <template #header>
       <div class="flex justify-between items-center w-full ">

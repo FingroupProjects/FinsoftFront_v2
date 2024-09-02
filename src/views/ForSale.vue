@@ -10,6 +10,9 @@ import FastGoods from "@/components/ForSale/FastGoods.vue";
 import formatPrice from "../constants/formatNumber.js";
 import DepositMoney from "@/components/ForSale/DepositMoney.vue";
 import DiscountCard from "@/components/ForSale/DiscountCard.vue";
+import FilterFastGoods from "@/components/ForSale/FilterFastGoods.vue";
+import ManualDiscount from "@/components/ForSale/ManualDiscount.vue";
+import AddUserInfo from "@/components/ForSale/AddUserInfo.vue";
 
 const openFastGoods = ref(false);
 const selectedGoods = ref();
@@ -23,6 +26,12 @@ const openDeposit = ref(false);
 const userInfo = ref(null);
 const payCount = ref(0);
 const activeDiscount = ref(false);
+const activeRightArrow = ref(false);
+const openImgModal = ref(false);
+const activeManual = ref(false);
+const openManualModal = ref(false);
+const saleSum = ref(0);
+const userInfoModal = ref(false);
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -47,7 +56,14 @@ getIdProducts();
 
 function userInfoFn(info) {
   userInfo.value = info
+  saleSum.value += Number(info.sum)
+  console.log()
   openDiscount.value = false
+}
+
+function postSaleFn(info) {
+  saleSum.value += info
+  openManualModal.value = false
 }
 
 function deleteFn(i) {
@@ -64,7 +80,9 @@ const highlightMatch = (name, term) => {
 };
 
 function getFastProducts(products) {
-  listPostGoods.value = [...products]
+  products.forEach(product => {
+    listPostGoods.value.push(product);
+  });
   if (products.length > 0) openFastGoods.value = false
 
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
@@ -82,6 +100,11 @@ function addCountFn(count) {
 function openActiveFn() {
   openDiscount.value = true
   activeDiscount.value = true
+}
+
+function openManual() {
+  activeManual.value = true
+  openManualModal.value = true
 }
 
 watch(selectedGoods, (newValue) => {
@@ -140,8 +163,9 @@ watchEffect(() => {
             <fin-button class="w-full" severity="warning" @click="openFastGoods = true">
               <template #icon><img src="@/assets/img/iconFilterFale.svg" alt=""></template>
             </fin-button>
-            <fin-button icon="pi pi-images" class="w-full" severity="warning"/>
-            <fin-button icon="pi pi-arrow-right-arrow-left" severity="warning"/>
+            <fin-button @click="openImgModal = true" icon="pi pi-images" class="w-full" severity="warning"/>
+            <fin-button icon="pi pi-arrow-right-arrow-left" @click="activeRightArrow = true"
+                        :severity="activeRightArrow ? 'success' : 'warning'" severity="warning"/>
           </div>
         </div>
         <hr class="mt-[24px]">
@@ -210,13 +234,14 @@ watchEffect(() => {
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">
           Скидка
         </div>
-        <fin-button icon="pi pi-plus" severity="warning" label="Дисконтная"/>
+        <fin-button @click="userInfoModal = true" icon="pi pi-plus" severity="warning" label="Дисконтная"/>
       </div>
       <div class="flex gap-4 mt-4">
         <fin-button icon="pi pi-credit-card" :severity="activeDiscount ? 'success' : 'warning'" @click="openActiveFn"
                     class="p-button-2xl w-full"
                     label="Дисконтная"/>
-        <fin-button icon="pi pi-percentage" class="p-button-2xl w-full" severity="warning" label="Ручная скидка"/>
+        <fin-button icon="pi pi-percentage" :severity="activeManual ? 'success' : 'warning'" @click="openManual"
+                    class="p-button-2xl w-full" severity="warning" label="Ручная скидка"/>
       </div>
       <div v-if="userInfo"
            class="bg-[#F2F2F2] mt-[16px] flex items-center gap-[10px] px-[16px] py-[12px] h-[50px] rounded-[12px]
@@ -238,7 +263,7 @@ watchEffect(() => {
         </div>
         <div class="flex justify-between">
           <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Скидка</div>
-          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">{{ userInfo?.sum }} <span
+          <div class="font-semibold text-[24px] leading-[24px] text-[#141C30]">{{ saleSum }} <span
               class="text-[16px]">сум</span>
           </div>
         </div>
@@ -247,7 +272,7 @@ watchEffect(() => {
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
         <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{
-            formatPrice(payCount - userInfo?.sum || payCount)
+            formatPrice(payCount - saleSum || payCount)
           }}
           <span
               class="text-[24px]">сум</span></div>
@@ -262,6 +287,10 @@ watchEffect(() => {
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="openDiscount=false"/>
+  <FilterFastGoods @postProducts="getFastProducts" :open-fast-goods="openImgModal" @close-modal="openImgModal=false"/>
+  <ManualDiscount @postSale="postSaleFn" :open-deposit-money="openManualModal"
+                  @close-modal="openManualModal=false"/>
+  <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
 
 </template>
 

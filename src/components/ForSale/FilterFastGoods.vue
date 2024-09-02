@@ -36,7 +36,7 @@ async function getGoodGroup(event) {
     search: event?.srcElement.value,
   }
   try {
-    const res = await useAxios(`fastGoods${filterSelect.value || ''}`, {params});
+    const res = await useAxios(`good${filterSelect.value || ''}`, {params});
 
     const data = Array.isArray(res.result.data) && res.result.data.length > 0
         ? res.result.data
@@ -54,7 +54,6 @@ async function getGoodGroup(event) {
           : new URL('@/assets/img/exampleImg.svg', import.meta.url),
     }));
   } catch (e) {
-    console.log()
   }
 }
 
@@ -113,16 +112,12 @@ function closeDialog() {
 }
 
 function postFn() {
-  if (postProducts.value.length !== 0) {
-    emit('postProducts', postProducts.value)
-    selectFilter.value = null
-    filterSelect.value = null
-    checked.value = []
-    postProducts.value = []
+  emit('postProducts', postProducts.value)
+  selectFilter.value = null
+  filterSelect.value = null
+  checked.value = []
 
-    getGoodGroup()
-  }
-
+  getGoodGroup()
 }
 
 const checkedCount = computed(() => {
