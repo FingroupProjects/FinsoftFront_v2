@@ -52,7 +52,7 @@ const number = ref([
 const searchQuery = ref('');
 
 function updateSearchQuery(code) {
-  searchQuery.value += code;
+  return searchQuery.value += code;
 }
 
 function removeLastCharacter() {
@@ -64,8 +64,10 @@ function handleKeydown(event) {
 }
 
 function pushNumbers() {
-  emit('numbersWallet', searchQuery.value)
-  searchQuery.value = ''
+  if (searchQuery.value) {
+    emit('numbersWallet', searchQuery.value)
+    searchQuery.value = ''
+  }
 }
 </script>
 
