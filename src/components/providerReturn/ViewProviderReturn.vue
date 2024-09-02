@@ -138,6 +138,7 @@ const updateView = async () => {
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
+
       //
     } catch (e) {
       console.error(e);
@@ -151,7 +152,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
       data: {
@@ -169,7 +170,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/provider/return/unApprove`, {
       method: 'POST',
       data: {

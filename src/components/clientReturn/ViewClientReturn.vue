@@ -138,7 +138,7 @@ const updateView = async () => {
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      //
+
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
@@ -151,7 +151,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/client/return/approve`, {
       method: 'POST',
       data: {
@@ -169,7 +169,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/client/return/unApprove`, {
       method: 'POST',
       data: {
@@ -261,7 +261,7 @@ watch(productsInfo, (newVal) => {
 }, {deep: true});
 
 async function saveFnDialog() {
-  await updateView()
+  //await updateView()
   emit('close-sidebar')
 }
 </script>

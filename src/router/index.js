@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory} from 'vue-router'
 import Dashboard from "@/views/Dashboard.vue";
 import DocumentPrint from "@/components/DocumentPrint.vue";
+import FinancePrint from "@/components/finance/FinanceView/FinancePrint.vue"
 import { useCookies } from 'vue3-cookies';
 
 const routes = [
@@ -139,6 +140,16 @@ const routes = [
         path: '/documents/:productId', // Updated to include a route parameter
         name: 'DocumentPrint',
         component: DocumentPrint,
+        meta: {
+            requiresAuth: true,
+            layout: 'main'
+        },
+        props: true // Allows passing route params as props to the component
+    },
+    {
+        path: '/finance/:productId', // Updated to include a route parameter
+        name: 'FinancePrint',
+        component: FinancePrint,
         meta: {
             requiresAuth: true,
             layout: 'main'

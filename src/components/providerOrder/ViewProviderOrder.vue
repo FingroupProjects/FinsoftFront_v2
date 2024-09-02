@@ -132,16 +132,13 @@ const updateView = async () => {
         comment: viewDocument.value.comment,
         goods: store.postGoods
       };
-      console.log(123)
-      console.log(data)
-
       const res = await useAxios(`/document/provider/update-order/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      //
+
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
@@ -154,7 +151,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/provider/order/approve`, {
       method: 'POST',
       data: {
@@ -172,7 +169,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/document/provider/order/unApprove`, {
       method: 'POST',
       data: {
@@ -264,7 +261,7 @@ watch(productsInfo, (newVal) => {
 }, {deep: true});
 
 async function saveFnDialog() {
-  await updateView()
+  //await updateView()
   emit('close-sidebar')
 }
 </script>

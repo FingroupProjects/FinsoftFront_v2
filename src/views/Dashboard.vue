@@ -21,6 +21,7 @@ import OverlayBadge from 'primevue/overlaybadge';
           <a href="#" class="flex ms-2 md:me-24 mt-[10px]">
             <img width="36" src="@/assets/img/Logo.svg" class="h-[28px] me-3" alt="FlowBite Logo"/>
             <img width="93" src="@/assets/img/CloudFin.svg" class="h-[28px] me-3" alt="FlowBite Logo"/>
+            <div class="open-close-sidebar pi pi-chevron-left"></div>
           </a>
         </div>
 
@@ -102,5 +103,13 @@ import OverlayBadge from 'primevue/overlaybadge';
   font-family: Manrope,sans-serif;
   border-radius: 100%;
   outline-style:none !important;
+}
+
+.open-close-sidebar{
+  margin-left: 50px;
+  background-color: #F2F2F2 !important;
+  border-radius: 70px !important;
+  padding: 10px !important;
+  color: #808BA0 !important;
 }
 </style>

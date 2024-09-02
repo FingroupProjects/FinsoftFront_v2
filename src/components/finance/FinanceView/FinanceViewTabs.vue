@@ -12,6 +12,8 @@ import moment from "moment/moment.js";
 import formatInputAmount from "@/constants/formatInput.js";
 import Dialog from "primevue/dialog";
 import Select from "primevue/dropdown";
+import Sidebar from "primevue/sidebar";
+import FinanceHistory from "@/components/HistoryPurchase.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
@@ -45,7 +47,7 @@ const {
   loadingBalance,
   findBalance,
 } = useStaticApi();
-
+const visibleHistory = ref(false);
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const initialValue = ref(null);
@@ -151,9 +153,11 @@ async function saveFn() {
   }
 }
 
+
+
 const approve = async () => {
   try {
-    await saveFn()
+    //await saveFn()
     const res = await useAxios(`/cash-store/approve`, {
       method: 'POST',
       data: {
@@ -170,7 +174,7 @@ const approve = async () => {
 }
 const unApprove = async () => {
   try {
-    await saveFn()
+    //await saveFn()
     const res = await useAxios(`/cash-store/unApprove`, {
       method: 'POST',
       data: {
@@ -213,6 +217,11 @@ getView()
 
 const openTab = (index) => {
   activeTabIndex.value = index;
+};
+
+const openDocumentPrint = (productId) => {
+  const url = `/finance/${productId}`;
+  window.open(url, '_blank');
 };
 
 function infoModalClose() {
@@ -286,6 +295,16 @@ watch(financeDate, (newVal) => {
 
     </div>
     <div class="flex gap-[16px] pt-2">
+      <fin-button @click="visibleHistory = true" class="icon-histories" severity="success">
+        <i class="pi pi-history mb-[1px] "></i>
+        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
+      </fin-button>
+
+      <fin-button  class="icon-print" severity="success" @click="openDocumentPrint(operationTypeId)">
+        <i class="pi pi-print mb-[1px ]"></i>
+        <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
+      </fin-button>
+
       <fin-button @click="visibleMovement = true" severity="warning"
                   class="p-button-lg flex gap-2">
         <img src="@/assets/img/img.png" alt="" class="w-[20px] mr-2"/>
@@ -480,6 +499,16 @@ watch(financeDate, (newVal) => {
     </div>
 
   </div>
+
+  <Sidebar
+      v-model:visible="visibleHistory"
+      :show-close-icon="false"
+      position="right"
+      class="drower-movement"
+  >
+    <finance-history :productId="props.operationTypeId"/>
+  </Sidebar>
+
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
@@ -553,21 +582,20 @@ watch(financeDate, (newVal) => {
   }
 }
 
-.icon-history {
-  margin-left: 780px !important;
+.icon-histories {
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
-  width: 160px !important;
-  height: 31px !important;
+  width: 100px !important;
+  height: 46px !important;
 }
 
 .icon-print {
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
-  width: 150px !important;
-  height: 31px !important;
+  width: 100px !important;
+  height: 46px !important;
 }
 
 .edit-purchase {

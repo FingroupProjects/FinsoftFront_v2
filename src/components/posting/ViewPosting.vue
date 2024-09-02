@@ -132,8 +132,8 @@ const updateView = async () => {
         method: 'PATCH',
         data: data
       });
+       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
 
-      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
       //
     } catch (e) {
       console.error(e);
@@ -147,7 +147,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/inventoryOperation/approve`, {
       method: 'POST',
       data: {
@@ -165,7 +165,7 @@ const approve = async () => {
 
 const unApprove = async () => {
   try {
-    await updateView()
+    //await updateView()
     const res = await useAxios(`/inventoryOperation/unApprove`, {
       method: 'POST',
       data: {

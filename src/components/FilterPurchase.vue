@@ -2,7 +2,7 @@
 import DatePicker from "primevue/datepicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch, defineEmits  } from "vue";
 import { useStaticApi } from "@/composable/useStaticApi.js";
 import { useAxios } from "@/composable/useAxios.js";
 
@@ -16,6 +16,7 @@ const status = ref([
   { label: 'Проведен', value: 1 },
   { label: 'Не проведен', value: 0 },
 ]);
+
 const rawDateFirst = ref(null);
 const rawDateSecond = ref(null);
 const filterValues = reactive({
@@ -113,7 +114,6 @@ onMounted(() => {
   getCurrency();
 });
 </script>
-
 
 <template>
   <div class="filters-purchase ml-5">
