@@ -7,6 +7,7 @@ import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
 import CounterpartyAgreements from "@/components/counterparty/CounterpartyAgreements.vue";
+import Checkbox from "primevue/checkbox";
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const props = defineProps({
@@ -19,7 +20,20 @@ const props = defineProps({
   },
   data: Object
 });
-
+const roleList = ref([
+  {
+    name: 'Клиент',
+    id: 1
+  },
+  {
+    name: 'Поставщик',
+    id: 2
+  },
+  {
+    name: 'Прочие',
+    id: 3
+  },
+])
 const toast = useToast();
 
 const id = ref();
@@ -27,17 +41,19 @@ const createValues = reactive({
   name: "",
   address: "",
   phone: "",
-  email: ""
+  email: "",
+  roles: []
 });
+
 const rules = reactive({
   name: {required},
   phone: {required}
 });
-const v$ = useVuelidate(rules, createValues);
 
+const fv$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
-  const result = await v$.value.$validate();
+  const result = await fv$.value.$validate();
 
   if (result) {
     try {
@@ -48,7 +64,7 @@ async function saveFn() {
           address: createValues.address,
           phone: createValues.phone,
           email: createValues.email,
-          roles: []
+          roles: createValues.roles
         },
       });
       toast.add({
@@ -77,7 +93,8 @@ async function getGood() {
     createValues.address = item.address
     createValues.phone = item.phone
     createValues.email = item.email
-
+    createValues.roles = item.roles
+  console.log(createValues.roles)
     id.value = item.id
 }
 
@@ -116,10 +133,18 @@ onMounted(async () => {
     </div>
     <div class="grid grid-cols-10 mt-[30px] gap-[26px]">
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
+        <fin-input :class="{ 'p-invalid': fv$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
         <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
-        <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
+        <fin-input :class="{ 'p-invalid': fv$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
         <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
+        <div class="form col-span-6 grid grid-cols-3 gap-[16px]">
+          <div v-for="category of roleList" :key="category.id" class="flex items-center">
+            <Checkbox  v-model="createValues.roles"  name="category" :value="category.id"/>
+            <label :for="category.id" class="ml-2">{{ category.name }}</label>
+          </div>
+        </div>
+
+
       </div>
     </div>
   <CounterpartyAgreements :productId="props.productId" :data="props.data"></CounterpartyAgreements>
