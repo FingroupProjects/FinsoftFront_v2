@@ -34,7 +34,7 @@ function postDiscount(sale) {
           <fin-button @click="emit('close-modal')" icon="pi pi-times" class="p-button-2xl" severity="warning"
                       label="Отменить"/>
           <div class="font-semibold text-[26px] leading-[26px] text-[#141C30]">
-            Дисконтная карта
+            Ручная скидка
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
@@ -44,7 +44,7 @@ function postDiscount(sale) {
     <div class="grid grid-cols-12 gap-[26px] mt-[6px]">
       <Calculate @numbers-wallet="postDiscount" class="col-span-6"/>
       <div class="col-span-6 flex justify-between ">
-        <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Накоплено</div>
+        <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Скидка</div>
         <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{formatPrice(saleSum) }} <span
             class="text-[24px]">сум</span></div>
       </div>
