@@ -19,7 +19,7 @@ import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
 import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
-
+import { reactive } from "vue";
 const {
   findStorage,
   storage,
@@ -45,7 +45,15 @@ const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dateInfo = ref(null)
-
+const savedFilterValues = reactive({
+  startDate: '',
+  endDate: '',
+  organization_id: '',
+  currency_id: '',
+  author_id: '',
+  deleted: '',
+  active: ''
+});
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -82,8 +90,12 @@ const onRowClick = (event) => {
   selectedProductId.value = product.id
 };
 
+
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
   visibleFilter.value = false
 }
 
@@ -167,6 +179,7 @@ async function closeFnVl() {
   await getProducts();
   visibleRight.value = false
 }
+
 
 watch(selectedStorage, () => {
   getProducts();
@@ -460,7 +473,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" />
   </Sidebar>
   <Toast/>
 

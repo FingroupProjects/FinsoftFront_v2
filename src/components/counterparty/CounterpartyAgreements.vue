@@ -21,10 +21,11 @@ const props = defineProps({
   data: Object
 });
 
+const showForm = ref(false)
 const toast = useToast();
 
 const getCPList = ref([]);
-const createValues = reactive({
+const createValuess = reactive({
   name: "",
   date: "",
   comment: "",
@@ -49,7 +50,7 @@ const getSeverity = (status) => {
   }
 };
 
-const rules = reactive({
+const ruless = reactive({
   name: {required},
   currency: {required},
   payment: {required},
@@ -58,19 +59,19 @@ const rules = reactive({
   contact_number: {required},
   contract_person: {required}
 });
-const v$ = useVuelidate(rules, createValues);
+const v$ = useVuelidate(ruless, createValuess);
 
 
 const clearInputValues = () => {
-  createValues.date = ""
-  createValues.name = ""
-  createValues.comment = ""
-  createValues.organization = ""
-  createValues.contact_number = ""
-  createValues.contract_person = ""
-  createValues.currency = ""
-  createValues.payment = ""
-  createValues.priceType = ""
+  createValuess.date = ""
+  createValuess.name = ""
+  createValuess.comment = ""
+  createValuess.organization = ""
+  createValuess.contact_number = ""
+  createValuess.contract_person = ""
+  createValuess.currency = ""
+  createValuess.payment = ""
+  createValuess.priceType = ""
 };
 const {
   findOrganization,
@@ -93,16 +94,16 @@ async function addCpAgreement() {
     const res = await useAxios(`/cpAgreement`, {
       method: "POST",
       data: {
-            "name": createValues.name,
-            "contract_number": createValues.contact_number,
-            "date": createValues.date,
-            "organization_id": createValues.organization.code,
+            "name": createValuess.name,
+            "contract_number": createValuess.contact_number,
+            "date": createValuess.date,
+            "organization_id": createValuess.organization.code,
             "counterparty_id": props.productId,
-            "contact_person": createValues.contract_person,
-            "currency_id": createValues.currency.code,
-            "payment_id": createValues.payment.code,
-            "comment": createValues.comment,
-            "price_type_id": createValues.priceType.code
+            "contact_person": createValuess.contract_person,
+            "currency_id": createValuess.currency.code,
+            "payment_id": createValuess.payment.code,
+            "comment": createValuess.comment,
+            "price_type_id": createValuess.priceType.code
       },
     });
     clearInputValues();
@@ -160,6 +161,9 @@ async function getGood() {
     getCPList.value = item.counterpartyAgreement;
     console.log(item, getCPList.value);
 }
+function toggleForm() {
+  showForm.value = !showForm.value
+}
 
 onMounted(async () => {
   await getGood()
@@ -179,14 +183,21 @@ async function getAgreements() {
 </script>
 
 <template>
-  <div class="flex items-center mt-[30px] gap-[21px]">
-    <div class="header-title">Договоры контрагента</div>
+  <div class="flex items-center mt-[30px] gap-[21px] mb-3">
+    <div
+        class="header-title font-bold"
+        :class="{ 'text-blue-500 cursor-pointer': !showForm }"
+    >
+      <a @click="toggleForm">Договоры контрагента</a>
+    </div>
   </div>
-  <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
+
+
+  <div v-show="showForm"  class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-4">
       <DatePicker
           showIcon
-          v-model="createValues.date"
+          v-model="createValuess.date"
           dateFormat="dd.mm.yy"
           :class="{ 'p-invalid': v$.date.$error }"
           iconDisplay="input"
@@ -195,12 +206,12 @@ async function getAgreements() {
       </DatePicker>
       <label for="dd-city">Дата</label>
     </FloatLabel>
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-4" v-model="createValues.name"/>
-        <fin-input :class="{ 'p-invalid': v$.contract_person.$error }" placeholder="Контакная лицо" class="col-span-4" v-model="createValues.contract_person"/>
-        <fin-input :class="{ 'p-invalid': v$.contact_number.$error }" placeholder="Номер контракта" class="col-span-4" v-model="createValues.contact_number"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-4" v-model="createValuess.name"/>
+        <fin-input :class="{ 'p-invalid': v$.contract_person.$error }" placeholder="Контакная лицо" class="col-span-4" v-model="createValuess.contract_person"/>
+        <fin-input :class="{ 'p-invalid': v$.contact_number.$error }" placeholder="Номер контракта" class="col-span-4" v-model="createValuess.contact_number"/>
     <FloatLabel class="col-span-4">
       <Dropdown
-          v-model="createValues.organization"
+          v-model="createValuess.organization"
           :class="{ 'p-invalid': v$.currency.$error }"
           @click="findOrganization"
           :loading="loading"
@@ -209,14 +220,14 @@ async function getAgreements() {
           class="w-full"
       >
         <template #value>
-          {{ createValues.organization?.name }}
+          {{ createValuess.organization?.name }}
         </template>
       </Dropdown>
       <label for="dd-city">Организация</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
       <Dropdown
-          v-model="createValues.currency"
+          v-model="createValuess.currency"
           :class="{ 'p-invalid': v$.currency.$error }"
           @click="findCurrency"
           :loading="loading"
@@ -225,14 +236,14 @@ async function getAgreements() {
           class="w-full"
       >
         <template #value>
-          {{ createValues.currency?.name }}
+          {{ createValuess.currency?.name }}
         </template>
       </Dropdown>
       <label for="dd-city">Валюта</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
       <Dropdown
-          v-model="createValues.payment"
+          v-model="createValuess.payment"
           :class="{ 'p-invalid': v$.payment.$error }"
           @click="findCurrency"
           :loading="loading"
@@ -241,14 +252,14 @@ async function getAgreements() {
           class="w-full"
       >
         <template #value>
-          {{ createValues.payment?.name }}
+          {{ createValuess.payment?.name }}
         </template>
       </Dropdown>
       <label for="dd-city">Валюта</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
       <Dropdown
-          v-model="createValues.priceType"
+          v-model="createValuess.priceType"
           :class="{ 'p-invalid': v$.priceType.$error }"
           @click="findPriceType"
           :loading="loadPriceType"
@@ -257,7 +268,7 @@ async function getAgreements() {
           class="w-full"
       >
         <template #value>
-          {{ createValues.priceType?.name }}
+          {{ createValuess.priceType?.name }}
         </template>
       </Dropdown>
       <label for="dd-city">Тип цены</label>
@@ -271,6 +282,7 @@ async function getAgreements() {
     />
 
   </div>
+
   <div  class="table-create dropdown-status">
     <DataTable
         scrollable
