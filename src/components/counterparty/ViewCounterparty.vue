@@ -20,6 +20,8 @@ const props = defineProps({
   },
   data: Object
 });
+
+
 const roleList = ref([
   {
     name: 'Клиент',
@@ -53,8 +55,8 @@ const rules = reactive({
 const fv$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
-  const result = await fv$.value.$validate();
-
+  const result = true
+    console.log(1)
   if (result) {
     try {
       const res = await useAxios(`counterparty/${props.productId}`, {
