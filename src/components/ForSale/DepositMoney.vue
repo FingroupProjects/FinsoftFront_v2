@@ -99,7 +99,7 @@ watch(walletChangeAll, (newValue) => {
             Внесение денег
           </div>
         </div>
-        <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="primary"
+        <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
                     label="Закрыть чек" @click="emit('postProducts',postProducts)"/>
       </div>
     </template>

@@ -79,7 +79,7 @@ function pushNumbers() {
           v-model="searchQuery"
           :model-value="formatInputAmount(searchQuery)"
           @keydown="handleKeydown"
-          placeholder="Внесение денег"
+          placeholder="Введите сумму"
       />
     </IconField>
     <div class="grid grid-cols-12 gap-[16px]">

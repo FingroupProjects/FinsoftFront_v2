@@ -1,16 +1,13 @@
 <script setup>
+import {ref} from 'vue'
 import Dialog from "primevue/dialog";
-import {ref} from "vue";
-import Calculate from "@/components/ForSale/Calculate.vue";
-import formatPrice from "@/constants/formatNumber.js";
-import {useAxios} from "@/composable/useAxios.js";
-
-import IconField from "primevue/iconfield";
-import InputIcon from "primevue/inputicon";
-import InputText from "primevue/inputtext";
-import PhoneNumber from "@/components/ForSale/PhoneNumber.vue";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
+import {useAxios} from "@/composable/useAxios.js";
+import moment from "moment/moment.js";
+import Toast from 'primevue/toast'
+import {useToast} from "primevue/usetoast";
+import InputMask from 'primevue/inputmask';
 
 const emit = defineEmits(['close-modal', 'postSale'])
 const props = defineProps({
@@ -19,7 +16,32 @@ const props = defineProps({
     default: false
   }
 })
+const toast = useToast()
+const name = ref('');
+const lastName = ref('');
+const phone = ref('');
+const birthday = ref('');
+const address = ref('');
 
+
+async function addUser() {
+  try {
+    const res = await useAxios(`discount`, {
+      method: 'POST',
+      data: {
+        "name": name.value,
+        "lastname": lastName.value,
+        "phone": phone.value,
+        "birthday": moment(birthday.value).format('YYYY-MM-DD HH:mm:ss'),
+        "address": address.value,
+      }
+    })
+    toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
+    emit('close-modal')
+  } catch (e) {
+    toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+  }
+}
 </script>
 
 <template>
@@ -36,19 +58,24 @@ const props = defineProps({
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
-                    label="Применить" @click="emit('postSale')"/>
+                    label="Создать" @click="addUser"/>
       </div>
     </template>
     <div class="grid add-user-info-modal grid-cols-12 gap-[16px] mt-[6px]">
-      <fin-input class="col-span-4" placeholder="Имя"/>
-      <fin-input class="col-span-4" placeholder="Фамилия"/>
+      <fin-input v-model="name" class="col-span-4" placeholder="Имя"/>
+      <fin-input v-model="lastName" class="col-span-4" placeholder="Фамилия"/>
       <FloatLabel class="col-span-4">
+        <InputMask id="ssn" class="w-full" v-model="phone" mask="+99999-999-9999" placeholder="Телефон" />
+        <label for="ssn">SSN</label>
+      </FloatLabel>
+      <fin-input v-model="address" class="col-span-6" placeholder="Адрес"/>
+
+      <FloatLabel class="col-span-6">
         <DatePicker
             showIcon
-
-            showTime
+            v-model="birthday"
             hourFormat="24"
-            dateFormat="dd.mm.yy,"
+            dateFormat="dd.mm.yy"
             fluid
             hideOnDateTimeSelect
             iconDisplay="input"
@@ -56,10 +83,9 @@ const props = defineProps({
         />
         <label for="dd-city">Дата</label>
       </FloatLabel>
-      <fin-input class="col-span-6" placeholder="Адрес"/>
-      <fin-input class="col-span-6" placeholder="Телефон"/>
     </div>
   </Dialog>
+  <Toast/>
 </template>
 
 <style scoped lang="scss">
@@ -85,11 +111,10 @@ const props = defineProps({
       top: 18px !important;
     }
   }
-  .p-inputtext{
+
+  .p-inputtext {
     height: 46px !important;
     border-radius: 10px !important;
   }
 }
-
-
 </style>

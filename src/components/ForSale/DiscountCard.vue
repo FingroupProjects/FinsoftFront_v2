@@ -24,6 +24,7 @@ const props = defineProps({
 
 const payMethods = ref([]);
 const infoUser = ref();
+const errorName = ref('');
 
 async function postPhone(numbers) {
   try {
@@ -38,6 +39,8 @@ async function postPhone(numbers) {
       console.log('Invalid number format');
     }
   } catch (e) {
+    errorName.value = 'дисконтная карта для не существует'
+    infoUser.value = ''
     console.log(e);
   }
 }
@@ -53,6 +56,12 @@ async function cardFn() {
     })
   } catch (e) {
     console.log(e)
+  }
+}
+
+function postFn() {
+  if (infoUser.value) {
+    emit('postInfoUser', infoUser)
   }
 }
 
@@ -73,7 +82,7 @@ cardFn()
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
-                    label="Применить" @click="emit('postInfoUser',infoUser)"/>
+                    label="Применить" @click="postFn"/>
       </div>
     </template>
     <div class="grid grid-cols-12 gap-[26px] mt-[6px]">
@@ -85,7 +94,7 @@ cardFn()
           <div
               class="bg-[#F2F2F2] flex items-center gap-[10px] px-[16px] py-[12px] h-[50px] rounded-[12px] text-[#808BA0] text-[18px] font-semibold leading-[18px] mb-[24px]">
             <img src="@/assets/img/IconUser.svg" alt="">
-            {{ infoUser?.lastname }} {{ infoUser?.name }}
+            {{ infoUser?.lastname || errorName }} {{ infoUser?.name }}
           </div>
           <div class="flex justify-between items-center border-dashed border-t py-[24px] ">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Накоплено</div>

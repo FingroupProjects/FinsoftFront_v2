@@ -57,7 +57,6 @@ getIdProducts();
 function userInfoFn(info) {
   userInfo.value = info
   saleSum.value += Number(info.sum)
-  console.log()
   openDiscount.value = false
 }
 
@@ -90,6 +89,16 @@ function getFastProducts(products) {
   }, 0)
 }
 
+function getFilterGoods(products){
+  products.forEach(product => {
+    listPostGoods.value.push(product);
+  });
+  if (products.length > 0) openImgModal.value = false
+
+  getAllSum.value = listPostGoods.value.reduce((total, el) => {
+    return total + (el?.price || 0);
+  }, 0)
+}
 function addCountFn(count) {
   count++
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
@@ -164,18 +173,18 @@ watchEffect(() => {
               <template #icon><img src="@/assets/img/iconFilterFale.svg" alt=""></template>
             </fin-button>
             <fin-button @click="openImgModal = true" icon="pi pi-images" class="w-full" severity="warning"/>
-            <fin-button icon="pi pi-arrow-right-arrow-left" @click="activeRightArrow = true"
+            <fin-button icon="pi pi-arrow-right-arrow-left" @click="activeRightArrow=!activeRightArrow"
                         :severity="activeRightArrow ? 'success' : 'warning'" severity="warning"/>
           </div>
         </div>
         <hr class="mt-[24px]">
-        <div class="mt-[30px]">
+        <div class="mt-[30px] overflow-y-scroll h-[750px]">
           <div class="text-[20px] leading-[20px] text-[#141C30] font-semibold">
             Товары ({{ listPostGoods.length }})
           </div>
           <TransitionGroup name="fade" tag="div">
             <div
-                class="rounded-[16px] h-[77px] bg-[#fff] shadow-goods py-[15px] px-[12px] grid grid-cols-12 w-full justify-center  mt-5"
+                class="rounded-[16px] h-[77px] bg-[#fff] shadow-goods  py-[15px] px-[12px] grid grid-cols-12 w-full justify-center  mt-5"
                 v-for="(infoGoods,index) in listPostGoods" :key="index">
               <div class="flex gap-[15px] col-span-4">
                 <img src="@/assets/img/exampleImg.svg" alt="" class="w-[50px] h-[50px] rounded-[14px]">
@@ -218,7 +227,7 @@ watchEffect(() => {
           </TransitionGroup>
         </div>
       </div>
-      <div class=" left-[15%] fixed bottom-[0px] w-[55.3%] bg-white">
+      <div class="  bg-white">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
           <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
           <div class="">
@@ -287,7 +296,7 @@ watchEffect(() => {
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="openDiscount=false"/>
-  <FilterFastGoods @postProducts="getFastProducts" :open-fast-goods="openImgModal" @close-modal="openImgModal=false"/>
+  <FilterFastGoods @postProducts="getFilterGoods" :open-fast-goods="openImgModal" @close-modal="openImgModal=false"/>
   <ManualDiscount @postSale="postSaleFn" :open-deposit-money="openManualModal"
                   @close-modal="openManualModal=false"/>
   <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
