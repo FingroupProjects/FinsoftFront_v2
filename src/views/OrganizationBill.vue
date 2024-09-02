@@ -239,7 +239,7 @@ getProducts();
         <Column selectionMode="multiple"></Column>
         <Column field="name" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
+            <div class="w-full h-full" @click="sortData('name', index)">
               Наименование <i
 
                 :class="{
@@ -257,9 +257,9 @@ getProducts();
             {{ slotProps.data.name }}
           </template>
         </Column>
-        <Column field="name" :sortable="true" header="">
+        <Column field="bill_number" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
+            <div class="w-full h-full" @click="sortData('bill_number',index)">
               Номер счета <i
 
                 :class="{
@@ -270,16 +270,13 @@ getProducts();
             ></i>
             </div>
           </template>
-          <template #sorticon="{index}">
-
-          </template>
           <template #body="slotProps">
             {{ slotProps.data.bill_number }}
           </template>
         </Column>
         <Column field="date" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('date',index)">
+            <div class="w-full h-full" @click="sortData('created_at',index)">
               Дата <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -295,7 +292,7 @@ getProducts();
             {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
           </template>
         </Column>
-        <Column field="address" :sortable="true" header="">
+        <Column field="currency" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('address',index)">
               Валюта <i
@@ -314,7 +311,7 @@ getProducts();
           </template>
         </Column>
 
-        <Column field="address" :sortable="true" header="">
+        <Column field="organization" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('address',index)">
               Организация <i

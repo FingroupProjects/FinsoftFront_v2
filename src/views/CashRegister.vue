@@ -34,9 +34,6 @@ const createOpenModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 import moment from "moment";
-import CreateOrganizationBill from "@/components/organizationBillComponents/CreateOrganizationBill.vue";
-import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
-import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
 import FilterOrganizationBill from "@/components/organizationBillComponents/FilterOrganizationBill.vue";
 import MethodsCashRegister from "@/components/cashRegister/MethodsCashRegister.vue";
 import ViewCashRegisters from "@/components/cashRegister/ViewCashRegisters.vue";
@@ -284,7 +281,7 @@ getProducts();
           {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY") }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="">
+      <Column field="currency" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('currency.name',index)">
             Валюта <i
@@ -302,7 +299,7 @@ getProducts();
           {{ slotProps.data?.currency?.name }}
         </template>
       </Column>
-      <Column field="price" :sortable="true" header="">
+      <Column field="responsiblePerson" :sortable="true" header="">
         <template #header="{index}">
           <div class="w-full h-full" @click="sortData('responsiblePerson.name',index)">
             Ответсвенное лицо <i
