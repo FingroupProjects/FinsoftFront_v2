@@ -12,6 +12,7 @@ const deleted = ref([
   { label: 'Да', value: 1},
   { label: 'Нет', value: 0 },
 ]);
+
 const status = ref([
   { label: 'Проведен', value: 1 },
   { label: 'Не проведен', value: 0 },
@@ -28,6 +29,11 @@ const filterValues = reactive({
   deleted: '',
   active: ''
 });
+onMounted(() => {
+  console.log(filterValues)
+  Object.assign(filterValues, props.savedFilters);
+});
+
 
 function formatDateTime(date) {
   const d = new Date(date);
@@ -74,7 +80,14 @@ const emit = defineEmits(['updateFilters']);
 const datas = () => {
   emit('updateFilters', filterValues);
 };
+const applyFilters = () => {
+  emit('updateFilters', filterValues);
+};
 
+const clearFilters = () => {
+  Object.keys(filterValues).forEach(key => filterValues[key] = '');
+  emit('updateFilters', filterValues); // Обновляем сохраненные фильтры
+};
 const getUsers = async () => {
   try {
     const res = await useAxios('/user');
@@ -182,8 +195,8 @@ onMounted(() => {
       />
     </div>
     <div class="flex mt-[22px] gap-4">
-      <fin-button @click="datas()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
-      <fin-button @click="clear()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
+      <fin-button @click="applyFilters()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
+      <fin-button @click="clearFilters()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
     </div>
   </div>
 </template>

@@ -20,33 +20,35 @@ const modules = ref([])
 const fastGoodsList = ref([]);
 const checked = ref(Array(fastGoodsList.value.length).fill(false));
 const selectFilter = ref(null);
-const filterList = ref([]);
+const filterList = ref(null);
 const filterSelect = ref(null);
 const postProducts = ref([]);
+const postSelect = ref()
 const imgURL = import.meta.env.VITE_IMG_URL;
 
 const toggleFilter = (index, number) => {
-  filterSelect.value = `/get-by-good-group-id/${number}`
+  filterSelect.value = `/goods-by-group-ids`
   selectFilter.value = index;
+  postSelect.value = number
   getGoodGroup();
 };
 
 async function getGoodGroup(event) {
   const params = {
     search: event?.srcElement.value,
+    ids: [postSelect.value]
   }
   try {
-    const res = await useAxios(`fastGoods${filterSelect.value || ''}`, {params});
+    const res = await useAxios(`good${filterSelect.value || ''}`, {params});
 
     const data = Array.isArray(res.result.data) && res.result.data.length > 0
         ? res.result.data
         : res.result;
-
     fastGoodsList.value = data.map(el => ({
       count: 1,
       products: el.name,
       description: el.description,
-      vendorCode: el.vendor_code,
+      vendorCode: el?.vendor_code,
       price: el.price,
       id: el.id,
       img: el.images.length > 0 && el.images[0].image
@@ -54,7 +56,6 @@ async function getGoodGroup(event) {
           : new URL('@/assets/img/exampleImg.svg', import.meta.url),
     }));
   } catch (e) {
-    console.log()
   }
 }
 
@@ -140,7 +141,7 @@ const checkedCount = computed(() => {
           <fin-button @click="closeDialog" icon="pi pi-times" class="p-button-2xl" severity="warning"
                       label="Отменить"/>
           <div class="font-semibold text-[26px] leading-[26px] text-[#141C30]">
-            Быстрые товары: {{ checkedCount }}
+            Фильтр товары: {{ checkedCount }}
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="success"

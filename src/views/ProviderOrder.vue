@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {reactive, ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -28,7 +28,15 @@ const {
   counterparty,
   loadingCounterparty,
 } = useStaticApi();
-
+const savedFilterValues = reactive({
+  startDate: '',
+  endDate: '',
+  organization_id: '',
+  currency_id: '',
+  author_id: '',
+  deleted: '',
+  active: ''
+});
 const visibleRight = ref(false);
 const products = ref([]);
 const selectedStorage = ref(null);
@@ -84,6 +92,9 @@ const onRowClick = (event) => {
 
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
   visibleFilter.value = false
 }
 
@@ -460,7 +471,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" />
   </Sidebar>
   <Toast/>
 

@@ -52,7 +52,7 @@ const number = ref([
 const searchQuery = ref('');
 
 function updateSearchQuery(code) {
-  searchQuery.value += code;
+  return searchQuery.value += code;
 }
 
 function removeLastCharacter() {
@@ -64,8 +64,10 @@ function handleKeydown(event) {
 }
 
 function pushNumbers() {
-  emit('numbersWallet', searchQuery.value)
-  searchQuery.value = ''
+  if (searchQuery.value) {
+    emit('numbersWallet', searchQuery.value)
+    searchQuery.value = ''
+  }
 }
 </script>
 
@@ -77,7 +79,7 @@ function pushNumbers() {
           v-model="searchQuery"
           :model-value="formatInputAmount(searchQuery)"
           @keydown="handleKeydown"
-          placeholder="Внесение денег"
+          placeholder="Введите сумму"
       />
     </IconField>
     <div class="grid grid-cols-12 gap-[16px]">

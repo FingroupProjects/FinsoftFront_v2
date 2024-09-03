@@ -46,7 +46,7 @@ const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
-
+const selectedStatus = ref();
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -94,7 +94,7 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    storage_id: selectedStorage.value?.code,
+    deleted: selectedStatus.value?.code,
     counterparty_id: selectedCounterparty.value?.code,
     page: first.value,
     ...filters,
@@ -165,18 +165,16 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch(selectedStorage, () => {
+watch(selectedStatus, () => {
   getProducts();
 });
-watch(selectedCounterparty, () => {
-  getProducts();
-});
-const selectedStatus = ref();
+
+
 getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Покупка товаров"/>
+  <header-purchase header-title="Контагенты"/>
   <Loader v-if="loader"/>
   <div v-else>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
@@ -251,7 +249,7 @@ getProducts();
         </Column>
         <Column field="date" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('date',index)">
+            <div class="w-full h-full" @click="sortData('created_at',index)">
               Дата <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -266,6 +264,25 @@ getProducts();
           <template #body="slotProps">
             {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
           </template>
+        </Column>
+        <Column field="role" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('created_at',index)">
+              Роль <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.roles.map(role => role.name).join(', ') }}
+          </template>
+
         </Column>
         <Column field="address" :sortable="true" header="">
           <template #header="{index}">

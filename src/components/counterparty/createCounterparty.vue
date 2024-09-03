@@ -6,13 +6,25 @@ import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
-
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 import {minLength, maxLength} from '@vuelidate/validators';
-
+import Checkbox from 'primevue/checkbox';
 
 const toast = useToast();
-
+  const roleList = ref([
+    {
+      name: 'Клиент',
+      code: 1
+    },
+    {
+      name: 'Поставщик',
+      code: 2
+    },
+    {
+      name: 'Прочие',
+      code: 3
+    },
+  ])
 const openInfoModal = ref()
 const createValues = reactive({
   name: "",
@@ -46,7 +58,7 @@ async function saveFn() {
           phone: createValues.phone,
           name: createValues.name,
           email: createValues.email,
-          roles: [1]
+          roles: createValues.roles
         },
       });
       toast.add({
@@ -99,6 +111,14 @@ async function saveFn() {
         <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
         <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
         <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
+
+        <div class="form col-span-6 grid grid-cols-3 gap-[16px]">
+          <div v-for="category of roleList" :key="category.code" class="flex items-center">
+            <Checkbox v-model="createValues.roles" :inputId="category.code" name="category" :value="category.code" />
+            <label :for="category.code" class="ml-2">{{ category.name }}</label> <!-- Отступ между чекбоксом и лейблом -->
+          </div>
+        </div>
+
       </div>
     </div>
 
