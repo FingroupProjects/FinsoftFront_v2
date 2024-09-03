@@ -17,6 +17,7 @@ import Dialog from "primevue/dialog";
 import ClientReturnTable from "@/components/clientReturn/ClientReturnTable.vue";
 import {useClientReturn} from "@/store/clientReturn.js";
 import ClientOrderTable from "@/components/clientOrder/ClientOrderTable.vue";
+import DocumentPrint from "@/components/DocumentPrint.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -44,6 +45,7 @@ const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
 const loaderSave = ref(false)
+
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -150,7 +152,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    //await updateView()
+    await updateView()
     const res = await useAxios(`/document/client/return/approve`, {
       method: 'POST',
       data: {
@@ -186,6 +188,7 @@ const unApprove = async () => {
 const openDocumentPrint = (productId) => {
   const url = `/documents/${productId}`;
   window.open(url, '_blank');
+
 };
 
 function getProducts(products) {
@@ -320,7 +323,6 @@ async function saveFnDialog() {
       </div>
       <div v-if="isOpen"
            class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
-
         <FloatLabel class="col-span-4">
           <DatePicker
               showIcon
@@ -414,6 +416,7 @@ async function saveFnDialog() {
         <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
           <i class="pi pi-print mb-[1px ]"></i>
           <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
+
         </fin-button>
       </div>
     </div>

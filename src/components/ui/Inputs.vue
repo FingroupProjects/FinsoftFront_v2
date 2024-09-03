@@ -16,7 +16,7 @@
           :required="props.required"
           :type="type"
           autocomplete="off"
-          class="block px-2.5 pb-3 w-full border text-secondary
+          class="block px-2.5 pb-5 w-full border text-secondary
           bg-transparent rounded-[10px] border-1 border-border appearance-none  focus:outline-none focus:ring-0 focus:border-primary peer "
           placeholder=" "
           @focus="$emit('focus')"
