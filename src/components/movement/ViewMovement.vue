@@ -127,9 +127,8 @@ const updateView = async () => {
         method: 'PATCH',
         data: data
       });
-
-      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-
+      if (approved.value === true)
+        toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
       console.log('Response:', res);
     } catch (e) {
       console.error(e);

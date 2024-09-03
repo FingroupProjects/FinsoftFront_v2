@@ -136,8 +136,8 @@ const updateView = async () => {
         method: 'PATCH',
         data: data
       });
-
-      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
+      if (approved.value === true)
+        toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
 
       //
     } catch (e) {
@@ -384,7 +384,7 @@ async function saveFnDialog() {
         </FloatLabel>
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                  @click="findCurrency">
+                  @click="findCurrency" disabled style="background-color: #fff !important;">
             <template #value>
               {{ viewDocument.currencyName?.name }}
             </template>

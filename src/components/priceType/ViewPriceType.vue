@@ -13,6 +13,7 @@ import moment from "moment";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {data} from "autoprefixer";
+import Select from "primevue/dropdown";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -143,6 +144,7 @@ onMounted(function (){
             :options="currency"
             optionLabel="name"
             class="w-full"
+            disabled style="background-color: #fff !important;"
         >
           <template #value>
             {{ viewValues.currency?.name }}

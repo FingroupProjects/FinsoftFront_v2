@@ -13,6 +13,7 @@ import Dropdown from "primevue/dropdown";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 import moment from "moment";
+import Select from "primevue/dropdown";
 const props = defineProps({
   productId: {
     required: true,
@@ -183,6 +184,7 @@ const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
             :options="currency"
             optionLabel="name"
             class="w-full"
+            disabled style="background-color: #fff !important;"
         >
           <template #value>
             {{ createValues.selectCurrency?.name }}

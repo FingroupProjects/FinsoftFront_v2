@@ -143,8 +143,8 @@ const updateView = async () => {
         data: data
       });
 
-
-      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
+      if (approved.value === true)
+        toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
 
     } catch (e) {
       console.error(e);
@@ -158,7 +158,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    //await updateView()
+    await updateView()
     const res = await useAxios(`/document/client/order/approve`, {
       method: 'POST',
       data: {
@@ -403,7 +403,7 @@ async function saveFnDialog() {
         </FloatLabel>
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                  @click="findCurrency">
+                  @click="findCurrency" disabled style="background-color: #fff !important;">
             <template #value>
               {{ viewDocument.currencyName?.name }}
             </template>
