@@ -15,11 +15,13 @@ const toggleOpen = (item) => {
   }
 };
 
+
+
 </script>
 <template>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-[280px] h-screen pt-[66px]  transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+         class="fixed top-0 left-0 z-40 w-[280px] h-screen pt-[66px] transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
     <div class="h-full px-3 pb-4 overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
       <PanelMenu :model="sidebar" class="w-full">
@@ -98,6 +100,7 @@ const toggleOpen = (item) => {
       </PanelMenu>
     </div>
   </aside>
+
 </template>
 
 <style lang="scss">

@@ -43,6 +43,7 @@ const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
 const loaderSave = ref(false)
+const visibleToast = ref(false)
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -136,7 +137,6 @@ const updateView = async () => {
       });
 
       toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-      //
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
@@ -149,7 +149,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    await updateView()
+    // await updateView()
     const res = await useAxios(`/document/provider/approve`, {
       method: 'POST',
       data: {
@@ -161,7 +161,7 @@ const approve = async () => {
     status.value = 'Проведен'
   } catch (e) {
     console.error(e)
-    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500});
+    toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось одобрить документ!', life: 1500});
   }
 }
 
@@ -199,7 +199,7 @@ function changeModal() {
 }
 
 async function saveFnDialog() {
-  await updateView()
+  //await updateView()
   emit('close-sidebar')
 }
 

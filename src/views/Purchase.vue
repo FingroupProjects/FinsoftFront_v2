@@ -461,7 +461,6 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-
       <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo" :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
