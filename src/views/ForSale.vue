@@ -302,7 +302,7 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :sale-sum="payCount - userInfo?.sum || payCount" :open-deposit-money="openDeposit"
+  <DepositMoney :sale-sum="payCount - saleSum || payCount" :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="closeDiscount"/>
