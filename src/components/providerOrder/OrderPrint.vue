@@ -16,8 +16,9 @@ const goods = ref({
   price:''
 })
 const props = defineProps({
-  productId:{},
-  namePrint: String
+  productId:{
+    required: true
+  }
 });
 
 
@@ -115,7 +116,7 @@ onMounted(async () => {
     </div>
 
     <div class="flex mt-10 gap-[100px] justify-center">
-      <div class="text-center text-3xl"> Накладная поступление №  {{printDoc.doc_number}} от {{printDoc.date}}</div>
+      <div class="text-center text-3xl"> Накладная заказ поставщику №  {{printDoc.doc_number}} от {{printDoc.date}}</div>
 
     </div>
     <div class="flex justify-center mt-10">

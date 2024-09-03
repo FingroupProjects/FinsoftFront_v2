@@ -178,13 +178,12 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-
-// watch(selectedStorage, () => {
-//   getProducts();
-// });
-// watch(selectedCounterparty, () => {
-//   getProducts();
-// });
+watch(selectedStorage, () => {
+  getProducts();
+});
+watch(selectedCounterparty, () => {
+  getProducts();
+});
 onMounted(()=>{
   getProducts()
 })

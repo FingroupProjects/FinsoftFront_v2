@@ -185,7 +185,7 @@ const unApprove = async () => {
   }
 }
 const openDocumentPrint = (productId) => {
-  const url = `/documents/${productId}`;
+  const url = `/order/${productId}`;
   window.open(url, '_blank');
 };
 
