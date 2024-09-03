@@ -1,7 +1,49 @@
 <script setup>
+import {onMounted, reactive} from "vue";
+import {useAxios} from "@/composable/useAxios.js";
+
 const props = defineProps({
   headerTitle:''
 })
+
+const dashboardValues = reactive({
+  purchase: '',
+  purchase_percent: '',
+  return: '',
+  return_percent: '',
+  for_payment: '',
+  for_payment_percent: '',
+  avg_price: '',
+  avg_price_percent: '',
+  order: '',
+  order_percent: ''
+})
+
+async function getDashBoardData()
+{
+  try {
+    const res = await useAxios(`/document/dashboard`);
+
+    dashboardValues.purchase = res.purchase;
+    dashboardValues.purchase_percent = res.purchase_percent;
+    dashboardValues.return = res.return
+    dashboardValues.return_percent = res.return_percent
+    dashboardValues.for_payment = res.for_payment
+    dashboardValues.for_payment_percent = res.for_payment_percent
+    dashboardValues.avg_price = res.avg_price
+    dashboardValues.avg_price_percent = res.avg_price_percent
+    dashboardValues.order = res.order
+    dashboardValues.order_percent = res.order_percent
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+onMounted(function () {
+  getDashBoardData()
+})
+
+
 </script>
 
 <template>
@@ -13,66 +55,66 @@ const props = defineProps({
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i class="pi pi-arrow-down text-[#EE2828] text-[10px]"></i> -5.6%
+            <i :class="dashboardValues.purchase_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.purchase_percent}} %
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            Новые
+            Покупки
           </div>
         </div>
         <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
-          180
+          {{dashboardValues.purchase}}
         </div>
       </div>
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i class="pi pi-arrow-up text-[#07BC51] text-[10px]"></i> +2.6%
+            <i :class="dashboardValues.return_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.return_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            В пути
+            Возврат
           </div>
         </div>
         <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
-          89
+          {{dashboardValues.return}}
         </div>
       </div>
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i class="pi pi-arrow-up text-[#07BC51] text-[10px]"></i> 1.6%
+            <i :class="dashboardValues.for_payment_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i>{{dashboardValues.for_payment_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            С рассрочкой
+            К оплате
           </div>
         </div>
         <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
-          65%
+          {{dashboardValues.for_payment}}
         </div>
       </div>
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i class="pi pi-arrow-up text-[#07BC51] text-[10px]"></i>1.6%
+            <i :class="dashboardValues.avg_price_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.avg_price_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            Проведенные
+            Сред. цена за ед.
           </div>
         </div>
         <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
-          192
+          {{dashboardValues.avg_price}}
         </div>
       </div>
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i class="pi pi-arrow-up text-[#07BC51] text-[10px]"></i> 1.6%
+            <i :class="dashboardValues.order_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.order_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            Отказ
+            Заказ в пути
           </div>
         </div>
         <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
-          20
+          {{dashboardValues.order}}
         </div>
       </div>
     </div>
