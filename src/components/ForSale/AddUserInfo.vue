@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue'
+import {reactive} from 'vue'
 import Dialog from "primevue/dialog";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
@@ -8,6 +8,8 @@ import moment from "moment/moment.js";
 import Toast from 'primevue/toast'
 import {useToast} from "primevue/usetoast";
 import InputMask from 'primevue/inputmask';
+import {required} from "@vuelidate/validators";
+import {useVuelidate} from "@vuelidate/core";
 
 const emit = defineEmits(['close-modal', 'postSale'])
 const props = defineProps({
@@ -16,31 +18,54 @@ const props = defineProps({
     default: false
   }
 })
-const toast = useToast()
-const name = ref('');
-const lastName = ref('');
-const phone = ref('');
-const birthday = ref('');
-const address = ref('');
+const toast = useToast();
 
+const objectInfo = reactive({
+  name: '',
+  lastName: '',
+  phone: '',
+  birthday: '',
+  address: ''
+})
+const rules = reactive({
+  name: {required},
+  lastName: {required},
+  phone: {required},
+  birthday: {required},
+  address: {required},
+});
+const v$ = useVuelidate(rules, objectInfo);
 
 async function addUser() {
-  try {
-    const res = await useAxios(`discount`, {
-      method: 'POST',
-      data: {
-        "name": name.value,
-        "lastname": lastName.value,
-        "phone": phone.value,
-        "birthday": moment(birthday.value).format('YYYY-MM-DD HH:mm:ss'),
-        "address": address.value,
-      }
-    })
-    toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
-    emit('close-modal')
-  } catch (e) {
-    toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+  const result = await v$.value.$validate();
+  if (result) {
+    try {
+      const res = await useAxios(`discount`, {
+        method: 'POST',
+        data: {
+          "name": objectInfo.name,
+          "lastname": objectInfo.lastName,
+          "phone": objectInfo.phone,
+          "birthday": moment(objectInfo.birthday).format('YYYY-MM-DD HH:mm:ss'),
+          "address": objectInfo.address,
+        }
+      })
+      toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
+      emit('close-modal')
+    } catch (e) {
+      toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+    } finally {
+      resetObjectInfo();
+    }
   }
+}
+
+function resetObjectInfo() {
+  objectInfo.name = '';
+  objectInfo.lastName = '';
+  objectInfo.phone = '';
+  objectInfo.birthday = '';
+  objectInfo.address = '';
 }
 </script>
 
@@ -62,19 +87,21 @@ async function addUser() {
       </div>
     </template>
     <div class="grid add-user-info-modal grid-cols-12 gap-[16px] mt-[6px]">
-      <fin-input v-model="name" class="col-span-4" placeholder="Имя"/>
-      <fin-input v-model="lastName" class="col-span-4" placeholder="Фамилия"/>
+      <fin-input :error="v$.name.$error" v-model="objectInfo.name" class="col-span-4" placeholder="Имя"/>
+      <fin-input :error="v$.lastName.$error" v-model="objectInfo.lastName" class="col-span-4" placeholder="Фамилия"/>
       <FloatLabel class="col-span-4">
-        <InputMask id="ssn" class="w-full" v-model="phone" mask="+99999-999-9999" placeholder="Телефон" />
-        <label for="ssn">SSN</label>
+        <InputMask :class="{ 'p-invalid': v$.phone.$error }" id="ssn" class="w-full" v-model="objectInfo.phone"
+                   mask="+99999-999-9999" placeholder="Телефон"/>
+        <label for="ssn">Телефон</label>
       </FloatLabel>
-      <fin-input v-model="address" class="col-span-6" placeholder="Адрес"/>
+      <fin-input :error="v$.address.$error" v-model="objectInfo.address" class="col-span-6" placeholder="Адрес"/>
 
       <FloatLabel class="col-span-6">
         <DatePicker
             showIcon
-            v-model="birthday"
+            v-model="objectInfo.birthday"
             hourFormat="24"
+            :class="{ 'p-invalid': v$.birthday.$error }"
             dateFormat="dd.mm.yy"
             fluid
             hideOnDateTimeSelect
@@ -100,12 +127,15 @@ async function addUser() {
 </style>
 <style lang="scss">
 .add-user-info-modal {
+  .p-invalid {
+    border: 1px solid #f2376f !important;
+  }
+
   .p-datepicker {
-    border: none !important;
-    border-radius: 14px !important;
+    border: #e2e8f0;
+    border-radius: 10px !important;
     display: flex !important;
     align-items: center !important;
-
 
     &-input-icon-container {
       top: 18px !important;

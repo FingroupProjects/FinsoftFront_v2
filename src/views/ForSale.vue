@@ -89,7 +89,7 @@ function getFastProducts(products) {
   }, 0)
 }
 
-function getFilterGoods(products){
+function getFilterGoods(products) {
   products.forEach(product => {
     listPostGoods.value.push(product);
   });
@@ -99,6 +99,7 @@ function getFilterGoods(products){
     return total + (el?.price || 0);
   }, 0)
 }
+
 function addCountFn(count) {
   count++
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
@@ -116,13 +117,22 @@ function openManual() {
   openManualModal.value = true
 }
 
+function closeDiscount() {
+  openDiscount.value = false
+  activeDiscount.value = false
+}
+
+function closeManual() {
+  openManualModal.value = false
+  activeManual.value = false
+}
+
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
 
     listGoods.value.hide();
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
-      console.log(total)
       return total + (el?.price || 0);
     }, 0)
   }
@@ -178,7 +188,7 @@ watchEffect(() => {
           </div>
         </div>
         <hr class="mt-[24px]">
-        <div class="mt-[30px] overflow-y-scroll h-[750px]">
+        <div class="mt-[30px] overflow-style-for-sale overflow-y-scroll h-[750px]">
           <div class="text-[20px] leading-[20px] text-[#141C30] font-semibold">
             Товары ({{ listPostGoods.length }})
           </div>
@@ -295,10 +305,10 @@ watchEffect(() => {
   <DepositMoney :sale-sum="payCount - userInfo?.sum || payCount" :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
-                @close-modal="openDiscount=false"/>
-  <FilterFastGoods @postProducts="getFilterGoods" :open-fast-goods="openImgModal" @close-modal="openImgModal=false"/>
+                @close-modal="closeDiscount"/>
+  <FilterFastGoods @postProducts="getFilterGoods" :open-fast-goods="openImgModal" @close-modal="openImgModal = false"/>
   <ManualDiscount @postSale="postSaleFn" :open-deposit-money="openManualModal"
-                  @close-modal="openManualModal=false"/>
+                  @close-modal="closeManual"/>
   <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
 
 </template>
@@ -312,6 +322,27 @@ watchEffect(() => {
 {
   opacity: 0;
 }
+
+  .overflow-style-for-sale::-webkit-scrollbar {
+    width: 4px !important;
+    height: 3px !important;
+  }
+
+  .overflow-style-for-sale::-webkit-scrollbar-track {
+    background-color: #f1f1f1 !important;
+    height: 3px !important;
+  }
+
+  .overflow-style-for-sale::-webkit-scrollbar-thumb {
+    background-color: #3935E7 !important;
+    border-radius: 6px !important;
+    height: 3px !important;
+  }
+
+  .overflow-style-for-sale::-webkit-scrollbar-thumb:hover {
+    background-color: #3935E7;
+    height: 3px !important;
+  }
 
 .filter-goods {
   .p-inputtext {
