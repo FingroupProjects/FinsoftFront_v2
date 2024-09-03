@@ -10,8 +10,10 @@ export const useStaticApi = () => {
   const loadingOrganization = ref(false);
   const counterparty = ref([]);
   const statusList = ref([]);
+  const providerOrderStatusList = ref([]);
   const loadingCounterparty = ref(false);
   const loadStatus = ref(false);
+  const providerOrderLoadStatus = ref(false);
   const cashRegisterList = ref([]);
   const loadingCash = ref(false);
   const loadingBill = ref(false);
@@ -26,6 +28,7 @@ export const useStaticApi = () => {
   const priceTypes = ref([]);
   const loadingOperationPko = ref(false)
   const loadPriceType = ref(false)
+  const loadProviderStatus = ref(false)
 
   const findStorage = async () => {
     try {
@@ -100,6 +103,23 @@ export const useStaticApi = () => {
     } finally {
 
       loadStatus.value = false;
+    }
+  };
+  const findOrderProviderStatus = async () => {
+    try {
+      providerOrderLoadStatus.value = true;
+      const res = await useAxios(`/document/provider/order/statuses`);
+
+      return (providerOrderStatusList.value = res.result.map((el) => {
+        return {
+          name: el.name,
+          code: el.id
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadProviderStatus.value = false;
     }
   };
   const findCounterparty = async () => {
@@ -273,6 +293,9 @@ export const useStaticApi = () => {
     loadStatus,
     findPriceType,
     loadPriceType,
-    priceTypes
+    priceTypes,
+    providerOrderStatusList,
+    findOrderProviderStatus,
+    loadProviderStatus
   };
 };

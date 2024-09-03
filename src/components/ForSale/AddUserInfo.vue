@@ -51,11 +51,14 @@ async function addUser() {
         }
       })
       toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
-      emit('close-modal')
+      emit('close-modal');
     } catch (e) {
       toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+
     } finally {
       resetObjectInfo();
+      const validationAfterReset = v$.value.$validate();
+      !validationAfterReset
     }
   }
 }

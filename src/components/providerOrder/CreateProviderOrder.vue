@@ -30,6 +30,9 @@ const {
   counterparty,
   loadingCounterparty,
   loadingOrganization,
+  providerOrderStatusList,
+  loadProviderStatus,
+  findOrderProviderStatus
 } = useStaticApi();
 
 const agreementList = ref([]);
@@ -42,6 +45,7 @@ const isModal = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
+  selectStatus: "",
   selectedStorage: "",
   selectedAgreement: "",
   comments: "",
@@ -55,6 +59,7 @@ const rules = reactive({
   selectedOrganization: {required},
   selectedCounterparty: {required},
   selectedAgreement: {required},
+  selectStatus: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -182,7 +187,7 @@ watch(createValues, (newValue) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание закупки</div>
+        <div class="header-title">Создание заказа</div>
 
       </div>
       <div class="flex gap-[16px]">
@@ -284,6 +289,22 @@ watch(createValues, (newValue) => {
           </template>
         </Dropdown>
         <label for="dd-city">Валюта</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
+        <Dropdown
+            v-model="createValues.selectStatus"
+            :class="{ 'p-invalid': v$.selectStatus.$error }"
+            @click=""
+            :loading="loadProviderStatus"
+            :options="providerOrderStatusList"
+            optionLabel="name"
+            class="w-full"
+        >
+          <template #value>
+            {{ createValues.selectStatus?.name }}
+          </template>
+        </Dropdown>
+        <label for="dd-city">Статус</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">
         <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>

@@ -19,7 +19,8 @@ import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
 import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Loader from "@/components/ui/Loader.vue";
-import { reactive } from "vue";
+import {reactive} from "vue";
+
 const {
   findStorage,
   storage,
@@ -178,13 +179,18 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
+
 watch(selectedStorage, () => {
-  getProducts();
+  if (selectedStorage.value) {
+    getProducts();
+  }
 });
 watch(selectedCounterparty, () => {
-  getProducts();
+  if (selectedStorage.value) {
+    getProducts();
+  }
 });
-onMounted(()=>{
+onMounted(() => {
   getProducts()
 })
 </script>
@@ -458,7 +464,8 @@ onMounted(()=>{
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo" :openModalClose="openInfoModal"/>
+      <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo"
+                     :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
@@ -469,7 +476,7 @@ onMounted(()=>{
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" />
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
 

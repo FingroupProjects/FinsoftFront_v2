@@ -16,6 +16,7 @@ import Dialog from "primevue/dialog";
 import ProviderOrderTable from "@/components/providerOrder/ProviderOrderTable.vue";
 import {useProviderOrder} from "@/store/providerOrder.js";
 import {usePurchaseStore} from "@/store/pruchase.js";
+import Dropdown from "primevue/dropdown";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -44,6 +45,7 @@ const initialValue = ref(null);
 const loaderSave = ref(false);
 
 const viewDocument = ref({
+  statusName: '',
   organizationName: '',
   author: '',
   counterpartyName: '',
@@ -65,7 +67,10 @@ const {
   findOrganization,
   organization,
   findCounterparty,
-  counterparty
+  counterparty,
+  findOrderProviderStatus,
+  providerOrderStatusList,
+  loadProviderStatus
 } = useStaticApi()
 
 const userName = {
@@ -389,6 +394,21 @@ async function saveFnDialog() {
             </template>
           </Select>
           <label for="dd-city">Валюта</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Dropdown
+              v-model="viewDocument.statusName"
+              @click="findOrderProviderStatus"
+              :loading="loadProviderStatus"
+              :options="providerOrderStatusList"
+              optionLabel="name"
+              class="w-full"
+          >
+            <template #value>
+              {{ viewDocument.selectStatus?.name }}
+            </template>
+          </Dropdown>
+          <label for="dd-city">Статус</label>
         </FloatLabel>
         <FloatLabel class="col-span-12 mt-[10px]">
           <Textarea class="w-full" v-model="viewDocument.comment" style="min-height: 20px" rows="2" cols="20"/>
