@@ -61,7 +61,7 @@ async function cardFn() {
 
 function postFn() {
   if (infoUser.value) {
-    emit('postInfoUser', infoUser)
+    emit('postInfoUser', infoUser.value)
   }
 }
 

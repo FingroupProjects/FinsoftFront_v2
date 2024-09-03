@@ -141,7 +141,7 @@ const checkedCount = computed(() => {
           <fin-button @click="closeDialog" icon="pi pi-times" class="p-button-2xl" severity="warning"
                       label="Отменить"/>
           <div class="font-semibold text-[26px] leading-[26px] text-[#141C30]">
-            Фильтр товары: {{ checkedCount }}
+            Поиск по фото: {{ checkedCount }}
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="success"
