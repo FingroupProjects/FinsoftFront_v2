@@ -39,15 +39,7 @@ export default [
                     }
                 ]
             },
-            {
-                title: 'Справочники',
-                data: [
-                    {
-                        label: 'РМК',
-                        route: '/for-sale'
-                    }
-                ]
-            }
+
         ]
     },
     {
@@ -68,7 +60,11 @@ export default [
                     {
                         label: 'Заказ клиентов',
                         route: '/clientOrder'
-                    }
+                    },
+                    {
+                        label: 'РМК',
+                        route: '/for-sale'
+                    },
                 ]
             }
         ]

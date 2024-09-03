@@ -90,7 +90,7 @@ export const useStaticApi = () => {
   const findStatus = async () => {
     try {
       loadStatus.value = true;
-      const res = await useAxios(`/document/client/order/statuses`);
+      const res = await useAxios(`/document/client/order/statuses/1`);
 
       return (statusList.value = res.result.map((el) => {
         return {
@@ -108,7 +108,7 @@ export const useStaticApi = () => {
   const findOrderProviderStatus = async () => {
     try {
       providerOrderLoadStatus.value = true;
-      const res = await useAxios(`/document/provider/order/statuses`);
+      const res = await useAxios(`/document/client/order/statuses/2`);
 
       return (providerOrderStatusList.value = res.result.map((el) => {
         return {

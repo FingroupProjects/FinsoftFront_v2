@@ -14,7 +14,7 @@ const dashboardValues = reactive({
   for_payment: '',
   for_payment_percent: '',
   avg_price: '',
-  avg_price_percent: '',
+  avg_percent: '',
   order: '',
   order_percent: ''
 })
@@ -24,16 +24,16 @@ async function getDashBoardData()
   try {
     const res = await useAxios(`/document/dashboard`);
 
-    dashboardValues.purchase = res.purchase;
-    dashboardValues.purchase_percent = res.purchase_percent;
-    dashboardValues.return = res.return
-    dashboardValues.return_percent = res.return_percent
-    dashboardValues.for_payment = res.for_payment
-    dashboardValues.for_payment_percent = res.for_payment_percent
-    dashboardValues.avg_price = res.avg_price
-    dashboardValues.avg_price_percent = res.avg_price_percent
-    dashboardValues.order = res.order
-    dashboardValues.order_percent = res.order_percent
+    dashboardValues.purchase = res.result.purchase;
+    dashboardValues.purchase_percent = res.result.purchase_percent;
+    dashboardValues.return = res.result.return
+    dashboardValues.return_percent = res.result.return_percent
+    dashboardValues.for_payment = res.result.for_payment
+    dashboardValues.for_payment_percent = res.result.for_payment_percent
+    dashboardValues.avg_price = res.result.avg_price
+    dashboardValues.avg_percent = res.result.avg_percent
+    dashboardValues.order = res.result.order
+    dashboardValues.order_percent = res.result.order_percent
   } catch (e) {
     console.log(e)
   }
@@ -94,7 +94,7 @@ onMounted(function () {
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i :class="dashboardValues.avg_price_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.avg_price_percent}}%
+            <i :class="dashboardValues.avg_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.avg_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
             Сред. цена за ед.

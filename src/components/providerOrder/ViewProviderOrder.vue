@@ -114,7 +114,8 @@ const getView = async () => {
     postDate: item.date,
     currencyName: item.currency,
     doc_number: item.doc_number,
-    comment: item.comment
+    comment: item.comment,
+    statusName: item.orderStatus
   };
 };
 
@@ -135,7 +136,8 @@ const updateView = async () => {
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comment,
-        goods: store.postGoods
+        goods: store.postGoods,
+        order_status_id: viewDocument.value.statusName?.id || viewDocument.value.statusName?.code
       };
       const res = await useAxios(`/document/provider/update-order/${props.productId}`, {
         method: 'PATCH',

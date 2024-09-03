@@ -104,6 +104,7 @@ async function saveFn() {
           currency_id: createValues.selectCurrency.code,
           comment: createValues.comments,
           goods: productsInfo.value,
+          order_status_id: createValues.selectStatus.code
         },
       });
       toast.add({
@@ -294,7 +295,7 @@ watch(createValues, (newValue) => {
         <Dropdown
             v-model="createValues.selectStatus"
             :class="{ 'p-invalid': v$.selectStatus.$error }"
-            @click=""
+            @click="findOrderProviderStatus"
             :loading="loadProviderStatus"
             :options="providerOrderStatusList"
             optionLabel="name"
