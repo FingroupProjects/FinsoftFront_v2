@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -90,15 +90,6 @@ const onRowClick = (event) => {
   selectedProductId.value = product.id
 };
 
-
-const handleFiltersUpdate = (filters) => {
-  getProducts(filters);
-  selectedStorage.value = null;
-  selectedCounterparty.value = null;
-  Object.assign(savedFilterValues, filters);
-  visibleFilter.value = false
-}
-
 async function getProducts(filters = {}) {
   const params = {
     itemsPerPage: selectPage.value.count,
@@ -113,7 +104,6 @@ async function getProducts(filters = {}) {
   };
   try {
     const res = await useAxios(`/document/provider/purchase`, {params});
-
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
@@ -124,9 +114,17 @@ async function getProducts(filters = {}) {
   }
 }
 
+const handleFiltersUpdate = (filters) => {
+  getProducts(filters);
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+}
+
 function getProductMethods() {
   selectedProduct.value = null
-  getProducts()
+
 }
 
 const getSeverity = (status, deleted) => {
@@ -181,14 +179,15 @@ async function closeFnVl() {
 }
 
 
-watch(selectedStorage, () => {
-  getProducts();
-});
-watch(selectedCounterparty, () => {
-  getProducts();
-});
-
-getProducts();
+// watch(selectedStorage, () => {
+//   getProducts();
+// });
+// watch(selectedCounterparty, () => {
+//   getProducts();
+// });
+onMounted(()=>{
+  getProducts()
+})
 </script>
 
 <template>
@@ -299,7 +298,6 @@ getProducts();
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('counterparty.name',index)">
               Поставщик <i
-
                 :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],

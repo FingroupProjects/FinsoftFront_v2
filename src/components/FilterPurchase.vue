@@ -2,12 +2,12 @@
 import DatePicker from "primevue/datepicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
-import { onMounted, reactive, ref, watch, defineEmits  } from "vue";
-import { useStaticApi } from "@/composable/useStaticApi.js";
+import { onMounted, reactive, ref, watch, defineEmits, defineProps  } from "vue";
 import { useAxios } from "@/composable/useAxios.js";
 
 const userNames = ref([]);
-const currency = ref([])
+const currency = ref([]);
+const organization = ref([]);
 const deleted = ref([
   { label: 'Да', value: 1},
   { label: 'Нет', value: 0 },
@@ -28,10 +28,6 @@ const filterValues = reactive({
   author_id: '',
   deleted: '',
   active: ''
-});
-onMounted(() => {
-  console.log(filterValues)
-  Object.assign(filterValues, props.savedFilters);
 });
 
 
@@ -77,16 +73,14 @@ watch(rawDateSecond, (newValue) => {
 });
 
 const emit = defineEmits(['updateFilters']);
-const datas = () => {
-  emit('updateFilters', filterValues);
-};
+const props = defineProps(['savedFilters']);
 const applyFilters = () => {
   emit('updateFilters', filterValues);
 };
 
 const clearFilters = () => {
   Object.keys(filterValues).forEach(key => filterValues[key] = '');
-  emit('updateFilters', filterValues); // Обновляем сохраненные фильтры
+  emit('updateFilters', filterValues);
 };
 const getUsers = async () => {
   try {
@@ -105,26 +99,32 @@ const getCurrency = async () =>{
       id: user.id,
       name: user.name,
     }));
-    console.log('log', currency.value)
   }catch (e){
   }
 }
-const clear = () => {
-  Object.keys(filterValues).forEach(key => filterValues[key] = '');
-  rawDateFirst.value = '';
-  rawDateSecond.value = '';
-  datas()
-};
 
-const {
-  findOrganization,
-  organization,
-} = useStaticApi();
-
+const getOrganization = async () =>{
+  try {
+    const res = await useAxios(`/organization`)
+    const items = res.result.data;
+    organization.value = items.map(user => ({
+      id: user.id,
+      name: user.name,
+    }));
+  }catch (e){
+  }
+}
 
 onMounted(() => {
   getUsers();
   getCurrency();
+  getOrganization();
+  console.log('logg',filterValues)
+  Object.assign(filterValues, props.savedFilters);
+  if (props.savedFilters.startDate)
+    rawDateFirst.value = new Date(props.savedFilters.startDate);
+  if (props.savedFilters.endDate)
+    rawDateSecond.value = new Date(props.savedFilters.endDate);
 });
 </script>
 
@@ -139,6 +139,7 @@ onMounted(() => {
           hourFormat="24"
           dateFormat="dd.mm.yy,"
           fluid
+          hideOnDateTimeSelect
           iconDisplay="input"
           class="w-[466px]"
       />
@@ -152,6 +153,7 @@ onMounted(() => {
           hourFormat="24"
           dateFormat="dd.mm.yy"
           fluid
+          hideOnDateTimeSelect
           iconDisplay="input"
           class="w-[466px]"
       />
@@ -162,8 +164,7 @@ onMounted(() => {
         placeholder="Организация"
         :options="organization"
         option-label="name"
-        @click="findOrganization"
-        option-value="code"
+        option-value="id"
     />
     <div class="flex mt-[22px] gap-4">
       <Dropdown class="w-[225px] font-semibold" placeholder="Статус"
