@@ -17,6 +17,7 @@ import Dialog from "primevue/dialog";
 import ProviderReturnTable from "@/components/providerReturn/ProviderReturnTable.vue";
 import {useProviderOrder} from "@/store/providerOrder.js";
 import {useProviderReturn} from "@/store/providerReturn.js";
+import DocumentPrint from "@/components/DocumentPrint.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -44,6 +45,7 @@ const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
 const loaderSave = ref(false)
+const printName = ref('Возврат поставщику')
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -152,7 +154,7 @@ const updateView = async () => {
 
 const approve = async () => {
   try {
-    //await updateView()
+    await updateView()
     const res = await useAxios(`/document/provider/return/approve`, {
       method: 'POST',
       data: {
@@ -186,7 +188,7 @@ const unApprove = async () => {
   }
 }
 const openDocumentPrint = (productId) => {
-  const url = `/documents/${productId}`;
+  const url = `/return/${productId}`;
   window.open(url, '_blank');
 };
 
