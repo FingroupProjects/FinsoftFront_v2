@@ -6,6 +6,8 @@ import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {Swiper, SwiperSlide} from "swiper/vue";
 import 'swiper/css';
+import ComplexPayment from "@/components/ForSale/ComplexPayment.vue";
+import ComplexPaymentInputs from "@/components/ForSale/ComplexPaymentInputs.vue";
 
 const emit = defineEmits(['close-modal', 'postProducts'])
 const props = defineProps({
@@ -14,6 +16,10 @@ const props = defineProps({
     default: false
   },
   saleSum: {
+    type: Number,
+    default: 0
+  },
+  disCount: {
     type: Number,
     default: 0
   }
@@ -26,6 +32,9 @@ const cardPay = ref(0);
 const walletChangeAll = ref(0);
 const selectPayMethods = ref(0);
 const postProducts = ref([]);
+const bonusValue = ref(0);
+const certificationValue = ref(0);
+
 const filterList = ref([
   {
     name: 'Наличные',
@@ -57,7 +66,9 @@ function calculateFn(numbers) {
       return change.value = cardPay.value - props.saleSum
     } else change.value = 0
   }
-  walletChangeAll.value = walletNumbers.value + cardPay.value
+
+
+  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value+bonusValue.value
 }
 
 function togglePay(index) {
@@ -79,6 +90,23 @@ async function cardFn() {
 }
 
 cardFn()
+
+function getBonusCard(value) {
+  bonusValue.value = Number(value)
+  if (bonusValue.value > props.saleSum) {
+    return change.value = bonusValue.value - props.saleSum
+  } else change.value = 0
+  walletChangeAll.value = walletNumbers.value + cardPay.value +bonusValue.value+ certificationValue.value
+}
+
+function certificationFn(value) {
+  certificationValue.value = Number(value)
+  if (certificationValue.value > props.saleSum) {
+    return change.value = certificationValue.value - props.saleSum
+  } else change.value = 0
+  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value+ bonusValue.value
+}
+
 watch(walletChangeAll, (newValue) => {
   if (newValue > props.saleSum) {
     change.value = walletChangeAll.value -= props.saleSum
@@ -88,7 +116,8 @@ watch(walletChangeAll, (newValue) => {
 
 <template>
   <Dialog :draggable="false" class="fast-goods-header transition-all" v-model:visible="props.openDepositMoney" modal
-          :style="{ width: '940px',   height:selectFilter === 0 ? '620px' : '720px'}" scroll :closable="false"
+          :style="{ width: '940px', height: selectFilter === 0 ? '620px' : selectFilter === 1 ? '720px' : '760px' }"
+          scroll :closable="false"
           :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
     <template #header>
       <div class="flex justify-between items-center w-full ">
@@ -139,7 +168,10 @@ watch(walletChangeAll, (newValue) => {
           </swiper-slide>
         </swiper>
       </div>
-      <Calculate @numbers-wallet="calculateFn" class="col-span-6" :class="{'mt-[26px]' : selectFilter === 0 }"/>
+      <ComplexPaymentInputs @post-certification="certificationFn" @post-bonus-card="getBonusCard"
+                            :dis-count="props.disCount" v-if="selectFilter===2" class="col-span-12 mt-[26px]"/>
+      <ComplexPayment v-if="selectFilter===2" class="col-span-6"/>
+      <Calculate v-else @numbers-wallet="calculateFn" class="col-span-6" :class="{'mt-[26px]' : selectFilter === 0 }"/>
       <div class="col-span-6" :class="{'mt-[26px]' : selectFilter === 0 }">
         <div class=" mt-[5px] flex flex-col gap-[16px]">
           <div class="flex justify-between items-center border-b border-dashed border-t pt-[16px] pb-[16px]">
@@ -159,6 +191,19 @@ watch(walletChangeAll, (newValue) => {
                 class="text-[16px]">сум</span>
             </div>
           </div>
+          <div class="flex justify-between" v-if="bonusValue">
+            <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Бонусы дисконтной карты</div>
+            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(bonusValue) }} <span
+                class="text-[16px]">сум</span>
+            </div>
+          </div>
+          <div class="flex justify-between" v-if="certificationValue">
+            <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Подарочный сертификат</div>
+            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(certificationValue) }}
+              <span
+                  class="text-[16px]">сум</span>
+            </div>
+          </div>
           <div class="flex justify-between items-center border-dashed border-t py-[24px] ">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Сдача</div>
             <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(change) }} <span
@@ -166,7 +211,6 @@ watch(walletChangeAll, (newValue) => {
           </div>
         </div>
       </div>
-
     </div>
   </Dialog>
 </template>
