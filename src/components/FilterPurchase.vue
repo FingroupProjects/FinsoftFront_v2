@@ -72,15 +72,16 @@ watch(rawDateSecond, (newValue) => {
   }
 });
 
-const emit = defineEmits(['updateFilters']);
+const emit = defineEmits(['updateFilters', 'clearFilter']);
 const props = defineProps(['savedFilters']);
 const applyFilters = () => {
   emit('updateFilters', filterValues);
 };
 
+
 const clearFilters = () => {
   Object.keys(filterValues).forEach(key => filterValues[key] = '');
-  emit('updateFilters', filterValues);
+  emit('clearFilter', filterValues);
 };
 const getUsers = async () => {
   try {

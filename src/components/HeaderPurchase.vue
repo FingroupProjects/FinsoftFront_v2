@@ -22,7 +22,7 @@ const dashboardValues = reactive({
 async function getDashBoardData()
 {
   try {
-    const res = await useAxios(`/document/dashboard`);
+    const res = await useAxios('/document/dashboard');
 
     dashboardValues.purchase = res.result.purchase;
     dashboardValues.purchase_percent = res.result.purchase_percent;
@@ -42,7 +42,6 @@ async function getDashBoardData()
 onMounted(function () {
   getDashBoardData()
 })
-
 
 </script>
 

@@ -55,7 +55,9 @@ const savedFilterValues = reactive({
   deleted: '',
   active: ''
 });
+
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
 
 const pageCounts = ref([
   {
@@ -74,11 +76,15 @@ const pageCounts = ref([
     count: 20,
   },
 ]);
+
+
 const openUp = ref(Array(products.value?.length).fill(false));
+
 const pagination = ref({
   perPage: 0,
   totalPages: 0,
 });
+
 const selectPage = ref({
   count: 20,
 });
@@ -117,15 +123,22 @@ async function getProducts(filters = {}) {
 
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+}
+const clearFilter  = (filters) => {
+
   selectedStorage.value = null;
   selectedCounterparty.value = null;
   Object.assign(savedFilterValues, filters);
   visibleFilter.value = false;
+  getProducts()
 }
+
 
 function getProductMethods() {
   selectedProduct.value = null
-
+  getProducts()
 }
 
 const getSeverity = (status, deleted) => {
@@ -186,6 +199,7 @@ watch(selectedStorage, () => {
   }
 });
 watch(selectedCounterparty, () => {
+
   if (selectedStorage.value) {
     getProducts();
   }
@@ -476,7 +490,7 @@ onMounted(() => {
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 
