@@ -112,6 +112,11 @@ const routes = [
                 component: () => import('@/views/Currency.vue'),
             },
             {
+                path: '/storage',
+                name: 'storage',
+                component: () => import('@/views/Storage.vue'),
+            },
+            {
                 path: '/warehouses',
                 name: 'warehouses',
                 component: () => import('@/views/Goods.vue'),
