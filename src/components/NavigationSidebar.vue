@@ -102,7 +102,7 @@ function sidebarClose() {
 
 @keyframes left-sidebar {
   0% {
-    transform: translateX(60px);
+    transform: translateX(-60px);
   }
   100% {
     transform: translateX(0px);
