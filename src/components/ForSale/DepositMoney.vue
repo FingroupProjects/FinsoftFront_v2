@@ -1,6 +1,6 @@
 <script setup>
 import Dialog from "primevue/dialog";
-import {ref, watch} from "vue";
+import {ref, watch,computed} from "vue";
 import Calculate from "@/components/ForSale/Calculate.vue";
 import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -8,6 +8,7 @@ import {Swiper, SwiperSlide} from "swiper/vue";
 import 'swiper/css';
 import ComplexPayment from "@/components/ForSale/ComplexPayment.vue";
 import ComplexPaymentInputs from "@/components/ForSale/ComplexPaymentInputs.vue";
+import Toast from 'primevue/toast'
 
 const emit = defineEmits(['close-modal', 'postProducts'])
 const props = defineProps({
@@ -34,6 +35,7 @@ const selectPayMethods = ref(0);
 const postProducts = ref([]);
 const bonusValue = ref(0);
 const certificationValue = ref(0);
+const allSum = ref(null);
 
 const filterList = ref([
   {
@@ -67,8 +69,7 @@ function calculateFn(numbers) {
     } else change.value = 0
   }
 
-
-  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value+bonusValue.value
+  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
 }
 
 function togglePay(index) {
@@ -96,7 +97,8 @@ function getBonusCard(value) {
   if (bonusValue.value > props.saleSum) {
     return change.value = bonusValue.value - props.saleSum
   } else change.value = 0
-  walletChangeAll.value = walletNumbers.value + cardPay.value +bonusValue.value+ certificationValue.value
+  walletChangeAll.value = walletNumbers.value + cardPay.value + bonusValue.value + certificationValue.value
+
 }
 
 function certificationFn(value) {
@@ -104,8 +106,12 @@ function certificationFn(value) {
   if (certificationValue.value > props.saleSum) {
     return change.value = certificationValue.value - props.saleSum
   } else change.value = 0
-  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value+ bonusValue.value
+  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
 }
+const adjustedSaleSum = computed(() => {
+  const totalPayments = walletNumbers.value + cardPay.value + bonusValue.value + certificationValue.value;
+  return props.saleSum - totalPayments < 0 ? 0 : props.saleSum - totalPayments;
+});
 
 watch(walletChangeAll, (newValue) => {
   if (newValue > props.saleSum) {
@@ -176,7 +182,7 @@ watch(walletChangeAll, (newValue) => {
         <div class=" mt-[5px] flex flex-col gap-[16px]">
           <div class="flex justify-between items-center border-b border-dashed border-t pt-[16px] pb-[16px]">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-            <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(props.saleSum) }} <span
+            <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(adjustedSaleSum) }}<span
                 class="text-[24px]">сум</span></div>
           </div>
           <div class="flex justify-between">
@@ -213,6 +219,7 @@ watch(walletChangeAll, (newValue) => {
       </div>
     </div>
   </Dialog>
+  <Toast/>
 </template>
 
 <style scoped lang="scss">
