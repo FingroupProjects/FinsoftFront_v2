@@ -5,9 +5,12 @@ import formatInputAmount from "@/constants/formatInput.js";
 import {useForSale} from "@/store/forSale.js";
 import {useAxios} from "@/composable/useAxios.js";
 import formatPrice from "@/constants/formatNumber.js";
-import {ref, watch, watchEffect} from 'vue'
+import {ref, watchEffect} from 'vue'
+
+import {useToast} from "primevue/usetoast";
 
 const store = useForSale();
+const toast = useToast()
 const emit = defineEmits(['postBonusCard', 'postCertification'])
 const props = defineProps({
   disCount: {
@@ -28,9 +31,11 @@ async function certificationFn() {
     activeCertification.value = false
     store.numberCertification = ''
     returnFnNumber.value = Number(res.result.sum);
-    allNumberFn.value = Number(res.result.sum)
+    allNumberFn.value = Number(res.result.sum);
+
   } catch (e) {
     console.log(e)
+    toast.add({severity: 'error', summary: 'Сертификата такого нет', life: 3000});
   }
 }
 
@@ -46,7 +51,6 @@ const validateInput = () => {
     store.bonusCard = ''
   }
 };
-
 
 function postFnBonusCard() {
   bonusCard.value = Number(props.disCount) - Number(store.bonusCard)
@@ -69,27 +73,26 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex gap-[26px] transition-all">
+  <div class="flex gap-[26px] transition-all ">
     <div class="bg-[#F2F2F2] p-[20px] rounded-[16px] w-full">
       <div class="text-[18px] leading-[18px] text-[#141C30] font-semibold">
         Подарочный сертификат
       </div>
-      <div class="flex gap-[16px] items-center complex-payment mt-[15px]">
+      <div class="flex gap-[16px] items-center justify-between complex-payment mt-[15px]">
         <div v-show="!activeCertification" class="text-[34px] leading-[34px] font-semibold text-[#141C30]">
-          {{ formatPrice(allNumberFn) }} <span
-            class="text-[24px] leading-[24px]">сум</span>
+          {{ formatPrice(allNumberFn) }} <span class="text-[24px] leading-[24px]">сум</span>
         </div>
-        <IconField class="w-full" :class="{'w-[40%] ml-[70px]' :!activeCertification}">
+        <IconField class="w-full" :class="{'w-[35%]' :!activeCertification}">
           <InputText
               class="w-full"
               v-model="store.numberCertification"
               :model-value="formatInputAmount(store.numberCertification)"
               @focus="store.activeInput = false"
-              :placeholder="activeCertification?'Номер сертификата' : 'Кол-во'"
+              :placeholder="activeCertification ? 'Номер сертификата' : 'Кол-во'"
               @keydown="handleKeydown"
           />
         </IconField>
-        <fin-button v-if="activeCertification" icon="pi pi-arrow-right" @click="certificationFn" class="h-[60px]"
+        <fin-button v-if="activeCertification" icon="pi pi-arrow-right" @click="certificationFn"
                     severity="success"/>
       </div>
       <fin-button @click="postFnCertification" v-show="!activeCertification"
@@ -101,14 +104,14 @@ watchEffect(() => {
       <div class="text-[18px] leading-[18px] text-[#141C30] font-semibold">
         Бонусы дисконтной карты
       </div>
-      <div class="flex gap-[26px] items-center">
+      <div class="flex gap-[26px] items-center justify-between complex-payment mt-[15px]">
         <div class="text-[34px] leading-[34px] font-semibold text-[#141C30]">
           {{ formatPrice(bonusCard) }} <span
             class="text-[24px] leading-[24px]">сум</span>
         </div>
-        <IconField class="w-[40%]  complex-payment ml-[60px]">
+        <IconField class="w-[35%]">
           <InputText
-              class="w-full mt-[15px]"
+              class="w-full"
               v-model="store.bonusCard"
               @focus="store.activeInput = true"
               :disabled="disCount === 0"
@@ -123,6 +126,7 @@ watchEffect(() => {
                   label="Списать" severity="success"/>
     </div>
   </div>
+
 </template>
 <style lang="scss">
 .btn-animation-payment {

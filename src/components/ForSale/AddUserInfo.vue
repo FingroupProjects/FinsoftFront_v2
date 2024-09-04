@@ -57,18 +57,17 @@ async function addUser() {
 
     } finally {
       resetObjectInfo();
-      const validationAfterReset = v$.value.$validate();
-      !validationAfterReset
     }
   }
 }
 
 function resetObjectInfo() {
-  objectInfo.name = '';
-  objectInfo.lastName = '';
-  objectInfo.phone = '';
-  objectInfo.birthday = '';
-  objectInfo.address = '';
+  objectInfo.name = null;
+  objectInfo.lastName =null;
+  objectInfo.phone = null;
+  objectInfo.birthday = null;
+  objectInfo.address = null;
+  v$.value.$reset();
 }
 </script>
 

@@ -49,7 +49,6 @@ const number = ref([
   },
 
 ]);
-const searchQuery = ref('');
 
 function updateSearchQuery(code) {
   if (store.activeInput) {

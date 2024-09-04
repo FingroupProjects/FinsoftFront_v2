@@ -290,9 +290,7 @@ watchEffect(() => {
       </div>
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{
-            formatPrice(payCount - saleSum || payCount)
-          }}
+        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(payCount)}}
           <span
               class="text-[24px]">сум</span></div>
       </div>
