@@ -24,17 +24,18 @@ const dashboardValues = reactive({
 
 async function getDashBoardData() {
   try {
-    const res = await useAxios(`/document/dashboard`);
-    animateCounter('purchase', res.result.purchase);
-    animateCounter('purchase_percent', res.result.purchase_percent);
-    animateCounter('return', res.result.return);
-    animateCounter('return_percent', res.result.return_percent);
-    animateCounter('for_payment', res.result.for_payment);
-    animateCounter('for_payment_percent', res.result.for_payment_percent);
-    animateCounter('avg_price', res.result.avg_price);
-    animateCounter('avg_percent', res.result.avg_percent);
-    animateCounter('order', res.result.order);
-    animateCounter('order_percent', res.result.order_percent);
+    const res = await useAxios('/document/dashboard');
+
+    dashboardValues.purchase = res.result.purchase;
+    dashboardValues.purchase_percent = res.result.purchase_percent;
+    dashboardValues.return = res.result.return
+    dashboardValues.return_percent = res.result.return_percent
+    dashboardValues.for_payment = res.result.for_payment
+    dashboardValues.for_payment_percent = res.result.for_payment_percent
+    dashboardValues.avg_price = res.result.avg_price
+    dashboardValues.avg_percent = res.result.avg_percent
+    dashboardValues.order = res.result.order
+    dashboardValues.order_percent = res.result.order_percent
   } catch (e) {
     console.log(e);
   }
@@ -45,6 +46,7 @@ function animateCounter(key, targetValue) {
   const interval = 3;
   const step = (targetValue / duration) * interval;
   let currentValue = 0;
+
 
   const update = () => {
     if (currentValue >= targetValue) {
@@ -72,6 +74,7 @@ watch(() => props.data, (newValue) => {
 onMounted(() => {
   getDashBoardData();
 });
+
 </script>
 
 
