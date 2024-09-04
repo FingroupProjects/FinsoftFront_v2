@@ -55,6 +55,7 @@ const savedFilterValues = reactive({
   deleted: '',
   active: ''
 });
+
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const pageCounts = ref([
@@ -103,11 +104,13 @@ async function getProducts(filters = {}) {
     ...filters,
     sort: sortDesc.value
   };
+
   try {
     const res = await useAxios(`/document/provider/purchase`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
+
   } catch (e) {
     console.log(e)
   } finally {
@@ -125,7 +128,8 @@ const handleFiltersUpdate = (filters) => {
 
 function getProductMethods() {
   selectedProduct.value = null
-
+  getProducts()
+  callGetDashBoardData()
 }
 
 const getSeverity = (status, deleted) => {
@@ -177,6 +181,7 @@ const sortData = (field, index) => {
 async function closeFnVl() {
   await getProducts();
   visibleRight.value = false
+  callGetDashBoardData()
 }
 
 
@@ -186,19 +191,31 @@ watch(selectedStorage, () => {
   }
 });
 watch(selectedCounterparty, () => {
-  if (selectedStorage.value) {
+  if (selectedCounterparty.value) {
     getProducts();
   }
 });
+
+const headerPurchaseRef = ref(null);
+
+function callGetDashBoardData() {
+  if (headerPurchaseRef.value && headerPurchaseRef.value.getDashBoardData) {
+    headerPurchaseRef.value.getDashBoardData();
+  } else {
+    console.error('getDashBoardData method is not defined or ref is not resolved');
+  }
+}
+
 onMounted(() => {
   getProducts()
 })
 </script>
 
 <template>
-  <header-purchase header-title="Покупка товаров"/>
+  <header-purchase ref="headerPurchaseRef" header-title="Покупка товаров"  />
   <Loader v-if="loader"/>
   <div v-else>
+
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
         <InputIcon class="pi pi-search"/>

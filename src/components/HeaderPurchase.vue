@@ -1,50 +1,79 @@
 <script setup>
-import {onMounted, reactive} from "vue";
-import {useAxios} from "@/composable/useAxios.js";
+import { onMounted, reactive, ref, watch } from 'vue';
+import { useAxios } from '@/composable/useAxios.js';
 
 const props = defineProps({
-  headerTitle:''
-})
+  headerTitle: '',
+  data: Number
+});
+
+const refreshedData = ref(props.data);
 
 const dashboardValues = reactive({
-  purchase: '',
-  purchase_percent: '',
-  return: '',
-  return_percent: '',
-  for_payment: '',
-  for_payment_percent: '',
-  avg_price: '',
-  avg_percent: '',
-  order: '',
-  order_percent: ''
-})
+  purchase: 0,
+  purchase_percent: 0,
+  return: 0,
+  return_percent: 0,
+  for_payment: 0,
+  for_payment_percent: 0,
+  avg_price: 0,
+  avg_percent: 0,
+  order: 0,
+  order_percent: 0
+});
 
-async function getDashBoardData()
-{
+async function getDashBoardData() {
   try {
     const res = await useAxios(`/document/dashboard`);
-
-    dashboardValues.purchase = res.result.purchase;
-    dashboardValues.purchase_percent = res.result.purchase_percent;
-    dashboardValues.return = res.result.return
-    dashboardValues.return_percent = res.result.return_percent
-    dashboardValues.for_payment = res.result.for_payment
-    dashboardValues.for_payment_percent = res.result.for_payment_percent
-    dashboardValues.avg_price = res.result.avg_price
-    dashboardValues.avg_percent = res.result.avg_percent
-    dashboardValues.order = res.result.order
-    dashboardValues.order_percent = res.result.order_percent
+    animateCounter('purchase', res.result.purchase);
+    animateCounter('purchase_percent', res.result.purchase_percent);
+    animateCounter('return', res.result.return);
+    animateCounter('return_percent', res.result.return_percent);
+    animateCounter('for_payment', res.result.for_payment);
+    animateCounter('for_payment_percent', res.result.for_payment_percent);
+    animateCounter('avg_price', res.result.avg_price);
+    animateCounter('avg_percent', res.result.avg_percent);
+    animateCounter('order', res.result.order);
+    animateCounter('order_percent', res.result.order_percent);
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 }
 
-onMounted(function () {
-  getDashBoardData()
-})
+function animateCounter(key, targetValue) {
+  const duration = 800;
+  const interval = 3;
+  const step = (targetValue / duration) * interval;
+  let currentValue = 0;
 
+  const update = () => {
+    if (currentValue >= targetValue) {
+      dashboardValues[key] = targetValue;
+    } else {
+      currentValue += step;
+      dashboardValues[key] = Math.round(currentValue);
+      setTimeout(update, interval);
+    }
+  };
 
+  update();
+}
+
+defineExpose({
+  getDashBoardData
+});
+
+watch(() => props.data, (newValue) => {
+  refreshedData.value = newValue;
+  console.log('Data refreshed:', refreshedData.value);
+  getDashBoardData();
+});
+
+onMounted(() => {
+  getDashBoardData();
+});
 </script>
+
 
 <template>
   <div class="relative z-20 bottom-[40px]">
@@ -74,20 +103,20 @@ onMounted(function () {
             Возврат
           </div>
         </div>
-        <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
+        <div class="text-[32px] font-medium leading-[32px] text-[#141C30] counter">
           {{dashboardValues.return}}
         </div>
       </div>
       <div class="card-header mt-4 mb-4 col-span-1">
         <div class="flex justify-between">
           <div class="font-semibold text-[13px] text-[#120F1F]">
-            <i :class="dashboardValues.for_payment_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i>{{dashboardValues.for_payment_percent}}%
+            <i :class="dashboardValues.for_payment_percent > 0 ? 'pi pi-arrow-up text-[#07BC51]' : 'pi pi-arrow-down text-[#EE2828]'" class="text-[10px]"></i> {{dashboardValues.for_payment_percent}}%
           </div>
           <div class="font-semibold text-[13px] text-[#120F1F]">
             К оплате
           </div>
         </div>
-        <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
+        <div class="text-[32px] font-medium leading-[32px] text-[#141C30] counter">
           {{dashboardValues.for_payment}}
         </div>
       </div>
@@ -100,7 +129,7 @@ onMounted(function () {
             Сред. цена за ед.
           </div>
         </div>
-        <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
+        <div class="text-[32px] font-medium leading-[32px] text-[#141C30] counter">
           {{dashboardValues.avg_price}}
         </div>
       </div>
@@ -113,12 +142,11 @@ onMounted(function () {
             Заказ в пути
           </div>
         </div>
-        <div class="text-[32px] font-medium leading-[32px] text-[#141C30]">
+        <div class="text-[32px] font-medium leading-[32px] text-[#141C30] counter">
           {{dashboardValues.order}}
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -130,4 +158,5 @@ onMounted(function () {
   padding: 16px;
   background: white;
 }
+
 </style>
