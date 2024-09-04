@@ -4,6 +4,7 @@ export default [
     {
         label: 'Дашборд',
         icon: 'pi pi-chart-pie',
+        route: '/'
     },
     {
         label: 'Закупка',

@@ -12,7 +12,7 @@ export async function useAxios(url, options = {}) {
         baseURL: import.meta.env.VITE_API_KEY,
         transformResponse: [function (data) {
             try {
-                console.log(`%c ${this.method?.toUpperCase()} ${url}`, `background: green`, JSON.parse(data || "{}"));
+                // console.log(`%c ${this.method?.toUpperCase()} ${url}`, `background: green`, JSON.parse(data || "{}"));
                 return JSON.parse(data || "{}");
             } catch (e) {
                 return data;
