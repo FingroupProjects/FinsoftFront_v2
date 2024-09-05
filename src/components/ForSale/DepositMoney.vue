@@ -10,8 +10,10 @@ import ComplexPayment from "@/components/ForSale/ComplexPayment.vue";
 import ComplexPaymentInputs from "@/components/ForSale/ComplexPaymentInputs.vue";
 import Toast from 'primevue/toast'
 import {useToast} from "primevue/usetoast";
+import {useRouter} from "vue-router";
 
-const emit = defineEmits(['close-modal', 'postProducts'])
+
+const emit = defineEmits(['close-modal', 'postProducts', 'closeEmpty'])
 const props = defineProps({
   openDepositMoney: {
     type: Boolean,
@@ -43,7 +45,7 @@ const props = defineProps({
   }
 });
 const toast = useToast();
-
+const router = useRouter()
 const modules = ref([])
 const selectFilter = ref(0);
 const walletNumbers = ref(0);
@@ -164,8 +166,8 @@ function payMethodsFn() {
       data: data
     })
     toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
-    emit('close-modal');
-
+    emit('closeEmpty');
+    router.go()
   } catch (e) {
     toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
   }

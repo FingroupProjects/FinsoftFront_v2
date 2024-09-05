@@ -45,7 +45,6 @@ async function postPhone(numbers) {
   }
 }
 
-
 async function cardFn() {
   try {
     const res = await useAxios(`/good-group`)
