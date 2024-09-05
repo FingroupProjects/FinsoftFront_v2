@@ -39,7 +39,7 @@ function sidebarClose() {
   </nav>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-[100px] h-screen pt-[6px]
+         class="fixed top-0 left-0 z-40 w-[100px] h-screen pt-[66px]
          sidebar-animation-two
          transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
