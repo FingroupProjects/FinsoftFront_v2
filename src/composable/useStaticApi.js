@@ -26,8 +26,14 @@ export const useStaticApi = () => {
   const loadingUser = ref(false);
   const operationPkoList = ref([]);
   const priceTypes = ref([]);
+  const positions = ref([]);
+  const departments = ref([]);
+  const schedules = ref([]);
   const loadingOperationPko = ref(false)
   const loadPriceType = ref(false)
+  const loadSchedule = ref(false)
+  const loadDepartment = ref(false)
+  const loadPositions = ref(false)
   const loadProviderStatus = ref(false)
 
   const findStorage = async () => {
@@ -257,6 +263,56 @@ export const useStaticApi = () => {
     }
   };
 
+  const findPosition = async () => {
+    try {
+      loadPositions.value = true;
+      const res = await useAxios(`/position`);
+      return (positions.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadPositions.value = false;
+    }
+  };
+  const findDepartment = async () => {
+    try {
+      loadDepartment.value = true;
+      const res = await useAxios(`/departent`);
+      return (departments.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadDepartment.value = false;
+    }
+  };
+
+  const findSchedule = async () => {
+    try {
+      loadSchedule.value = true;
+      const res = await useAxios(`/schedules`);
+      return (schedules.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadDepartment.value = false;
+    }
+  };
+
   return {
     storage,
     findCurrency,
@@ -296,6 +352,15 @@ export const useStaticApi = () => {
     priceTypes,
     providerOrderStatusList,
     findOrderProviderStatus,
-    loadProviderStatus
+    loadProviderStatus,
+    findPosition,
+    positions,
+    loadPositions,
+    departments,
+    loadDepartment,
+    findDepartment,
+    findSchedule,
+    loadSchedule,
+    schedules
   };
 };

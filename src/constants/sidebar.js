@@ -271,18 +271,25 @@ export default [
         icon: 'pi pi-user',
         items: [
             {
-                datas:[
+                title: 'Справочники',
+                data :[
                     {
                         label: 'Сотрудники',
-                        route: '/'
+                        route: '/employee'
                     },
                     {
                         label: 'Должности',
-                        route: '/'
+                        route: '/position'
                     },
+
+                ]
+            },
+            {
+                title: 'Документы',
+                data: [
                     {
                         label: 'Прием на работу',
-                        route: '/'
+                        route: '/hiring'
                     },
                     {
                         label: 'Кадровое перемещение',
