@@ -5,7 +5,7 @@ import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
 import FilterPurchase from "@/components/FilterPurchase.vue";
@@ -18,6 +18,7 @@ import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Dialog from "primevue/dialog";
 import CreateInventarization from "@/components/inventarization/CreateInventarization.vue";
+import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
 
 const {
   findStorage,
@@ -192,7 +193,7 @@ getProducts();
           placeholder="Поиск"
       />
     </IconField>
-    <Dropdown
+    <Select
         v-model="selectedStorage"
         optionLabel="name"
         placeholder="Склад"
@@ -201,7 +202,7 @@ getProducts();
         :options="storage"
         class="w-full col-span-2"
     />
-    <Dropdown
+    <Select
         v-model="selectedStatus"
         :options="statusList"
         optionLabel="name"
@@ -358,9 +359,9 @@ getProducts();
       </Column>
 
     </DataTable>
-    <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
+    <div class="paginator-Select bg-white sticky left-0 top-[100%]">
       <span class="paginator-text"> Элементов на странице: </span>
-      <Dropdown
+      <Select
           v-model="selectPage"
           @update:model-value="getProducts"
           :options="pageCounts"
@@ -369,7 +370,7 @@ getProducts();
         <template #option="slotProps">
           {{ slotProps.option.count }}
         </template>
-      </Dropdown>
+      </Select>
       <Paginator
           :rows="1"
           :totalRecords="Number(pagination.totalPages)"
@@ -409,7 +410,7 @@ getProducts();
 
 </template>
 <style lang="scss">
-.paginator-dropdown {
+.paginator-Select {
   display: flex;
   justify-content: end;
   align-items: center;
@@ -441,7 +442,7 @@ getProducts();
     text-align: left;
   }
 
-  .p-select-dropdown {
+  .p-select-Select {
     width: 10px;
     height: 5px;
     margin-right: 10px;

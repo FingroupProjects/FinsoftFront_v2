@@ -71,7 +71,7 @@ async function fetchOrders(event) {
 </script>
 
 <template>
-  <div class="grid grid-cols-12">
+  <div class="grid grid-cols-12 bg-white">
     <div class="col-span-6">
       <img src="@/assets/img/AuthImg.svg" alt="">
     </div>

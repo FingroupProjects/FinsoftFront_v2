@@ -2,22 +2,20 @@
 import DatePicker from "primevue/datepicker";
 import Dropdown from "primevue/dropdown";
 import FloatLabel from "primevue/floatlabel";
-import { onMounted, reactive, ref, watch, defineEmits, defineProps  } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
+import { useStaticApi } from "@/composable/useStaticApi.js";
 import { useAxios } from "@/composable/useAxios.js";
 
 const userNames = ref([]);
-const currency = ref([]);
-const organization = ref([]);
+const currency = ref([])
 const deleted = ref([
   { label: 'Да', value: 1},
   { label: 'Нет', value: 0 },
 ]);
-
 const status = ref([
   { label: 'Проведен', value: 1 },
   { label: 'Не проведен', value: 0 },
 ]);
-
 const rawDateFirst = ref(null);
 const rawDateSecond = ref(null);
 const filterValues = reactive({
@@ -29,7 +27,6 @@ const filterValues = reactive({
   deleted: '',
   active: ''
 });
-
 
 function formatDateTime(date) {
   const d = new Date(date);
@@ -72,17 +69,11 @@ watch(rawDateSecond, (newValue) => {
   }
 });
 
-const emit = defineEmits(['updateFilters', 'clearFilter']);
-const props = defineProps(['savedFilters']);
-const applyFilters = () => {
+const emit = defineEmits(['updateFilters']);
+const datas = () => {
   emit('updateFilters', filterValues);
 };
 
-
-const clearFilters = () => {
-  Object.keys(filterValues).forEach(key => filterValues[key] = '');
-  emit('clearFilter', filterValues);
-};
 const getUsers = async () => {
   try {
     const res = await useAxios('/user');
@@ -100,72 +91,41 @@ const getCurrency = async () =>{
       id: user.id,
       name: user.name,
     }));
+    console.log('log', currency.value)
   }catch (e){
   }
 }
+const clear = () => {
+  Object.keys(filterValues).forEach(key => filterValues[key] = '');
+  rawDateFirst.value = '';
+  rawDateSecond.value = '';
+  datas()
+};
 
-const getOrganization = async () =>{
-  try {
-    const res = await useAxios(`/organization`)
-    const items = res.result.data;
-    organization.value = items.map(user => ({
-      id: user.id,
-      name: user.name,
-    }));
-  }catch (e){
-  }
-}
+const {
+  findOrganization,
+  organization,
+} = useStaticApi();
+
 
 onMounted(() => {
   getUsers();
   getCurrency();
-  getOrganization();
-  console.log('logg',filterValues)
-  Object.assign(filterValues, props.savedFilters);
-  if (props.savedFilters.startDate)
-    rawDateFirst.value = new Date(props.savedFilters.startDate);
-  if (props.savedFilters.endDate)
-    rawDateSecond.value = new Date(props.savedFilters.endDate);
 });
 </script>
+
 
 <template>
   <div class="filters-purchase ml-5">
     <div class="text-black text-[20px] font-semibold ">Фильтры</div>
-    <FloatLabel class="mt-[14px] col-span-4">
-      <DatePicker
-          v-model="rawDateFirst"
-          showIcon
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy,"
-          fluid
-          hideOnDateTimeSelect
-          iconDisplay="input"
-          class="w-[466px]"
-      />
-      <label for="dd-city">От</label>
-    </FloatLabel>
-    <FloatLabel class="col-span-4 mt-[22px]">
-      <DatePicker
-          v-model="rawDateSecond"
-          showIcon
-          showTime
-          hourFormat="24"
-          dateFormat="dd.mm.yy"
-          fluid
-          hideOnDateTimeSelect
-          iconDisplay="input"
-          class="w-[466px]"
-      />
-      <label for="dd-city">До</label>
-    </FloatLabel>
+
     <Dropdown class="mt-[22px] w-[466px] font-semibold"
         v-model="filterValues.organization_id"
         placeholder="Организация"
         :options="organization"
         option-label="name"
-        option-value="id"
+        @click="findOrganization"
+        option-value="code"
     />
     <div class="flex mt-[22px] gap-4">
       <Dropdown class="w-[225px] font-semibold" placeholder="Статус"
@@ -182,12 +142,6 @@ onMounted(() => {
       />
     </div>
     <div class="flex mt-[22px] gap-4">
-      <Dropdown class="w-[225px] font-semibold" placeholder="Автор"
-                v-model="filterValues.author_id"
-                :options="userNames"
-                option-label="label"
-                option-value="value"
-      />
       <Dropdown class="w-[225px] font-semibold"
                 v-model="filterValues.currency_id"
                 placeholder="Валюта"
@@ -197,8 +151,8 @@ onMounted(() => {
       />
     </div>
     <div class="flex mt-[22px] gap-4">
-      <fin-button @click="applyFilters()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
-      <fin-button @click="clearFilters()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
+      <fin-button @click="datas()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
+      <fin-button @click="clear()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
     </div>
   </div>
 </template>

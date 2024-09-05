@@ -174,7 +174,7 @@ export default [
                 data:[
                     {
                         label:'Склады',
-                        route: '/'
+                        route: '/storage'
                     },
                     {
                         label:'Ед.Из',
