@@ -23,6 +23,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
+const actual_quantity = ref()
 
 const validateProduct = (product) => {
   return product.actual_quantity && product.accounting_quantity && product.difference;
@@ -59,6 +60,8 @@ const addFn = async () => {
 
     emit("postGoods", postProducts.value);
   }
+
+  console.log('props', products.value)
 
   clearInputValues();
 };
@@ -98,8 +101,6 @@ const onRowEditSave = (event) => {
 
   getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
 };
-
-
 
 onMounted(async () => {
   await getIdProducts();
