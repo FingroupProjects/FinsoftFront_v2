@@ -50,7 +50,8 @@ const createValues = reactive({
   salary: "",
   schedule: "",
   basis: "",
-  hiring_date: new Date
+  hiring_date: new Date,
+  organization: ""
 
 });
 const rules = reactive({
@@ -60,7 +61,8 @@ const rules = reactive({
   salary: {required},
   schedule: {required},
   basis: {required},
-  hiring_date: {required}
+  hiring_date: {required},
+  organization: {required}
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -182,9 +184,9 @@ watch(createValues, (newVal) => {
 
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
-            v-model="createValues.selectedOrganization"
+            v-model="createValues.organization"
             :options="organization"
-            :class="{ 'p-invalid': v$.selectedOrganization.$error }"
+            :class="{ 'p-invalid': v$.organization.$error }"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"

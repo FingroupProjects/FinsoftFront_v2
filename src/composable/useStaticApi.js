@@ -299,7 +299,7 @@ export const useStaticApi = () => {
   const findSchedule = async () => {
     try {
       loadSchedule.value = true;
-      const res = await useAxios(`/schedules`);
+      const res = await useAxios(`/schedule`);
       return (schedules.value = res.result.data.map((el) => {
         return {
           name: el.name,
