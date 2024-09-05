@@ -13,7 +13,9 @@ import DiscountCard from "@/components/ForSale/DiscountCard.vue";
 import FilterFastGoods from "@/components/ForSale/FilterFastGoods.vue";
 import ManualDiscount from "@/components/ForSale/ManualDiscount.vue";
 import AddUserInfo from "@/components/ForSale/AddUserInfo.vue";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const openFastGoods = ref(false);
 const selectedGoods = ref();
 const openDiscount = ref(false);
@@ -133,8 +135,40 @@ function closeManual() {
   openManualModal.value = false
   activeManual.value = false
 }
-
-
+function emptyAll() {
+  openDeposit.value = false
+  listPostGoods.value = []
+  activeRightArrow.value = false
+  getAllSum.value = 0
+}
+function payMethodsFn() {
+  const data = {
+    "date": "2024-06-10 08:49:00",
+    "discount_id":null,
+    "certificate_id": null,
+    "card_id": null,
+    "card_sum": null,
+    "discount_sum": null,
+    "certificate_sum": null,
+    "type": activeRightArrow.value ? "return" : 'sale',
+    "sale": null,
+    "for_payment": payCount.value - handSale.value,
+    "changes":null,
+    "cash_sum": null,
+    "goods": listPostGoods.value
+  }
+  console.log(data)
+  try {
+    const res = useAxios(`rmk`, {
+      method: 'POST',
+      data: data
+    })
+    toast.add({severity: 'success', summary: 'Аннулировано!', detail: 'Успешно Аннулировано', life: 1500});
+    router.go()
+  } catch (e) {
+    toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+  }
+}
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
@@ -248,7 +282,7 @@ watchEffect(() => {
       </div>
       <div class="  bg-white">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
-          <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
+          <fin-button @click="payMethodsFn" severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
           <div class="">
             Кассир: {{ userName.name }}
           </div>
@@ -309,7 +343,7 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :goods-post="listPostGoods" :sale-post="handSale" :typeSale="activeRightArrow"
+  <DepositMoney @closeEmpty="emptyAll" :goods-post="listPostGoods" :sale-post="handSale" :typeSale="activeRightArrow"
                 :discount-id="userInfo?.id" :dis-count="discountSale" :sale-sum="payCount - handSale"
                 :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
