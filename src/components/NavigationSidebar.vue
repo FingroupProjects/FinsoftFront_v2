@@ -2,14 +2,12 @@
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
 import {ref} from "vue";
-import OverlayBadge from "primevue/overlaybadge";
 import {useSidebar} from "@/store/sidebar.js";
 
 const emit = defineEmits(['valueFn']);
 const store = useSidebar()
 const isOpen = ref(false);
 const dataOpened = ref(null);
-const valueLeft = ref(false);
 
 const toggleOpen = (item) => {
   isOpen.value = !isOpen.value;
@@ -58,7 +56,7 @@ function sidebarClose() {
                 <span class="opened item-size" style="font-size: 100px" :class="item.icon"></span>
               </router-link>
             </template>
-            <!--            <Transition name="slide-fade">-->
+            <!--<Transition name="slide-fade">-->
 
           </div>
         </template>

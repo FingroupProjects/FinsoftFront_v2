@@ -49,6 +49,8 @@ const getIdProducts = async (event) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
+    good_id: el.id,
+    amount: el.amount,
     img: el.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
     vendorCode: el.vendor_code,
     price: el.price,
@@ -136,7 +138,6 @@ function closeManual() {
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
-    console.log(selectedGoods.value)
     listGoods.value.hide();
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
       return total + (el?.price || 0);
@@ -308,7 +309,9 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :dis-count="discountSale" :sale-sum="payCount - handSale" :open-deposit-money="openDeposit"
+  <DepositMoney :goods-post="listPostGoods" :sale-post="handSale" :typeSale="activeRightArrow"
+                :discount-id="userInfo?.id" :dis-count="discountSale" :sale-sum="payCount - handSale"
+                :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="closeDiscount"/>
