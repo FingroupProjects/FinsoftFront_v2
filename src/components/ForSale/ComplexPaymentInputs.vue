@@ -20,8 +20,9 @@ const props = defineProps({
 })
 const bonusCard = ref(props.disCount);
 const activeCertification = ref(true);
-const returnFnNumber = ref(0)
-const allNumberFn = ref(0)
+const returnFnNumber = ref(0);
+const allNumberFn = ref(0);
+const idCertification = ref(null);
 
 async function certificationFn() {
   try {
@@ -32,6 +33,7 @@ async function certificationFn() {
     store.numberCertification = ''
     returnFnNumber.value = Number(res.result.sum);
     allNumberFn.value = Number(res.result.sum);
+    idCertification.value = res.result.id
 
   } catch (e) {
     console.log(e)
@@ -59,7 +61,7 @@ function postFnBonusCard() {
 
 function postFnCertification() {
   allNumberFn.value = returnFnNumber.value - Number(store.numberCertification)
-  emit('postCertification', store.numberCertification)
+  emit('postCertification', store.numberCertification,idCertification.value)
 }
 
 watchEffect(() => {
