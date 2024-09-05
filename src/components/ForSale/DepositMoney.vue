@@ -143,7 +143,7 @@ const adjustedSaleSum = computed(() => {
   return props.saleSum - totalPayments < 0 ? 0 : props.saleSum - totalPayments;
 });
 
-function payMethodsFn() {
+async function payMethodsFn() {
   const data = {
     "date": "2024-06-10 08:49:00",
     "discount_id": props.discountId,
@@ -161,13 +161,17 @@ function payMethodsFn() {
   }
   console.log(data)
   try {
-    const res = useAxios(`rmk`, {
+    const res = await useAxios(`rmk`, {
       method: 'POST',
       data: data
     })
     toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
     emit('closeEmpty');
-    router.go()
+    console.log(res)
+    if (res.errors === null) {
+      router.go()
+    }
+
   } catch (e) {
     toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
   }
