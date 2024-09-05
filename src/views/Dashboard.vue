@@ -42,7 +42,13 @@ const store = useSidebar()
   margin-left: 50px;
   background-color: #F2F2F2 !important;
   border-radius: 70px !important;
-  padding: 10px !important;
+  padding: 7px !important;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  font-size: 11px !important;
+  justify-content: center;
+  align-items: center;
   color: #808BA0 !important;
 }
 </style>
