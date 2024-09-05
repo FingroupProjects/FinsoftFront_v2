@@ -1,6 +1,5 @@
 <script setup>
 import Sidebar from "@/components/Sidebar.vue"
-import {ref} from 'vue'
 import {useSidebar} from "@/store/sidebar.js";
 
 const store = useSidebar()
@@ -10,7 +9,7 @@ const store = useSidebar()
   <div class="transition-all">
     <Sidebar/>
     <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[100px]':store.activeSidebar === false}">
-      <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" :class="{'sm:mt-[0] pt-[0]':store.activeSidebar===false}">
+      <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" >
         <div class="gap-4">
           <router-view></router-view>
         </div>

@@ -43,15 +43,15 @@ function sidebarClose() {
          sidebar-animation-two
          transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
-    <div class="h-full px-2 pb-3 overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
+    <div class="h-full  overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
       <PanelMenu :model="sidebar" class="w-full">
         <template #item="{ item, index }">
           <div>
             <template v-if="item.label">
               <router-link
                   :to="item.route ? item.route : ''"
-                  class="flex items-center justify-center cursor-pointer w-[100px] text-surface-700 font-[600] dark:text-[#ffffff] px-3
-                   py-2 hover:text-[#ffffff] text-[#141C30] h-[42px]"
+                  class="flex items-center justify-center cursor-pointer w-[100px] text-surface-700 font-[600] dark:text-[#ffffff]
+                    hover:text-[#ffffff] text-[#141C30] h-[42px]"
                   :class="{ 'active-item': $route.path === item.route }"
                   @click="toggleOpen(item.label)"
               >

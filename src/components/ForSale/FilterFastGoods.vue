@@ -123,7 +123,6 @@ function postFn() {
 
     getGoodGroup()
   }
-
 }
 
 const checkedCount = computed(() => {

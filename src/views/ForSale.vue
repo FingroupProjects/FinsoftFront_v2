@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, watchEffect} from 'vue';
+import {ref, watch, watchEffect, onMounted} from 'vue';
 import InputText from "primevue/inputtext";
 import InputIcon from "primevue/inputicon";
 import IconField from "primevue/iconfield";
@@ -32,6 +32,9 @@ const activeManual = ref(false);
 const openManualModal = ref(false);
 const saleSum = ref(0);
 const userInfoModal = ref(false);
+const handSale = ref(0);
+const discountSale = ref(0);
+const searchProducts = ref('');
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -56,12 +59,14 @@ getIdProducts();
 
 function userInfoFn(info) {
   userInfo.value = info
+  discountSale.value += Number(info.sum)
   saleSum.value += Number(info.sum)
   openDiscount.value = false
 }
 
 function postSaleFn(info) {
   saleSum.value += info
+  handSale.value += info
   openManualModal.value = false
 }
 
@@ -127,14 +132,16 @@ function closeManual() {
   activeManual.value = false
 }
 
+
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
-
+    console.log(selectedGoods.value)
     listGoods.value.hide();
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
       return total + (el?.price || 0);
     }, 0)
+    searchProducts.value = ''
   }
 });
 watchEffect(() => {
@@ -158,6 +165,7 @@ watchEffect(() => {
             <InputText
                 @focus="(e)=>{listGoods.toggle(e)}"
                 class="w-full"
+                v-model="searchProducts"
                 @input="getIdProducts"
                 placeholder="Поиск по названию, артикулу, штрих-коду"
             />
@@ -188,7 +196,7 @@ watchEffect(() => {
           </div>
         </div>
         <hr class="mt-[24px]">
-        <div class="mt-[30px] overflow-style-for-sale overflow-y-scroll h-[750px]">
+        <div class="mt-[30px] overflow-style-for-sale h-[750px]">
           <div class="text-[20px] leading-[20px] text-[#141C30] font-semibold">
             Товары ({{ listPostGoods.length }})
           </div>
@@ -290,7 +298,7 @@ watchEffect(() => {
       </div>
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(payCount)}}
+        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(payCount - handSale) }}
           <span
               class="text-[24px]">сум</span></div>
       </div>
@@ -300,7 +308,7 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :dis-count="saleSum" :sale-sum="payCount" :open-deposit-money="openDeposit"
+  <DepositMoney :dis-count="discountSale" :sale-sum="payCount - handSale" :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
   <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
                 @close-modal="closeDiscount"/>
@@ -321,26 +329,30 @@ watchEffect(() => {
   opacity: 0;
 }
 
-  .overflow-style-for-sale::-webkit-scrollbar {
-    width: 4px !important;
-    height: 3px !important;
-  }
+.overflow-style-for-sale {
+  overflow: auto; /* Ensure the element can scroll if needed */
+}
 
-  .overflow-style-for-sale::-webkit-scrollbar-track {
-    background-color: #f1f1f1 !important;
-    height: 3px !important;
-  }
+.overflow-style-for-sale::-webkit-scrollbar {
+  width: 3px; /* Default width */
+  height: 3px; /* Height for horizontal scrollbar */
+}
 
-  .overflow-style-for-sale::-webkit-scrollbar-thumb {
-    background-color: #3935E7 !important;
-    border-radius: 6px !important;
-    height: 3px !important;
-  }
 
-  .overflow-style-for-sale::-webkit-scrollbar-thumb:hover {
-    background-color: #3935E7;
-    height: 3px !important;
-  }
+.overflow-style-for-sale::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  height: 3px;
+}
+
+.overflow-style-for-sale::-webkit-scrollbar-thumb {
+  background-color: #3935E7;
+  border-radius: 6px;
+  height: 3px;
+}
+
+.overflow-style-for-sale::-webkit-scrollbar-thumb:hover {
+  background-color: #3935E7;
+}
 
 .filter-goods {
   .p-inputtext {
