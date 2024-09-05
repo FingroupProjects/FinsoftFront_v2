@@ -141,7 +141,7 @@ function emptyAll() {
   activeRightArrow.value = false
   getAllSum.value = 0
 }
-function payMethodsFn() {
+async function payMethodsFn() {
   const data = {
     "date": "2024-06-10 08:49:00",
     "discount_id":null,
@@ -155,16 +155,19 @@ function payMethodsFn() {
     "for_payment": payCount.value - handSale.value,
     "changes":null,
     "cash_sum": null,
-    "goods": listPostGoods.value
+    "goods": listPostGoods.value,
+    archive: true
   }
   console.log(data)
   try {
-    const res = useAxios(`rmk`, {
+    const res = await useAxios(`rmk`, {
       method: 'POST',
       data: data
     })
     toast.add({severity: 'success', summary: 'Аннулировано!', detail: 'Успешно Аннулировано', life: 1500});
-    router.go()
+    if (res.errors === null) {
+      router.go()
+    }
   } catch (e) {
     toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
   }
