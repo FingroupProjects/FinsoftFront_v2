@@ -84,7 +84,7 @@ watchEffect(() => {
         <div v-show="!activeCertification" class="text-[34px] leading-[34px] font-semibold text-[#141C30]">
           {{ formatPrice(allNumberFn) }} <span class="text-[24px] leading-[24px]">сум</span>
         </div>
-        <IconField class="w-full" :class="{'w-[35%]' :!activeCertification}">
+        <IconField class="w-full" :class="{'w-[34.6%]' :!activeCertification}">
           <InputText
               class="w-full"
               v-model="store.numberCertification"
