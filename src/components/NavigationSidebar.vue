@@ -30,7 +30,7 @@ function sidebarClose() {
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
           <a href="#" class="flex ms-2  mt-[10px]">
-            <img width="36" src="@/assets/img/Logo.svg" class="h-[28px]" alt=""/>
+            <img width="36" src="@/assets/img/Logo.svg" class="w-[30px] h-[24px]" alt=""/>
             <div @click="sidebarClose" class="open-close-sidebar pi pi-chevron-right" style="margin-left: 15px"></div>
           </a>
         </div>
@@ -39,7 +39,7 @@ function sidebarClose() {
   </nav>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-[120px] h-screen pt-[66px]
+         class="fixed top-0 left-0 z-40 w-[100px] h-screen pt-[6px]
          sidebar-animation-two
          transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
@@ -59,34 +59,7 @@ function sidebarClose() {
               </router-link>
             </template>
             <!--            <Transition name="slide-fade">-->
-            <!--            <div  class="page-data absolute z-10 ">-->
-            <!--              <div class="sub-item uppercase">-->
-            <!--                {{ item.title }}-->
-            <!--              </div>-->
-            <!--              <router-link-->
-            <!--                  v-for="subItem in item.data"-->
-            <!--                  :key="subItem.title"-->
-            <!--                  :to="subItem.route ? subItem.route : ''"-->
-            <!--                  v-slot="{ href, navigate }"-->
-            <!--                  custom-->
-            <!--              >-->
-            <!--                <a-->
-            <!--                    v-ripple-->
-            <!--                    class="flex items-center w-full cursor-pointer text-surface-700 dark:text-surface-0 py-2 hover:text-blue-600 text-[15px] font-semibold"-->
-            <!--                    :class="{-->
-            <!--                      'text-[#3935E7]': $route.path === subItem.route,-->
-            <!--                      'text-[#808BA0]': $route.path !== subItem.route,-->
-            <!--                      'active-item': $route.path === subItem.route,-->
-            <!--                      'text-surface-700 dark:text-surface-0': $route.path !== subItem.route-->
-            <!--                          }"-->
-            <!--                    :href="href"-->
-            <!--                    @click="navigate"-->
-            <!--                >-->
-            <!--                  <span class="ml-2">{{ subItem.label }}</span>-->
-            <!--                </a>-->
-            <!--              </router-link>-->
-            <!--            </div>-->
-            <!--            </Transition>-->
+
           </div>
         </template>
       </PanelMenu>
@@ -96,6 +69,7 @@ function sidebarClose() {
 </template>
 
 <style scoped lang="scss">
+
 .sidebar-animation-two{
   animation: left-sidebar 0.2s linear forwards;
 }
