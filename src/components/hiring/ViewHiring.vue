@@ -1,13 +1,8 @@
 <script setup>
-import {onMounted, ref, watch, watchEffect} from 'vue';
-import Select from "primevue/dropdown";
-import PurchasingTable from "@/components/purchase/PurchasingTable.vue";
+import {onMounted, reactive, ref, watch, watchEffect} from 'vue';
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
-import Sidebar from "primevue/sidebar";
-import ShoppingMovement from "@/components/ShoppingMovement.vue";
-import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
 import moment from "moment";
 import FloatLabel from "primevue/floatlabel";
@@ -15,6 +10,9 @@ import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
 import {usePurchaseStore} from "@/store/pruchase.js";
+import Dropdown from "primevue/dropdown";
+import {required} from "@vuelidate/validators";
+import FinInput from "@/components/ui/Inputs.vue";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -25,7 +23,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  date: Object
+  data: Object
 });
 
 const store = usePurchaseStore()
@@ -33,8 +31,7 @@ const store = usePurchaseStore()
 const status = ref('');
 const productsInfo = ref();
 const toast = useToast();
-const visibleMovement = ref(false);
-const visibleHistory = ref(false);
+
 const approved = ref(false);
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
@@ -43,30 +40,51 @@ const agreementList = ref([]);
 const changeValue = ref(false);
 const initialValue = ref(null);
 const loaderSave = ref(false)
-const visibleToast = ref(false)
-const viewDocument = ref({
-  organizationName: '',
-  author: '',
-  counterpartyName: '',
-  counterpartyAgreementName: '',
-  storageName: '',
-  date: null,
-  currencyName: '',
-  comments: ''
+const createValues = reactive({
+  datetime24h: new Date,
+  comment: "",
+  position: "",
+  department: "",
+  salary: "",
+  schedule: "",
+  basis: "",
+  hiring_date: new Date,
+  employee: "",
+  organization: "",
+  doc_number: ""
+
+});
+const rules = reactive({
+  datetime24h: {required},
+  position: {required},
+  employee: {required},
+  department: {required},
+  salary: {required},
+  schedule: {required},
+  basis: {required},
+  hiring_date: {required},
+  organization: {required}
 });
 
-const v$ = useVuelidate();
+const v$ = useVuelidate(rules, createValues);
 
 const {
-  findCurrency,
-  currency,
-  findStorage,
-  storage,
   findOrganization,
   organization,
-  findCounterparty,
-  counterparty
-} = useStaticApi()
+  loadingOrganization,
+  findDepartment,
+  departments,
+  loadDepartment,
+  findPosition,
+  positions,
+  loadPositions,
+  findEmployee,
+  employeeList,
+  loadingEmployee,
+  findSchedule,
+  schedules,
+  loadSchedule
+} = useStaticApi();
 
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -75,43 +93,25 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
-async function getAgreement() {
-  try {
-    const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/${viewDocument.counterpartyName?.code}`)
-    return agreementList.value = res.result.data.map(el => {
-      return {
-        name: el.name,
-        code: el.id
-      }
-    })
-  } catch (e) {
-    console.log(e)
-  }
-}
 
 const getView = async () => {
-  const item = props.date
+  const item = props.data;
 
-  if (item.active) {
-    approved.value = true;
-    status.value = 'Проведен';
-  } else {
-    approved.value = false;
-    status.value = 'Не проведен';
-  }
-  viewDocument.value = {
-    organizationName: item.organization,
-    author: item.author,
-    counterpartyName: item.counterparty,
-    counterpartyAgreementName: item.counterpartyAgreement,
-    storageName: item.storage,
-    date: new Date(item.date),
-    postDate: item.date,
-    currencyName: item.currency,
-    doc_number: item.doc_number,
-    comments: item.comment
-  };
+  createValues.organization = item.organization;
+  createValues.employee = item.employee;
+  createValues.salary = item.salary;
+  createValues.hiring_date = new Date(item.hiring_date);
+  createValues.author = item.author;
+  createValues.department = item.department;
+  createValues.basis = item.basis;
+  createValues.position = item.position;
+  createValues.schedule = item.schedule;
+  createValues.datetime24h = new Date(item.date);
+  createValues.doc_number = item.doc_number;
+
+  console.log(createValues);
 };
+
 
 const updateView = async () => {
   const result = await v$.value.$validate();
@@ -121,17 +121,19 @@ const updateView = async () => {
     loaderSave.value = true
     try {
       const data = {
-        organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
-        counterparty_id: viewDocument.value.counterpartyName?.id || viewDocument.value.counterpartyName?.code,
-        storage_id: viewDocument.value.storageName?.id || viewDocument.value.storageName?.code,
-        date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
-        currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
-        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
-        comment: viewDocument.value.comments,
+        organization_id: createValues.value.organization?.id || createValues.value.organization?.code,
+        employee_id: createValues.value.employee?.id || createValues.value.employee?.code,
+        salary: createValues.value.salary?.id || createValues.value.salary?.code,
+        date: moment(createValues.value.date).format('YYYY-MM-DD '),
+        hiring_date: moment(createValues.value.hiring_date).format('YYYY-MM-DD '),
+        department_id: createValues.value.department?.id || createValues.value.department?.code,
+        position: createValues.value.position?.id || createValues.value.position?.code,
+        schedule_id: createValues.value.schedule?.id || createValues.value.schedule?.code,
+        basis: createValues.value.basis,
         goods: store.postGoods
       };
 
-      const res = await useAxios(`/document/update/${props.productId}`, {
+      const res = await useAxios(`/hiring/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
@@ -147,47 +149,6 @@ const updateView = async () => {
   }
 };
 
-const approve = async () => {
-  try {
-    await updateView()
-    const res = await useAxios(`/document/provider/approve`, {
-      method: 'POST',
-      data: {
-        ids: [`${props.productId}`]
-      }
-    });
-    toast.add({severity: 'success', summary: 'Проведен!', detail: 'Документ успешно проведен!', life: 1500});
-    approved.value = true
-    status.value = 'Проведен'
-  } catch (e) {
-    console.error(e)
-    toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось одобрить документ!', life: 1500});
-  }
-}
-
-const unApprove = async () => {
-  try {
-    //  await updateView()
-    const res = await useAxios(`/document/provider/unApprove`, {
-      method: 'POST',
-      data: {
-        ids: [`${props.productId}`]
-      }
-    });
-    approved.value = false
-    status.value = 'Не проведен'
-    toast.add({severity: 'success', summary: 'Проведение отменено!', detail: 'Документ не проведен!', life: 1500});
-  } catch (e) {
-    console.error(e)
-    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось отменить одобрение документа', life: 1500});
-  }
-}
-const openDocumentPrint = (productId) => {
-  const url = `/documents/${productId}`;
-  window.open(url, '_blank');
-};
-
-findStorage();
 
 function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
@@ -203,42 +164,6 @@ async function saveFnDialog() {
   emit('close-sidebar')
 }
 
-watchEffect(() => {
-
-  if (viewDocument.value.counterpartyName &&
-      viewDocument.value.counterpartyName.agreement &&
-      viewDocument.value.counterpartyName.agreement.length > 0) {
-    viewDocument.value.counterpartyAgreementName = {
-      name: viewDocument.value.counterpartyName.agreement[0].name,
-      code: viewDocument.value.counterpartyName.agreement[0].id,
-    };
-  } else {
-    viewDocument.counterpartyAgreementName = null;
-  }
-  if (hasOrganization === true) viewDocument.organizationName = {
-    name: organizationHas.name,
-    code: organizationHas.id
-  }
-  if (storage.value.length === 1) viewDocument.storageName = storage.value[0]
-});
-
-watch(viewDocument.value, (newValue) => {
-  console.log(newValue)
-  if (newValue.counterpartyAgreementName && !isCurrencyFetched.value) {
-
-    findCurrency(newValue.counterpartyAgreementName).then(() => {
-      viewDocument.value.currencyName = currency.value[0];
-    });
-    isCurrencyFetched.value = true;
-  }
-}, {deep: true});
-
-watch(viewDocument, (newVal) => {
-  if (initialValue.value !== null) {
-    changeValue.value = true;
-  }
-  initialValue.value = newVal;
-}, {deep: true});
 
 watch(productsInfo, (newVal) => {
   if (initialValue.value !== null) {
@@ -247,18 +172,15 @@ watch(productsInfo, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-onMounted(async () => {
-  try {
-    await Promise.all([
-      getView(),
+onMounted(function () {
+  getView(),
       findOrganization(),
-      findCounterparty(),
-      findStorage()
-    ]);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-});
+      findDepartment(),
+      findPosition(),
+      findSchedule(),
+      findEmployee()
+})
+
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
@@ -271,172 +193,126 @@ onMounted(async () => {
           <div>
             <div class="header-title">Закупка</div>
             <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">№{{
-                viewDocument.doc_number
+                createValues.doc_number
               }}
             </div>
           </div>
 
-          <FloatLabel class="col-span-4">
-            <Select
-                v-model="status"
-                placeholder="Организация"
-                class="w-full p-focus active-approve"
-                disabled
-            >
-              <template #value>
-                <span :style="{ color: '#17A825', fontWeight: '600' }">{{ status }}</span>
-              </template>
-
-            </Select>
-            <label for="dd-city">Статус</label>
-          </FloatLabel>
-
-          <fin-button v-if="approved === false" @click="approve()"
-                      icon="pi pi-arrow-right bold" label="Провести"
-                      severity="secondary" class="p-button-lg btn-approve"
-                      :style="{ color: '#17A825', borderColor: '#17A825', backgroundColor: '#fff', }"
-          />
-
-          <fin-button v-if="approved === true"
-                      @click="unApprove()" icon="pi pi-arrow-right"
-                      label="Отменить проведение" severity="secondary"
-                      class="p-button-lg btn-un-approve" :style="{ color: '#C1790C', borderColor: '#C1790C' }"
-          />
-
           <fin-button icon="pi pi-save" @click="updateView()" label="Сохранить" :loading="loaderSave" severity="success"
                       class="p-button-lg"/>
         </div>
-        <div class="flex gap-[16px] pt-2">
-          <fin-button @click="visibleMovement = true" icon="pi pi-arrow-right-arrow-left" severity="warning"
-                      class="p-button-lg btn-movement w-[158px]">
-            <img src="@/assets/img/img.png" alt="" class="w-[20px]"/>
-            Движение
-          </fin-button>
-        </div>
-      </div>
-      <div v-if="isOpen"
-           class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
 
+      </div>
+      <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
         <FloatLabel class="col-span-4">
           <DatePicker
               showIcon
-              v-model="viewDocument.date"
+              v-model="createValues.datetime24h"
+              :class="{ 'p-invalid': v$.datetime24h.$error }"
               showTime
-              hourFormat="24"
-              dateFormat="dd.mm.yy,"
+              dateFormat="dd.mm.yy"
               fluid
               hideOnDateTimeSelect
               iconDisplay="input"
               class="w-full"
-          >
-
-          </DatePicker>
+          />
           <label for="dd-city">Дата</label>
         </FloatLabel>
 
         <FloatLabel class="col-span-4" v-if="!hasOrganization">
-          <Select
-              v-model="viewDocument.organizationName"
-              class="w-full"
+          <Dropdown
+              v-model="createValues.organization"
               :options="organization"
-              option-label="name"
-              @click="findOrganization"
+              :class="{ 'p-invalid': v$.organization.$error }"
+              :loading="loadingOrganization"
+              optionLabel="name"
+              class="w-full"
           >
-            <template #value>
-              {{ viewDocument.organizationName?.name }}
-            </template>
-          </Select>
           <label for="dd-city">Организация</label>
+            <template #value>
+              {{ createValues.organization?.name }}
+            </template>
+          </Dropdown>
         </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Dropdown
+              v-model="createValues.employee"
+              :options="employeeList"
+              :class="{ 'p-invalid': v$.employee.$error }"
+              :loading="loadingEmployee"
+              optionLabel="name"
+              class="w-full"
+          >
+          <label for="dd-city">Сотрудник</label>
+            <template #value>
+              {{ createValues.employee?.name }}
+            </template>
+          </Dropdown>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Dropdown
+              v-model="createValues.department"
+              :class="{ 'p-invalid': v$.department.$error }"
+              :options="departments"
+              :loading="loadDepartment"
+              optionLabel="name"
+              class="w-full"
+          />
+          <label for="dd-city">Отдел</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Dropdown
+              v-model="createValues.position"
+              :class="{ 'p-invalid': v$.position.$error }"
+              :loading="loadPositions"
+              :options="positions"
+              optionLabel="name"
+              class="w-full"
+          >
+            <template #value>{{ createValues.position?.name }}</template>
+          </Dropdown>
+          <label for="dd-city">Должность</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <DatePicker
+              showIcon
+              v-model="createValues.hiring_date"
+              :class="{ 'p-invalid': v$.hiring_date.$error }"
+              showTime
+              dateFormat="dd.mm.yy"
+              fluid
+              hideOnDateTimeSelect
+              iconDisplay="input"
+              class="w-full"
+          />
+          <label for="dd-city">Дата приема</label>
+        </FloatLabel>
+        <FloatLabel class="col-span-4">
+          <Dropdown
+              v-model="createValues.schedule"
+              :class="{ 'p-invalid': v$.schedule.$error }"
+              :loading="loadSchedule"
+              :options="schedules"
+              optionLabel="name"
+              class="w-full"
+          />
+          <label for="dd-city">График</label>
+        </FloatLabel>
+        <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" option-label="name">
-            <template #value>
-              {{ viewDocument.counterpartyName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Поставщик</label>
-        </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
-                  :options="agreementList" @click="getAgreement" option-label="name">
-            <template #value>
-              {{ viewDocument.counterpartyAgreementName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Договор</label>
-        </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
-                  @click="findStorage">
-            <template #value>
-              {{ viewDocument.storageName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Склад</label>
-        </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                  @click="findCurrency" disabled style="background-color: #fff !important;">
-            <template #value>
-              {{ viewDocument.currencyName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Валюта</label>
-        </FloatLabel>
         <FloatLabel class="col-span-12 mt-[10px]">
-          <Textarea class="w-full" v-model="viewDocument.comments" style="min-height: 20px" rows="2" cols="20"/>
-          <label for="dd-city">Комментарий</label>
+          <Textarea :class="{ 'p-invalid': v$.schedule.$error }" v-model="createValues.basis" class="w-full"
+                    style="min-height: 20px" rows="8" cols="20"/>
+          <label for="dd-city">Основание</label>
         </FloatLabel>
-        <div class="col-span-12">
-          <button @click="isOpen = false"
-                  class="text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Скрыть <i
-              class=" mt-0.5 ml-1 pi pi-angle-up"></i></button>
-        </div>
-      </div>
-      <div v-if="isOpen === false" class="border-y py-5 mt-[30px] col-span-12">
-        <button @click="isOpen = true"
-                class="  text-[#808BA0] m-auto flex justify-center text-[16px] font-[Manrope] leading-[16px]">Раскрыть
-          <i
-              class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
-      </div>
-      <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
-        <div class="header-title">Товары</div>
-        <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
-          <i class="pi pi-history mb-[1px] "></i>
-          <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
-        </fin-button>
-        <fin-button class="icon-print" severity="success" @click="openDocumentPrint(productId)">
-          <i class="pi pi-print mb-[1px ]"></i>
-          <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
-        </fin-button>
       </div>
     </div>
-    <purchasing-table :info-goods="props.date" @editModal="changeModal"/>
-
     <div class="text-[20px] font-[600] absolute bottom-[40px]">
       Автор: {{ userName.name }}
     </div>
   </div>
 
 
-  <Sidebar
-      v-model:visible="visibleMovement"
-      :show-close-icon="false"
-      position="right"
-      class="drower-movement"
-  >
-    <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
-  </Sidebar>
-  <Sidebar
-      v-model:visible="visibleHistory"
-      :show-close-icon="false"
-      position="right"
-      class="drower-movement"
-  >
-    <history-purchase :productId="productId"/>
-  </Sidebar>
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"

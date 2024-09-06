@@ -12,6 +12,7 @@ import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
+import FinInput from "@/components/ui/Inputs.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -51,12 +52,14 @@ const createValues = reactive({
   schedule: "",
   basis: "",
   hiring_date: new Date,
+  employee: "",
   organization: ""
 
 });
 const rules = reactive({
   datetime24h: {required},
   position: {required},
+  employee: {required},
   department: {required},
   salary: {required},
   schedule: {required},
@@ -83,11 +86,12 @@ async function saveFn() {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
           department_id: createValues.department.code,
           position_id: createValues.position.code,
+          organization_id: createValues.organization.code,
           schedule_id: createValues.schedule.code,
           hiring_date: createValues.hiring_date,
           salary: createValues.salary,
-          comment: createValues.comments,
-          basis: productsInfo.basis,
+          basis: createValues.basis,
+          employee_id: createValues.employee.code
         },
       });
       toast.add({
@@ -119,7 +123,8 @@ onMounted(async () => {
       findOrganization(),
       findDepartment(),
         findPosition(),
-        findSchedule()
+        findSchedule(),
+      findEmployee()
     ]);
   } catch (error) {
     console.error('Error:', error);
@@ -195,6 +200,17 @@ watch(createValues, (newVal) => {
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
+            v-model="createValues.employee"
+            :options="employeeList"
+            :class="{ 'p-invalid': v$.employee.$error }"
+            :loading="loadingEmployee"
+            optionLabel="name"
+            class="w-full"
+        />
+        <label for="dd-city">Сотрудник</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
+        <Dropdown
             v-model="createValues.department"
             :class="{ 'p-invalid': v$.department.$error }"
             :options="departments"
@@ -218,6 +234,20 @@ watch(createValues, (newVal) => {
         <label for="dd-city">Должность</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
+        <DatePicker
+            showIcon
+            v-model="createValues.hiring_date"
+            :class="{ 'p-invalid': v$.hiring_date.$error }"
+            showTime
+            dateFormat="dd.mm.yy"
+            fluid
+            hideOnDateTimeSelect
+            iconDisplay="input"
+            class="w-full"
+        />
+        <label for="dd-city">Дата приема</label>
+      </FloatLabel>
+      <FloatLabel class="col-span-4">
         <Dropdown
             v-model="createValues.schedule"
             :class="{ 'p-invalid': v$.schedule.$error }"
@@ -228,14 +258,15 @@ watch(createValues, (newVal) => {
         />
         <label for="dd-city">График</label>
       </FloatLabel>
+      <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
+        <Textarea :class="{ 'p-invalid': v$.schedule.$error }" v-model="createValues.basis" class="w-full" style="min-height: 20px" rows="8" cols="20"/>
+        <label for="dd-city">Основание</label>
       </FloatLabel>
     </div>
   </div>
-  <CreateProduct @postGoods="getProducts"/>
+
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>

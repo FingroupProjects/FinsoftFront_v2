@@ -282,7 +282,7 @@ export const useStaticApi = () => {
   const findDepartment = async () => {
     try {
       loadDepartment.value = true;
-      const res = await useAxios(`/departent`);
+      const res = await useAxios(`/department`);
       return (departments.value = res.result.data.map((el) => {
         return {
           name: el.name,
@@ -309,7 +309,7 @@ export const useStaticApi = () => {
     } catch (e) {
       console.log(e);
     } finally {
-      loadDepartment.value = false;
+      loadSchedule.value = false;
     }
   };
 

@@ -499,7 +499,7 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-hiring :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo"
+      <view-hiring :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dateInfo"
                      :openModalClose="openInfoModal"/>
       <CreateHiring v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
