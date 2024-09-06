@@ -14,8 +14,12 @@ import FilterFastGoods from "@/components/ForSale/FilterFastGoods.vue";
 import ManualDiscount from "@/components/ForSale/ManualDiscount.vue";
 import AddUserInfo from "@/components/ForSale/AddUserInfo.vue";
 import {useRouter} from "vue-router";
+import ArciveList from "@/components/ForSale/ArciveList.vue";
+import {useToast} from "primevue/usetoast";
 
-const router = useRouter()
+const router = useRouter();
+const toast = useToast();
+
 const openFastGoods = ref(false);
 const selectedGoods = ref();
 const openDiscount = ref(false);
@@ -37,6 +41,10 @@ const userInfoModal = ref(false);
 const handSale = ref(0);
 const discountSale = ref(0);
 const searchProducts = ref('');
+const countArchive = ref(0);
+const openArchiveList = ref(false);
+const getIdSale = ref(null);
+const disCount = ref();
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -52,7 +60,7 @@ const getIdProducts = async (event) => {
     products: el.name,
     code: el.id,
     good_id: el.id,
-    amount: el.amount,
+    amount: el.amount + 1,
     img: el.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
     vendorCode: el.vendor_code,
     price: el.price,
@@ -63,13 +71,13 @@ getIdProducts();
 
 function userInfoFn(info) {
   userInfo.value = info
-  discountSale.value += Number(info.sum)
-  saleSum.value += Number(info.sum)
+  discountSale.value += Number(info?.sum)
+  saleSum.value += Number(info?.sum)
   openDiscount.value = false
 }
 
 function postSaleFn(info) {
-  saleSum.value += info
+  saleSum.value = info
   handSale.value += info
   openManualModal.value = false
 }
@@ -135,28 +143,30 @@ function closeManual() {
   openManualModal.value = false
   activeManual.value = false
 }
+
 function emptyAll() {
   openDeposit.value = false
   listPostGoods.value = []
   activeRightArrow.value = false
   getAllSum.value = 0
 }
+
 async function payMethodsFn() {
   const data = {
     "date": "2024-06-10 08:49:00",
-    "discount_id":userInfo.value?.id,
+    "discount_id": userInfo.value?.id,
     "certificate_id": null,
     "card_id": null,
     "card_sum": null,
     "discount_sum": userInfo.value?.sum,
     "certificate_sum": null,
     "type": activeRightArrow.value ? "return" : 'sale',
-    "sale": null,
+    "sale": handSale.value,
     "for_payment": payCount.value - handSale.value,
-    "changes":null,
+    "changes": null,
     "cash_sum": null,
     "goods": listPostGoods.value,
-    archive: true
+    "archive": true
   }
 
   try {
@@ -172,6 +182,39 @@ async function payMethodsFn() {
     toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
   }
 }
+
+async function getArchiveCount() {
+  try {
+    const res = await useAxios(`rmk/count/archive`)
+    countArchive.value = res.result.count
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+getArchiveCount()
+
+async function getArchive(id) {
+  try {
+    const res = await useAxios(`rmk/${id.value.id}`)
+    getIdSale.value = res.result.sale
+    payCount.value = res.result.for_payment
+    disCount.value = res.result.discount
+    listPostGoods.value = res.result?.goods.map((el) => ({
+      products: el.good.name,
+      good_id: el.good.id,
+      amount: el.amount,
+      img: el.good.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
+      vendorCode: el.good.vendor_code,
+      price: Number(el.price),
+    }));
+    openArchiveList.value = false
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+getArchiveCount()
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
@@ -184,7 +227,7 @@ watch(selectedGoods, (newValue) => {
 });
 watchEffect(() => {
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
-    return total + (el?.price * el?.count || 0);
+    return total + (el?.price * el?.amount || 0);
   }, 0)
   payCount.value = getAllSum.value
 })
@@ -254,11 +297,11 @@ watchEffect(() => {
               <div
                   class="flex p-[10px] gap-[15px] items-center bg-[#F2F2F2]  rounded-[90px] col-span-3 w-[139px] mt-[-7px]">
                 <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
-                        @click="infoGoods.count > 1 ? infoGoods.count-- : null"><i
+                        @click="infoGoods.amount > 1 ? infoGoods.amount-- : null"><i
                     class="pi pi-minus text-[#3935E7]"></i></button>
-                <div class="text-[#000] text-[18px] leading-[18px] text-center">{{ infoGoods.count }}</div>
+                <div class="text-[#000] text-[18px] leading-[18px] text-center">{{ infoGoods.amount }}</div>
                 <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
-                        @click="addCountFn(infoGoods.count++)"><i
+                        @click="addCountFn(infoGoods.amount++)"><i
                     class="pi pi-plus text-[#3935E7]"></i>
                 </button>
               </div>
@@ -272,7 +315,7 @@ watchEffect(() => {
                 <div>
                   <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Сумма</div>
                   <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">
-                    {{ formatPrice(infoGoods.price * infoGoods.count) }}
+                    {{ formatPrice(infoGoods.price * infoGoods.amount) }}
                   </div>
                 </div>
                 <div @click="deleteFn(index)" class="flex justify-center items-center">
@@ -285,7 +328,12 @@ watchEffect(() => {
       </div>
       <div class="  bg-white">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
-          <fin-button @click="payMethodsFn" severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
+          <div class="flex gap-2 footer-btn-pencil">
+            <fin-button @click="openArchiveList = true" severity="warning" class="w-[10%]" icon="pi pi-pencil"/>
+            <fin-button @click="payMethodsFn" severity="warning" class="p-button-lg" icon="pi pi-pencil"
+                        :label="`Отложить чек (${countArchive})`"/>
+          </div>
+
           <div class="">
             Кассир: {{ userName.name }}
           </div>
@@ -350,16 +398,24 @@ watchEffect(() => {
                 :discount-id="userInfo?.id" :dis-count="discountSale" :sale-sum="payCount - handSale"
                 :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
-  <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
+  <DiscountCard :discountInfo="disCount" @post-info-user="userInfoFn" :sale-sum="getAllSum"
+                :open-deposit-money="openDiscount"
                 @close-modal="closeDiscount"/>
+
   <FilterFastGoods @postProducts="getFilterGoods" :open-fast-goods="openImgModal" @close-modal="openImgModal = false"/>
-  <ManualDiscount @postSale="postSaleFn" :open-deposit-money="openManualModal"
+  <ManualDiscount :get-id-sale="getIdSale" @postSale="postSaleFn" :open-deposit-money="openManualModal"
                   @close-modal="closeManual"/>
   <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
+  <ArciveList @postArchive="getArchive" :open-fast-goods="openArchiveList" @close-modal="openArchiveList=false"/>
 
 </template>
 
 <style lang="scss">
+.footer-btn-pencil{
+  .p-button{
+   height: 46px !important;
+  }
+}
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s;
 }
