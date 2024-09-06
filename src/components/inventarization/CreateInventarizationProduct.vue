@@ -1,9 +1,9 @@
 <script setup>
-import {onMounted, ref, watchEffect} from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import {useAxios} from "@/composable/useAxios.js";
+import { useAxios } from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
@@ -17,51 +17,58 @@ const products = ref([]);
 const postProducts = ref([]);
 const coleVo = ref("");
 const accounting_quantity = ref("");
+const actual_quantity = ref("");
 const difference = ref("");
 const getAllSum = ref(0);
 const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
-const actual_quantity = ref()
 
 const validateProduct = (product) => {
-  return product.actual_quantity && product.accounting_quantity && product.difference;
+  return product.actual_quantity && product.accounting_quantity && product.difference !== null;
 };
+
 const clearInputValues = () => {
   newProduct.value = {};
   actual_quantity.value = "";
   coleVo.value = "";
   accounting_quantity.value = "";
   difference.value = "";
-  selectedProducts.value = null
+  selectedProducts.value = null;
 };
 
 const addFn = async () => {
+  if (!selectedProducts.value || !selectedProducts.value.code || !selectedProducts.value.products) {
+    console.error("Selected product is invalid or missing properties.");
+    return;
+  }
+
   const product = {
-    accounting_quantity: coleVo.value,
-    actual_quantity: accounting_quantity.value,
-    difference: difference.value,
+    accounting_quantity: accounting_quantity.value,
+    actual_quantity: actual_quantity.value,
+
+    difference: (Number(accounting_quantity.value) - Number(actual_quantity.value)).toFixed(2),
     good_id: selectedProducts.value.code,
     products: selectedProducts.value.products,
     img: selectedProducts.value.img
   };
 
+  console.log('posted', postProducts)
+
   if (validateProduct(product)) {
     products.value.push(product);
     postProducts.value.push({
-      accounting_quantity: product.coleVo,
+      accounting_quantity: product.accounting_quantity,
       actual_quantity: product.actual_quantity,
       good_id: selectedProducts.value.code,
-      difference: product.difference,
+      difference: parseFloat(product.difference),
     });
     getAllProduct.value += Number(product.accounting_quantity);
     addInput.value = false;
 
     emit("postGoods", postProducts.value);
   }
-
-  console.log('props', products.value)
 
   clearInputValues();
 };
@@ -70,7 +77,7 @@ const confirmDeleteProduct = (index) => {
   const deletedProduct = products.value.splice(index, 1)[0];
   postProducts.value.splice(index, 1);
   getAllSum.value -= Number(deletedProduct.sum);
-  getAllProduct.value -= Number(deletedProduct.coleVo);
+  getAllProduct.value -= Number(deletedProduct.accounting_quantity);
 };
 
 const getIdProducts = async (inputValue) => {
@@ -79,33 +86,37 @@ const getIdProducts = async (inputValue) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
-    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
+    img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url)
   }));
 };
 
 const onRowEditSave = (event) => {
-  const {newData, index} = event;
+  const { newData, index } = event;
   const oldProduct = products.value[index];
 
-  newData.sum = Number((newData.price * newData.coleVo).toFixed(2));
+  newData.difference = (Number(newData.accounting_quantity) - Number(newData.actual_quantity)).toFixed(2);
 
   products.value.splice(index, 1, newData);
 
   postProducts.value.splice(index, 1, {
-    accounting_quantity: newData.coleVo,
+    accounting_quantity: newData.accounting_quantity,
     good_id: newData.products.code || oldProduct.good_id,
-    actual_quantity: newData.accounting_quantity,
+    actual_quantity: newData.actual_quantity,
     difference: newData.difference
-
   });
 
-  getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
+  getAllProduct.value = getAllProduct.value - Number(oldProduct.accounting_quantity) + Number(newData.accounting_quantity);
 };
+
+watchEffect(() => {
+  difference.value = (Number(accounting_quantity.value) - Number(actual_quantity.value)).toFixed(2);
+});
 
 onMounted(async () => {
   await getIdProducts();
 });
 </script>
+
 
 <template>
   <div class="flex items-center mt-[30px] gap-[21px]">
@@ -124,9 +135,9 @@ onMounted(async () => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="coleVo" :model-value="formatInputAmount(coleVo)" placeholder="Кол-во"/>
-      <fin-input v-model="accounting_quantity" :model-value="formatInputAmount(accounting_quantity)" placeholder="Факт. кол"/>
-      <fin-input v-model="difference" :model-value="formatInputAmount(difference)" placeholder="Разница" type="number"/>
+      <fin-input v-model="accounting_quantity" placeholder="Факт. кол" />
+      <fin-input v-model="actual_quantity" placeholder="Фактическое количество" />
+      <fin-input v-model="difference" placeholder="Разница" :disabled="true" />
       <fin-button
           icon="pi pi-save"
           @click="addFn"
@@ -207,17 +218,17 @@ onMounted(async () => {
               </span>
         </template>
       </Column>
-      <Column field="coleVo" header="Кол-во">
+      <Column field="accounting_quantity" header="Кол-во">
         <template #editor="{ data, field }">
           <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
         </template>
       </Column>
-      <Column field="price" header="Фактическое количество">
+      <Column field="actual_quantity" header="Фактическое количество">
         <template #editor="{ data, field }">
           <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
         </template>
       </Column>
-      <Column field="sum" header="Разница"></Column>
+      <Column field="difference" header="Разница"></Column>
       <Column field="quantity" header="">
         <template #body="{ index }">
           <i

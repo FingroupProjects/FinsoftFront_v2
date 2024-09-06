@@ -14,11 +14,11 @@ import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
-import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
+import MethodsInventarization from "@/components/inventarization/MethodsInventarization.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import Dialog from "primevue/dialog";
 import CreateInventarization from "@/components/inventarization/CreateInventarization.vue";
-import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
+import ViewInventarization from "@/components/inventarization/ViewInventarization.vue";
 
 const {
   findStorage,
@@ -38,6 +38,7 @@ const search = ref('')
 const selectedCounterparty = ref();
 const first = ref(1)
 const selectedStatus = ref();
+const dateInfo = ref(null)
 const statusList = ref([
   {
     name: 'Активный',
@@ -87,6 +88,7 @@ const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
   createOpenModal.value = true
+  dateInfo.value = product
   selectedProductId.value = product.id
 };
 
@@ -113,6 +115,7 @@ async function getProducts(filters = {}) {
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
   return products.value;
+
 }
 
 function getProductMethods() {
@@ -147,8 +150,8 @@ const getSeverity = (status, deleted) => {
   }
 };
 
-function closeFn(id) {
-  selectedProductId.value = id
+function closeFn(result) {
+  dateInfo.value = result
   createOpenModal.value = true
   getProducts();
 }
@@ -228,7 +231,7 @@ getProducts();
   </div>
 
   <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-    <MethodsPurchase @get-product="getProductMethods" :select-products="selectedProduct"
+    <MethodsInventarization @get-product="getProductMethods" :select-products="selectedProduct"
                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
     <DataTable
@@ -354,7 +357,7 @@ getProducts();
         <template #sorticon="{index}">
         </template>
         <template #body="slotProps">
-          {{ slotProps.data?.author?.name }}
+          {{ slotProps.data?.author_id?.name }}
         </template>
       </Column>
 
@@ -391,7 +394,7 @@ getProducts();
         class="create-purchase"
         :dismissable="false"
     >
-      <view-purchase v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="selectedProductId"
+      <view-inventarization v-if="createOpenModal" @close-sidebar="closeFnVl" :productId="dateInfo.id" :date="dateInfo"
                      :openModalClose="openInfoModal"/>
       <CreateInventarization v-else @close-sidebar="closeFnVl" @close-dialog="closeFn"/>
     </Sidebar>
