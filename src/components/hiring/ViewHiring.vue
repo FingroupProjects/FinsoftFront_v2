@@ -121,23 +121,21 @@ const updateView = async () => {
     loaderSave.value = true
     try {
       const data = {
-        organization_id: createValues.value.organization?.id || createValues.value.organization?.code,
-        employee_id: createValues.value.employee?.id || createValues.value.employee?.code,
-        salary: createValues.value.salary?.id || createValues.value.salary?.code,
-        date: moment(createValues.value.date).format('YYYY-MM-DD '),
-        hiring_date: moment(createValues.value.hiring_date).format('YYYY-MM-DD '),
-        department_id: createValues.value.department?.id || createValues.value.department?.code,
-        position: createValues.value.position?.id || createValues.value.position?.code,
-        schedule_id: createValues.value.schedule?.id || createValues.value.schedule?.code,
-        basis: createValues.value.basis,
-        goods: store.postGoods
+        organization_id: createValues.organization?.id || createValues.organization?.code,
+        employee_id: createValues.employee?.id || createValues.employee?.code,
+        salary: createValues.salary,
+        date: moment(createValues.date).format('YYYY-MM-DD '),
+        hiring_date: moment(createValues.hiring_date).format('YYYY-MM-DD '),
+        department_id: createValues.department?.id || createValues.department?.code,
+        position_id: createValues.position?.id || createValues.position?.code,
+        schedule_id: createValues.schedule?.id || createValues.schedule?.code,
+        basis: createValues.basis,
       };
 
       const res = await useAxios(`/hiring/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
-      if (approved.value === true)
         toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
     } catch (e) {
       console.error(e);
@@ -257,8 +255,12 @@ onMounted(function () {
               :loading="loadDepartment"
               optionLabel="name"
               class="w-full"
-          />
+          >
           <label for="dd-city">Отдел</label>
+          <template #value>
+            {{ createValues.department?.name }}
+          </template>
+          </Dropdown>
         </FloatLabel>
         <FloatLabel class="col-span-4">
           <Dropdown
@@ -295,8 +297,12 @@ onMounted(function () {
               :options="schedules"
               optionLabel="name"
               class="w-full"
-          />
+          >
           <label for="dd-city">График</label>
+          <template #value>
+            {{ createValues.schedule?.name }}
+          </template>
+          </Dropdown>
         </FloatLabel>
         <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
