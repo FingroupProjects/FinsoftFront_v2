@@ -45,7 +45,7 @@ const addFn = async () => {
     products: selectedProducts.value.products,
     img: selectedProducts.value.img
   };
-
+  console.log("Selected Productesss:", selectedProducts.value);
   if (validateProduct(product)) {
     products.value.push(product);
     postProducts.value.push({

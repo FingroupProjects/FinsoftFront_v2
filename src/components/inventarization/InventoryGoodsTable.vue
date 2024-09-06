@@ -7,7 +7,7 @@ import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/dropdown";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
-import formatInputAmount from "@/constants/formatInput.js";
+import formatInputaccounting_quantity from "@/constants/formatInput.js";
 import formatNumber from '../../constants/formatNumber.js'
 import {usePurchaseStore} from "@/store/pruchase.js";
 
@@ -20,9 +20,9 @@ const store = usePurchaseStore();
 const goods = ref([]);
 const selectedProducts = ref();
 const addInput = ref(false);
-const amount = ref("");
-const price = ref("");
-const sum = ref("");
+const accounting_quantity = ref("");
+const actual_quantity = ref("");
+const difference = ref("");
 const getAllSum = ref(0);
 const getAllProduct = ref(0);
 const productsId = ref([]);
@@ -34,38 +34,37 @@ const imgURL = import.meta.env.VITE_IMG_URL;
 
 const clearInputValues = () => {
   newProduct.value = {};
-  amount.value = "";
-  price.value = "";
-  sum.value = "";
+  accounting_quantity.value = "";
+  actual_quantity.value = "";
+  difference.value = "";
   selectedProducts.value = null;
 };
 
 const validateProduct = (product) => {
-  return product.amount && product.price && product.sum;
+  return product.accounting_quantity && product.actual_quantity && product.difference;
 };
 
 const addFn = async () => {
   const product = {
-    amount: amount.value,
-    price: price.value,
-    sum: sum.value,
+    accounting_quantity: accounting_quantity.value,
+    actual_quantity: actual_quantity.value,
+    difference: (Number(accounting_quantity.value) - Number(actual_quantity.value)).toFixed(2),
     good_id: selectedProducts.value.code,
     name: selectedProducts.value.products,
     img: selectedProducts.value.img,
-    created: true,
-    deleted: false,
-    updated: false
+
   };
 
   if (validateProduct(product)) {
     goods.value.push(product);
     store.postGoods.push({
-      amount: product.amount,
+      accounting_quantity: product.accounting_quantity,
       good_id: selectedProducts.value?.code,
-      price: product.price,
+      actual_quantity: product.actual_quantity,
+      difference: parseFloat(product.difference),
     })
-    getAllSum.value += Number(product.sum);
-    getAllProduct.value += Number(product.amount);
+    getAllSum.value += Number(product.actual_quantity);
+    getAllProduct.value += Number(product.accounting_quantity);
     addInput.value = false;
   }
   clearInputValues();
@@ -75,11 +74,11 @@ const confirmDeleteProduct = async (index, indexProduct) => {
   store.postGoods.splice(indexProduct, 1)
   goods.value.splice(indexProduct, 1)
   getAllProduct.value = goods.value.reduce((total, el) => {
-    return total + (el?.amount || 0);
+    return total + (el?.accounting_quantity || 0);
   }, 0);
 
   getAllSum.value = goods.value.reduce((total, el) => {
-    return total + (el?.sum || 0);
+    return total + (el?.actual_quantity || 0);
   }, 0);
   emit('editModal', editModalOpen.value)
   try {
@@ -105,54 +104,50 @@ const getIdProducts = async (inputValue) => {
   }));
 };
 
-const userName = {
-  name: localStorage.getItem("user_name"),
-};
-
 const onRowEditSave = (event) => {
   const {newData, index} = event;
   const oldProduct = goods.value[index];
-  newData.sum = Number((newData.price * newData.amount).toFixed(2));
+  newData.difference = Number((newData.actual_quantity * newData.accounting_quantity).toFixed(2));
   goods.value.splice(index, 1, newData);
 
   store.postGoods.splice(index, 1, {
-    amount: newData.amount,
+    accounting_quantity: newData.accounting_quantity,
     id: oldProduct.id,
     good_id: oldProduct.good_id,
-    price: newData.price,
+    actual_quantity: newData.actual_quantity,
   });
 
-  getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
-  getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
+  getAllSum.value = getAllSum.value - Number(oldProduct.actual_quantity) + Number(newData.accounting_quantity);
+  getAllProduct.value = getAllProduct.value - Number(oldProduct.accounting_quantity) + Number(newData.accounting_quantity);
   emit('editModal', editModalOpen.value);
 };
 
 const getGood = async () => {
+  try {
+      const items = props.infoGoods.inventoryGoods;
+      goods.value = items.map((item) => ({
+        id: item.id,
+        good_id: item.good.id,
+        name: item.good.name,
+        accounting_quantity: item.accounting_quantity,
+        actual_quantity: item.actual_quantity,
+        difference: item.accounting_quantity - item.actual_quantity,
+        img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
+        created: false,
+        updated: false,
+        deleted: false,
+      }));
 
-  console.log('get goods', props.infoGoods.goods)
-  const items = props.infoGoods.goods;
-
-  goods.value = items.map((item) => ({
-    id: item.id,
-    good_id: item.good.id,
-    name: item.good.name,
-    amount: item.amount,
-    price: item.price,
-    sum: item.amount * item.price,
-    img: item.image ? imgURL + item.image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
-    created: false,
-    updated: false,
-    deleted: false,
-  }));
-  getAllProduct.value = items.reduce((total, el) => {
-    return total + el?.amount;
-  }, 0);
-  getAllSum.value = props.infoGoods.sum;
+      getAllProduct.value = items.reduce((total, el) => total + (el?.accounting_quantity || 0), 0);
+      getAllSum.value = props.infoGoods.actual_quantity || 0;
+  } catch (error) {
+    console.error('Error in getGood:', error);
+  }
 };
 
-watchEffect(() => {
-  sum.value = Number((amount.value * price.value).toFixed(2));
 
+watchEffect(() => {
+  difference.value = Number((accounting_quantity.value - actual_quantity.value).toFixed(2));
 });
 
 onMounted(async () => {
@@ -180,9 +175,9 @@ watchEffect(() => {
       <label for="">Поиск по Id, наименованию, штрих коду</label>
     </FloatLabel>
     <div class="col-span-6 flex gap-[16px]">
-      <fin-input v-model="amount" :model-value="formatInputAmount(amount)" placeholder="Кол-во"/>
-      <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена"/>
-      <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма"/>
+      <fin-input v-model="accounting_quantity" :model-value="formatInputaccounting_quantity(accounting_quantity)" placeholder="Факт.кол"/>
+      <fin-input v-model="actual_quantity" :model-value="formatInputaccounting_quantity(actual_quantity)" placeholder="Физ.кол"/>
+      <fin-input v-model="difference" :model-value="formatInputaccounting_quantity(difference)" placeholder="Разница"/>
       <fin-button
           icon="pi pi-plus"
           @click="addFn"
@@ -229,19 +224,17 @@ watchEffect(() => {
           </div>
         </template>
       </Column>
-      <Column field="amount" header="Кол-во">
+      <Column field="accounting_quantity" header="Факт.кол">
         <template #editor="{ data, field }">
-          <input-text v-model="data[field]" fluid :model-value="formatInputAmount(data[field])"/>
+          <input-text v-model="data[field]" fluid :model-value="formatInputaccounting_quantity(data[field])"/>
         </template>
       </Column>
-
-      <Column field="price" header="Цена">
+      <Column field="actual_quantity" header="Физ.кол">
         <template #editor="{ data, field }">
-          <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid/>
+          <input-text v-model="data[field]" :model-value="formatInputaccounting_quantity(data[field])" fluid/>
         </template>
       </Column>
-
-      <Column field="sum" header="Сумма"></Column>
+      <Column field="difference" header="Разница"></Column>
       <Column field="quantity" header="">
         <template #body="{data,index}">
           <i
@@ -252,17 +245,13 @@ watchEffect(() => {
       </Column>
       <Column :rowEditor="true"
               style="width: 0; min-width: 7rem;"
-              bodyStyle="text-align:center">
-      </Column>
+              bodyStyle="text-align:center"></Column>
     </DataTable>
   </div>
   <div class="summary-container">
     <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]">
       <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
         Итого:
-      </div>
-      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
-        Автор: {{userName.name}}
       </div>
       <div class="flex gap-[49px]">
         <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
