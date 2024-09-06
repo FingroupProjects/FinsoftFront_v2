@@ -160,21 +160,24 @@ async function payMethodsFn() {
     "goods": props.goodsPost
   }
   console.log(data)
-  try {
-    const res = await useAxios(`rmk`, {
-      method: 'POST',
-      data: data
-    })
-    toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
-    emit('closeEmpty');
-    console.log(res)
-    if (res.errors === null) {
-      router.go()
-    }
+  if ((walletNumbers.value + cardPay.value) >= props.saleSum) {
+    try {
+      const res = await useAxios(`rmk`, {
+        method: 'POST',
+        data: data
+      })
+      toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
+      emit('closeEmpty');
+      console.log(res)
+      if (res.errors === null) {
+        router.go()
+      }
 
-  } catch (e) {
-    toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+    } catch (e) {
+      toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+    }
   }
+
 }
 
 watch(walletChangeAll, (newValue) => {

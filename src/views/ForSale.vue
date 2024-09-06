@@ -144,11 +144,11 @@ function emptyAll() {
 async function payMethodsFn() {
   const data = {
     "date": "2024-06-10 08:49:00",
-    "discount_id":null,
+    "discount_id":userInfo.value?.id,
     "certificate_id": null,
     "card_id": null,
     "card_sum": null,
-    "discount_sum": null,
+    "discount_sum": userInfo.value?.sum,
     "certificate_sum": null,
     "type": activeRightArrow.value ? "return" : 'sale',
     "sale": null,
@@ -158,7 +158,7 @@ async function payMethodsFn() {
     "goods": listPostGoods.value,
     archive: true
   }
-  console.log(data)
+
   try {
     const res = await useAxios(`rmk`, {
       method: 'POST',
