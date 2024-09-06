@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, watchEffect} from 'vue';
+import {ref, watch, watchEffect, onMounted} from 'vue';
 import InputText from "primevue/inputtext";
 import InputIcon from "primevue/inputicon";
 import IconField from "primevue/iconfield";
@@ -13,6 +13,12 @@ import DiscountCard from "@/components/ForSale/DiscountCard.vue";
 import FilterFastGoods from "@/components/ForSale/FilterFastGoods.vue";
 import ManualDiscount from "@/components/ForSale/ManualDiscount.vue";
 import AddUserInfo from "@/components/ForSale/AddUserInfo.vue";
+import {useRouter} from "vue-router";
+import ArciveList from "@/components/ForSale/ArciveList.vue";
+import {useToast} from "primevue/usetoast";
+
+const router = useRouter();
+const toast = useToast();
 
 const openFastGoods = ref(false);
 const selectedGoods = ref();
@@ -32,6 +38,13 @@ const activeManual = ref(false);
 const openManualModal = ref(false);
 const saleSum = ref(0);
 const userInfoModal = ref(false);
+const handSale = ref(0);
+const discountSale = ref(0);
+const searchProducts = ref('');
+const countArchive = ref(0);
+const openArchiveList = ref(false);
+const getIdSale = ref(null);
+const disCount = ref();
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -46,6 +59,8 @@ const getIdProducts = async (event) => {
   productsId.value = res.result.data.map((el) => ({
     products: el.name,
     code: el.id,
+    good_id: el.id,
+    amount: el.amount + 1,
     img: el.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
     vendorCode: el.vendor_code,
     price: el.price,
@@ -56,12 +71,14 @@ getIdProducts();
 
 function userInfoFn(info) {
   userInfo.value = info
-  saleSum.value += Number(info.sum)
+  discountSale.value += Number(info?.sum)
+  saleSum.value += Number(info?.sum)
   openDiscount.value = false
 }
 
 function postSaleFn(info) {
-  saleSum.value += info
+  saleSum.value = info
+  handSale.value += info
   openManualModal.value = false
 }
 
@@ -127,19 +144,90 @@ function closeManual() {
   activeManual.value = false
 }
 
+function emptyAll() {
+  openDeposit.value = false
+  listPostGoods.value = []
+  activeRightArrow.value = false
+  getAllSum.value = 0
+}
+
+async function payMethodsFn() {
+  const data = {
+    "date": "2024-06-10 08:49:00",
+    "discount_id": userInfo.value?.id,
+    "certificate_id": null,
+    "card_id": null,
+    "card_sum": null,
+    "discount_sum": userInfo.value?.sum,
+    "certificate_sum": null,
+    "type": activeRightArrow.value ? "return" : 'sale',
+    "sale": handSale.value,
+    "for_payment": payCount.value - handSale.value,
+    "changes": null,
+    "cash_sum": null,
+    "goods": listPostGoods.value,
+    "archive": true
+  }
+
+  try {
+    const res = await useAxios(`rmk`, {
+      method: 'POST',
+      data: data
+    })
+    toast.add({severity: 'success', summary: 'Аннулировано!', detail: 'Успешно Аннулировано', life: 1500});
+    if (res.errors === null) {
+      router.go()
+    }
+  } catch (e) {
+    toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+  }
+}
+
+async function getArchiveCount() {
+  try {
+    const res = await useAxios(`rmk/count/archive`)
+    countArchive.value = res.result.count
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+getArchiveCount()
+
+async function getArchive(id) {
+  try {
+    const res = await useAxios(`rmk/${id.value.id}`)
+    getIdSale.value = res.result.sale
+    payCount.value = res.result.for_payment
+    disCount.value = res.result.discount
+    listPostGoods.value = res.result?.goods.map((el) => ({
+      products: el.good.name,
+      good_id: el.good.id,
+      amount: el.amount,
+      img: el.good.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
+      vendorCode: el.good.vendor_code,
+      price: Number(el.price),
+    }));
+    openArchiveList.value = false
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+getArchiveCount()
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
-
     listGoods.value.hide();
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
       return total + (el?.price || 0);
     }, 0)
+    searchProducts.value = ''
   }
 });
 watchEffect(() => {
   getAllSum.value = listPostGoods.value.reduce((total, el) => {
-    return total + (el?.price * el?.count || 0);
+    return total + (el?.price * el?.amount || 0);
   }, 0)
   payCount.value = getAllSum.value
 })
@@ -158,6 +246,7 @@ watchEffect(() => {
             <InputText
                 @focus="(e)=>{listGoods.toggle(e)}"
                 class="w-full"
+                v-model="searchProducts"
                 @input="getIdProducts"
                 placeholder="Поиск по названию, артикулу, штрих-коду"
             />
@@ -188,7 +277,7 @@ watchEffect(() => {
           </div>
         </div>
         <hr class="mt-[24px]">
-        <div class="mt-[30px] overflow-style-for-sale overflow-y-scroll h-[750px]">
+        <div class="mt-[30px] overflow-style-for-sale h-[750px]">
           <div class="text-[20px] leading-[20px] text-[#141C30] font-semibold">
             Товары ({{ listPostGoods.length }})
           </div>
@@ -208,11 +297,11 @@ watchEffect(() => {
               <div
                   class="flex p-[10px] gap-[15px] items-center bg-[#F2F2F2]  rounded-[90px] col-span-3 w-[139px] mt-[-7px]">
                 <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
-                        @click="infoGoods.count > 1 ? infoGoods.count-- : null"><i
+                        @click="infoGoods.amount > 1 ? infoGoods.amount-- : null"><i
                     class="pi pi-minus text-[#3935E7]"></i></button>
-                <div class="text-[#000] text-[18px] leading-[18px] text-center">{{ infoGoods.count }}</div>
+                <div class="text-[#000] text-[18px] leading-[18px] text-center">{{ infoGoods.amount }}</div>
                 <button v-ripple class="rounded-full py-[8px] px-[14px] bg-white"
-                        @click="addCountFn(infoGoods.count++)"><i
+                        @click="addCountFn(infoGoods.amount++)"><i
                     class="pi pi-plus text-[#3935E7]"></i>
                 </button>
               </div>
@@ -226,7 +315,7 @@ watchEffect(() => {
                 <div>
                   <div class="text-[15px] leading-[15px] font-medium text-[#808BA0]">Сумма</div>
                   <div class="mt-[10px] text-[#000] text-[18px] leading-[18px] font-bold">
-                    {{ formatPrice(infoGoods.price * infoGoods.count) }}
+                    {{ formatPrice(infoGoods.price * infoGoods.amount) }}
                   </div>
                 </div>
                 <div @click="deleteFn(index)" class="flex justify-center items-center">
@@ -239,7 +328,12 @@ watchEffect(() => {
       </div>
       <div class="  bg-white">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
-          <fin-button severity="warning" class="p-button-lg" icon="pi pi-pencil" label="Ануллир. чека (2)"/>
+          <div class="flex gap-2 footer-btn-pencil">
+            <fin-button @click="openArchiveList = true" severity="warning" class="w-[10%]" icon="pi pi-pencil"/>
+            <fin-button @click="payMethodsFn" severity="warning" class="p-button-lg" icon="pi pi-pencil"
+                        :label="`Отложить чек (${countArchive})`"/>
+          </div>
+
           <div class="">
             Кассир: {{ userName.name }}
           </div>
@@ -290,7 +384,7 @@ watchEffect(() => {
       </div>
       <div class="flex justify-between items-center border-t py-[24px] ">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">К оплате</div>
-        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(payCount)}}
+        <div class="font-semibold text-[34px] leading-[24px] text-[#141C30]">{{ formatPrice(payCount - handSale) }}
           <span
               class="text-[24px]">сум</span></div>
       </div>
@@ -300,18 +394,28 @@ watchEffect(() => {
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
-  <DepositMoney :dis-count="saleSum" :sale-sum="payCount" :open-deposit-money="openDeposit"
+  <DepositMoney @closeEmpty="emptyAll" :goods-post="listPostGoods" :sale-post="handSale" :typeSale="activeRightArrow"
+                :discount-id="userInfo?.id" :dis-count="discountSale" :sale-sum="payCount - handSale"
+                :open-deposit-money="openDeposit"
                 @close-modal="openDeposit=false"/>
-  <DiscountCard @post-info-user="userInfoFn" :sale-sum="getAllSum" :open-deposit-money="openDiscount"
+  <DiscountCard :discountInfo="disCount" @post-info-user="userInfoFn" :sale-sum="getAllSum"
+                :open-deposit-money="openDiscount"
                 @close-modal="closeDiscount"/>
+
   <FilterFastGoods @postProducts="getFilterGoods" :open-fast-goods="openImgModal" @close-modal="openImgModal = false"/>
-  <ManualDiscount @postSale="postSaleFn" :open-deposit-money="openManualModal"
+  <ManualDiscount :get-id-sale="getIdSale" @postSale="postSaleFn" :open-deposit-money="openManualModal"
                   @close-modal="closeManual"/>
   <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
+  <ArciveList @postArchive="getArchive" :open-fast-goods="openArchiveList" @close-modal="openArchiveList=false"/>
 
 </template>
 
 <style lang="scss">
+.footer-btn-pencil{
+  .p-button{
+   height: 46px !important;
+  }
+}
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s;
 }
@@ -321,26 +425,30 @@ watchEffect(() => {
   opacity: 0;
 }
 
-  .overflow-style-for-sale::-webkit-scrollbar {
-    width: 4px !important;
-    height: 3px !important;
-  }
+.overflow-style-for-sale {
+  overflow: auto; /* Ensure the element can scroll if needed */
+}
 
-  .overflow-style-for-sale::-webkit-scrollbar-track {
-    background-color: #f1f1f1 !important;
-    height: 3px !important;
-  }
+.overflow-style-for-sale::-webkit-scrollbar {
+  width: 3px; /* Default width */
+  height: 3px; /* Height for horizontal scrollbar */
+}
 
-  .overflow-style-for-sale::-webkit-scrollbar-thumb {
-    background-color: #3935E7 !important;
-    border-radius: 6px !important;
-    height: 3px !important;
-  }
 
-  .overflow-style-for-sale::-webkit-scrollbar-thumb:hover {
-    background-color: #3935E7;
-    height: 3px !important;
-  }
+.overflow-style-for-sale::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  height: 3px;
+}
+
+.overflow-style-for-sale::-webkit-scrollbar-thumb {
+  background-color: #3935E7;
+  border-radius: 6px;
+  height: 3px;
+}
+
+.overflow-style-for-sale::-webkit-scrollbar-thumb:hover {
+  background-color: #3935E7;
+}
 
 .filter-goods {
   .p-inputtext {

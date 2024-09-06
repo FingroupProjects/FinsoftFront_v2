@@ -1,6 +1,6 @@
 <script setup>
 import Dialog from "primevue/dialog";
-import {ref, watch,computed} from "vue";
+import {ref, watch, computed} from "vue";
 import Calculate from "@/components/ForSale/Calculate.vue";
 import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -9,8 +9,11 @@ import 'swiper/css';
 import ComplexPayment from "@/components/ForSale/ComplexPayment.vue";
 import ComplexPaymentInputs from "@/components/ForSale/ComplexPaymentInputs.vue";
 import Toast from 'primevue/toast'
+import {useToast} from "primevue/usetoast";
+import {useRouter} from "vue-router";
 
-const emit = defineEmits(['close-modal', 'postProducts'])
+
+const emit = defineEmits(['close-modal', 'postProducts', 'closeEmpty'])
 const props = defineProps({
   openDepositMoney: {
     type: Boolean,
@@ -23,8 +26,26 @@ const props = defineProps({
   disCount: {
     type: Number,
     default: 0
+  },
+  discountId: {
+    type: Number,
+    default: null
+  },
+  typeSale: {
+    type: Boolean,
+    default: false
+  },
+  salePost: {
+    type: Number,
+    default: null
+  },
+  goodsPost: {
+    type: Array,
+    default: []
   }
-})
+});
+const toast = useToast();
+const router = useRouter()
 const modules = ref([])
 const selectFilter = ref(0);
 const walletNumbers = ref(0);
@@ -32,10 +53,10 @@ const change = ref(0);
 const cardPay = ref(0);
 const walletChangeAll = ref(0);
 const selectPayMethods = ref(0);
-const postProducts = ref([]);
 const bonusValue = ref(0);
 const certificationValue = ref(0);
-const allSum = ref(null);
+const idComplex = ref(null);
+const cardsId = ref(null);
 
 const filterList = ref([
   {
@@ -64,6 +85,11 @@ function calculateFn(numbers) {
     } else change.value = 0
   } else {
     cardPay.value = Number(numbers)
+    if (cardsId.value === null) {
+      cardsId.value = payMethods.value[0].code
+    } else {
+      cardsId.value
+    }
     if (cardPay.value > props.saleSum) {
       return change.value = cardPay.value - props.saleSum
     } else change.value = 0
@@ -72,8 +98,9 @@ function calculateFn(numbers) {
   walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
 }
 
-function togglePay(index) {
+function togglePay(index, id) {
   selectPayMethods.value = index;
+  cardsId.value = id
 }
 
 async function cardFn() {
@@ -94,6 +121,7 @@ cardFn()
 
 function getBonusCard(value) {
   bonusValue.value = Number(value)
+
   if (bonusValue.value > props.saleSum) {
     return change.value = bonusValue.value - props.saleSum
   } else change.value = 0
@@ -101,17 +129,56 @@ function getBonusCard(value) {
 
 }
 
-function certificationFn(value) {
+function certificationFn(value, id) {
+  idComplex.value = id
   certificationValue.value = Number(value)
   if (certificationValue.value > props.saleSum) {
     return change.value = certificationValue.value - props.saleSum
   } else change.value = 0
   walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
 }
+
 const adjustedSaleSum = computed(() => {
   const totalPayments = walletNumbers.value + cardPay.value + bonusValue.value + certificationValue.value;
   return props.saleSum - totalPayments < 0 ? 0 : props.saleSum - totalPayments;
 });
+
+async function payMethodsFn() {
+  const data = {
+    "date": "2024-06-10 08:49:00",
+    "discount_id": props.discountId,
+    "certificate_id": idComplex.value,
+    "card_id": cardsId.value,
+    "card_sum": cardPay.value,
+    "discount_sum": bonusValue.value,
+    "certificate_sum": certificationValue.value,
+    "type": props.typeSale ? "return" : 'sale',
+    "sale": props.salePost,
+    "for_payment": (walletNumbers.value + cardPay.value) - change.value,
+    "changes": change.value,
+    "cash_sum": walletNumbers.value,
+    "goods": props.goodsPost
+  }
+  console.log(data)
+  if ((walletNumbers.value + cardPay.value) >= props.saleSum) {
+    try {
+      const res = await useAxios(`rmk`, {
+        method: 'POST',
+        data: data
+      })
+      toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
+      emit('closeEmpty');
+      console.log(res)
+      if (res.errors === null) {
+        router.go()
+      }
+
+    } catch (e) {
+      toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
+    }
+  }
+
+}
 
 watch(walletChangeAll, (newValue) => {
   if (newValue > props.saleSum) {
@@ -135,7 +202,7 @@ watch(walletChangeAll, (newValue) => {
           </div>
         </div>
         <fin-button icon="pi pi-arrow-right" class="p-button-2xl" severity="info"
-                    label="Закрыть чек" @click="emit('postProducts',postProducts)"/>
+                    label="Закрыть чек" @click="payMethodsFn"/>
       </div>
     </template>
     <div class="flex gap-4">

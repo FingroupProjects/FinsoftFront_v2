@@ -1,13 +1,7 @@
 <script setup>
 import Dialog from "primevue/dialog";
-import {ref} from "vue";
-import Calculate from "@/components/ForSale/Calculate.vue";
-import formatPrice from "@/constants/formatNumber.js";
+import {ref, watch} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
-
-import IconField from "primevue/iconfield";
-import InputIcon from "primevue/inputicon";
-import InputText from "primevue/inputtext";
 import PhoneNumber from "@/components/ForSale/PhoneNumber.vue";
 
 const emit = defineEmits(['close-modal', 'postInfoUser'])
@@ -19,6 +13,10 @@ const props = defineProps({
   saleSum: {
     type: Number,
     default: 0
+  },
+  discountInfo:{
+    type: Object,
+    default: null
   }
 })
 
@@ -45,7 +43,6 @@ async function postPhone(numbers) {
   }
 }
 
-
 async function cardFn() {
   try {
     const res = await useAxios(`/good-group`)
@@ -58,7 +55,14 @@ async function cardFn() {
     console.log(e)
   }
 }
+watch(() => props.discountInfo, (newValue) => {
+  if (newValue) {
+    postPhone(newValue.phone).then(()=>{
+      postFn()
+    })
 
+  }
+});
 function postFn() {
   if (infoUser.value) {
     emit('postInfoUser', infoUser.value)

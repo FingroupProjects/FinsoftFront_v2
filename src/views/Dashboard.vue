@@ -1,6 +1,5 @@
 <script setup>
 import Sidebar from "@/components/Sidebar.vue"
-import {ref} from 'vue'
 import {useSidebar} from "@/store/sidebar.js";
 
 const store = useSidebar()
@@ -9,16 +8,14 @@ const store = useSidebar()
 <template>
   <div class="transition-all">
     <Sidebar/>
-    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[100px]':store.activeSidebar === false}">
-      <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" :class="{'sm:mt-[0] pt-[0]':store.activeSidebar===false}">
+    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[80px]':store.activeSidebar === false}">
+      <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" >
         <div class="gap-4">
           <router-view></router-view>
         </div>
       </div>
     </div>
   </div>
-
-
 </template>
 
 <style lang="scss">
@@ -43,7 +40,13 @@ const store = useSidebar()
   margin-left: 50px;
   background-color: #F2F2F2 !important;
   border-radius: 70px !important;
-  padding: 10px !important;
+  padding: 7px !important;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  font-size: 11px !important;
+  justify-content: center;
+  align-items: center;
   color: #808BA0 !important;
 }
 </style>
