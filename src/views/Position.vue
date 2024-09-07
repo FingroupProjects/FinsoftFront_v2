@@ -22,6 +22,10 @@ import CreateOrganizationBill from "@/components/organizationBillComponents/Crea
 import MethodsUnit from "@/components/unitComponents/MethodsUnit.vue";
 import ViewUnit from "@/components/unitComponents/ViewUnit.vue";
 import CreateUnit from "@/components/unitComponents/CreateUnit.vue";
+import MethodsPosition from "@/components/positionComponents/MethodsPosition.vue";
+import ViewPosition from "@/components/positionComponents/ViewPosition.vue";
+import CreatePosition from "@/components/positionComponents/CreatePosition.vue";
+import PositionFilter from "@/components/positionComponents/PositionFilter.vue";
 
 const {
   findCurrency,
@@ -100,7 +104,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
   try {
-    const res = await useAxios(`/unit`, {params});
+    const res = await useAxios(`/position`, {params});
 
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
@@ -177,7 +181,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Ед. Изм"/>
+  <header-purchase header-title="Должности"/>
   <Loader v-if="loader"/>
   <div v-else>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
@@ -216,7 +220,7 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsUnit @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsPosition @get-product="getProductMethods" :select-products="selectedProduct"
                            v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -310,9 +314,9 @@ getProducts();
         :dismissable="false"
     >
 
-      <view-unit :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-position :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                          :openModalClose="openInfoModal"/>
-      <CreateUnit v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreatePosition v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -322,7 +326,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <position-filter @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
 

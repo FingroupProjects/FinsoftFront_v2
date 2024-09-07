@@ -19,19 +19,18 @@ import Loader from "@/components/ui/Loader.vue";
 import MethodsCounterparty from "@/components/counterparty/MethodsCounterparty.vue";
 import ViewOrganizationBill from "@/components/organizationBillComponents/ViewOrganizationBill.vue";
 import CreateOrganizationBill from "@/components/organizationBillComponents/CreateOrganizationBill.vue";
-import MethodsUnit from "@/components/unitComponents/MethodsUnit.vue";
-import ViewUnit from "@/components/unitComponents/ViewUnit.vue";
-import CreateUnit from "@/components/unitComponents/CreateUnit.vue";
-
-const {
-  findCurrency,
-  currency,
-  loading
-} = useStaticApi();
+import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
+import MethodsUser from "@/components/userComponents/MethodsUser.vue";
+import ViewUser from "@/components/userComponents/ViewUser.vue";
+import CreateUser from "@/components/userComponents/CreateUser.vue";
+import MethodsEmployee from "@/components/employeeComponents/MethodsEmployee.vue";
+import ViewEmployee from "@/components/employeeComponents/ViewEmployee.vue";
+import CreateEmployee from "@/components/employeeComponents/CreateEmployee.vue";
+import FilterEmployee from "@/components/employeeComponents/FilterEmployee.vue";
 
 const visibleRight = ref(false);
 const products = ref([]);
-const selectedCurrency = ref(null);
+const selectedOrganization = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
@@ -86,21 +85,20 @@ const handleFiltersUpdate = (filters) => {
   getProducts(filters);
   visibleFilter.value = false
 }
-
 async function getProducts(filters = {}) {
   const params = {
     itemsPerPage: selectPage.value.count,
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    currency_id: selectedCurrency.value?.code,
-    deleted_at: selectedStatus.value?.code,
+    currency_id: selectedOrganization.value?.code,
+    deleted: selectedStatus.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
   };
   try {
-    const res = await useAxios(`/unit`, {params});
+    const res = await useAxios(`/employee`, {params});
 
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
@@ -165,7 +163,7 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch(selectedCurrency, () => {
+watch(selectedOrganization, () => {
   getProducts();
 });
 
@@ -177,7 +175,7 @@ getProducts();
 </script>
 
 <template>
-  <header-purchase header-title="Ед. Изм"/>
+  <header-purchase header-title="Сотрудники"/>
   <Loader v-if="loader"/>
   <div v-else>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
@@ -216,7 +214,7 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsUnit @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsEmployee @get-product="getProductMethods" :select-products="selectedProduct"
                            v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -248,6 +246,64 @@ getProducts();
           </template>
           <template #body="slotProps">
             {{ slotProps.data.name }}
+          </template>
+        </Column>
+        <Column field="name" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('name',index)">
+              Номер телефона <i
+
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.phone }}
+          </template>
+        </Column>
+        <Column field="name" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('name',index)">
+              Email<i
+
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.email }}
+          </template>
+        </Column>
+        <Column field="date" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('date',index)">
+              Дата добавления <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
           </template>
         </Column>
 
@@ -310,9 +366,9 @@ getProducts();
         :dismissable="false"
     >
 
-      <view-unit :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-employee :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                          :openModalClose="openInfoModal"/>
-      <CreateUnit v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreateEmployee v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -322,7 +378,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-employee @updateFilters="handleFiltersUpdate"/>
   </Sidebar>
   <Toast/>
 
