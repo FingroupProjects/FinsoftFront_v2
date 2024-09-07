@@ -3,7 +3,7 @@ import {onMounted, reactive, ref} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import formatInputAmount from "@/constants/formatInput.js";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import FloatLabel from "primevue/floatlabel";
 import {useAxios} from "@/composable/useAxios.js";
 import {useToast} from "primevue/usetoast";
@@ -13,6 +13,7 @@ import {required} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import DatePicker from "primevue/datepicker";
+import InputText from "primevue/inputtext";
 
 const props = defineProps({
   productId: {
@@ -21,11 +22,16 @@ const props = defineProps({
   data: Object
 });
 
+const selectedCurrency = ref(null);
+const selectedPayment = ref(null);
+const selectedPriceType = ref(null);
+const editingRows = ref([]);
 const showForm = ref(false)
 const toast = useToast();
 
 const getCPList = ref([]);
 const createValuess = reactive({
+  id:"",
   name: "",
   date: "",
   comment: "",
@@ -49,6 +55,27 @@ const getSeverity = (status) => {
     };
   }
 };
+
+const onRowEditSave = async (editedRowData) => {
+  try {
+    await updateCpAgreement(editedRowData);
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: "Agreement updated successfully",
+      life: 3000
+    });
+  } catch (error) {
+    console.error("Update failed:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to update agreement",
+      life: 3000
+    });
+  }
+};
+
 
 const ruless = reactive({
   name: {required},
@@ -76,14 +103,12 @@ const clearInputValues = () => {
 const {
   findOrganization,
   organization,
-  loadingOrganization,
   findCurrency,
   currency,
   loading,
-    findPriceType,
-    loadPriceType,
-    priceTypes
-
+  findPriceType,
+  loadPriceType,
+  priceTypes
 } = useStaticApi();
 
 async function addCpAgreement() {
@@ -126,6 +151,58 @@ async function addCpAgreement() {
   }
 }
 
+
+async function updateCpAgreement(agreementToUpdate) {
+  const result = await v$.value.$validate();
+  console.log('num', agreementToUpdate.newData.contract_number)
+
+  try {
+    if (!agreementToUpdate) {
+      console.error('No agreement specified for update');
+      return;
+    }
+
+    const res = await useAxios(`/cpAgreement/${agreementToUpdate.data.id}`, {
+      method: "PATCH",
+      data: {
+        comment: agreementToUpdate.comment,
+        contact_person: agreementToUpdate.newData.contact_person,
+        contract_number: agreementToUpdate.newData.contract_number,
+        currency_id: agreementToUpdate.newData.currency?.id,
+        counterparty_id: agreementToUpdate.newData.counterparty?.id,
+        organization_id: agreementToUpdate.newData.organization?.id,
+        date: agreementToUpdate.newData.date,
+        name: agreementToUpdate.newData.name,
+        payment_id: agreementToUpdate.newData.payment?.id,
+        price_type_id: agreementToUpdate.newData.price_type?.id
+      }
+    });
+
+    console.log('Update response:', res);
+    getAgreements()
+  } catch (e) {
+    console.error('Error updating agreement:', e);
+  }
+}
+
+
+
+function updateCurrencyName(data, value) {
+  data.currency.name = value.name;
+  data.currency = { ...data.currency, name: value.name };
+  data.currency.id = value.code;
+}
+function updatePaymentName(data, value) {
+  if (!data.payment) {
+    data.payment = {};
+  }
+  data.payment.name = value?.name || '';
+  data.payment.id = value?.code || '';
+}
+function updatePriceTypeName(data, value) {
+  data.price_type.name = value.name;
+}
+
 onMounted(function (){
   findCurrency()
   findOrganization()
@@ -158,8 +235,8 @@ const confirmDelete = async (index) => {
 };
 async function getGood() {
   const item = props.data;
-    getCPList.value = item.counterpartyAgreement;
-    console.log(item, getCPList.value);
+  getCPList.value = item.counterpartyAgreement;
+
 }
 function toggleForm() {
   showForm.value = !showForm.value
@@ -167,11 +244,13 @@ function toggleForm() {
 
 onMounted(async () => {
   await getGood()
+  await getAgreements()
 });
 
 async function getAgreements() {
   try {
     const res = await useAxios(`/cpAgreement/getAgreementByCounterpartyId/${props.productId}`);
+    console.log('result', getCPList.value)
     return getCPList.value = res.result.data
   } catch (e) {
     console.log(e);
@@ -199,20 +278,21 @@ async function getAgreements() {
           showIcon
           v-model="createValuess.date"
           dateFormat="dd.mm.yy"
-          :class="{ 'p-invalid': v$.date.$error }"
+          :class="{ 'p-invalid': v$.date.$error && createValuess.date}"
           iconDisplay="input"
           class="w-full"
       >
       </DatePicker>
+
       <label for="dd-city">Дата</label>
     </FloatLabel>
-        <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-4" v-model="createValuess.name"/>
-        <fin-input :class="{ 'p-invalid': v$.contract_person.$error }" placeholder="Контакная лицо" class="col-span-4" v-model="createValuess.contract_person"/>
-        <fin-input :class="{ 'p-invalid': v$.contact_number.$error }" placeholder="Номер контракта" class="col-span-4" v-model="createValuess.contact_number"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error && createValuess.name}" placeholder="Наименование" class="col-span-4" v-model="createValuess.name"/>
+        <fin-input :class="{ 'p-invalid': v$.contract_person.$error && createValuess.contract_person}" placeholder="Контакная лицо" class="col-span-4" v-model="createValuess.contract_person"/>
+        <fin-input :class="{ 'p-invalid': v$.contact_number.$error && createValuess.contact_number}" placeholder="Номер контракта" class="col-span-4" v-model="createValuess.contact_number"/>
     <FloatLabel class="col-span-4">
-      <Dropdown
+      <Select
           v-model="createValuess.organization"
-          :class="{ 'p-invalid': v$.currency.$error }"
+          :class="{ 'p-invalid': v$.currency.$error && createValuess.organization}"
           @click="findOrganization"
           :loading="loading"
           :options="organization"
@@ -222,13 +302,13 @@ async function getAgreements() {
         <template #value>
           {{ createValuess.organization?.name }}
         </template>
-      </Dropdown>
+      </Select>
       <label for="dd-city">Организация</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
-      <Dropdown
+      <Select
           v-model="createValuess.currency"
-          :class="{ 'p-invalid': v$.currency.$error }"
+          :class="{ 'p-invalid': v$.currency.$error && createValuess.currency}"
           @click="findCurrency"
           :loading="loading"
           :options="currency"
@@ -238,13 +318,13 @@ async function getAgreements() {
         <template #value>
           {{ createValuess.currency?.name }}
         </template>
-      </Dropdown>
+      </Select>
       <label for="dd-city">Валюта</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
-      <Dropdown
+      <Select
           v-model="createValuess.payment"
-          :class="{ 'p-invalid': v$.payment.$error }"
+          :class="{ 'p-invalid': v$.payment.$error && createValuess.payment}"
           @click="findCurrency"
           :loading="loading"
           :options="currency"
@@ -254,13 +334,13 @@ async function getAgreements() {
         <template #value>
           {{ createValuess.payment?.name }}
         </template>
-      </Dropdown>
-      <label for="dd-city">Валюта</label>
+      </Select>
+      <label for="dd-city">Валюта оплаты</label>
     </FloatLabel>
     <FloatLabel class="col-span-4">
-      <Dropdown
+      <Select
           v-model="createValuess.priceType"
-          :class="{ 'p-invalid': v$.priceType.$error }"
+          :class="{ 'p-invalid': v$.priceType.$error && createValuess.priceType}"
           @click="findPriceType"
           :loading="loadPriceType"
           :options="priceTypes"
@@ -270,7 +350,7 @@ async function getAgreements() {
         <template #value>
           {{ createValuess.priceType?.name }}
         </template>
-      </Dropdown>
+      </Select>
       <label for="dd-city">Тип цены</label>
     </FloatLabel>
     <fin-button
@@ -283,95 +363,97 @@ async function getAgreements() {
 
   </div>
 
-  <div  class="table-create dropdown-status">
+  <div class="table-create Select-status">
     <DataTable
+        :value="getCPList"
         scrollable
         scrollHeight="660px"
-        dataKey="id"
-        :value="getCPList"
+        v-model:editingRows="editingRows"
+        @row-edit-save="onRowEditSave"
+        editMode="row"
         tableStyle="min-width: 100%"
+        dataKey="id"
     >
+      <!-- Наименование -->
+      <Column field="name" header="Наименование">
+        <template #editor="{ data, field }">
+          <input-text v-model="data[field]"  fluid />
+        </template>
+      </Column>
 
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-            Наименование
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.name }}
+      <!-- Контакная лицо (already defined) -->
+      <Column field="contact_person" header="Контакная лицо">
+        <template #editor="{ data, field }">
+          <input-text v-model="data[field]"  fluid />
         </template>
       </Column>
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-            Контакная лицо
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.contact_person }}
+
+      <!-- Номер контракта -->
+      <Column field="contract_number" header="Номер контракта">
+        <template #editor="{ data, field }">
+          <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid />
         </template>
       </Column>
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-              Номер контракта
-          </div>
-        </template>
-        <template #sorticon="{index}">
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.contract_number }}
-        </template>
-      </Column>
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-            Валюта
-          </div>
-        </template>
-        <template #sorticon="{index}">
+
+      <!-- Валюта -->
+      <Column field="currency" header="Валюта">
+        <template #editor="{ data }">
+          <FloatLabel class="col-span-4">
+            <Select
+                v-model="selectedCurrency"
+                :options="currency"
+                optionLabel="name"
+                class="w-[110px]"
+                @update:modelValue="(value) => updateCurrencyName(data, value)"
+            />
+          </FloatLabel>
         </template>
         <template #body="slotProps">
-          {{ slotProps?.data.currency?.name }}
+          {{ slotProps.data.currency.name }}
         </template>
       </Column>
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-            Валюта оплаты
-          </div>
-        </template>
-        <template #sorticon="{index}">
+
+
+      <!-- Валюта оплаты -->
+      <Column field="currency" header="Валюта оплаты">
+        <template #editor="{ data }">
+          <FloatLabel class="col-span-4">
+            <Select
+                v-model="selectedPayment"
+                :options="currency"
+                optionLabel="name"
+                class="w-[110px]"
+                @click="findCurrency"
+                @update:modelValue="(value) => updatePaymentName(data, value)"
+            />
+          </FloatLabel>
         </template>
         <template #body="slotProps">
-          {{ slotProps?.data.payment?.name }}
+          {{ slotProps.data.payment?.name }}
         </template>
       </Column>
-      <Column field="image">
-        <template #header="{index}">
-          <div class="w-full h-full">
-            Тип цены
-          </div>
-        </template>
-        <template #sorticon="{index}">
+
+      <!-- Тип цены -->
+      <Column field="priceType" header="Тип цены">
+        <template #editor="{ data }">
+          <FloatLabel class="col-span-4">
+            <Select
+                v-model="selectedPriceType"
+                :options="priceTypes"
+                optionLabel="name"
+                class="w-[130px]"
+                @click="findPriceType"
+                @update:modelValue="(value) => updatePriceTypeName(data, value)"
+            />
+          </FloatLabel>
         </template>
         <template #body="slotProps">
-          {{ slotProps?.data.price_type?.name }}
+          {{ slotProps.data.price_type.name }}
         </template>
       </Column>
-      <Column field="status" :sortable="true" header="">
-        <template #header="{index}">
-          <div class="w-full h-full" >
-            Статус
-          </div>
-        </template>
-        <template #sorticon="">
-        </template>
+
+      <!-- Статус -->
+      <Column field="status" :sortable="true" header="Статус">
         <template #body="slotProps">
           <Tag
               :value="getSeverity(slotProps.data?.deleted_at).name"
@@ -379,6 +461,8 @@ async function getAgreements() {
           />
         </template>
       </Column>
+
+      <!-- Actions (Delete Icon) -->
       <Column field="quantity" header="">
         <template #body="{ data }">
           <i
@@ -387,8 +471,14 @@ async function getAgreements() {
           ></i>
         </template>
       </Column>
+      <Column :rowEditor="true"
+              style="width: 0; min-width: 7rem;"
+              bodyStyle="text-align:center">
+      </Column>
+
     </DataTable>
   </div>
+
 </template>
 <style lang="scss">
 .table-create {
@@ -401,7 +491,7 @@ async function getAgreements() {
   }
 }
 
-.dropdown-status {
+.Select-status {
   .p-select {
     border-radius: 10px;
   }

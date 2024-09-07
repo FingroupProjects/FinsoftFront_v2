@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref, watch, watchEffect} from 'vue';
 import Select from "primevue/dropdown";
-import PurchasingTable from "@/components/purchase/PurchasingTable.vue";
+import InventoryGoodsTable from "@/components/inventarization/InventoryGoodsTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
@@ -47,8 +47,7 @@ const visibleToast = ref(false)
 const viewDocument = ref({
   organizationName: '',
   author: '',
-  counterpartyName: '',
-  counterpartyAgreementName: '',
+  responsiblePerson: '',
   storageName: '',
   date: null,
   currencyName: '',
@@ -65,7 +64,9 @@ const {
   findOrganization,
   organization,
   findCounterparty,
-  counterparty
+  counterparty,
+  findEmployee,
+  employeeList,
 } = useStaticApi()
 
 const userName = {
@@ -104,14 +105,13 @@ const getView = async () => {
   viewDocument.value = {
     organizationName: item.organization,
     author: item.author,
-    counterpartyName: item.counterparty,
-    counterpartyAgreementName: item.counterpartyAgreement,
     storageName: item.storage,
     date: new Date(item.date),
     postDate: item.date,
     currencyName: item.currency,
     doc_number: item.doc_number,
-    comments: item.comment
+    comments: item.comment,
+    responsiblePerson: item.responsiblePerson
   };
 };
 
@@ -124,24 +124,24 @@ const updateView = async () => {
     try {
       const data = {
         organization_id: viewDocument.value.organizationName?.id || viewDocument.value.organizationName?.code,
-        counterparty_id: viewDocument.value.counterpartyName?.id || viewDocument.value.counterpartyName?.code,
         storage_id: viewDocument.value.storageName?.id || viewDocument.value.storageName?.code,
         date: moment(viewDocument.value.date).format('YYYY-MM-DD HH:mm:ss'),
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
-        counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comments,
+        responsible_person_id: viewDocument.value.responsiblePerson?.id || viewDocument.value.responsiblePerson?.code,
         goods: store.postGoods
       };
 
-      const res = await useAxios(`/document/update/${props.productId}`, {
+      const res = await useAxios(`/document/inventory/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
-      if (approved.value === true)
+      if(approved === true)
         toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
     } catch (e) {
       console.error(e);
-      toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
+      if(approved === true)
+        toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
     } finally {
       loaderSave.value = false
       store.postGoods = []
@@ -152,7 +152,7 @@ const updateView = async () => {
 const approve = async () => {
   try {
     await updateView()
-    const res = await useAxios(`/document/provider/approve`, {
+    const res = await useAxios(`/document/inventory/approve`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -170,7 +170,7 @@ const approve = async () => {
 const unApprove = async () => {
   try {
     //  await updateView()
-    const res = await useAxios(`/document/provider/unApprove`, {
+    const res = await useAxios(`/document/inventory/unApprove`, {
       method: 'POST',
       data: {
         ids: [`${props.productId}`]
@@ -206,17 +206,6 @@ async function saveFnDialog() {
 }
 
 watchEffect(() => {
-
-  if (viewDocument.value.counterpartyName &&
-      viewDocument.value.counterpartyName.agreement &&
-      viewDocument.value.counterpartyName.agreement.length > 0) {
-    viewDocument.value.counterpartyAgreementName = {
-      name: viewDocument.value.counterpartyName.agreement[0].name,
-      code: viewDocument.value.counterpartyName.agreement[0].id,
-    };
-  } else {
-    viewDocument.counterpartyAgreementName = null;
-  }
   if (hasOrganization === true) viewDocument.organizationName = {
     name: organizationHas.name,
     code: organizationHas.id
@@ -261,7 +250,6 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error:', error);
   }
-  console.log('view', viewDocument.value)
 });
 </script>
 <template>
@@ -321,7 +309,7 @@ onMounted(async () => {
       <div v-if="isOpen"
            class="view-doc form grid grid-cols-12 gap-[16px] mt-[30px] border-b border-t pt-[30px] pb-[20px]">
 
-        <FloatLabel class="col-span-4">
+        <FloatLabel class="col-span-4 ">
           <DatePicker
               showIcon
               v-model="viewDocument.date"
@@ -354,23 +342,15 @@ onMounted(async () => {
         </FloatLabel>
 
         <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" option-label="name">
+          <Select v-model="viewDocument.responsiblePerson" :options="employeeList" class="w-full" option-label="name"
+                  @click="findEmployee" >
             <template #value>
-              {{ viewDocument.counterpartyName?.name }}
+              {{ viewDocument.responsiblePerson?.name }}
             </template>
           </Select>
-          <label for="dd-city">Поставщик</label>
+          <label for="dd-city">Ответственное лицо</label>
         </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
-                  :options="agreementList" @click="getAgreement" option-label="name">
-            <template #value>
-              {{ viewDocument.counterpartyAgreementName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Договор</label>
-        </FloatLabel>
+
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.storageName" :options="storage" class="w-full" option-label="name"
                   @click="findStorage">
@@ -380,15 +360,7 @@ onMounted(async () => {
           </Select>
           <label for="dd-city">Склад</label>
         </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.currencyName" :options="currency" class="w-full" option-label="name"
-                  @click="findCurrency" disabled style="background-color: #fff !important;">
-            <template #value>
-              {{ viewDocument.currencyName?.name }}
-            </template>
-          </Select>
-          <label for="dd-city">Валюта</label>
-        </FloatLabel>
+
         <FloatLabel class="col-span-12 mt-[10px]">
           <Textarea class="w-full" v-model="viewDocument.comments" style="min-height: 20px" rows="2" cols="20"/>
           <label for="dd-city">Комментарий</label>
@@ -417,7 +389,11 @@ onMounted(async () => {
         </fin-button>
       </div>
     </div>
-    <purchasing-table :info-goods="props.date" @editModal="changeModal"/>
+    <inventory-goods-table :info-goods="props.date" @editModal="changeModal"/>
+
+    <div class="text-[20px] font-[600] absolute bottom-[40px]">
+      Автор: {{ userName.name }}
+    </div>
   </div>
 
 
