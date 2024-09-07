@@ -217,6 +217,10 @@ async function getArchive(id) {
       price: Number(el.price),
     }));
     openArchiveList.value = false
+    if (Number(getIdSale.value)) activeManual.value = true
+    else activeManual.value = false
+    if (Number(disCount.value)) activeDiscount.value = true
+    else activeDiscount.value = false
   } catch (e) {
     console.log(e)
   }
@@ -233,6 +237,7 @@ function closeReturnSale() {
   activeRightArrow.value = !activeRightArrow.value
   openModalReturnSale.value = false
 }
+
 async function getReturnSale(id) {
   try {
     const res = await useAxios(`rmk/${id.value.id}`)
@@ -248,18 +253,31 @@ async function getReturnSale(id) {
       price: Number(el.price),
     }));
     openModalReturnSale.value = false
+    if (Number(getIdSale.value)) activeManual.value = true
+    else activeManual.value = false
+    if (Number(disCount.value)) activeDiscount.value = true
+    else activeDiscount.value = false
   } catch (e) {
     console.log(e)
   }
 }
+
 watch(selectedGoods, (newValue) => {
   if (newValue) {
-    listPostGoods.value.push(newValue);
+    const existingItemIndex = listPostGoods.value.findIndex(item => item.good_id === newValue.good_id);
+    if (existingItemIndex !== -1) {
+      listPostGoods.value[existingItemIndex].amount += 1;
+    } else {
+      listPostGoods.value.push(newValue);
+    }
+
     listGoods.value.hide();
+
     getAllSum.value = listPostGoods.value.reduce((total, el) => {
-      return total + (el?.price || 0);
-    }, 0)
-    searchProducts.value = ''
+      return total + (el?.price * el.amount || 0);
+    }, 0);
+
+    searchProducts.value = '';
   }
 });
 watchEffect(() => {
@@ -282,7 +300,6 @@ watchEffect(() => {
           <IconField class="col-span-9">
             <InputIcon class="pi pi-search "/>
             <InputText
-                autofocus
                 ref="searchInput"
                 @focus="(e)=>{listGoods.toggle(e)}"
                 class="w-full"
@@ -428,7 +445,8 @@ watchEffect(() => {
           <span
               class="text-[24px]">сум</span></div>
       </div>
-      <fin-button :disabled="listPostGoods.length ===0" @click="openDeposit = true" icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full"
+      <fin-button :disabled="listPostGoods.length ===0" @click="openDeposit = true" icon="pi pi-arrow-right"
+                  class="mt-[24px] p-button-3xl w-full"
                   severity="success"
                   :label="!activeRightArrow?'Внести деньги': 'Возврат денег'"/>
     </div>
