@@ -26,10 +26,13 @@ function postDiscount(sale) {
   }
 }
 
-watch(() => props.getIdSale, (newValue) => {
+watch(() => Number(props.getIdSale), (newValue) => {
   if (newValue) {
     postDiscount();
     emit('postSale', saleSum.value); // Emit the current saleSum value
+  } else if (Number(newValue) === 0) {
+    saleSum.value = 0
+    emit('postSale', saleSum.value);
   }
 });
 
