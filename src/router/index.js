@@ -112,6 +112,21 @@ const routes = [
                 component: () => import('@/views/Currency.vue'),
             },
             {
+                path: '/employee',
+                name: 'employee',
+                component: () => import('@/views/Employee.vue'),
+            },
+            {
+                path: '/hiring',
+                name: 'hiring',
+                component: () => import('@/views/staff/Hiring.vue'),
+            },
+            {
+                path: '/position',
+                name: 'position',
+                component: () => import('@/views/Position.vue'),
+            },
+            {
                 path: '/storage',
                 name: 'storage',
                 component: () => import('@/views/Storage.vue'),
