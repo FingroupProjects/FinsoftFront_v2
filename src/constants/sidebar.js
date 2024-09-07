@@ -293,11 +293,11 @@ export default [
                     },
                     {
                         label: 'Кадровое перемещение',
-                        route: '/'
+                        route: '/staffMovement'
                     },
                     {
                         label: 'Увольнение',
-                        route: '/'
+                        route: '/firing'
                     },
                     {
                         label: 'Начисление зарплаты',

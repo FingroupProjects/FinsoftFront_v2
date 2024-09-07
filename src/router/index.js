@@ -127,6 +127,16 @@ const routes = [
                 component: () => import('@/views/Position.vue'),
             },
             {
+                path: '/staffMovement',
+                name: 'staffMovement',
+                component: () => import('@/views/staff/StaffMovement.vue'),
+            },
+            {
+                path: '/firing',
+                name: 'firing',
+                component: () => import('@/views/staff/Firing.vue'),
+            },
+            {
                 path: '/storage',
                 name: 'storage',
                 component: () => import('@/views/Storage.vue'),

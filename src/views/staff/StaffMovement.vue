@@ -24,6 +24,10 @@ import MethodsHiring from "@/components/hiring/MethodsHiring.vue";
 import ViewHiring from "@/components/hiring/ViewHiring.vue";
 import CreateHiring from "@/components/hiring/CreateHiring.vue";
 import FilterHiring from "@/components/hiring/FilterHiring.vue";
+import MethodsStaffMovement from "@/components/staffMovement/MethodsStaffMovement.vue";
+import ViewStaffMovement from "@/components/staffMovement/ViewStaffMovement.vue";
+import CreateStaffMovement from "@/components/staffMovement/CreateStaffMovement.vue";
+import FilterStaffMovement from "@/components/staffMovement/FilterStaffMovement.vue";
 
 const {
   findDepartment,
@@ -119,7 +123,7 @@ async function getProducts(filters = {}) {
   };
 
   try {
-    const res = await useAxios(`/hiring`, {params});
+    const res = await useAxios(`/employeeMovement`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
@@ -219,7 +223,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header-purchase ref="headerPurchaseRef" header-title="Прием  на работу"  />
+  <header-purchase ref="headerPurchaseRef" header-title="Кадровое перемещение"  />
   <Loader v-if="loader"/>
   <div v-else>
 
@@ -267,7 +271,7 @@ onMounted(() => {
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsHiring @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsStaffMovement @get-product="getProductMethods" :select-products="selectedProduct"
                        v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -485,9 +489,9 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-hiring :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-staff-movement :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                      :openModalClose="openInfoModal"/>
-      <CreateHiring v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreateStaffMovement v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -497,7 +501,7 @@ onMounted(() => {
       position="right"
       class="filters-purchase"
   >
-    <filter-hiring :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+    <filter-staff-movement :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 

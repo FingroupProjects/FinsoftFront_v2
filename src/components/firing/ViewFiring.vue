@@ -42,27 +42,17 @@ const initialValue = ref(null);
 const loaderSave = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
-  comment: "",
-  position: "",
-  department: "",
-  salary: "",
-  schedule: "",
   basis: "",
-  hiring_date: new Date,
+  firing_date: new Date,
   employee: "",
   organization: "",
   doc_number: ""
-
 });
 const rules = reactive({
   datetime24h: {required},
-  position: {required},
   employee: {required},
-  department: {required},
-  salary: {required},
-  schedule: {required},
   basis: {required},
-  hiring_date: {required},
+  firing_date: {required},
   organization: {required}
 });
 
@@ -72,18 +62,9 @@ const {
   findOrganization,
   organization,
   loadingOrganization,
-  findDepartment,
-  departments,
-  loadDepartment,
-  findPosition,
-  positions,
-  loadPositions,
   findEmployee,
   employeeList,
   loadingEmployee,
-  findSchedule,
-  schedules,
-  loadSchedule
 } = useStaticApi();
 
 const userName = {
@@ -99,13 +80,9 @@ const getView = async () => {
 
   createValues.organization = item.organization;
   createValues.employee = item.employee;
-  createValues.salary = item.salary;
-  createValues.hiring_date = new Date(item.hiring_date);
+  createValues.firing_date = new Date(item.firing_date);
   createValues.author = item.author;
-  createValues.department = item.department;
   createValues.basis = item.basis;
-  createValues.position = item.position;
-  createValues.schedule = item.schedule;
   createValues.datetime24h = new Date(item.date);
   createValues.doc_number = item.doc_number;
 
@@ -121,22 +98,18 @@ const updateView = async () => {
     loaderSave.value = true
     try {
       const data = {
-        organization_id: createValues.organization?.id || createValues.organization?.code,
-        employee_id: createValues.employee?.id || createValues.employee?.code,
-        salary: createValues.salary,
-        date: moment(createValues.date).format('YYYY-MM-DD '),
-        hiring_date: moment(createValues.hiring_date).format('YYYY-MM-DD '),
-        department_id: createValues.department?.id || createValues.department?.code,
-        position_id: createValues.position?.id || createValues.position?.code,
-        schedule_id: createValues.schedule?.id || createValues.schedule?.code,
+        date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
+        organization_id: createValues.organization.id,
+        firing_date: createValues.firing_date,
         basis: createValues.basis,
+        employee_id: createValues.employee.id
       };
 
-      const res = await useAxios(`/hiring/${props.productId}`, {
+      const res = await useAxios(`/firing/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
-        toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
+      toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
@@ -173,9 +146,6 @@ watch(productsInfo, (newVal) => {
 onMounted(function () {
   getView(),
       findOrganization(),
-      findDepartment(),
-      findPosition(),
-      findSchedule(),
       findEmployee()
 })
 
@@ -191,7 +161,8 @@ onMounted(function () {
           <div>
             <div class="header-title">Просмотр №{{
                 createValues.doc_number
-              }}   </div>
+              }}
+            </div>
             <div class="header-text text-[#808BA0] font-semibold mt-1.5 text-[12px]">
             </div>
           </div>
@@ -207,6 +178,7 @@ onMounted(function () {
               showIcon
               v-model="createValues.datetime24h"
               :class="{ 'p-invalid': v$.datetime24h.$error }"
+
               dateFormat="dd.mm.yy"
               fluid
               hideOnDateTimeSelect
@@ -225,7 +197,7 @@ onMounted(function () {
               optionLabel="name"
               class="w-full"
           >
-          <label for="dd-city">Организация</label>
+            <label for="dd-city">Организация</label>
             <template #value>
               {{ createValues.organization?.name }}
             </template>
@@ -240,72 +212,30 @@ onMounted(function () {
               optionLabel="name"
               class="w-full"
           >
-          <label for="dd-city">Сотрудник</label>
+            <label for="dd-city">Сотрудник</label>
             <template #value>
               {{ createValues.employee?.name }}
             </template>
           </Dropdown>
         </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Dropdown
-              v-model="createValues.department"
-              :class="{ 'p-invalid': v$.department.$error }"
-              :options="departments"
-              :loading="loadDepartment"
-              optionLabel="name"
-              class="w-full"
-          >
-          <label for="dd-city">Отдел</label>
-          <template #value>
-            {{ createValues.department?.name }}
-          </template>
-          </Dropdown>
-        </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Dropdown
-              v-model="createValues.position"
-              :class="{ 'p-invalid': v$.position.$error }"
-              :loading="loadPositions"
-              :options="positions"
-              optionLabel="name"
-              class="w-full"
-          >
-            <template #value>{{ createValues.position?.name }}</template>
-          </Dropdown>
-          <label for="dd-city">Должность</label>
-        </FloatLabel>
+
         <FloatLabel class="col-span-4">
           <DatePicker
               showIcon
-              v-model="createValues.hiring_date"
-              :class="{ 'p-invalid': v$.hiring_date.$error }"
+              v-model="createValues.firing_date"
+              :class="{ 'p-invalid': v$.firing_date.$error }"
+
               dateFormat="dd.mm.yy"
               fluid
               hideOnDateTimeSelect
               iconDisplay="input"
               class="w-full"
           />
-          <label for="dd-city">Дата приема</label>
+          <label for="dd-city">Дата увольнения</label>
         </FloatLabel>
-        <FloatLabel class="col-span-4">
-          <Dropdown
-              v-model="createValues.schedule"
-              :class="{ 'p-invalid': v$.schedule.$error }"
-              :loading="loadSchedule"
-              :options="schedules"
-              optionLabel="name"
-              class="w-full"
-          >
-          <label for="dd-city">График</label>
-          <template #value>
-            {{ createValues.schedule?.name }}
-          </template>
-          </Dropdown>
-        </FloatLabel>
-        <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
         <FloatLabel class="col-span-12 mt-[10px]">
-          <Textarea :class="{ 'p-invalid': v$.schedule.$error }" v-model="createValues.basis" class="w-full"
+          <Textarea :class="{ 'p-invalid': v$.basis.$error }" v-model="createValues.basis" class="w-full"
                     style="min-height: 20px" rows="8" cols="20"/>
           <label for="dd-city">Основание</label>
         </FloatLabel>
