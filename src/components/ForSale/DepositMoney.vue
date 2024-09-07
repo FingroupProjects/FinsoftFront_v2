@@ -168,14 +168,17 @@ async function payMethodsFn() {
       })
       toast.add({severity: 'success', summary: 'Создано!', detail: 'Документ успешно создано!', life: 1500});
       emit('closeEmpty');
-      console.log(res)
-      if (res.errors === null) {
-        router.go()
-      }
+      setTimeout(() => {
+        if (res.errors === null) {
+          router.go()
+        }
+      }, 1000)
 
     } catch (e) {
       toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
     }
+  }else{
+    toast.add({severity: 'error', summary: 'Не достатично срество ', life: 1500});
   }
 
 }

@@ -70,7 +70,7 @@ function pushNumbers() {
 <template>
   <div>
     <IconField class="w-full filter-goods deposit-money">
-      <InputMask id="phone" @keydown="handleKeydown" v-model="searchQuery" mask="(999)99 999-9999"
+      <InputMask autofocus id="phone" @keydown="handleKeydown" v-model="searchQuery" mask="(999)99 999-9999"
                  placeholder="(___)__ ___-____" fluid/>
 
     </IconField>

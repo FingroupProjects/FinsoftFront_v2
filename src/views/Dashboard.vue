@@ -1,14 +1,19 @@
 <script setup>
 import Sidebar from "@/components/Sidebar.vue"
-import {useSidebar} from "@/store/sidebar.js";
+import {ref} from "vue";
+let activeSidebar = ref(JSON.parse(localStorage.getItem('activeSidebar')));
 
-const store = useSidebar()
+function changeFn() {
+  activeSidebar.value = !activeSidebar.value;
+  localStorage.setItem('activeSidebar', JSON.stringify(activeSidebar.value));
+
+}
 </script>
 
 <template>
   <div class="transition-all">
-    <Sidebar/>
-    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[80px]':store.activeSidebar === false}">
+    <Sidebar @value-fn="changeFn"/>
+    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[80px]':activeSidebar}">
       <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" >
         <div class="gap-4">
           <router-view></router-view>

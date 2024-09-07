@@ -15,21 +15,24 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-})
-const modules = ref([])
+});
+
+const modules = ref([]);
 const fastGoodsList = ref([]);
 const checked = ref(Array(fastGoodsList.value.length).fill(false));
 const selectFilter = ref(null);
 const filterList = ref(null);
 const filterSelect = ref(null);
 const postProducts = ref([]);
-const postSelect = ref()
+const postSelect = ref();
+
 const imgURL = import.meta.env.VITE_IMG_URL;
 
 const toggleFilter = (index, number) => {
   filterSelect.value = `/goods-by-group-ids`
   selectFilter.value = index;
   postSelect.value = number
+
   getGoodGroup();
 };
 
@@ -41,11 +44,11 @@ async function getGoodGroup(event) {
   try {
     const res = await useAxios(`good${filterSelect.value || ''}`, {params});
 
-    const data = Array.isArray(res.result.data) && res.result.data.length > 0
+    const data = res.result.data && res.result.data.length > 0
         ? res.result.data
         : res.result;
     fastGoodsList.value = data.map(el => ({
-      count: 1,
+      amount: 1,
       products: el.name,
       description: el.description,
       vendorCode: el?.vendor_code,
@@ -69,7 +72,6 @@ async function getFilter() {
         code: el.id,
         name: el.name,
       }
-
     })
   } catch (e) {
     console.log()
@@ -167,7 +169,7 @@ const checkedCount = computed(() => {
               <button
                   v-ripple
                   :class="{ active: selectFilter === index }"
-                  @click="toggleFilter(index,infoFilter.code,)"
+                  @click="toggleFilter(index,infoFilter.code)"
                   class="font-semibold btn-transition text-[18px] w-[200px] leading-[20px] text-[#3935E7] bg-[#ECF1FB] h-[48px] rounded-[90px]
                px-[20px] py-[12px] flex items-center justify-center"
               >
@@ -183,7 +185,7 @@ const checkedCount = computed(() => {
       <div class="grid grid-cols-12 gap-5">
         <div class="relative fast-good-checkbox col-span-3" v-for="(infoFastGoods,index) in fastGoodsList"
              :key="index">
-          <div v-ripple @click="toggleChecked(index, infoFastGoods)"
+          <div v-ripple @click="toggleChecked(infoFastGoods.id, infoFastGoods)"
                class="bg-[#F3F3F3] rounded-[16px] overflow-hidden">
             <img :src="infoFastGoods?.img" class="w-[205px] h-[130px] rounded-[16px] object-cover" alt="">
           </div>
@@ -191,8 +193,8 @@ const checkedCount = computed(() => {
               class="text-ellipsis block w-[205px] mt-3 whitespace-nowrap overflow-hidden font-medium text-[18px] text-[#000] leading-[25px]">
             {{ infoFastGoods?.description }}
           </div>
-          <Checkbox v-model="checked[index]" :binary="true"
-                    @change="handleCheckboxChange(infoFastGoods, checked[index])"/>
+          <Checkbox v-model="checked[infoFastGoods.id]" :binary="true"
+                    @change="handleCheckboxChange(infoFastGoods, checked[infoFastGoods.id])"/>
         </div>
       </div>
     </div>
