@@ -1,16 +1,17 @@
 <script setup>
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import OverlayBadge from "primevue/overlaybadge";
 import NavigationSidebar from "@/components/NavigationSidebar.vue";
 import {useSidebar} from "@/store/sidebar.js";
 
 const emit = defineEmits(['valueFn']);
-const store = useSidebar()
+
 const isOpen = ref(false);
 const dataOpened = ref(null);
 const valueLeft = ref(true);
+let activeSidebar = ref(JSON.parse(localStorage.getItem('activeSidebar')) ?? true);
 
 const toggleOpen = (item) => {
   isOpen.value = !isOpen.value;
@@ -22,16 +23,25 @@ const toggleOpen = (item) => {
 };
 
 function sidebarFn() {
-  store.activeSidebar = false
+  activeSidebar.value = false;
+  localStorage.setItem('activeSidebar', JSON.stringify(activeSidebar.value));
+  emit('valueFn')
 }
 
-function changeFn(value) {
-  valueLeft.value = value
+function changeFn() {
+  activeSidebar.value = !activeSidebar.value;
+  localStorage.setItem('activeSidebar', JSON.stringify(activeSidebar.value));
+  emit('valueFn')
 }
+
+onMounted(() => {
+  activeSidebar.value = JSON.parse(localStorage.getItem('activeSidebar')) ?? true;
+})
 </script>
 <template>
   <transition name="slide-fade">
-    <div v-if="store.activeSidebar">
+
+    <div v-if="activeSidebar">
       <nav class="fixed top-0 z-50 w-full border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <div class="px-3 py-3 lg:px-5 lg:pl-3">
           <div class="flex items-center justify-between">
@@ -239,8 +249,7 @@ function changeFn(value) {
 <style lang="scss">
 @import "@/assets/style/colors.scss";
 
-
-.sidebar-animation{
+.sidebar-animation {
   animation: left-sidebar 0.2s linear forwards;
 }
 
@@ -252,6 +261,7 @@ function changeFn(value) {
     transform: translateX(0px);
   }
 }
+
 .p-panelmenu-header-active {
   background: $primary-color !important;
   border-width: 1px !important;

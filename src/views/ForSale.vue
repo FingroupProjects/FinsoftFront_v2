@@ -16,6 +16,8 @@ import AddUserInfo from "@/components/ForSale/AddUserInfo.vue";
 import {useRouter} from "vue-router";
 import ArciveList from "@/components/ForSale/ArciveList.vue";
 import {useToast} from "primevue/usetoast";
+import ReturnSale from "@/components/ForSale/ReturnSale.vue";
+import {list} from "postcss";
 
 const router = useRouter();
 const toast = useToast();
@@ -45,6 +47,7 @@ const countArchive = ref(0);
 const openArchiveList = ref(false);
 const getIdSale = ref(null);
 const disCount = ref();
+const openModalReturnSale = ref(false);
 
 const imgURL = import.meta.env.VITE_IMG_URL;
 const userName = {
@@ -72,7 +75,7 @@ getIdProducts();
 function userInfoFn(info) {
   userInfo.value = info
   discountSale.value += Number(info?.sum)
-  saleSum.value += Number(info?.sum)
+
   openDiscount.value = false
 }
 
@@ -174,10 +177,15 @@ async function payMethodsFn() {
       method: 'POST',
       data: data
     })
+
     toast.add({severity: 'success', summary: 'Аннулировано!', detail: 'Успешно Аннулировано', life: 1500});
-    if (res.errors === null) {
-      router.go()
-    }
+
+    setTimeout(() => {
+      if (res.errors === null) {
+        router.go()
+      }
+    }, 1000)
+
   } catch (e) {
     toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
   }
@@ -215,6 +223,35 @@ async function getArchive(id) {
 }
 
 getArchiveCount()
+
+function openReturnSale() {
+  activeRightArrow.value = !activeRightArrow.value
+  openModalReturnSale.value = true
+}
+
+function closeReturnSale() {
+  activeRightArrow.value = !activeRightArrow.value
+  openModalReturnSale.value = false
+}
+async function getReturnSale(id) {
+  try {
+    const res = await useAxios(`rmk/${id.value.id}`)
+    getIdSale.value = res.result.sale
+    payCount.value = res.result.for_payment
+    disCount.value = res.result.discount
+    listPostGoods.value = res.result?.goods.map((el) => ({
+      products: el.good.name,
+      good_id: el.good.id,
+      amount: el.amount,
+      img: el.good.images.length > 0 && el.images[0].image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg', import.meta.url),
+      vendorCode: el.good.vendor_code,
+      price: Number(el.price),
+    }));
+    openModalReturnSale.value = false
+  } catch (e) {
+    console.log(e)
+  }
+}
 watch(selectedGoods, (newValue) => {
   if (newValue) {
     listPostGoods.value.push(newValue);
@@ -231,6 +268,7 @@ watchEffect(() => {
   }, 0)
   payCount.value = getAllSum.value
 })
+
 </script>
 
 <template>
@@ -238,12 +276,14 @@ watchEffect(() => {
     <div class="bg-[#fff] col-span-8 px-[30px] py-[24px] rounded-[16px] for-sale h-[100vh] overflow-y-scroll">
       <div>
         <div class="header-component font-semibold text-[26px] leading-[26px] text-[#000]">
-          Продажа
+          {{ !activeRightArrow ? 'Продажа' : 'Возврат' }}
         </div>
         <div class="filter-goods grid grid-cols-12 mt-4 gap-4">
           <IconField class="col-span-9">
             <InputIcon class="pi pi-search "/>
             <InputText
+                autofocus
+                ref="searchInput"
                 @focus="(e)=>{listGoods.toggle(e)}"
                 class="w-full"
                 v-model="searchProducts"
@@ -272,7 +312,7 @@ watchEffect(() => {
               <template #icon><img src="@/assets/img/iconFilterFale.svg" alt=""></template>
             </fin-button>
             <fin-button @click="openImgModal = true" icon="pi pi-images" class="w-full" severity="warning"/>
-            <fin-button icon="pi pi-arrow-right-arrow-left" @click="activeRightArrow=!activeRightArrow"
+            <fin-button icon="pi pi-arrow-right-arrow-left" @click="openReturnSale"
                         :severity="activeRightArrow ? 'success' : 'warning'" severity="warning"/>
           </div>
         </div>
@@ -345,7 +385,7 @@ watchEffect(() => {
     <div class="bg-[#fff] col-span-4 px-[30px] py-[24px] rounded-[16px] for-sale h-[63%]">
       <div class="flex justify-between">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">
-          Скидка
+
         </div>
         <fin-button @click="userInfoModal = true" icon="pi pi-plus" severity="warning" label="Дисконтная"/>
       </div>
@@ -388,9 +428,9 @@ watchEffect(() => {
           <span
               class="text-[24px]">сум</span></div>
       </div>
-      <fin-button @click="openDeposit = true" icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full"
+      <fin-button :disabled="listPostGoods.length ===0" @click="openDeposit = true" icon="pi pi-arrow-right" class="mt-[24px] p-button-3xl w-full"
                   severity="success"
-                  label="Внести деньги"/>
+                  :label="!activeRightArrow?'Внести деньги': 'Возврат денег'"/>
     </div>
   </div>
   <FastGoods @postProducts="getFastProducts" :open-fast-goods="openFastGoods" @close-modal="openFastGoods=false"/>
@@ -407,15 +447,17 @@ watchEffect(() => {
                   @close-modal="closeManual"/>
   <AddUserInfo @closeModal="userInfoModal = false" :open-user-info="userInfoModal"/>
   <ArciveList @postArchive="getArchive" :open-fast-goods="openArchiveList" @close-modal="openArchiveList=false"/>
+  <ReturnSale @post-return-sale="getReturnSale" :open-return-sale="openModalReturnSale" @close-modal="closeReturnSale"/>
 
 </template>
 
 <style lang="scss">
-.footer-btn-pencil{
-  .p-button{
-   height: 46px !important;
+.footer-btn-pencil {
+  .p-button {
+    height: 46px !important;
   }
 }
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s;
 }
