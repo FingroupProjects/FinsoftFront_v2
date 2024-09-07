@@ -1,15 +1,17 @@
 <script setup>
-import {reactive, computed, ref} from "vue";
+import {reactive, watch, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
-const emit = defineEmits(["closeDialog", 'close-sidebar']);
 import {minLength, maxLength} from '@vuelidate/validators';
 import Checkbox from 'primevue/checkbox';
 
+const phoneError = ref(false);
+const emailError = ref(false);
+const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const toast = useToast();
   const roleList = ref([
     {
@@ -80,6 +82,42 @@ async function saveFn() {
   }
 }
 
+
+const formatPhoneNumber = (event) => {
+  let input = event.target.value;
+
+  input = input.replace(/[^\d+]/g, '');
+
+  if (input.length > 13) {
+    input = input.slice(0, 13);
+  }
+
+
+  const phoneRegex = /^\+?\d{10,13}$/;
+
+  if (!phoneRegex.test(input)) {
+    phoneError.value = true;
+  } else {
+    phoneError.value = false;
+  }
+
+  createValues.phone = input;
+};
+
+
+
+const validateEmail = (event) => {
+  const email = event.target.value;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!emailRegex.test(email)) {
+    emailError.value = true;
+  } else {
+    emailError.value = false;
+  }
+};
+
 </script>
 
 <template>
@@ -109,13 +147,25 @@ async function saveFn() {
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
         <fin-input :class="{ 'p-invalid': v$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
         <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
-        <fin-input :class="{ 'p-invalid': v$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
-        <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
+        <fin-input
+            @input="formatPhoneNumber"
+            :class="{ 'p-invalid': phoneError || v$.phone.$error }"
+            placeholder="Телефон"
+            class="col-span-5"
+            v-model="createValues.phone"
+        />
+        <fin-input
+            placeholder="Почта"
+            class="col-span-5"
+            v-model="createValues.email"
+            @input="validateEmail"
+            :class="{ 'p-invalid': emailError }"
+        />
 
         <div class="form col-span-6 grid grid-cols-3 gap-[16px]">
           <div v-for="category of roleList" :key="category.code" class="flex items-center">
             <Checkbox v-model="createValues.roles" :inputId="category.code" name="category" :value="category.code" />
-            <label :for="category.code" class="ml-2">{{ category.name }}</label> <!-- Отступ между чекбоксом и лейблом -->
+            <label :for="category.code" class="ml-2">{{ category.name }}</label>
           </div>
         </div>
 

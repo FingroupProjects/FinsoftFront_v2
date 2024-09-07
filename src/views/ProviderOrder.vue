@@ -81,19 +81,24 @@ const pagination = ref({
 const selectPage = ref({
   count: 20,
 });
-
+// const emits = defineEmits(['postGoods']);
 const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
   createOpenModal.value = true
   dataInfo.value = product
   selectedProductId.value = product.id
+  // emits('postGoods', product);
 };
-
-const handleFiltersUpdate = (filters) => {
-  getProducts(filters);
+const clearFilter  = (filters) => {
   selectedStorage.value = null;
   selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+  getProducts()
+}
+const handleFiltersUpdate = (filters) => {
+  getProducts(filters);
   Object.assign(savedFilterValues, filters);
   visibleFilter.value = false
 }
@@ -471,7 +476,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" />
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 

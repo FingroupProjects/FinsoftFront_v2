@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -48,6 +48,10 @@ const orderBy = ref('id');
 const dataInfo = ref(null)
 const selectedStatus = ref();
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+const savedFilterValues = reactive({
+  roles:'',
+  deleted:''
+});
 
 const pageCounts = ref([
   {
@@ -83,10 +87,7 @@ const onRowClick = (event) => {
   selectedProductId.value = product.id
 };
 
-const handleFiltersUpdate = (filters) => {
-  getProducts(filters);
-  visibleFilter.value = false
-}
+
 
 async function getProducts(filters = {}) {
   const params = {
@@ -105,12 +106,25 @@ async function getProducts(filters = {}) {
 
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
+    console.log('logs', products.value)
     return products.value;
   } catch (e) {
     console.log(e)
   } finally {
     loader.value = false
   }
+}
+const handleFiltersUpdate = (filters) => {
+  getProducts(filters);
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false
+}
+const clearFilter  = (filters) => {
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+  getProducts()
 }
 
 function getProductMethods() {
@@ -150,6 +164,11 @@ const sortData = (field, index) => {
   else sortDesc.value = 'asc'
   getProducts()
 };
+async function closeFnVl() {
+  await getProducts();
+  visibleRight.value = false
+}
+
 const statusList = ref([
   {
     name: 'Активный',
@@ -160,17 +179,18 @@ const statusList = ref([
     code: 1
   },
 ])
-async function closeFnVl() {
-  await getProducts();
-  visibleRight.value = false
-}
+
 
 watch(selectedStatus, () => {
   getProducts();
 });
 
 
-getProducts();
+onMounted(async()=>{
+  await getProducts();
+})
+
+
 </script>
 
 <template>
@@ -215,7 +235,6 @@ getProducts();
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
       <MethodsCounterparty @get-product="getProductMethods" :select-products="selectedProduct"
                        v-if="!(!selectedProduct || !selectedProduct.length)"/>
-
       <DataTable
           scrollable
           scrollHeight="660px"
@@ -231,7 +250,6 @@ getProducts();
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('name',index)">
               Наименование <i
-
                 :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -391,7 +409,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-counterparty @updateFilters="handleFiltersUpdate" ></filter-counterparty>
+    <filter-counterparty :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter"/>
   </Sidebar>
   <Toast/>
 

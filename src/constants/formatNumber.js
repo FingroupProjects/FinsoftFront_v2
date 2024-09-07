@@ -1,3 +1,7 @@
 export default function formatPrice(price) {
-    return price?.toFixed(2);
+    const numericPrice = Number(price);
+    if (isNaN(numericPrice)) {
+        return '0.00';
+    }
+    return numericPrice.toFixed(2);
 }

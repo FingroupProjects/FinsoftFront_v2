@@ -174,7 +174,7 @@ async function updateCpAgreement(agreementToUpdate) {
         date: agreementToUpdate.newData.date,
         name: agreementToUpdate.newData.name,
         payment_id: agreementToUpdate.newData.payment?.id,
-        price_type_id: agreementToUpdate.newData.price_type?.id
+        price_type_id: agreementToUpdate.newData.price_type.id
       }
     });
 
@@ -201,6 +201,8 @@ function updatePaymentName(data, value) {
 }
 function updatePriceTypeName(data, value) {
   data.price_type.name = value.name;
+  data.price_type = { ...data.price_type, name: value.name };
+  data.price_type.id = value.code;
 }
 
 onMounted(function (){
@@ -257,8 +259,6 @@ async function getAgreements() {
   }
 }
 
-
-
 </script>
 
 <template>
@@ -278,7 +278,7 @@ async function getAgreements() {
           showIcon
           v-model="createValuess.date"
           dateFormat="dd.mm.yy"
-          :class="{ 'p-invalid': v$.date.$error && createValuess.date}"
+          :class="{ 'p-invalid': v$.date.$error}"
           iconDisplay="input"
           class="w-full"
       >
@@ -286,13 +286,13 @@ async function getAgreements() {
 
       <label for="dd-city">Дата</label>
     </FloatLabel>
-        <fin-input :class="{ 'p-invalid': v$.name.$error && createValuess.name}" placeholder="Наименование" class="col-span-4" v-model="createValuess.name"/>
-        <fin-input :class="{ 'p-invalid': v$.contract_person.$error && createValuess.contract_person}" placeholder="Контакная лицо" class="col-span-4" v-model="createValuess.contract_person"/>
-        <fin-input :class="{ 'p-invalid': v$.contact_number.$error && createValuess.contact_number}" placeholder="Номер контракта" class="col-span-4" v-model="createValuess.contact_number"/>
+        <fin-input :class="{ 'p-invalid': v$.name.$error}" placeholder="Наименование" class="col-span-4" v-model="createValuess.name"/>
+        <fin-input :class="{ 'p-invalid': v$.contract_person.$error }" placeholder="Контакная лицо" class="col-span-4" v-model="createValuess.contract_person"/>
+        <fin-input :class="{ 'p-invalid': v$.contact_number.$error }" placeholder="Номер контракта" class="col-span-4" v-model="createValuess.contact_number"/>
     <FloatLabel class="col-span-4">
       <Select
           v-model="createValuess.organization"
-          :class="{ 'p-invalid': v$.currency.$error && createValuess.organization}"
+          :class="{ 'p-invalid': v$.currency.$error}"
           @click="findOrganization"
           :loading="loading"
           :options="organization"
@@ -308,7 +308,7 @@ async function getAgreements() {
     <FloatLabel class="col-span-4">
       <Select
           v-model="createValuess.currency"
-          :class="{ 'p-invalid': v$.currency.$error && createValuess.currency}"
+          :class="{ 'p-invalid': v$.currency.$error}"
           @click="findCurrency"
           :loading="loading"
           :options="currency"
@@ -324,7 +324,7 @@ async function getAgreements() {
     <FloatLabel class="col-span-4">
       <Select
           v-model="createValuess.payment"
-          :class="{ 'p-invalid': v$.payment.$error && createValuess.payment}"
+          :class="{ 'p-invalid': v$.payment.$error}"
           @click="findCurrency"
           :loading="loading"
           :options="currency"
@@ -340,7 +340,7 @@ async function getAgreements() {
     <FloatLabel class="col-span-4">
       <Select
           v-model="createValuess.priceType"
-          :class="{ 'p-invalid': v$.priceType.$error && createValuess.priceType}"
+          :class="{ 'p-invalid': v$.priceType.$error}"
           @click="findPriceType"
           :loading="loadPriceType"
           :options="priceTypes"
@@ -391,7 +391,7 @@ async function getAgreements() {
       <!-- Номер контракта -->
       <Column field="contract_number" header="Номер контракта">
         <template #editor="{ data, field }">
-          <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid />
+          <input-text v-model="data[field]" type="number" :model-value="formatInputAmount(data[field])" fluid />
         </template>
       </Column>
 
@@ -405,7 +405,11 @@ async function getAgreements() {
                 optionLabel="name"
                 class="w-[110px]"
                 @update:modelValue="(value) => updateCurrencyName(data, value)"
-            />
+            >
+              <template #value>
+                {{data.currency.name}}
+              </template>
+            </Select>
           </FloatLabel>
         </template>
         <template #body="slotProps">
@@ -425,7 +429,11 @@ async function getAgreements() {
                 class="w-[110px]"
                 @click="findCurrency"
                 @update:modelValue="(value) => updatePaymentName(data, value)"
-            />
+            >
+              <template #value>
+                {{data.payment.name}}
+              </template>
+            </Select>
           </FloatLabel>
         </template>
         <template #body="slotProps">
@@ -444,7 +452,11 @@ async function getAgreements() {
                 class="w-[130px]"
                 @click="findPriceType"
                 @update:modelValue="(value) => updatePriceTypeName(data, value)"
-            />
+            >
+              <template #value>
+                {{data.price_type.name}}
+              </template>
+            </Select>
           </FloatLabel>
         </template>
         <template #body="slotProps">
@@ -453,7 +465,7 @@ async function getAgreements() {
       </Column>
 
       <!-- Статус -->
-      <Column field="status" :sortable="true" header="Статус">
+      <Column field="status" header="Статус">
         <template #body="slotProps">
           <Tag
               :value="getSeverity(slotProps.data?.deleted_at).name"
