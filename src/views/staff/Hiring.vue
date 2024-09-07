@@ -320,9 +320,9 @@ onMounted(() => {
             {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
           </template>
         </Column>
-        <Column field="category" :sortable="true" header="">
+        <Column field="employee" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('counterparty.name',index)">
+            <div class="w-full h-full" @click="sortData('employee.name',index)">
               Сотрудник <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -359,7 +359,7 @@ onMounted(() => {
         </Column>
         <Column field="price" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('sum',index)">
+            <div class="w-full h-full" @click="sortData('salary',index)">
               Оклад <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -377,7 +377,7 @@ onMounted(() => {
         </Column>
         <Column field="storage" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('storage.name',index)">
+            <div class="w-full h-full" @click="sortData('position.name',index)">
               Должность <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -416,7 +416,7 @@ onMounted(() => {
         </Column>
         <Column field="inventoryStatus" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('author.name',index)">
+            <div class="w-full h-full" @click="sortData('department.name',index)">
               Отдел <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -432,9 +432,9 @@ onMounted(() => {
             {{ slotProps.data?.department?.name }}
           </template>
         </Column>
-        <Column field="currency" :sortable="true" header="">
+        <Column field="currcency" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('currency.name',index)">
+            <div class="w-full h-full" @click="sortData('author.name',index)">
               Автор <i
                 :class="{
             'pi pi-arrow-down': openUp[index],

@@ -436,7 +436,7 @@ onMounted(() => {
             {{ slotProps.data?.department?.name }}
           </template>
         </Column>
-        <Column field="currency" :sortable="true" header="">
+        <Column field="currexncy" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('currency.name',index)">
               Автор <i

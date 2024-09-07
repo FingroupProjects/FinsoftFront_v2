@@ -29,6 +29,9 @@ export const useStaticApi = () => {
   const positions = ref([]);
   const departments = ref([]);
   const schedules = ref([]);
+
+  const months = ref([]);
+  const loadingMonth = ref(false)
   const loadingOperationPko = ref(false)
   const loadPriceType = ref(false)
   const loadSchedule = ref(false)
@@ -312,7 +315,22 @@ export const useStaticApi = () => {
       loadSchedule.value = false;
     }
   };
-
+  const findMonth = async () => {
+    try {
+      loadingMonth.value = true;
+      const res = await useAxios(`/months`);
+      return (months.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingMonth.value = false;
+    }
+  };
   return {
     storage,
     findCurrency,
@@ -361,6 +379,9 @@ export const useStaticApi = () => {
     findDepartment,
     findSchedule,
     loadSchedule,
-    schedules
+    schedules,
+    months,
+    loadingMonth,
+    findMonth
   };
 };
