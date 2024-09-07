@@ -8,7 +8,7 @@ import Select from "primevue/dropdown";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '../../constants/formatNumber.js'
+
 import {usePurchaseStore} from "@/store/pruchase.js";
 
 const emit = defineEmits([ 'editModal']);
@@ -68,6 +68,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
   }
+  sendData();
   clearInputValues();
 };
 
@@ -92,6 +93,8 @@ const confirmDeleteProduct = async (index, indexProduct) => {
         'permission': 1
       }
     });
+
+
   } catch (error) {
   }
 };
@@ -109,6 +112,10 @@ const userName = {
   name: localStorage.getItem("user_name"),
 };
 
+function sendData () {
+  emit('editModal', {editModalOpen:editModalOpen.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: goods?.value });
+}
+
 const onRowEditSave = (event) => {
   const {newData, index} = event;
   const oldProduct = goods.value[index];
@@ -124,7 +131,8 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal', editModalOpen.value);
+  sendData()
+
 };
 
 const getGood = async () => {
@@ -157,6 +165,7 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
+  await sendData();
 
 });
 watchEffect(() => {
@@ -197,7 +206,7 @@ watchEffect(() => {
     <DataTable
         :value="goods"
         scrollable
-        scrollHeight="280px"
+        scrollHeight="500px"
         class="mt-[21px]"
         v-model:editingRows="editingRows"
         @row-edit-save="onRowEditSave"
@@ -256,36 +265,7 @@ watchEffect(() => {
       </Column>
     </DataTable>
   </div>
-  <div class="summary-container">
-    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]">
-      <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-        Итого:
-      </div>
-      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
-        Автор: {{userName.name}}
-      </div>
-      <div class="flex gap-[49px]">
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Кол-во
-          </div>
-          {{ formatNumber(getAllProduct) }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Товаров
-          </div>
-          {{ goods?.length }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Сумма
-          </div>
-          {{ formatNumber(getAllSum) }}
-        </div>
-      </div>
-    </div>
-  </div>
+
 </template>
 
 <style lang="scss">

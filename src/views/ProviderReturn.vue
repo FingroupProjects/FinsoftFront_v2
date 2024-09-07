@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {reactive, ref, watch} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -46,6 +46,15 @@ const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
+const savedFilterValues = reactive({
+  startDate: '',
+  endDate: '',
+  organization_id: '',
+  currency_id: '',
+  author_id: '',
+  deleted: '',
+  active: ''
+});
 
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
@@ -82,11 +91,6 @@ const onRowClick = (event) => {
   dataInfo.value = product
   selectedProductId.value = product.id
 };
-
-const handleFiltersUpdate = (filters) => {
-  getProducts(filters);
-  visibleFilter.value = false
-}
 
 async function getProducts(filters = {}) {
   const params = {
@@ -144,6 +148,20 @@ const getSeverity = (status, deleted) => {
       };
   }
 };
+
+const handleFiltersUpdate = (filters) => {
+  getProducts(filters);
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+}
+const clearFilter  = (filters) => {
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+  getProducts()
+}
+
 
 function closeFn(result) {
   dataInfo.value = result
@@ -461,7 +479,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 
