@@ -13,7 +13,7 @@ function changeFn() {
 <template>
   <div class="transition-all">
     <Sidebar @value-fn="changeFn"/>
-    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[80px]':activeSidebar}">
+    <div class="pt-4 pl-4 pr-4 pb-0 animation-dashboard sm:ml-64 bg-[#ECF1FB]" :class="{'sm:ml-[80px]':!activeSidebar}">
       <div class="pt-4 pl-4 pr-4 pb-0 rounded-lg  dark:border-gray-700 mt-[28px]" >
         <div class="gap-4">
           <router-view></router-view>

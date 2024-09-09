@@ -57,6 +57,7 @@ const bonusValue = ref(0);
 const certificationValue = ref(0);
 const idComplex = ref(null);
 const cardsId = ref(null);
+const cardList = ref([]);
 
 const filterList = ref([
   {
@@ -79,29 +80,38 @@ const toggleFilter = (index) => {
 
 function calculateFn(numbers) {
   if (selectFilter.value === 0) {
-    walletNumbers.value = Number(numbers)
-    if (walletNumbers.value > props.saleSum) {
-      return change.value = walletNumbers.value - props.saleSum
-    } else change.value = 0
+    walletNumbers.value = Number(numbers);
+    change.value = walletNumbers.value > props.saleSum ? walletNumbers.value - props.saleSum : 0;
   } else {
-    cardPay.value = Number(numbers)
+    cardPay.value = Number(numbers);
     if (cardsId.value === null) {
-      cardsId.value = payMethods.value[0].code
-    } else {
-      cardsId.value
+      cardsId.value = payMethods.value[0].code;
     }
-    if (cardPay.value > props.saleSum) {
-      return change.value = cardPay.value - props.saleSum
-    } else change.value = 0
+    const existingCard = cardList.value.find(card => card.card_id === cardsId.value);
+    payMethods.value[selectPayMethods.value].sum = cardPay.value
+    if (!existingCard) {
+      cardList.value.push({
+        card_id: cardsId.value,
+        sum: payMethods.value[selectPayMethods.value].sum,
+        name: payMethods.value[selectPayMethods.value].name
+      });
+    } else {
+      existingCard.sum += cardPay.value;
+    }
+    change.value = cardList.value.reduce((total, card) => total + card.sum, 0) > props.saleSum ? cardList.value.reduce((total, card) => total + card.sum, 0) - props.saleSum : 0;
   }
 
-  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
+  walletChangeAll.value = walletNumbers.value + cardList.value.reduce((total, card) => total + card.sum, 0) + certificationValue.value + bonusValue.value;
 }
 
-function togglePay(index, id) {
+function togglePay(index, id, info) {
   selectPayMethods.value = index;
-  cardsId.value = id
+  cardsId.value = id;
 }
+
+const deleteCard = (index) => {
+  cardList.value.splice(index, 1);
+};
 
 async function cardFn() {
   try {
@@ -109,7 +119,8 @@ async function cardFn() {
     payMethods.value = res.result.map(el => {
       return {
         name: el.name,
-        code: el.id
+        code: el.id,
+        sum: 0
       }
     })
   } catch (e) {
@@ -125,7 +136,7 @@ function getBonusCard(value) {
   if (bonusValue.value > props.saleSum) {
     return change.value = bonusValue.value - props.saleSum
   } else change.value = 0
-  walletChangeAll.value = walletNumbers.value + cardPay.value + bonusValue.value + certificationValue.value
+  walletChangeAll.value = walletNumbers.value + cardList.value.reduce((total, card) => total + card.sum, 0) + bonusValue.value + certificationValue.value
 
 }
 
@@ -135,11 +146,11 @@ function certificationFn(value, id) {
   if (certificationValue.value > props.saleSum) {
     return change.value = certificationValue.value - props.saleSum
   } else change.value = 0
-  walletChangeAll.value = walletNumbers.value + cardPay.value + certificationValue.value + bonusValue.value
+  walletChangeAll.value = walletNumbers.value + cardList.value.reduce((total, card) => total + card.sum, 0) + certificationValue.value + bonusValue.value
 }
 
 const adjustedSaleSum = computed(() => {
-  const totalPayments = walletNumbers.value + cardPay.value + bonusValue.value + certificationValue.value;
+  const totalPayments = walletNumbers.value + cardList.value.reduce((total, card) => total + card.sum, 0) + bonusValue.value + certificationValue.value;
   return props.saleSum - totalPayments < 0 ? 0 : props.saleSum - totalPayments;
 });
 
@@ -148,8 +159,7 @@ async function payMethodsFn() {
     "date": "2024-06-10 08:49:00",
     "discount_id": props.discountId,
     "certificate_id": idComplex.value,
-    "card_id": cardsId.value,
-    "card_sum": cardPay.value,
+    "cards": cardList.value,
     "discount_sum": bonusValue.value,
     "certificate_sum": certificationValue.value,
     "type": props.typeSale ? "return" : 'sale',
@@ -159,8 +169,7 @@ async function payMethodsFn() {
     "cash_sum": walletNumbers.value,
     "goods": props.goodsPost
   }
-  console.log(data)
-  if ((walletNumbers.value + cardPay.value) >= props.saleSum) {
+  if ((walletNumbers.value + cardList.value.reduce((total, card) => total + card.sum, 0)) >= props.saleSum) {
     try {
       const res = await useAxios(`rmk`, {
         method: 'POST',
@@ -177,12 +186,14 @@ async function payMethodsFn() {
     } catch (e) {
       toast.add({severity: 'error', summary: e.response.data.message, life: 1500});
     }
-  }else{
+  } else {
     toast.add({severity: 'error', summary: 'Не достатично срество ', life: 1500});
   }
-
 }
 
+const totalCardPay = computed(() => {
+  return cardList.value.reduce((total, item) => total + item.sum, 0);
+});
 watch(walletChangeAll, (newValue) => {
   if (newValue > props.saleSum) {
     change.value = walletChangeAll.value -= props.saleSum
@@ -228,14 +239,13 @@ watch(walletChangeAll, (newValue) => {
             :slidesPerView="4"
             :spaceBetween="-5"
             :modules="modules"
-
         >
           <swiper-slide v-for="(infoFilter, index) in payMethods"
                         :key="index">
             <button
                 v-ripple
                 :class="{ active: selectPayMethods === index }"
-                @click="togglePay(index,infoFilter.code,)"
+                @click="togglePay(index,infoFilter.code,infoFilter)"
                 class="font-semibold btn-transition text-[18px] w-[200px] leading-[20px] text-[#3935E7] bg-[#ECF1FB] h-[60px] rounded-[12px]
                px-[20px] py-[12px] flex items-center justify-center"
             >
@@ -263,9 +273,18 @@ watch(walletChangeAll, (newValue) => {
           </div>
           <div class="flex justify-between">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Внесено платежной картой</div>
-            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(cardPay) }} <span
+            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(totalCardPay) }} <span
                 class="text-[16px]">сум</span>
             </div>
+          </div>
+          <div class="flex justify-between" v-show="cardList.length !==0" v-for="(item,index) in cardList" :key="index">
+            <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Внесено платежной картой
+              {{ item.name }}
+            </div>
+            <div class="font-semibold text-[20px] leading-[24px] text-[#141C30]">{{ formatPrice(item.sum) }} <span
+                class="text-[16px]">сум</span>
+            </div>
+            <div><span @click="deleteCard(index)" v-ripple class="pi pi-trash text-[16px] cursor-pointer"></span></div>
           </div>
           <div class="flex justify-between" v-if="bonusValue">
             <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">Бонусы дисконтной карты</div>

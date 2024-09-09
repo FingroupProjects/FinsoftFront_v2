@@ -291,7 +291,7 @@ watchEffect(() => {
 
 <template>
   <div class="grid grid-cols-12 gap-[14px]">
-    <div class="bg-[#fff] col-span-8 px-[30px] py-[24px] rounded-[16px] for-sale h-[100vh] overflow-y-scroll">
+    <div class="bg-[#fff] col-span-8 px-[30px] py-[24px] rounded-[16px] for-sale ">
       <div>
         <div class="header-component font-semibold text-[26px] leading-[26px] text-[#000]">
           {{ !activeRightArrow ? 'Продажа' : 'Возврат' }}
@@ -334,7 +334,7 @@ watchEffect(() => {
           </div>
         </div>
         <hr class="mt-[24px]">
-        <div class="mt-[30px] overflow-style-for-sale h-[750px]">
+        <div class="mt-[30px] overflow-style-for-sale h-[590px]">
           <div class="text-[20px] leading-[20px] text-[#141C30] font-semibold">
             Товары ({{ listPostGoods.length }})
           </div>
@@ -383,7 +383,7 @@ watchEffect(() => {
           </TransitionGroup>
         </div>
       </div>
-      <div class="  bg-white">
+      <div class="relative top-[30px]">
         <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
           <div class="flex gap-2 footer-btn-pencil">
             <fin-button @click="openArchiveList = true" severity="warning" class="w-[10%]" icon="pi pi-pencil"/>
