@@ -383,7 +383,7 @@ watchEffect(() => {
         </div>
       </div>
       <div class="relative top-[30px]">
-        <div class="flex justify-between items-center w-full border-t py-[22px]  px-[30px]">
+        <div class="flex justify-between items-center w-full border-t py-[22px] px-[30px]">
           <div class="flex gap-2 footer-btn-pencil">
             <fin-button @click="openArchiveList = true" severity="warning" class="w-[10%]" icon="pi pi-pencil"/>
             <fin-button @click="payMethodsFn" severity="warning" class="p-button-lg" icon="pi pi-pencil"
@@ -398,7 +398,7 @@ watchEffect(() => {
       </div>
     </div>
 
-    <div class="bg-[#fff] col-span-4 px-[30px] py-[24px] rounded-[16px] for-sale h-[63%]">
+    <div class="bg-[#fff] col-span-4 px-[30px] py-[24px] rounded-[16px] for-sale h-[67%]">
       <div class="flex justify-between">
         <div class="font-semibold text-[18px] leading-[18px] text-[#808BA0]">
 
