@@ -17,7 +17,6 @@ import {useRouter} from "vue-router";
 import ArciveList from "@/components/ForSale/ArciveList.vue";
 import {useToast} from "primevue/usetoast";
 import ReturnSale from "@/components/ForSale/ReturnSale.vue";
-import {list} from "postcss";
 
 const router = useRouter();
 const toast = useToast();
