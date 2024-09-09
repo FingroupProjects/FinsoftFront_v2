@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, watch, onMounted, reactive, ref} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
@@ -8,8 +8,10 @@ import Toast from "primevue/toast";
 import FinInput from "@/components/ui/Inputs.vue";
 import CounterpartyAgreements from "@/components/counterparty/CounterpartyAgreements.vue";
 import Checkbox from "primevue/checkbox";
-const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
+const phoneError = ref(false);
+const emailError = ref(false);
+const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const props = defineProps({
   productId: {
     required: true,
@@ -56,7 +58,7 @@ const fv$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
   const result = true
-    console.log(1)
+  createValues.roles = createValues.roles.map(role => role.id);
   if (result) {
     try {
       const res = await useAxios(`counterparty/${props.productId}`, {
@@ -69,13 +71,15 @@ async function saveFn() {
           roles: createValues.roles
         },
       });
+
       toast.add({
         severity: "success",
-        summary: "Success Message",
+        summary: "Обновлено",
         detail: "Message Content",
         life: 3000,
       });
       emit("closeDialog", res.result);
+      await getGood()
     } catch (e) {
       console.log(e);
       toast.add({
@@ -88,20 +92,61 @@ async function saveFn() {
   }
 }
 
-async function getGood() {
-    const item = props.data
-
+ async function getGood() {
+   const item = props.data
     createValues.name = item.name
     createValues.address = item.address
     createValues.phone = item.phone
     createValues.email = item.email
     createValues.roles = item.roles
-  console.log(createValues.roles)
+    console.log('Getter Data',createValues)
     id.value = item.id
 }
 
-onMounted(async () => {
-     await getGood()
+const formatPhoneNumber = (event) => {
+  let input = event.target.value;
+
+  input = input.replace(/[^\d+]/g, '');
+
+  if (input.length > 13) {
+    input = input.slice(0, 13);
+  }
+
+  const phoneRegex = /^\+?\d{10,13}$/;
+
+  if (!phoneRegex.test(input)) {
+    phoneError.value = true;
+  } else {
+    phoneError.value = false;
+  }
+
+  createValues.phone = input;
+};
+
+const validateEmail = (event) => {
+  const email = event.target.value;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!emailRegex.test(email)) {
+    emailError.value = true;
+  } else {
+    emailError.value = false;
+  }
+};
+
+  const selectedRoleIds = computed({
+    get() {
+      return createValues.roles.map(role => role.id);
+    },
+    set(newRoleIds) {
+      createValues.roles = newRoleIds.map(id => ({ id }));
+    }
+  });
+
+onMounted( async() => {
+   await getGood()
+
 });
 
 
@@ -137,11 +182,27 @@ onMounted(async () => {
       <div class="form w-full col-span-12 grid grid-cols-12 gap-[16px] relative create-goods">
         <fin-input :class="{ 'p-invalid': fv$.name.$error }" placeholder="Наименование" class="col-span-5" v-model="createValues.name"/>
         <fin-input  placeholder="Адрес" class="col-span-5" v-model="createValues.address"/>
-        <fin-input :class="{ 'p-invalid': fv$.phone.$error }" placeholder="Телефон" class="col-span-5" v-model="createValues.phone"/>
-        <fin-input placeholder="Почта" class="col-span-5" v-model="createValues.email"/>
+        <fin-input
+            @input="formatPhoneNumber"
+            :class="{ 'p-invalid': phoneError || fv$.phone.$error }"
+            placeholder="Телефон"
+            class="col-span-5"
+            v-model="createValues.phone"
+        />
+        <fin-input
+            placeholder="Почта"
+            class="col-span-5"
+            v-model="createValues.email"
+            @input="validateEmail"
+            :class="{ 'p-invalid': emailError }"
+        />
         <div class="form col-span-6 grid grid-cols-3 gap-[16px]">
-          <div v-for="category of roleList" :key="category.id" class="flex items-center">
-            <Checkbox  v-model="createValues.roles"  name="category" :value="category.id"/>
+          <div v-for="category in roleList" :key="category.id" class="flex items-center">
+            <Checkbox
+                v-model="selectedRoleIds"
+                :value="category.id"
+                name="category"
+            />
             <label :for="category.id" class="ml-2">{{ category.name }}</label>
           </div>
         </div>

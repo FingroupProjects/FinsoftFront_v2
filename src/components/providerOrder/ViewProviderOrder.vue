@@ -53,7 +53,8 @@ const viewDocument = ref({
   storageName: '',
   date: null,
   currencyName: '',
-  comment: ''
+  comment: '',
+  orderStatus:''
 });
 const store = useProviderOrder()
 
@@ -96,7 +97,7 @@ async function getAgreement() {
 
 const getView = async () => {
   const item = props.data
-
+  console.log('item', item)
   if (item.active) {
     approved.value = true;
     status.value = 'Проведен';
@@ -407,7 +408,7 @@ async function saveFnDialog() {
               class="w-full"
           >
             <template #value>
-              {{ viewDocument.selectStatus?.name }}
+              {{ viewDocument.statusName?.name }}
             </template>
           </Dropdown>
           <label for="dd-city">Статус</label>

@@ -2,12 +2,11 @@
 import sidebar from "@/constants/sidebar.js";
 import PanelMenu from 'primevue/panelmenu';
 import {ref} from "vue";
-import {useSidebar} from "@/store/sidebar.js";
 
 const emit = defineEmits(['valueFn']);
-const store = useSidebar()
 const isOpen = ref(false);
 const dataOpened = ref(null);
+let activeSidebar = ref(JSON.parse(localStorage.getItem('activeSidebar')));
 
 const toggleOpen = (item) => {
   isOpen.value = !isOpen.value;
@@ -19,10 +18,13 @@ const toggleOpen = (item) => {
 };
 
 function sidebarClose() {
-  store.activeSidebar = true
+  emit('valueFn',!activeSidebar.value)
+  activeSidebar.value = true
+  localStorage.setItem('activeSidebar', JSON.stringify(!activeSidebar.value));
 }
 </script>
 <template>
+
   <nav class="fixed top-0 z-50 w-full border-gray-200 dark:bg-gray-800 dark:border-gray-700">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">

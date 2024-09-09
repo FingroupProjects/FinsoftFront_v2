@@ -75,6 +75,7 @@ function pushNumbers() {
   <div>
     <IconField class="w-full filter-goods deposit-money">
       <InputText
+          autofocus
           class="w-full"
           v-model="searchQuery"
           :model-value="formatInputAmount(searchQuery)"

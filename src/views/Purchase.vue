@@ -5,9 +5,9 @@ import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
+import Dropdown from "primevue/dropdown";
 import CreatePurchase from "@/components/purchase/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
@@ -97,7 +97,7 @@ const onRowClick = (event) => {
   selectedProductId.value = product.id
 };
 
-async function getProducts(filters = {}) {
+const getProducts = async (filters = {}) => {
   const params = {
     itemsPerPage: selectPage.value.count,
     orderBy: orderBy.value,
@@ -110,18 +110,18 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
+  loader.value = true;
+
   try {
-    const res = await useAxios(`/document/provider/purchase`, {params});
+    const res = await useAxios(`/document/provider/purchase`, { params });
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
-    return products.value;
-
   } catch (e) {
-    console.log(e)
+    console.log(e);
   } finally {
-    loader.value = false
+    loader.value = false;
   }
-}
+};
 
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
@@ -129,7 +129,6 @@ const handleFiltersUpdate = (filters) => {
   visibleFilter.value = false;
 }
 const clearFilter  = (filters) => {
-
   selectedStorage.value = null;
   selectedCounterparty.value = null;
   Object.assign(savedFilterValues, filters);
@@ -221,8 +220,8 @@ function callGetDashBoardData() {
   }
 }
 
-onMounted(() => {
-  getProducts()
+onMounted(async () => {
+  await getProducts()
 })
 </script>
 

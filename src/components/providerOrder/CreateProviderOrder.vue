@@ -90,6 +90,7 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate();
+  console.log('product', productsInfo.value)
   openInfoModal.value = false
   if (result) {
     try {
