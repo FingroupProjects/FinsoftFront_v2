@@ -156,6 +156,11 @@ const routes = [
                 name: 'for-sale',
                 component: () => import('@/views/ForSale.vue'),
             },
+            {
+                path: '/schedule',
+                name: 'schedule',
+                component: () => import('@/views/WorkSchedule.vue')
+            }
         ]
     },
     {

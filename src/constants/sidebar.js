@@ -281,6 +281,10 @@ export default [
                         label: 'Должности',
                         route: '/position'
                     },
+                    {
+                        label: 'График работы',
+                        route: '/schedule'
+                    }
 
                 ]
             },
