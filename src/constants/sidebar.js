@@ -301,7 +301,7 @@ export default [
                     },
                     {
                         label: 'Начисление зарплаты',
-                        route: '/reportCard'
+                        route: '/xz'
                     },
                     {
                         label: 'Оплата зарплаты',
@@ -309,7 +309,7 @@ export default [
                     },
                     {
                         label: 'Табель',
-                        route: '/'
+                        route: '/reportCard'
                     },
                     {
                         label: 'Ведомость зарплаты',

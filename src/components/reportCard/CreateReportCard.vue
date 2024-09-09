@@ -3,7 +3,6 @@ import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
-import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
@@ -12,7 +11,7 @@ import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
-import FinInput from "@/components/ui/Inputs.vue";
+import EmployeesTable from "@/components/reportCard/EmployeesTable.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -22,13 +21,11 @@ const {
   findOrganization,
   organization,
   loadingOrganization,
-    months,
-    loadingMonth,
-    findMonth
+  months,
+  loadingMonth,
+  findMonth
 } = useStaticApi();
 
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
 const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
@@ -40,6 +37,9 @@ const createValues = reactive({
   month: "",
   organization: ""
 });
+
+const employees = ref([])
+
 const rules = reactive({
   datetime24h: {required},
   month: {required},
@@ -58,13 +58,14 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`hiring`, {
+      const res = await useAxios(`reportCard`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
           organization_id: createValues.organization.code,
           month_id: createValues.month.code,
-          comment: createValues.comment
+          comment: createValues.comment,
+          data: employees.value
         },
       });
       toast.add({
@@ -73,7 +74,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.result);
+      emit("closeDialog", res.data);
     } catch (e) {
       console.log(e);
       toast.add({
@@ -86,19 +87,48 @@ async function saveFn() {
   }
 }
 
-function getProducts(products) {
-  productsInfo.value = products;
+watchEffect(function () {
+  if (hasOrganization === true) createValues.organization = {
+    name: organizationHas.name,
+    code: organizationHas.id
+  }
+})
+
+async function getEmployeeSalary() {
+  try {
+    const res = await useAxios(`reportCard/employees`, {
+      method: "GET",
+      params: {
+        organization_id: createValues.organization.code,
+        month_id: createValues.month.code
+      },
+    });
+
+    employees.value = res.result.map((item) => ({
+      employee_id: item.id,
+      employee_name: item.name,
+      standart_hours: item.number_of_hours,
+      fact_hours: item.number_of_hours,
+      schedule_id: item.schedule_id,
+      salary: item.salary
+    }))
+
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e.response.data.message,
+      life: 3000,
+    });
+  }
 }
 
 onMounted(async () => {
-  try {
-    await Promise.all([
-      findOrganization(),
-        findMonth()
-    ]);
-  } catch (error) {
-    console.error('Error:', error);
-  }
+
+  await findOrganization(),
+  await findMonth()
+
 });
 
 async function infoModalClose() {
@@ -108,7 +138,7 @@ async function infoModalClose() {
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
+
     isModal.value = true;
   }
   initialValue.value = newVal;
@@ -122,9 +152,16 @@ watch(createValues, (newVal) => {
     <div class="header">
       <div>
         <div class="header-title">Табель</div>
-
       </div>
-      <div class="flex gap-[16px]">
+
+      <div class="flex gap-[18px]">
+        <fin-button
+            icon="pi pi-save"
+            @click="getEmployeeSalary"
+            label="Вычислить"
+            severity="success"
+            class="p-button-lg"
+        />
         <fin-button
             icon="pi pi-save"
             @click="saveFn"
@@ -139,6 +176,7 @@ watch(createValues, (newVal) => {
             severity="warning"
             class="p-button-lg"
         />
+
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
@@ -184,7 +222,7 @@ watch(createValues, (newVal) => {
       </FloatLabel>
     </div>
   </div>
-
+  <employees-table :info-goods="employees"/>
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>

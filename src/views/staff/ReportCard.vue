@@ -175,6 +175,7 @@ const getSeverity = (status) => {
 
 function closeFn(result) {
   dataInfo.value = result
+  console.log(dataInfo.value)
   createOpenModal.value = true
   getProducts();
 }
