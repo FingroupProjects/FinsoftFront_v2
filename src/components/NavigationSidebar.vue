@@ -18,9 +18,9 @@ const toggleOpen = (item) => {
 };
 
 function sidebarClose() {
-  emit('valueFn',!activeSidebar.value)
+  emit('valueFn',activeSidebar.value)
   activeSidebar.value = true
-  localStorage.setItem('activeSidebar', JSON.stringify(!activeSidebar.value));
+  localStorage.setItem('activeSidebar', JSON.stringify(activeSidebar.value));
 }
 </script>
 <template>

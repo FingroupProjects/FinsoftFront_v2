@@ -90,7 +90,7 @@ cardFn()
       </div>
     </template>
     <div class="grid grid-cols-12 gap-[26px] mt-[6px]">
-      <PhoneNumber  @numbers-wallet="postPhone" class="col-span-6"/>
+      <PhoneNumber @numbers-wallet="postPhone" class="col-span-6"/>
       <div class="col-span-6">
         <div
             class="https://chromewebstore.google.com/detail/dimensions/baocaagndhipibgklemoalmkljaimfdj?pli=1flex flex-col gap-[16px]">

@@ -35,7 +35,7 @@ function changeFn() {
 }
 
 onMounted(() => {
-  activeSidebar.value = JSON.parse(localStorage.getItem('activeSidebar')) ?? true;
+  activeSidebar.value = JSON.parse(localStorage.getItem('activeSidebar'));
 })
 </script>
 <template>

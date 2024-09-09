@@ -44,6 +44,7 @@ async function fetchOrders(event) {
         }
       });
       cookies.set('token', res.token)
+      localStorage.setItem('activeSidebar',JSON.stringify(true))
       if (res.token) {
         toast.add({
           severity: "success",

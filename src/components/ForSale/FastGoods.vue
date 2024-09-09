@@ -48,7 +48,7 @@ async function getGoodGroup(event) {
       description: el.description,
       vendorCode: el.vendor_code,
       price: el.price,
-      id: el.id,
+      good_id: el.id,
       img: el.images.length > 0 && el.images[0].image
           ? imgURL + el.images[0].image
           : new URL('@/assets/img/exampleImg.svg', import.meta.url),
@@ -183,7 +183,7 @@ const checkedCount = computed(() => {
       <div class="grid grid-cols-12 gap-5">
         <div class="relative fast-good-checkbox col-span-3" v-for="(infoFastGoods,index) in fastGoodsList"
              :key="index">
-          <div v-ripple @click="toggleChecked(infoFastGoods.id, infoFastGoods)"
+          <div v-ripple @click="toggleChecked(infoFastGoods.good_id, infoFastGoods)"
                class="bg-[#F3F3F3] rounded-[16px] overflow-hidden">
             <img :src="infoFastGoods?.img" class="w-[205px] h-[130px] rounded-[16px] object-cover" alt="">
           </div>
@@ -191,8 +191,8 @@ const checkedCount = computed(() => {
               class="text-ellipsis block w-[205px] mt-3 whitespace-nowrap overflow-hidden font-medium text-[18px] text-[#000] leading-[25px]">
             {{ infoFastGoods?.description }}
           </div>
-          <Checkbox v-model="checked[infoFastGoods.id]" :binary="true"
-                    @change="handleCheckboxChange(infoFastGoods, checked[infoFastGoods.id])"/>
+          <Checkbox v-model="checked[infoFastGoods.good_id]" :binary="true"
+                    @change="handleCheckboxChange(infoFastGoods, checked[infoFastGoods.good_id])"/>
         </div>
       </div>
     </div>
