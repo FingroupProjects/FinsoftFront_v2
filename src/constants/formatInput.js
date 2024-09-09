@@ -1,6 +1,15 @@
 export default function formatInputAmount(input) {
     input = input.toString();
 
+    // Remove any non-digit and non-decimal characters
+    input = input.replace(/[^0-9.]/g, '');
+
+    // Limit total length to 9 characters
+    if (input.length > 9) {
+        return null;
+    }
+
+    // Handle decimal point cases
     if (input[input.length - 1] === '.') {
         if ((input.match(/\./g) || []).length === 1) {
             return input;

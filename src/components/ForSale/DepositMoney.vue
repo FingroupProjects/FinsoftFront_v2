@@ -196,9 +196,11 @@ const totalCardPay = computed(() => {
 });
 watch(walletChangeAll, (newValue) => {
   if (newValue > props.saleSum) {
-    change.value = walletChangeAll.value -= props.saleSum
+    change.value = newValue - props.saleSum; // Calculate change without modifying walletChangeAll
+  } else {
+    change.value = 0; // Reset change if the condition is not met
   }
-})
+});
 </script>
 
 <template>

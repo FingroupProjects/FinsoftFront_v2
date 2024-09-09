@@ -31,7 +31,11 @@
     background-color: var(--background-neutral) !important;
     border: none !important;
   }
-
+  &:disabled:hover {
+    color: var(--text-disabled) !important;
+    background-color: var(--background-neutral) !important;
+    border: none !important;
+  }
   &-icon-sm {
     display: flex;
     justify-content: center;
