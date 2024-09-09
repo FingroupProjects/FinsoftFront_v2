@@ -42,7 +42,9 @@ const createValuess = reactive({
   payment: "",
   priceType: ""
 });
-const getSeverity = (status) => {
+
+
+    const getSeverity = (status) => {
   if (status == null) {
     return {
       status: "success",
@@ -131,7 +133,7 @@ async function addCpAgreement() {
             "price_type_id": createValuess.priceType.code
       },
     });
-    clearInputValues();
+    clearInputValues()
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -209,6 +211,7 @@ onMounted(function (){
   findCurrency()
   findOrganization()
   findPriceType()
+
 });
 const confirmDelete = async (index) => {
   try {
@@ -247,6 +250,7 @@ function toggleForm() {
 onMounted(async () => {
   await getGood()
   await getAgreements()
+
 });
 
 async function getAgreements() {
@@ -377,7 +381,7 @@ async function getAgreements() {
       <!-- Наименование -->
       <Column field="name" header="Наименование">
         <template #editor="{ data, field }">
-          <input-text v-model="data[field]"  fluid />
+          <input-text v-model="data[field]"  fluid style="width: 90px !important;" />
         </template>
       </Column>
 
@@ -391,7 +395,7 @@ async function getAgreements() {
       <!-- Номер контракта -->
       <Column field="contract_number" header="Номер контракта">
         <template #editor="{ data, field }">
-          <input-text v-model="data[field]" type="number" :model-value="formatInputAmount(data[field])" fluid />
+          <input-text style="width: 110px !important;" v-model="data[field]" type="number" :model-value="formatInputAmount(data[field])" fluid />
         </template>
       </Column>
 

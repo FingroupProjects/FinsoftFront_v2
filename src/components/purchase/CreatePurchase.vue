@@ -85,9 +85,16 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate();
-  openInfoModal.value = false
+  openInfoModal.value = false;
+
   if (result) {
     try {
+      const products = Array.isArray(productsInfo.value.postProducts) ? productsInfo.value.postProducts : [];
+      const goodsToSend = products.map(product => ({
+        good_id: product.good_id,
+        amount: product.amount,
+        price: product.price
+      }));
       const res = await useAxios(`/document/provider/purchase`, {
         method: "POST",
         data: {
@@ -98,15 +105,17 @@ async function saveFn() {
           storage_id: createValues.selectedStorage.code,
           currency_id: createValues.selectCurrency.code,
           comment: createValues.comments,
-          goods: productsInfo.value,
+          goods: goodsToSend,
         },
       });
+
       toast.add({
         severity: "success",
         summary: "Success Message",
         detail: "Message Content",
         life: 3000,
       });
+
       emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
@@ -119,6 +128,7 @@ async function saveFn() {
     }
   }
 }
+
 const productsInfo = ref({
   postProducts: [],
   getAllSum: 0,
@@ -128,6 +138,7 @@ const productsInfo = ref({
 
 function getProducts(products) {
   productsInfo.value = products;
+  console.log('product info', productsInfo.value)
 }
 
 onMounted(async () => {
