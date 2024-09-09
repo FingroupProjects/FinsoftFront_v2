@@ -34,7 +34,7 @@ const copyProducts = async () => {
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   try {
-    const res = await useAxios(`/document/copy/${id.value[0]}`, {
+    const res = await useAxios(`/firing/copy/${id.value[0]}`, {
       method: "POST",
     });
     emit('getProduct')
@@ -60,8 +60,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
 
   const endpoint = props.selectProducts[0].deleted_at
-      ? '/hiring/massRestore'
-      :'/hiring/massDelete' ;
+      ? '/firing/massRestore'
+      :'/firing/massDelete' ;
 
   try {
     const response = await useAxios(endpoint, {
@@ -91,8 +91,8 @@ async function conductMethod(){
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   const endpoint = props.selectProducts[0].active
-      ? '/hiring/approve'
-      :'/hiring/unApprove' ;
+      ? '/firing/approve'
+      :'/firing/unApprove' ;
 
   try {
     const res = await useAxios(endpoint, {

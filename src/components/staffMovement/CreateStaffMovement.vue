@@ -51,7 +51,7 @@ const createValues = reactive({
   salary: "",
   schedule: "",
   basis: "",
-  hiring_date: new Date,
+  movement_date: new Date,
   employee: "",
   organization: ""
 
@@ -64,7 +64,7 @@ const rules = reactive({
   salary: {required},
   schedule: {required},
   basis: {required},
-  hiring_date: {required},
+  movement_date: {required},
   organization: {required}
 });
 const userName = {
@@ -80,7 +80,7 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`hiring`, {
+      const res = await useAxios(`employeeMovement`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
@@ -88,7 +88,7 @@ async function saveFn() {
           position_id: createValues.position.code,
           organization_id: createValues.organization.code,
           schedule_id: createValues.schedule.code,
-          hiring_date: createValues.hiring_date,
+          movement_date: createValues.movement_date,
           salary: createValues.salary,
           basis: createValues.basis,
           employee_id: createValues.employee.code
@@ -151,7 +151,7 @@ watch(createValues, (newVal) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Прием на работу</div>
+        <div class="header-title">Кадровое перемещение</div>
 
       </div>
       <div class="flex gap-[16px]">
@@ -177,6 +177,7 @@ watch(createValues, (newVal) => {
             showIcon
             v-model="createValues.datetime24h"
             :class="{ 'p-invalid': v$.datetime24h.$error }"
+            showTime
             dateFormat="dd.mm.yy"
             fluid
             hideOnDateTimeSelect
@@ -235,15 +236,16 @@ watch(createValues, (newVal) => {
       <FloatLabel class="col-span-4">
         <DatePicker
             showIcon
-            v-model="createValues.hiring_date"
-            :class="{ 'p-invalid': v$.hiring_date.$error }"
+            v-model="createValues.movement_date"
+            :class="{ 'p-invalid': v$.movement_date.$error }"
+            showTime
             dateFormat="dd.mm.yy"
             fluid
             hideOnDateTimeSelect
             iconDisplay="input"
             class="w-full"
         />
-        <label for="dd-city">Дата приема</label>
+        <label for="dd-city">Дата перемещение</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
         <Dropdown
@@ -259,7 +261,7 @@ watch(createValues, (newVal) => {
       <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea :class="{ 'p-invalid': v$.schedule.$error }" v-model="createValues.basis" class="w-full" style="min-height: 20px" rows="8" cols="20"/>
+        <Textarea :class="{ 'p-invalid': v$.basis.$error }" v-model="createValues.basis" class="w-full" style="min-height: 20px" rows="8" cols="20"/>
         <label for="dd-city">Основание</label>
       </FloatLabel>
     </div>

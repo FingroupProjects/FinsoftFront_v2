@@ -60,8 +60,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
 
   const endpoint = props.selectProducts[0].deleted_at
-      ? '/hiring/massRestore'
-      :'/hiring/massDelete' ;
+      ? '/employeeMovement/massRestore'
+      :'/employeeMovement/massDelete' ;
 
   try {
     const response = await useAxios(endpoint, {
@@ -75,7 +75,7 @@ const deleteProduct = async () => {
     toast.add({
       severity: "success",
       summary: "Success",
-      detail: "Products deleted successfully.",
+      detail: "Document deleted successfully.",
       life: 3000,
     });
   } catch (error) {
@@ -91,8 +91,8 @@ async function conductMethod(){
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   const endpoint = props.selectProducts[0].active
-      ? '/hiring/approve'
-      :'/hiring/unApprove' ;
+      ? '/employeeMovement/approve'
+      :'/employeeMovement/unApprove' ;
 
   try {
     const res = await useAxios(endpoint, {

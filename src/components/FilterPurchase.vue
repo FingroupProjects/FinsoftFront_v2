@@ -116,6 +116,7 @@ const getOrganization = async () =>{
   }
 }
 
+
 onMounted(() => {
   getUsers();
   getCurrency();
@@ -127,6 +128,8 @@ onMounted(() => {
   if (props.savedFilters.endDate)
     rawDateSecond.value = new Date(props.savedFilters.endDate);
 });
+
+
 </script>
 
 <template>

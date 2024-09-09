@@ -48,11 +48,10 @@ const createValues = reactive({
   salary: "",
   schedule: "",
   basis: "",
-  hiring_date: new Date,
+  movement_date: new Date,
   employee: "",
   organization: "",
   doc_number: ""
-
 });
 const rules = reactive({
   datetime24h: {required},
@@ -62,7 +61,7 @@ const rules = reactive({
   salary: {required},
   schedule: {required},
   basis: {required},
-  hiring_date: {required},
+  movement_date: {required},
   organization: {required}
 });
 
@@ -100,7 +99,7 @@ const getView = async () => {
   createValues.organization = item.organization;
   createValues.employee = item.employee;
   createValues.salary = item.salary;
-  createValues.hiring_date = new Date(item.hiring_date);
+  createValues.movement_date = new Date(item.movement_date);
   createValues.author = item.author;
   createValues.department = item.department;
   createValues.basis = item.basis;
@@ -125,14 +124,14 @@ const updateView = async () => {
         employee_id: createValues.employee?.id || createValues.employee?.code,
         salary: createValues.salary,
         date: moment(createValues.date).format('YYYY-MM-DD '),
-        hiring_date: moment(createValues.hiring_date).format('YYYY-MM-DD '),
+        movement_date: moment(createValues.movement_date).format('YYYY-MM-DD '),
         department_id: createValues.department?.id || createValues.department?.code,
         position_id: createValues.position?.id || createValues.position?.code,
         schedule_id: createValues.schedule?.id || createValues.schedule?.code,
         basis: createValues.basis,
       };
 
-      const res = await useAxios(`/hiring/${props.productId}`, {
+      const res = await useAxios(`/employeeMovement/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
@@ -207,6 +206,7 @@ onMounted(function () {
               showIcon
               v-model="createValues.datetime24h"
               :class="{ 'p-invalid': v$.datetime24h.$error }"
+              showTime
               dateFormat="dd.mm.yy"
               fluid
               hideOnDateTimeSelect
@@ -277,15 +277,15 @@ onMounted(function () {
         <FloatLabel class="col-span-4">
           <DatePicker
               showIcon
-              v-model="createValues.hiring_date"
-              :class="{ 'p-invalid': v$.hiring_date.$error }"
+              v-model="createValues.movement_date"
+              :class="{ 'p-invalid': v$.movement_date.$error }"
+
               dateFormat="dd.mm.yy"
               fluid
-              hideOnDateTimeSelect
               iconDisplay="input"
               class="w-full"
           />
-          <label for="dd-city">Дата приема</label>
+          <label for="dd-city">Дата перемещения</label>
         </FloatLabel>
         <FloatLabel class="col-span-4">
           <Dropdown

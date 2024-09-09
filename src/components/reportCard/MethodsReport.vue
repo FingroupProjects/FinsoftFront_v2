@@ -60,8 +60,8 @@ const deleteProduct = async () => {
   id.value = props.selectProducts.flatMap((el) => el.id);
 
   const endpoint = props.selectProducts[0].deleted_at
-      ? '/hiring/massRestore'
-      :'/hiring/massDelete' ;
+      ? '/reportCard/massRestore'
+      :'/reportCard/massDelete' ;
 
   try {
     const response = await useAxios(endpoint, {
@@ -91,8 +91,8 @@ async function conductMethod(){
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
   const endpoint = props.selectProducts[0].active
-      ? '/hiring/approve'
-      :'/hiring/unApprove' ;
+      ? '/reportCard/approve'
+      :'/reportCard/unApprove' ;
 
   try {
     const res = await useAxios(endpoint, {
