@@ -15,6 +15,7 @@ import Textarea from "primevue/textarea";
 import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
 import {usePurchaseStore} from "@/store/pruchase.js";
+import formatNumber from '../../constants/formatNumber.js'
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -192,13 +193,20 @@ const openDocumentPrint = (productId) => {
 findStorage();
 
 function infoModalClose() {
-  if (changeValue.value) openInfoModal.value = true
-  else emit('close-sidebar')
+  if (changeValue.value)  openInfoModal.value = true
+  else  emit('close-sidebar')
 }
+const infoGoods = ref({
+  editModalOpen: false,
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 
-function changeModal() {
-  changeValue.value = true
-}
+const changeModal = (data) => {
+  infoGoods.value = data;
+  console.log('info goods',infoGoods.value)
+};
 
 async function saveFnDialog() {
   //await updateView()
@@ -419,6 +427,39 @@ onMounted(async () => {
     </div>
     <purchasing-table :info-goods="props.date" @editModal="changeModal"/>
   </div>
+  <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+    <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+        Автор: {{ userName.name }}
+      </div>
+      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+
+          </div>
+          Итого:
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Кол-во
+          </div>
+          {{ formatNumber(infoGoods.getAllProduct) }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Товаров
+          </div>
+          {{ infoGoods.goods?.length }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Сумма
+          </div>
+          {{ formatNumber(infoGoods.getAllSum) }}
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <Sidebar
@@ -471,6 +512,7 @@ onMounted(async () => {
   left: -15px;
   z-index: 3333;
 }
+
 
 .view-doc {
   .p-select-option .p-focus {

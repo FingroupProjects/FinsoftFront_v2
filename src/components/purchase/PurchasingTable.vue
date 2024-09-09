@@ -8,7 +8,7 @@ import Select from "primevue/dropdown";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '../../constants/formatNumber.js'
+
 import {usePurchaseStore} from "@/store/pruchase.js";
 
 const emit = defineEmits([ 'editModal']);
@@ -31,7 +31,6 @@ const newProduct = ref();
 const editModalOpen = ref(true);
 
 const imgURL = import.meta.env.VITE_IMG_URL;
-
 const clearInputValues = () => {
   newProduct.value = {};
   amount.value = "";
@@ -68,6 +67,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
   }
+  sendData();
   clearInputValues();
 };
 
@@ -92,6 +92,8 @@ const confirmDeleteProduct = async (index, indexProduct) => {
         'permission': 1
       }
     });
+
+
   } catch (error) {
   }
 };
@@ -109,6 +111,10 @@ const userName = {
   name: localStorage.getItem("user_name"),
 };
 
+function sendData () {
+  emit('editModal', {editModalOpen:editModalOpen.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: goods?.value });
+}
+
 const onRowEditSave = (event) => {
   const {newData, index} = event;
   const oldProduct = goods.value[index];
@@ -124,7 +130,8 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal', editModalOpen.value);
+  sendData()
+
 };
 
 const getGood = async () => {
@@ -157,6 +164,7 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
+  await sendData();
 
 });
 watchEffect(() => {
@@ -197,7 +205,7 @@ watchEffect(() => {
     <DataTable
         :value="goods"
         scrollable
-        scrollHeight="280px"
+        scrollHeight="500px"
         class="mt-[21px]"
         v-model:editingRows="editingRows"
         @row-edit-save="onRowEditSave"

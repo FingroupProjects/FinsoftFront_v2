@@ -1,10 +1,10 @@
 <script setup>
 import Dropdown from "primevue/dropdown";
-import {onMounted, reactive, ref, watch} from "vue";
+import {onMounted, reactive, ref, defineEmits} from "vue";
 
 
 const filterValues = reactive({
-  role_id: '',
+  roles: '',
   deleted: '',
 });
 const statusList = ref([
@@ -15,22 +15,27 @@ const statusList = ref([
 const roleList = ref([
   {
     name: 'Клиент',
-    code: 0
-  },
-  {
-    name: 'Поставщик',
     code: 1
   },
   {
-    name: 'Прочие',
+    name: 'Поставщик',
     code: 2
+  },
+  {
+    name: 'Прочие',
+    code: 3
   },
 ])
 
 
 const emit = defineEmits(['updateFilters']);
-const datas = () => {
+const applyFilters = () => {
   emit('updateFilters', filterValues);
+  console.log('posted', filterValues);
+};
+const clearFilters = () => {
+  Object.keys(filterValues).forEach(key => filterValues[key] = '');
+  emit('clearFilter', filterValues);
 };
 
 
@@ -42,10 +47,11 @@ const datas = () => {
     <div class="text-black text-[20px] font-semibold ">Фильтры</div>
 
     <Dropdown class="mt-[22px] w-[466px] font-semibold"
-              v-model="filterValues.role_id"
-              :options="roleList"
-              optionLabel="name"
+              v-model="filterValues.roles"
               placeholder="Роль"
+              :options="roleList"
+              option-label="name"
+              option-value="code"
     />
     <div class="flex mt-[1px] gap-4">
       <Dropdown class="mt-[22px] w-[466px] font-semibold"
@@ -58,9 +64,9 @@ const datas = () => {
     </div>
 
     <div class="flex mt-[22px] gap-4">
-      <fin-button @click="datas()" icon="pi pi-save" label="Применить" severity="success"
+      <fin-button @click="applyFilters()" icon="pi pi-save" label="Применить" severity="success"
                   class="p-button-lg w-[225px]"/>
-      <fin-button @click="clear()" icon="pi pi-times" label="Сбросить" severity="secondary"
+      <fin-button @click="clearFilters()" icon="pi pi-times" label="Сбросить" severity="secondary"
                   class="p-button-lg w-[225px]"/>
     </div>
   </div>
