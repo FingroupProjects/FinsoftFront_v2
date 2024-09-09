@@ -24,6 +24,13 @@ import MethodsHiring from "@/components/hiring/MethodsHiring.vue";
 import ViewHiring from "@/components/hiring/ViewHiring.vue";
 import CreateHiring from "@/components/hiring/CreateHiring.vue";
 import FilterHiring from "@/components/hiring/FilterHiring.vue";
+import MethodsStaffMovement from "@/components/staffMovement/MethodsStaffMovement.vue";
+import ViewStaffMovement from "@/components/staffMovement/ViewStaffMovement.vue";
+import CreateStaffMovement from "@/components/staffMovement/CreateStaffMovement.vue";
+import FilterStaffMovement from "@/components/staffMovement/FilterStaffMovement.vue";
+import MethodsReport from "@/components/reportCard/MethodsReport.vue";
+import ViewReportCard from "@/components/reportCard/ViewReportCard.vue";
+import CreateReportCard from "@/components/reportCard/CreateReportCard.vue";
 
 const {
   findDepartment,
@@ -119,7 +126,7 @@ async function getProducts(filters = {}) {
   };
 
   try {
-    const res = await useAxios(`/hiring`, {params});
+    const res = await useAxios(`/reportCard`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
@@ -168,6 +175,7 @@ const getSeverity = (status) => {
 
 function closeFn(result) {
   dataInfo.value = result
+  console.log(dataInfo.value)
   createOpenModal.value = true
   getProducts();
 }
@@ -219,7 +227,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header-purchase ref="headerPurchaseRef" header-title="Прием  на работу"  />
+  <header-purchase ref="headerPurchaseRef" header-title="Табель"  />
   <Loader v-if="loader"/>
   <div v-else>
 
@@ -236,7 +244,7 @@ onMounted(() => {
       <Dropdown
           v-model="selectedDepartment"
           optionLabel="name"
-          placeholder="Отдел"
+          placeholder="Месяц"
           :loading="loadDepartment"
           :options="departments"
           class="w-full col-span-2"
@@ -267,7 +275,7 @@ onMounted(() => {
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsHiring @get-product="getProductMethods" :select-products="selectedProduct"
+      <MethodsReport @get-product="getProductMethods" :select-products="selectedProduct"
                        v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -320,10 +328,10 @@ onMounted(() => {
             {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
           </template>
         </Column>
-        <Column field="employee" :sortable="true" header="">
+        <Column field="storage" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('employee.name',index)">
-              Сотрудник <i
+            <div class="w-full h-full" @click="sortData('storage.name',index)">
+              Месяц <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
             'pi pi-arrow-up': !openUp[index],
@@ -333,10 +341,9 @@ onMounted(() => {
             </div>
           </template>
           <template #sorticon="{index}">
-
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.employee?.name }}
+            {{ slotProps.data.month?.name }}
           </template>
         </Column>
         <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
@@ -357,42 +364,8 @@ onMounted(() => {
             {{ slotProps.data.organization?.name }}
           </template>
         </Column>
-        <Column field="price" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('salary',index)">
-              Оклад <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.salary }}
-          </template>
-        </Column>
-        <Column field="storage" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('position.name',index)">
-              Должность <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.position?.name }}
-          </template>
-        </Column>
+
+
         <Column field="status" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('active',index)">
@@ -414,27 +387,10 @@ onMounted(() => {
             />
           </template>
         </Column>
-        <Column field="inventoryStatus" :sortable="true" header="">
+
+        <Column field="currexncy" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('department.name',index)">
-              Отдел <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data?.department?.name }}
-          </template>
-        </Column>
-        <Column field="currcency" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('author.name',index)">
+            <div class="w-full h-full" @click="sortData('currency.name',index)">
               Автор <i
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -485,9 +441,9 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-hiring :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-report-card :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                      :openModalClose="openInfoModal"/>
-      <CreateHiring v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreateReportCard v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -497,7 +453,7 @@ onMounted(() => {
       position="right"
       class="filters-purchase"
   >
-    <filter-hiring :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+    <filter-staff-movement :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 

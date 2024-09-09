@@ -24,16 +24,19 @@ import MethodsHiring from "@/components/hiring/MethodsHiring.vue";
 import ViewHiring from "@/components/hiring/ViewHiring.vue";
 import CreateHiring from "@/components/hiring/CreateHiring.vue";
 import FilterHiring from "@/components/hiring/FilterHiring.vue";
+import ViewFiring from "@/components/firing/ViewFiring.vue";
+import CreateFiring from "@/components/firing/CreateFiring.vue";
+import FilterFiring from "@/components/firing/FilterFiring.vue";
 
 const {
-  findDepartment,
-  loadDepartment,
-  departments
+  findUsers,
+  loadingUser,
+  userList
 } = useStaticApi();
 const selectedStatus = ref();
 const visibleRight = ref(false);
 const products = ref([]);
-const selectedDepartment = ref(null);
+const selectedEmployee = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
@@ -112,14 +115,14 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     deleted: selectedStatus.value?.code,
-    department_id: selectedDepartment.value?.code,
+    employee_id: selectedEmployee.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
   };
 
   try {
-    const res = await useAxios(`/hiring`, {params});
+    const res = await useAxios(`/firing`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
@@ -138,7 +141,7 @@ const handleFiltersUpdate = (filters) => {
 }
 const clearFilter  = (filters) => {
 
-  selectedDepartment.value = null;
+  selectedEmployee.value = null;
   selectedStatus.value = null;
   Object.assign(savedFilterValues, filters);
   visibleFilter.value = false;
@@ -191,8 +194,8 @@ async function closeFnVl() {
   callGetDashBoardData()
 }
 
-watch(selectedDepartment, () => {
-  if (selectedDepartment.value) {
+watch(selectedEmployee, () => {
+  if (selectedEmployee.value) {
     getProducts();
   }
 });
@@ -214,12 +217,12 @@ function callGetDashBoardData() {
 
 onMounted(() => {
   getProducts()
-  findDepartment()
+  findUsers()
 })
 </script>
 
 <template>
-  <header-purchase ref="headerPurchaseRef" header-title="Прием  на работу"  />
+  <header-purchase ref="headerPurchaseRef" header-title="Увольнение"  />
   <Loader v-if="loader"/>
   <div v-else>
 
@@ -234,11 +237,11 @@ onMounted(() => {
         />
       </IconField>
       <Dropdown
-          v-model="selectedDepartment"
+          v-model="selectedEmployee"
           optionLabel="name"
-          placeholder="Отдел"
-          :loading="loadDepartment"
-          :options="departments"
+          placeholder="Сотрудник"
+          :loading="loadingUser"
+          :options="userList"
           class="w-full col-span-2"
       />
       <Dropdown
@@ -320,7 +323,7 @@ onMounted(() => {
             {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY") }}
           </template>
         </Column>
-        <Column field="employee" :sortable="true" header="">
+        <Column field="category" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('employee.name',index)">
               Сотрудник <i
@@ -339,7 +342,25 @@ onMounted(() => {
             {{ slotProps.data.employee?.name }}
           </template>
         </Column>
-        <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
+        <Column field="firing_date" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('firing_date',index)">
+              Дата <i
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            {{ moment(new Date(slotProps.data.firing_date)).format("D.MM.YYYY") }}
+          </template>
+        </Column>
+        <Column field="organization" v-if="!hasOrganization" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('organization.name',index)">
               Организация <i
@@ -357,42 +378,8 @@ onMounted(() => {
             {{ slotProps.data.organization?.name }}
           </template>
         </Column>
-        <Column field="price" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('salary',index)">
-              Оклад <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.salary }}
-          </template>
-        </Column>
-        <Column field="storage" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('position.name',index)">
-              Должность <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.position?.name }}
-          </template>
-        </Column>
+
+
         <Column field="status" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('active',index)">
@@ -414,25 +401,8 @@ onMounted(() => {
             />
           </template>
         </Column>
-        <Column field="inventoryStatus" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('department.name',index)">
-              Отдел <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data?.department?.name }}
-          </template>
-        </Column>
-        <Column field="currcency" :sortable="true" header="">
+
+        <Column field="author" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('author.name',index)">
               Автор <i
@@ -485,9 +455,9 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-hiring :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-firing :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                      :openModalClose="openInfoModal"/>
-      <CreateHiring v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <CreateFiring v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
 
@@ -497,7 +467,7 @@ onMounted(() => {
       position="right"
       class="filters-purchase"
   >
-    <filter-hiring :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+    <filter-firing :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 

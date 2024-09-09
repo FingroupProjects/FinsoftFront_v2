@@ -22,18 +22,11 @@ const {
   findOrganization,
   organization,
   loadingOrganization,
-  findDepartment,
-  departments,
-  loadDepartment,
-  findPosition,
-  positions,
-  loadPositions,
+
   findEmployee,
   employeeList,
   loadingEmployee,
-  findSchedule,
-  schedules,
-  loadSchedule
+
 } = useStaticApi();
 
 const agreementList = ref([]);
@@ -46,25 +39,17 @@ const isModal = ref(false)
 const createValues = reactive({
   datetime24h: new Date,
   comment: "",
-  position: "",
-  department: "",
-  salary: "",
-  schedule: "",
   basis: "",
-  hiring_date: new Date,
+  firing_date: new Date,
   employee: "",
   organization: ""
 
 });
 const rules = reactive({
   datetime24h: {required},
-  position: {required},
   employee: {required},
-  department: {required},
-  salary: {required},
-  schedule: {required},
   basis: {required},
-  hiring_date: {required},
+  firing_date: {required},
   organization: {required}
 });
 const userName = {
@@ -80,16 +65,12 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
-      const res = await useAxios(`hiring`, {
+      const res = await useAxios(`firing`, {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
-          department_id: createValues.department.code,
-          position_id: createValues.position.code,
           organization_id: createValues.organization.code,
-          schedule_id: createValues.schedule.code,
-          hiring_date: createValues.hiring_date,
-          salary: createValues.salary,
+          firing_date: createValues.firing_date,
           basis: createValues.basis,
           employee_id: createValues.employee.code
         },
@@ -121,9 +102,6 @@ onMounted(async () => {
   try {
     await Promise.all([
       findOrganization(),
-      findDepartment(),
-        findPosition(),
-        findSchedule(),
       findEmployee()
     ]);
   } catch (error) {
@@ -208,58 +186,23 @@ watch(createValues, (newVal) => {
         />
         <label for="dd-city">Сотрудник</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.department"
-            :class="{ 'p-invalid': v$.department.$error }"
-            :options="departments"
-            :loading="loadDepartment"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">Отдел</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.position"
-            :class="{ 'p-invalid': v$.position.$error }"
-            :loading="loadPositions"
-            :options="positions"
-            optionLabel="name"
-            class="w-full"
-        >
-          <template #value>{{ createValues.position?.name }}</template>
-        </Dropdown>
-        <label for="dd-city">Должность</label>
-      </FloatLabel>
+
       <FloatLabel class="col-span-4">
         <DatePicker
             showIcon
-            v-model="createValues.hiring_date"
-            :class="{ 'p-invalid': v$.hiring_date.$error }"
+            v-model="createValues.firing_date"
+            :class="{ 'p-invalid': v$.firing_date.$error }"
             dateFormat="dd.mm.yy"
             fluid
             hideOnDateTimeSelect
             iconDisplay="input"
             class="w-full"
         />
-        <label for="dd-city">Дата приема</label>
+        <label for="dd-city">Дата увольнения</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.schedule"
-            :class="{ 'p-invalid': v$.schedule.$error }"
-            :loading="loadSchedule"
-            :options="schedules"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">График</label>
-      </FloatLabel>
-      <fin-input class="col-span-4" placeholder="Оклад" v-model="createValues.salary"/>
 
       <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea :class="{ 'p-invalid': v$.schedule.$error }" v-model="createValues.basis" class="w-full" style="min-height: 20px" rows="8" cols="20"/>
+        <Textarea :class="{ 'p-invalid': v$.basis.$error }" v-model="createValues.basis" class="w-full" style="min-height: 20px" rows="8" cols="20"/>
         <label for="dd-city">Основание</label>
       </FloatLabel>
     </div>
