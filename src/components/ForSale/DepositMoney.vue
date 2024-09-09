@@ -1,6 +1,6 @@
 <script setup>
 import Dialog from "primevue/dialog";
-import {ref, watch, computed} from "vue";
+import {ref, watch, computed, watchEffect} from "vue";
 import Calculate from "@/components/ForSale/Calculate.vue";
 import formatPrice from "@/constants/formatNumber.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -11,7 +11,7 @@ import ComplexPaymentInputs from "@/components/ForSale/ComplexPaymentInputs.vue"
 import Toast from 'primevue/toast'
 import {useToast} from "primevue/usetoast";
 import {useRouter} from "vue-router";
-
+import moment from "moment";
 
 const emit = defineEmits(['close-modal', 'postProducts', 'closeEmpty'])
 const props = defineProps({
@@ -156,7 +156,7 @@ const adjustedSaleSum = computed(() => {
 
 async function payMethodsFn() {
   const data = {
-    "date": "2024-06-10 08:49:00",
+    "date":moment().format('YYYY-DD-MM hh:mm:ss'),
     "discount_id": props.discountId,
     "certificate_id": idComplex.value,
     "cards": cardList.value,
