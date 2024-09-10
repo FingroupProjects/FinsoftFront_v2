@@ -4,7 +4,7 @@ import InputText from "primevue/inputtext";
 import FloatLabel from "primevue/floatlabel";
 import DatePicker from "primevue/datepicker";
 import Textarea from "primevue/textarea";
-import {ref, watch, watchEffect,onMounted} from "vue";
+import {ref, watch, watchEffect, onMounted} from "vue";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import {useToast} from "primevue/usetoast";
@@ -83,26 +83,32 @@ const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 async function getAgreement() {
-  try {
-    loadingAgreement.value = true;
-    const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty?.code || financeDate.value.selectedCounterparty?.id}`
-    );
-    agreementList.value = res.result.data.map((el) => {
-      return {
-        name: el.name,
-        code: el.id,
-      };
-    })
-    selectAgreement.value = agreementList.value[0]
+  if (financeDate.value.operationType?.id === 1 ||
+      financeDate.value.operationType?.id === 4 ||
+      financeDate.value.operationType?.id === 5 ||
+      financeDate.value.operationType?.id === 6) {
+    try {
+      loadingAgreement.value = true;
+      const res = await useAxios(
+          `/cpAgreement/getAgreementByCounterpartyId/${financeDate.value.selectedCounterparty?.code || financeDate.value.selectedCounterparty?.id}`
+      );
+      agreementList.value = res.result.data.map((el) => {
+        return {
+          name: el.name,
+          code: el.id,
+        };
+      })
+      selectAgreement.value = agreementList.value[0]
 
-  } catch (e) {
-    console.log(e);
-  } finally {
-    loadingAgreement.value = false;
-    openInfoModal.value = false
-    changeValue.value = false
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingAgreement.value = false;
+      openInfoModal.value = false
+      changeValue.value = false
+    }
   }
+
 }
 
 async function saveFn() {
@@ -152,7 +158,6 @@ async function saveFn() {
     });
   }
 }
-
 
 
 const approve = async () => {
@@ -300,7 +305,7 @@ watch(financeDate, (newVal) => {
         <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
       </fin-button>
 
-      <fin-button  class="icon-print" severity="success" @click="openDocumentPrint(operationTypeId)">
+      <fin-button class="icon-print" severity="success" @click="openDocumentPrint(operationTypeId)">
         <i class="pi pi-print mb-[1px ]"></i>
         <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px;font-size: 15px;">Печать</span>
       </fin-button>
@@ -357,7 +362,10 @@ watch(financeDate, (newVal) => {
       </FloatLabel>
       <fin-input v-model="financeDate.getUser" class="col-span-6" placeholder="Вноситель"/>
 
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 1 ||
+                                           financeDate.operationType?.id === 4 ||
+                                           financeDate.operationType?.id === 5 ||
+                                           financeDate.operationType?.id === 6">
         <Dropdown
             v-model="financeDate.selectedCounterparty"
             @click="findCounterparty"
@@ -373,7 +381,10 @@ watch(financeDate, (newVal) => {
         <label for="dd-city">Контрагент</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 1 || 4 || 5 || 6">
+      <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 1 ||
+                                           financeDate.operationType?.id === 4 ||
+                                           financeDate.operationType?.id === 5 ||
+                                           financeDate.operationType?.id === 6">
         <Dropdown
             v-model="selectAgreement"
 

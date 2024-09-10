@@ -120,7 +120,6 @@ onMounted(async () => {
   try {
     await Promise.all([
       findOrganization(),
-      findCounterparty(),
       findCashRegister(),
       findBalance()
     ]);
@@ -151,6 +150,7 @@ onMounted(async () => {
     <FloatLabel class="col-span-6" v-if="!hasOrganization">
       <Dropdown
           v-model="financeDate.selectedOrganization"
+          :options="organization"
           :class="{ 'p-invalid': v$.selectedOrganization.$error }"
           @click="findOrganization"
           :loading="loadingOrganization"

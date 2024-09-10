@@ -185,7 +185,7 @@ export const useStaticApi = () => {
   const findEmployee = async () => {
     try {
       loadingEmployee.value = true;
-      const res = await useAxios(`/employee?itemsPerPage=10`);
+      const res = await useAxios(`/employee?itemsPerPage=10`)
       return (employeeList.value = res.result.data.map((el) => {
         return {
           name: el.name,
