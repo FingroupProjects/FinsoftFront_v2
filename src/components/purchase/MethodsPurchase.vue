@@ -138,11 +138,6 @@ async function conductMethod(){
     });
   }
 }
-
-function test (){
-  console.log('test', selected)
-}
-
 watchEffect(() => {
   selectProduct()
 })
@@ -261,8 +256,7 @@ watchEffect(() => {
         </div>
       </template>
     </Dialog>
-
-
+    
     <Dialog
         v-model:visible="conductDialog"
         :style="{ width: '450px' }"

@@ -107,12 +107,18 @@ function getBasedOn (){
   }
 
 
-  console.log('look',store.getId)
+  console.log('look',createValues.selectedCounterparty)
 }
 
 
 async function saveFn() {
   const result = await v$.value.$validate();
+  const products = Array.isArray(productsInfo.value.postProducts) ? productsInfo.value.postProducts : [];
+  const goodsToSend = products.map(product => ({
+    good_id: product.good_id,
+    amount: product.amount,
+    price: product.price
+  }));
   openInfoModal.value = false
   if (result) {
     try {
@@ -120,13 +126,13 @@ async function saveFn() {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-          organization_id: createValues.selectedOrganization.code,
-          counterparty_id: createValues.selectedCounterparty.code,
-          counterparty_agreement_id: createValues.selectedAgreement.code,
-          storage_id: createValues.selectedStorage.code,
-          currency_id: createValues.selectCurrency.code,
+          organization_id: createValues.selectedOrganization.id || createValues.selectedOrganization.code,
+          counterparty_id: createValues.selectedCounterparty.id || createValues.selectedCounterparty.code,
+          counterparty_agreement_id: createValues.selectedAgreement.id || createValues.selectedAgreement.code,
+          storage_id: createValues.selectedStorage.id || createValues.selectedStorage.code,
+          currency_id: createValues.selectCurrency.id || createValues.selectCurrency.code,
           comment: createValues.comments,
-          goods: productsInfo.value,
+          goods: goodsToSend,
         },
       });
       toast.add({
