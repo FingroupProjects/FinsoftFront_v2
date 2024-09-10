@@ -175,7 +175,12 @@ const routes = [
                 path: '/schedule',
                 name: 'schedule',
                 component: () => import('@/views/WorkSchedule.vue')
-            }
+            },
+            {
+                path: '/salaryDocument',
+                name: 'salaryDocument',
+                component: () => import('@/views/staff/SalaryDocument.vue')
+            },
         ]
     },
     {
