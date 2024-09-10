@@ -305,7 +305,7 @@ export default [
                     },
                     {
                         label: 'Начисление зарплаты',
-                        route: '/xz'
+                        route: '/salaryDocument'
                     },
                     {
                         label: 'Оплата зарплаты',
