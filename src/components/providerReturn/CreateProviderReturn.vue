@@ -99,7 +99,7 @@ async function saveFn() {
           storage_id: createValues.selectedStorage.code,
           currency_id: createValues.selectCurrency.code,
           comment: createValues.comments,
-          goods: productsInfo.value,
+          goods: productsInfo.value.postProducts,
         },
       });
       toast.add({

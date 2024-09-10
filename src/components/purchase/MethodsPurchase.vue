@@ -4,16 +4,26 @@ import {useAxios} from "@/composable/useAxios.js";
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
 import {useToast} from "primevue/usetoast";
+import { useRouter } from 'vue-router'
+import {useClientSale} from "@/store/clientSale.js";
 
-const toast = useToast();
 const props = defineProps({
   selectProducts: ''
 })
 const emit = defineEmits(['getProduct'])
 
+const store = useClientSale()
+const router = useRouter();
+const toast = useToast();
+
 const deleteProductsDialog = ref(false);
 const copyProductsDialog = ref(false);
+const createBasedOnDialog = ref(false);
 const conductDialog = ref(false)
+const selectProducts = ref([]);
+const selected = ref()
+const showCreate = ref(false)
+
 
 const selectProduct = (product) => {
   const hasActive = props.selectProducts.some(p => p.active);
@@ -27,9 +37,7 @@ const selectProduct = (product) => {
     });
   }
 };
-watchEffect(() => {
-  selectProduct()
-})
+
 const copyProducts = async () => {
   const id = ref();
   id.value = props.selectProducts.flatMap((el) => el.id);
@@ -54,6 +62,16 @@ const copyProducts = async () => {
     });
   }
 };
+
+
+const createBasedOn = (item) => {
+  if (item === 'saleToClients') {
+    showCreate.value = true;
+    store.getId = props.selectProducts
+    console.log('post', store.getId);
+    router.push({ name: 'clientSale' });
+  }
+} ;
 
 const deleteProduct = async () => {
   const id = ref();
@@ -121,6 +139,14 @@ async function conductMethod(){
   }
 }
 
+function test (){
+  console.log('test', selected)
+}
+
+watchEffect(() => {
+  selectProduct()
+})
+
 </script>
 
 <template>
@@ -165,6 +191,78 @@ async function conductMethod(){
         />
       </template>
     </Dialog>
+      <!-- Создать на оснавании-->
+    <Dialog
+        v-model:visible="createBasedOnDialog"
+        :style="{ width: '450px' }"
+        :closable="false"
+        :modal="true"
+    >
+      <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30] mb-4">
+        Создание на основании
+      </div>
+
+      <div class="w-full card flex justify-center border-0">
+        <ul class="ml-7 mr-7 w-full border-0 border-b-2">
+          <li
+              id="saleToClients"
+              @click="createBasedOn('saleToClients')"
+              class="h-[63px] text-[18px] font-semibold pt-3 mb-3 border-t-2 text-black flex justify-between items-center"
+          >
+
+            Продажа клиентам
+            <i class="pi pi-arrow-right text-[#3935E7] font-semibold"></i>
+
+          </li>
+          <li
+              id="returnToSupplier"
+              @click="createBasedOn('returnToSupplier')"
+              class="h-[63px] text-[18px] font-semibold pt-3 mb-3 border-t-2 text-black flex justify-between items-center"
+          >
+            Возврат поставщику
+            <i class="pi pi-arrow-right text-[#3935E7]"></i>
+          </li>
+          <li
+              id="moneyExpense"
+              @click="createBasedOn('moneyExpense')"
+              class="h-[63px] text-[18px] font-semibold pt-3 mb-3 border-t-2 text-black flex justify-between items-center"
+          >
+            Росход денег
+            <i class="pi pi-arrow-right text-[#3935E7]"></i>
+          </li>
+          <li
+              id="rsExpense"
+              @click="createBasedOn('rsExpense')"
+              class="h-[63px] text-[18px] font-semibold pt-3 mb-3 border-t-2 text-black flex justify-between items-center"
+          >
+            Росход рс
+            <i class="pi pi-arrow-right text-[#3935E7]"></i>
+          </li>
+          <li
+              id="transfer"
+              @click="createBasedOn('transfer')"
+              class="h-[63px] text-[18px] font-semibold pt-3 mb-3 border-t-2 text-black flex justify-between items-center"
+          >
+            Перемещение
+            <i class="pi pi-arrow-right text-[#3935E7]"></i>
+          </li>
+        </ul>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-center w-full h-[50px] ">
+          <fin-button
+              label="Отменить"
+              icon="pi pi-times"
+              class="button-close"
+              severity="warning"
+              @click="createBasedOnDialog = false"
+          />
+        </div>
+      </template>
+    </Dialog>
+
+
     <Dialog
         v-model:visible="conductDialog"
         :style="{ width: '450px' }"
@@ -214,6 +312,13 @@ async function conductMethod(){
               class="p-button-sm"
               @click="copyProductsDialog = true"
           />
+          <fin-button
+              label="Создать на основании"
+              icon="pi pi-plus"
+              severity="warning"
+              class="p-button-sm"
+              @click="createBasedOnDialog = true"
+          />
         </div>
       </template>
     </Toolbar>
@@ -236,4 +341,21 @@ async function conductMethod(){
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
+
+.button-close{
+  border-radius: 10px !important;
+  width: 90% !important;
+  height: 100% !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+}
+
+.button-close:hover{
+
+}
+.button-close .pi {
+  font-weight: 16 !important;
+  font-size: 22px !important;
+}
+
 </style>

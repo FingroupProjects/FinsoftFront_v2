@@ -45,7 +45,6 @@ const financeDate = reactive({
   employeeId: "",
   comments: "",
   selectedOrganization: "",
-
   sum: '',
   base: '',
   getUser: ''
@@ -120,7 +119,6 @@ onMounted(async () => {
   try {
     await Promise.all([
       findOrganization(),
-      findCounterparty(),
       findCashRegister(),
       findEmployee()
     ]);

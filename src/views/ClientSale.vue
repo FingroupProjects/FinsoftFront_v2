@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {ref, watch, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -19,7 +19,11 @@ import Loader from "@/components/ui/Loader.vue";
 import MethodsClientSale from "@/components/clientSale/MethodsClientSale.vue";
 import ViewClientSale from "@/components/clientSale/ViewClientSale.vue";
 import CreateSale from "@/components/clientSale/CreateSale.vue";
+import {useClientSale} from "@/store/clientSale.js";
 
+
+
+const store = useClientSale()
 const {
   findStorage,
   storage,
@@ -168,12 +172,26 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
+watch (store.getId, (newVal) =>{
+  if (newVal !== null){
+    visibleRight.value = true
+  }
+  console.log(newVal)
+}, {deep:true})
+
+watchEffect(()=>{
+  if (store.getId !== null){
+    visibleRight.value = true
+  }
+})
+
 watch(selectedStorage, () => {
   getProducts();
 });
 watch(selectedCounterparty, () => {
   getProducts();
 });
+
 
 getProducts();
 </script>
@@ -216,8 +234,10 @@ getProducts();
             severity="primary"
             class="w-[46px]"
         >
+
           <img src="@/assets/img/menu.svg" alt=""/>
         </fin-button>
+
         <fin-button
             @click="createOpen"
             severity="success"
