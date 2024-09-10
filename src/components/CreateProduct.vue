@@ -7,7 +7,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '../constants/formatNumber.js';
+import formatNumber from '@/constants/formatNumber.js';
 import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(["postGoods"]);
@@ -45,10 +45,24 @@ const getOnBased = () =>{
   if (store.getId !== null){
     for (const idElement of getOnBasedValues.value) {
       for (const item of idElement.goods) {
-          price.value = item.price;
-        console.log('called', products.value)
-      }
+        products.value.push({
+          products: item.good.name,
+          coleVo: item.amount,
+          price: item.price,
+          sum: item.amount * item.price,
+          img: item.image
+        });
+        const lastProduct = products.value[products.value.length - 1];
 
+        // Make sure index is valid and updating the correct item
+        postProducts.value.push({
+          amount: lastProduct.coleVo,
+          good_id: item.good.id,
+          price: lastProduct.price,
+        });
+        emit("postGoods", {postProducts:postProducts.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: products?.value });
+        console.log('called', postProducts.value)
+      }
     }
   }
 
@@ -219,8 +233,7 @@ onMounted(async () => {
                 "
           class="flex items-center gap-[10px]"
           >
-            <img :src="slotProps.data?.img" alt=""
-                            class="w-[32px] h-[32px] rounded-[8px] object-cover">
+            <img :src="slotProps.data?.img " class="w-[32px] h-[32px] rounded-[8px] object-cover" />
                 {{ slotProps.data.products }}
               </span>
         </template>
@@ -230,7 +243,7 @@ onMounted(async () => {
           <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
         </template>
       </Column>
-      <Column   field="price" header="Цена">
+      <Column  field="price" header="Цена">
         <template #editor="{ data, field }">
           <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
         </template>
