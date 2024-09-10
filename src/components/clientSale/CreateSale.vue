@@ -5,6 +5,7 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
+import Select from "primevue/select"
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
@@ -13,11 +14,16 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
+import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
+const props = defineProps({
+  selectProducts: ''
+})
 
+const store = useClientSale()
 const {
   findCurrency,
   currency,
@@ -40,6 +46,7 @@ const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
+const getOnBasedValues = ref([])
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -84,6 +91,26 @@ async function getAgreement() {
   }
 }
 
+
+function getBasedOn (){
+  getOnBasedValues.value = store.getId
+  if (store.getId !== null){
+    for (const onBasedValue of getOnBasedValues.value) {
+      createValues.selectedOrganization = onBasedValue.organization
+      createValues.selectedStorage = onBasedValue.storage
+      createValues.selectedCounterparty = onBasedValue.counterparty
+      createValues.selectedAgreement = onBasedValue.counterpartyAgreement
+      createValues.selectCurrency = onBasedValue.currency
+      createValues.comments = onBasedValue.comment
+      console.log('lok', createValues.selectedAgreement)
+    }
+  }
+
+
+  console.log('look',store.getId)
+}
+
+
 async function saveFn() {
   const result = await v$.value.$validate();
   openInfoModal.value = false
@@ -125,17 +152,7 @@ function getProducts(products) {
   productsInfo.value = products;
 }
 
-onMounted(async () => {
-  try {
-    await Promise.all([
-      findOrganization(),
-      findCounterparty(),
-      findStorage()
-    ]);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-});
+
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
@@ -159,9 +176,8 @@ watchEffect(() => {
       name: createValues.selectedCounterparty.agreement[0].name,
       code: createValues.selectedCounterparty.agreement[0].id,
     };
-  } else {
-    createValues.selectedAgreement = null;
   }
+
   if (hasOrganization === true) createValues.selectedOrganization = {
     name: organizationHas.name,
     code: organizationHas.id
@@ -176,6 +192,23 @@ watch(createValues, (newValue) => {
     isCurrencyFetched.value = true;
   }
 });
+
+onMounted(async () => {
+  try {
+    await Promise.all([
+      findOrganization(),
+      findCounterparty(),
+      findStorage(),
+
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
+
+onMounted(()=>{
+  getBasedOn()
+})
 </script>
 
 <template>
@@ -220,29 +253,37 @@ watch(createValues, (newValue) => {
       </FloatLabel>
 
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Dropdown
+        <Select
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedOrganization.name}}
+          </template>
+        </Select>
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedCounterparty"
             :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
             :options="counterparty"
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedCounterparty.name}}
+          </template>
+        </Select>
         <label for="dd-city">Клиент</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedAgreement"
             :class="{ 'p-invalid': v$.selectedAgreement.$error }"
             @click="getAgreement"
@@ -251,24 +292,30 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
         >
-          <template #value>{{ createValues.selectedAgreement?.name }}</template>
-        </Dropdown>
+          <template #value>
+            {{createValues.selectedAgreement?.name}}
+          </template>
+        </Select>
         <label for="dd-city">Договор</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedStorage"
             :class="{ 'p-invalid': v$.selectedStorage.$error }"
             :loading="loadingStorage"
             :options="storage"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{ createValues.selectedStorage.name }}
+          </template>
+        </Select>
         <label for="dd-city">Склад</label>
       </FloatLabel>
 
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectCurrency"
             :class="{ 'p-invalid': v$.selectCurrency.$error }"
             @click="findCurrency(createValues.selectedAgreement)"
@@ -282,7 +329,7 @@ watch(createValues, (newValue) => {
           <template #value>
             {{ createValues.selectCurrency?.name }}
           </template>
-        </Dropdown>
+        </Select>
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">

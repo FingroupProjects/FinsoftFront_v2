@@ -3,5 +3,8 @@ import {ref} from 'vue'
 
 export const useClientSale = defineStore('useClientSale', () => {
     const postGoods = ref([])
-    return {postGoods}
+    const getId = ref(null)
+    return {postGoods, getId}
 })
+
+

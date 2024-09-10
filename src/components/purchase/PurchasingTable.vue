@@ -264,42 +264,42 @@ watchEffect(() => {
       </Column>
     </DataTable>
   </div>
-  <div class="summary-container "  >
-    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]" >
-      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
-        Автор: {{userName.name}}
-      </div>
+<!--  <div class="summary-container "  >-->
+<!--    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]" >-->
+<!--      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">-->
+<!--        Автор: {{userName.name}}-->
+<!--      </div>-->
 
-      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20PX"  >
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold " >
+<!--      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20PX"  >-->
+<!--        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold " >-->
 
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+<!--          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
 
-          </div>
-          Итого:
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+<!--          </div>-->
+<!--          Итого:-->
+<!--        </div>-->
+<!--        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
 
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-             Кол-во
-          </div>
-          {{ formatNumber(getAllProduct) }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Товаров
-          </div>
-          {{ goods?.length }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Сумма
-          </div>
-          {{ formatNumber(getAllSum) }}
-        </div>
-      </div>
-    </div>
-  </div>
+<!--          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--             Кол-во-->
+<!--          </div>-->
+<!--          {{ getAllProduct }}-->
+<!--        </div>-->
+<!--        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--            Товаров-->
+<!--          </div>-->
+<!--          {{ goods?.length }}-->
+<!--        </div>-->
+<!--        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--            Сумма-->
+<!--          </div>-->
+<!--          {{ getAllSum }}-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
 </template>
 
 <style lang="scss">
