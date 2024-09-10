@@ -119,7 +119,6 @@ onMounted(async () => {
   try {
     await Promise.all([
       findOrganization(),
-      findCounterparty(),
       findCashRegister(),
       findBalance()
     ]);
