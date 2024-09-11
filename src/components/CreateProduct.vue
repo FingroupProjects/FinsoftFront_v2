@@ -54,7 +54,6 @@ const getOnBased = () =>{
         });
         const lastProduct = products.value[products.value.length - 1];
 
-        // Make sure index is valid and updating the correct item
         postProducts.value.push({
           amount: lastProduct.coleVo,
           good_id: item.good.id,

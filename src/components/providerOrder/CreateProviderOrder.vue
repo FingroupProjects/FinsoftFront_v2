@@ -12,6 +12,7 @@ import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
+import formatNumber from "@/constants/formatNumber.js";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -37,7 +38,6 @@ const {
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
-const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
@@ -68,6 +68,12 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const v$ = useVuelidate(rules, createValues);
+const productsInfo = ref({
+  postProducts: [],
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 
 async function getAgreement() {
   try {
@@ -90,7 +96,6 @@ async function getAgreement() {
 
 async function saveFn() {
   const result = await v$.value.$validate();
-  console.log('product', productsInfo.value)
   openInfoModal.value = false
   if (result) {
     try {
@@ -315,6 +320,43 @@ watch(createValues, (newValue) => {
     </div>
   </div>
   <CreateProduct @postGoods="getProducts"/>
+
+  <!--Итог-->
+
+  <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+    <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+        Автор: {{ userName.name }}
+      </div>
+      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+
+          </div>
+          Итого:
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Кол-во
+          </div>
+          {{ formatNumber(productsInfo.getAllProduct) }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Товаров
+          </div>
+          {{ productsInfo.goods?.length }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Сумма
+          </div>
+          {{ formatNumber(productsInfo.getAllSum) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>

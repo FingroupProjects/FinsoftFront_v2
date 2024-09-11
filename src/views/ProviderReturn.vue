@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watch} from "vue";
+import {reactive, ref, watch, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -20,7 +20,10 @@ import MethodsProviderOrder from "@/components/providerOrder/MethodsProviderOrde
 import ViewProviderReturn from "@/components/providerReturn/ViewProviderReturn.vue";
 import CreateProviderReturn from "@/components/providerReturn/CreateProviderReturn.vue";
 import MethodsReturnProvider from "@/components/providerReturn/MethodsReturnProvider.vue";
+import {useClientSale} from "@/store/clientSale.js";
 
+
+const store = useClientSale()
 const {
   findStorage,
   storage,
@@ -193,6 +196,13 @@ watch(selectedStorage, () => {
 watch(selectedCounterparty, () => {
   getProducts();
 });
+
+watchEffect(()=>{
+  if (store.getId !== null && store.getId !== ''){
+    visibleRight.value = true
+    console.log('before', store.getId)
+  }
+})
 
 getProducts();
 </script>

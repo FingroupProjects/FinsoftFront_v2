@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, watchEffect, watch} from "vue";
+import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
@@ -14,9 +14,10 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
 import CreateMovementProduct from "@/components/movement/CreateMovementProduct.vue";
+import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-
+const store = useClientSale()
 const toast = useToast();
 
 const {
@@ -63,11 +64,11 @@ async function saveFn() {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-          organization_id: createValues.selectedOrganization.code,
+          organization_id: createValues.selectedOrganization.code || createValues.selectedOrganization.id,
           comment: createValues.comments,
           goods: productsInfo.value,
-          sender_storage_id: createValues.selectedSenderStorage.code,
-          recipient_storage_id: createValues.selectedRecipientStorage.code
+          sender_storage_id: createValues.selectedSenderStorage.code || createValues.selectedRecipientStorage.id,
+          recipient_storage_id: createValues.selectedRecipientStorage.code || createValues.selectedRecipientStorage.id
         },
       });
       toast.add({
@@ -88,6 +89,20 @@ async function saveFn() {
     }
   }
 }
+
+
+function getOnBased(){
+  console.log('getter', store.getId)
+  if (store.getId !== null){
+    for (const idElement of store.getId) {
+      createValues.selectedOrganization = idElement.organization;
+      createValues.selectedRecipientStorage = idElement.storage;
+      createValues.selectedSenderStorage = idElement.storage;
+      createValues.comments = idElement.comment;
+    }
+  }
+}
+
 
 function getProducts(products) {
   productsInfo.value = products;
@@ -117,6 +132,9 @@ watchEffect(() => {
   if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
 });
 
+onMounted(() =>{
+  getOnBased()
+})
 </script>
 
 <template>
@@ -169,7 +187,11 @@ watchEffect(() => {
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedOrganization.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Организация</label>
       </FloatLabel>
 
@@ -182,7 +204,11 @@ watchEffect(() => {
             :options="storage"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedSenderStorage?.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Склад Отправитель</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
@@ -194,7 +220,11 @@ watchEffect(() => {
             :options="storage"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedRecipientStorage?.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Склад Получатель</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">

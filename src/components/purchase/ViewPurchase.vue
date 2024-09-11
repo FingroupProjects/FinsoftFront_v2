@@ -18,6 +18,7 @@ import {usePurchaseStore} from "@/store/pruchase.js";
 import formatNumber from '../../constants/formatNumber.js'
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
+const store = usePurchaseStore()
 const props = defineProps({
   productId: {
     required: true,
@@ -29,7 +30,10 @@ const props = defineProps({
   date: Object
 });
 
-const store = usePurchaseStore()
+
+const organizationJson = localStorage.getItem('organization');
+const organizationHas = JSON.parse(organizationJson);
+const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const status = ref('');
 const productsInfo = ref();
@@ -45,6 +49,12 @@ const changeValue = ref(false);
 const initialValue = ref(null);
 const loaderSave = ref(false)
 const visibleToast = ref(false)
+const infoGoods = ref({
+  editModalOpen: false,
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 const viewDocument = ref({
   organizationName: '',
   author: '',
@@ -72,9 +82,7 @@ const {
 const userName = {
   name: localStorage.getItem("user_name"),
 };
-const organizationJson = localStorage.getItem('organization');
-const organizationHas = JSON.parse(organizationJson);
-const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
+
 
 async function getAgreement() {
   try {
@@ -94,7 +102,7 @@ async function getAgreement() {
 
 const getView = async () => {
   const item = props.date
-
+  console.log('info', infoGoods.value)
   if (item.active) {
     approved.value = true;
     status.value = 'Проведен';
@@ -196,12 +204,7 @@ function infoModalClose() {
   if (changeValue.value)  openInfoModal.value = true
   else  emit('close-sidebar')
 }
-const infoGoods = ref({
-  editModalOpen: false,
-  getAllSum: 0,
-  getAllProduct: [],
-  goods: []
-});
+
 
 const changeModal = (data) => {
   infoGoods.value = data;
@@ -264,7 +267,6 @@ onMounted(async () => {
       findOrganization(),
       findCounterparty(),
       findStorage(),
-
     ]);
   } catch (error) {
     console.error('Error:', error);

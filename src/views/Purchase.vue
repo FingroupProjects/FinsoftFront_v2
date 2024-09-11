@@ -17,7 +17,7 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
 import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
-import HeaderPurchase from "@/components/HeaderPurchase.vue";
+import HeaderPurchase from "@/components/HeaderPurchase.vue"
 import Loader from "@/components/ui/Loader.vue";
 import {reactive} from "vue";
 

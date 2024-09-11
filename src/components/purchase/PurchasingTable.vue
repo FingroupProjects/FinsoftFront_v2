@@ -4,12 +4,13 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
-import Select from "primevue/dropdown";
+import Select from "primevue/select";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 
 import {usePurchaseStore} from "@/store/pruchase.js";
+import {send} from "vite";
 
 const emit = defineEmits([ 'editModal']);
 const props = defineProps({
@@ -113,6 +114,7 @@ const userName = {
 
 function sendData () {
   emit('editModal', {editModalOpen:editModalOpen.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: goods?.value });
+
 }
 
 const onRowEditSave = (event) => {
@@ -136,7 +138,7 @@ const onRowEditSave = (event) => {
 
 const getGood = async () => {
 
-  console.log('get goods', props.infoGoods.goods)
+
   const items = props.infoGoods.goods;
 
   goods.value = items.map((item) => ({
@@ -164,9 +166,10 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
-  await sendData();
+  await sendData;
 
 });
+
 watchEffect(() => {
   getGood();
 })
