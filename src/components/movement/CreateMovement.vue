@@ -78,6 +78,7 @@ async function saveFn() {
         life: 3000,
       });
       emit("closeDialog", res.data.id);
+      store.getId = null
     } catch (e) {
       console.log(e);
       toast.add({
@@ -113,6 +114,7 @@ findStorage()
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
+  store.getId = null
 }
 
 watch(createValues, (newVal) => {

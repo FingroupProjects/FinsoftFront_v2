@@ -102,7 +102,6 @@ async function getAgreement() {
 
 const getView = async () => {
   const item = props.date
-  console.log('info', infoGoods.value)
   if (item.active) {
     approved.value = true;
     status.value = 'Проведен';
@@ -208,7 +207,6 @@ function infoModalClose() {
 
 const changeModal = (data) => {
   infoGoods.value = data;
-  console.log('info goods',infoGoods.value)
 };
 
 async function saveFnDialog() {

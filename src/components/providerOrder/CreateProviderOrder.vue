@@ -357,9 +357,6 @@ watch(createValues, (newValue) => {
     </div>
   </div>
 
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
-  </div>
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"

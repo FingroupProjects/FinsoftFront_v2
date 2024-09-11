@@ -137,8 +137,8 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-      store.getId = ''
       emit("closeDialog", res.result);
+      store.getId = null
     } catch (e) {
       console.log(e);
       toast.add({
@@ -175,6 +175,7 @@ onMounted(() =>{
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
+  store.getId = null
 }
 
 watch(createValues, (newVal) => {
@@ -374,9 +375,6 @@ watch(createValues, (newValue) => {
     </div>
   </div>
 
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
-  </div>
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"

@@ -10,7 +10,6 @@ import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
 
 import {usePurchaseStore} from "@/store/pruchase.js";
-import {send} from "vite";
 
 const emit = defineEmits([ 'editModal']);
 const props = defineProps({
@@ -114,7 +113,6 @@ const userName = {
 
 function sendData () {
   emit('editModal', {editModalOpen:editModalOpen.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: goods?.value });
-
 }
 
 const onRowEditSave = (event) => {
@@ -133,12 +131,9 @@ const onRowEditSave = (event) => {
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
   sendData()
-
 };
 
 const getGood = async () => {
-
-
   const items = props.infoGoods.goods;
 
   goods.value = items.map((item) => ({
@@ -166,9 +161,12 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
-  await sendData;
 
 });
+
+onMounted(()=>{
+  sendData()
+})
 
 watchEffect(() => {
   getGood();

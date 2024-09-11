@@ -29,6 +29,7 @@ const createBasedOn = (item) => {
   if (item === 'returnToSupplier'){
     store.getId = props.selectProducts
     router.push({ name: 'providerReturn' });
+    createBasedOnDialog.value = false;
   }
   if (item === 'transfer'){
     store.getId = props.selectProducts

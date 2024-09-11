@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watchEffect} from "vue";
+import {ref, watchEffect, watch} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import Toolbar from 'primevue/toolbar';
 import Dialog from 'primevue/dialog';
@@ -57,7 +57,7 @@ const copyProducts = async () => {
     toast.add({
       severity: "error",
       summary: "Error Message",
-      detail: e,
+      detail: 'egfSIDJb',
       life: 3000,
     });
   }
@@ -65,20 +65,55 @@ const copyProducts = async () => {
 
 
 const createBasedOn = (item) => {
-  if (item === 'saleToClients') {
-    store.getId = props.selectProducts
-    router.push({ name: 'clientSale' });
-  }
+  if(props.selectProducts.length <= 1) {
 
-  if (item === 'returnToSupplier'){
-    store.getId = props.selectProducts
-    router.push({ name: 'providerReturn' });
-  }
-  if (item === 'transfer'){
-    store.getId = props.selectProducts
-    router.push({ name: 'movement' });
+    if (item === 'saleToClients') {
+      store.getId = props.selectProducts
+      router.push({name: 'clientSale'});
+    }
+
+    if (item === 'returnToSupplier') {
+      store.getId = props.selectProducts
+      router.push({name: 'providerReturn'});
+    }
+    if (item === 'transfer') {
+      store.getId = props.selectProducts
+      router.push({name: 'movement'});
+    }
+
+  }else{
+    toast.add({
+      severity: "warn",
+      summary: "Warning Message",
+      detail:"Выберите 1 документ!",
+      life: 1500
+    })
   }
 } ;
+
+const handleCreateBasedOnClick = () => {
+  if (props.selectProducts.length === 1) {
+    const isActive = props.selectProducts[0].active;
+    if (isActive) {
+      createBasedOnDialog.value = true;
+    } else {
+      toast.add({
+        severity: "warn",
+        summary: "Предупреждение!",
+        detail: "Пожалуйста, выберите проведенный документ!",
+        life: 3000
+      });
+    }
+  } else {
+    toast.add({
+      severity: "warn",
+      summary: "Предупреждение!",
+      detail: "Пожалуйста, выберите только один документ!",
+      life: 3000
+    });
+  }
+};
+
 
 const deleteProduct = async () => {
   const id = ref();
@@ -148,6 +183,14 @@ async function conductMethod(){
 watchEffect(() => {
   selectProduct()
 })
+//
+// watchEffect(()=> {
+//       if (props.selectProducts.length > 1) {
+//         createBasedOnDialog.value = false;
+//       }
+//     console.log('length', props.selectProducts.length)
+//     }
+// );
 
 </script>
 
@@ -318,7 +361,7 @@ watchEffect(() => {
               icon="pi pi-plus"
               severity="warning"
               class="p-button-sm"
-              @click="createBasedOnDialog = true"
+              @click="handleCreateBasedOnClick"
           />
         </div>
       </template>
@@ -349,10 +392,6 @@ watchEffect(() => {
   height: 100% !important;
   font-size: 18px !important;
   font-weight: bold !important;
-}
-
-.button-close:hover{
-
 }
 .button-close .pi {
   font-weight: 16 !important;

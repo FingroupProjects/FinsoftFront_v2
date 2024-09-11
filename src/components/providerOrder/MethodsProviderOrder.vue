@@ -50,6 +50,29 @@ const createBasedOn = (item) => {
   }
 } ;
 
+const handleCreateBasedOnClick = () => {
+  if (props.selectProducts.length === 1) {
+    const isActive = props.selectProducts[0].active;
+    if (isActive) {
+      createBasedOnDialog.value = true;
+    } else {
+      toast.add({
+        severity: "warn",
+        summary: "Предупреждение!",
+        detail: "Пожалуйста, выберите проведенный документ!",
+        life: 3000
+      });
+    }
+  } else {
+    toast.add({
+      severity: "warn",
+      summary: "Предупреждение!",
+      detail: "Пожалуйста, выберите только один документ!",
+      life: 3000
+    });
+  }
+};
+
 
 const copyProducts = async () => {
   const id = ref();
@@ -317,7 +340,7 @@ watchEffect(() => {
               icon="pi pi-plus"
               severity="warning"
               class="p-button-sm"
-              @click="createBasedOnDialog = true"
+              @click="handleCreateBasedOnClick"
           />
         </div>
       </template>
@@ -340,5 +363,17 @@ watchEffect(() => {
 .card{
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+}
+
+.button-close{
+  border-radius: 10px !important;
+  width: 90% !important;
+  height: 100% !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+}
+.button-close .pi {
+  font-weight: 16 !important;
+  font-size: 22px !important;
 }
 </style>
