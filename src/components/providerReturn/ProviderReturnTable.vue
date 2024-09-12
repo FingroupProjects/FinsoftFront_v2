@@ -31,8 +31,8 @@ const editingRows = ref([]);
 const newProduct = ref();
 const editModalOpen = ref(true);
 
-const imgURL = import.meta.env.VITE_IMG_URL;
 
+const imgURL = import.meta.env.VITE_IMG_URL;
 const clearInputValues = () => {
   newProduct.value = {};
   amount.value = "";
@@ -58,6 +58,8 @@ const addFn = async () => {
     updated: false
   };
 
+  console.log('amount',goods.value );
+
   if (validateProduct(product)) {
     goods.value.push(product);
     store.postGoods.push({
@@ -69,6 +71,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.amount);
     addInput.value = false;
   }
+  sendData();
   clearInputValues();
 };
 
@@ -121,8 +124,11 @@ const onRowEditSave = (event) => {
 
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
-  emit('editModal', editModalOpen.value);
 };
+
+function sendData () {
+  emit('editModal', {editModalOpen:editModalOpen.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: goods?.value });
+}
 
 const getGood = async () => {
 
@@ -144,6 +150,7 @@ const getGood = async () => {
     return total + el?.amount;
   }, 0);
   getAllSum.value = props.infoGoods.sum;
+  sendData()
 };
 
 watchEffect(() => {
@@ -152,9 +159,12 @@ watchEffect(() => {
 });
 
 onMounted(async () => {
-  await getIdProducts();
-
+  await getIdProducts()
 });
+
+onMounted(()=>{
+  sendData()
+})
 watchEffect(() => {
   getGood();
 })
@@ -193,7 +203,7 @@ watchEffect(() => {
     <DataTable
         :value="goods"
         scrollable
-        scrollHeight="280px"
+        scrollHeight="500px"
         class="mt-[21px]"
         v-model:editingRows="editingRows"
         @row-edit-save="onRowEditSave"
@@ -230,11 +240,13 @@ watchEffect(() => {
           <input-text v-model="data[field]" fluid :model-value="formatInputAmount(data[field])"/>
         </template>
       </Column>
+
       <Column field="price" header="Цена">
         <template #editor="{ data, field }">
           <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid/>
         </template>
       </Column>
+
       <Column field="sum" header="Сумма"></Column>
       <Column field="quantity" header="">
         <template #body="{data,index}">
@@ -246,36 +258,11 @@ watchEffect(() => {
       </Column>
       <Column :rowEditor="true"
               style="width: 0; min-width: 7rem;"
-              bodyStyle="text-align:center"></Column>
+              bodyStyle="text-align:center">
+      </Column>
     </DataTable>
   </div>
-  <div class="summary-container">
-    <div class="rounded-[10px] flex justify-between items-center p-[18px] mt-4 bg-[#F6F6F6]">
-      <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-        Итого:
-      </div>
-      <div class="flex gap-[49px]">
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Кол-во
-          </div>
-          {{ formatNumber(getAllProduct) }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Товаров
-          </div>
-          {{ goods?.length }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Сумма
-          </div>
-          {{ formatNumber(getAllSum) }}
-        </div>
-      </div>
-    </div>
-  </div>
+
 </template>
 
 <style lang="scss">

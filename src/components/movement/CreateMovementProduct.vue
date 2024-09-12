@@ -8,8 +8,10 @@ import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '../../constants/formatNumber.js';
+import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(["postGoods"]);
+const store = useClientSale();
 
 const selectedProducts = ref();
 const addInput = ref(false);
@@ -80,6 +82,29 @@ const getIdProducts = async (inputValue) => {
   }));
 };
 
+const getOnBased = () =>{
+  console.log('store',store.getId)
+  if (store.getId !== null){
+    for (const storeElement of store.getId) {
+      for (const item of storeElement.goods) {
+        products.value.push({
+          products: item.good.name,
+          coleVo: item.amount,
+          img: item.image
+        })
+        const lastProduct = products.value[products.value.length - 1];
+        postProducts.value.push({
+          amount: lastProduct.coleVo,
+          good_id: item.good.id,
+        });
+      }
+    }
+  }
+  console.log('post', postProducts.value)
+  emit("postGoods", postProducts.value);
+}
+
+
 const onRowEditSave = (event) => {
   const {newData, index} = event;
   const oldProduct = products.value[index];
@@ -103,6 +128,7 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
+  getOnBased()
 });
 </script>
 

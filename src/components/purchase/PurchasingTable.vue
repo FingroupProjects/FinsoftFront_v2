@@ -4,7 +4,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
-import Select from "primevue/dropdown";
+import Select from "primevue/select";
 import inputText from 'primevue/inputtext'
 import InputText from 'primevue/inputtext'
 import formatInputAmount from "@/constants/formatInput.js";
@@ -131,12 +131,9 @@ const onRowEditSave = (event) => {
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.amount) + Number(newData.amount);
   sendData()
-
 };
 
 const getGood = async () => {
-
-  console.log('get goods', props.infoGoods.goods)
   const items = props.infoGoods.goods;
 
   goods.value = items.map((item) => ({
@@ -164,9 +161,13 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
-  await sendData();
 
 });
+
+onMounted(()=>{
+  sendData()
+})
+
 watchEffect(() => {
   getGood();
 })

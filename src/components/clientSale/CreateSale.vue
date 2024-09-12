@@ -98,16 +98,11 @@ function getBasedOn (){
     for (const onBasedValue of getOnBasedValues.value) {
       createValues.selectedOrganization = onBasedValue.organization
       createValues.selectedStorage = onBasedValue.storage
-      createValues.selectedCounterparty = onBasedValue.counterparty
-      createValues.selectedAgreement = onBasedValue.counterpartyAgreement
       createValues.selectCurrency = onBasedValue.currency
       createValues.comments = onBasedValue.comment
-      console.log('lok', createValues.selectedAgreement)
+
     }
   }
-
-
-  console.log('look',createValues.selectedCounterparty)
 }
 
 
@@ -142,6 +137,7 @@ async function saveFn() {
         life: 3000,
       });
       emit("closeDialog", res.result);
+      store.getId = null
     } catch (e) {
       console.log(e);
       toast.add({
@@ -163,6 +159,7 @@ function getProducts(products) {
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
+  store.getId = null
 }
 
 watch(createValues, (newVal) => {

@@ -56,6 +56,12 @@ const rules = reactive({
   selectedCounterparty: {required},
   selectedAgreement: {required},
 });
+const productsInfo = ref({
+  postProducts: [],
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 const userName = {
   name: localStorage.getItem("user_name"),
 };
@@ -129,12 +135,7 @@ async function saveFn() {
   }
 }
 
-const productsInfo = ref({
-  postProducts: [],
-  getAllSum: 0,
-  getAllProduct: [],
-  goods: []
-});
+
 
 function getProducts(products) {
   productsInfo.value = products;
@@ -309,6 +310,9 @@ watch(createValues, (newValue) => {
     </div>
   </div>
   <CreateProduct @postGoods="getProducts"/>
+
+  <!--ИТОГ-->
+
   <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
     <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
       <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">

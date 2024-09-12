@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, onMounted} from "vue";
+import {ref, watch, onMounted, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -18,13 +18,14 @@ import HeaderPurchase from "@/components/HeaderPurchase.vue";
 import MethodsMovement from "@/components/movement/MethodsMovement.vue";
 import CreateMovement from "@/components/movement/CreateMovement.vue";
 import ViewMovement from "@/components/movement/ViewMovement.vue";
+import {useClientSale} from "@/store/clientSale.js";
 
+const store = useClientSale()
 const {
   findStorage,
   storage,
   loadingStorage,
 } = useStaticApi();
-
 const visibleRight = ref(false);
 const products = ref();
 const selectedStorage = ref(null);
@@ -174,6 +175,12 @@ watch(selectedStorage, () => {
 watch(selectedStatus, () => {
   getProducts();
 });
+watchEffect(()=>{
+  if (store.getId !== null){
+    visibleRight.value = true;
+  }
+})
+
 getProducts();
 </script>
 
