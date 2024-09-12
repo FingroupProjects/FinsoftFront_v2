@@ -14,10 +14,12 @@ import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import FinanceCreate from "@/components/finance/FinanceCreate.vue";
-import MethodsFinance from "@/components/finance/MethodsFinance.vue";
-import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
-import FinanceFilter from "@/components/finance/FinanceFilter.vue";
+import FinanceCreate from "@/components/bank/BankCreate.vue";
+import MethodsFinance from "@/components/bank/MethodsBank.vue";
+import FinanceViewTabs from "@/components/bank/BankView/BankViewTabs.vue";
+import FinanceFilter from "@/components/bank/BankFilter.vue";
+import BankViewTabs from "@/components/bank/BankView/BankViewTabs.vue";
+import BankCreate from "@/components/bank/BankCreate.vue";
 
 const {
   loadingUser,
@@ -75,7 +77,6 @@ const onRowClick = (event) => {
   visibleRight.value = true;
   createOpenModal.value = true
   selectedProductInfo.value = product
-
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -96,7 +97,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/cash-store/pko`, {params});
+  const res = await useAxios(`/checking-account/PKO`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -167,7 +168,7 @@ findUsers()
 </script>
 
 <template>
-  <header-purchase header-title="Приход средств"/>
+  <header-purchase header-title="Приход рас.чет"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -394,12 +395,12 @@ findUsers()
         :dismissable="false"
     >
 
-      <FinanceViewTabs v-if="createOpenModal"
+      <BankViewTabs v-if="createOpenModal"
                        :operation-list="operationPkoList"
                        :allDate="selectedProductInfo"
                        :operation-type-id="selectedProductInfo.id"
                        @close-sidebar="visibleRight = false"/>
-      <FinanceCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
+      <BankCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
 
     </Sidebar>
   </div>

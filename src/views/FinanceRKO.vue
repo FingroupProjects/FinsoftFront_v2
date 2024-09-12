@@ -14,16 +14,16 @@ import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import FinanceCreate from "@/components/finance/FinanceCreate.vue";
-import MethodsFinance from "@/components/finance/MethodsFinance.vue";
-import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
-import FinanceFilter from "@/components/finance/FinanceFilter.vue";
+import FinanceCreate from "@/components/financeRKO/FinanceCreate.vue";
+import MethodsFinance from "@/components/financeRKO/MethodsFinance.vue";
+import FinanceViewTabs from "@/components/financeRKO/FinanceView/FinanceViewTabs.vue";
+import FinanceFilter from "@/components/financeRKO/FinanceFilter.vue";
 
 const {
   loadingUser,
   findUsers,
   userList,
-  findOperationPko,
+  findOperationRKO,
   operationPkoList,
   loadingOperationPko
 } = useStaticApi();
@@ -77,7 +77,6 @@ const onRowClick = (event) => {
   selectedProductInfo.value = product
 
 };
-
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
   visibleFilter.value = false
@@ -96,7 +95,7 @@ async function getProducts(filters = {}) {
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/cash-store/pko`, {params});
+  const res = await useAxios(`/cash-store/RKO`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -162,12 +161,12 @@ watch(selectOperationPko, () => {
 });
 
 getProducts();
-findOperationPko();
+findOperationRKO();
 findUsers()
 </script>
 
 <template>
-  <header-purchase header-title="Приход средств"/>
+  <header-purchase header-title="Расход средств"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
