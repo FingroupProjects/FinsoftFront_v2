@@ -11,8 +11,6 @@ import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
-import EmployeesTable from "@/components/reportCard/EmployeesTable.vue";
-import CreateProduct from "@/components/CreateProduct.vue";
 import EmployeesSalary from "@/components/salaryDocument/EmployeesSalary.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
@@ -58,6 +56,7 @@ const v$ = useVuelidate(rules, createValues);
 async function saveFn() {
   const result = await v$.value.$validate();
   openInfoModal.value = false
+  employees.value = productsInfo.value
   if (result) {
     try {
       const res = await useAxios(`salaryDocument`, {
@@ -69,14 +68,17 @@ async function saveFn() {
           comment: createValues.comment,
           data: employees.value
         },
+
       });
+      console.log('res.data', res.result);
       toast.add({
         severity: "success",
         summary: "Success Message",
         detail: "Message Content",
         life: 3000,
       });
-      emit("closeDialog", res.data);
+      emit("closeDialog", res.result);
+
     } catch (e) {
       console.log(e);
       toast.add({
@@ -89,12 +91,7 @@ async function saveFn() {
   }
 }
 
-watchEffect(function () {
-  if (hasOrganization === true) createValues.organization = {
-    name: organizationHas.name,
-    code: organizationHas.id
-  }
-})
+
 
 async function getEmployeeSalary() {
   try {
@@ -105,8 +102,6 @@ async function getEmployeeSalary() {
         month_id: createValues.month.code
       },
     });
-
-
     employees.value = res.result.data.map((item) => ({
       employee_id: item.employee_id,
       employee_name: item.employee_name,
@@ -132,20 +127,23 @@ async function getEmployeeSalary() {
   }
 }
 
-onMounted(async () => {
 
-  await findOrganization(),
-  await findMonth()
-
-});
 function getProducts(products) {
   productsInfo.value = products;
-  console.log('product info', productsInfo.value)
+  console.log('product info', employees.value)
 }
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
+
+watchEffect(function () {
+  if (hasOrganization === true) createValues.organization = {
+    name: organizationHas.name,
+    code: organizationHas.id
+  }
+})
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
@@ -155,7 +153,11 @@ watch(createValues, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
+onMounted(async () => {
+  await findOrganization()
+  await findMonth()
 
+});
 </script>
 
 <template>

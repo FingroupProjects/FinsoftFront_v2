@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {ref, watch, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -18,7 +18,9 @@ import FinanceCreate from "@/components/financeRKO/FinanceCreate.vue";
 import MethodsFinance from "@/components/financeRKO/MethodsFinance.vue";
 import FinanceViewTabs from "@/components/financeRKO/FinanceView/FinanceViewTabs.vue";
 import FinanceFilter from "@/components/financeRKO/FinanceFilter.vue";
+import {useClientSale} from "@/store/clientSale.js";
 
+const store = useClientSale()
 const {
   loadingUser,
   findUsers,
@@ -159,6 +161,12 @@ watch(selectUser, () => {
 watch(selectOperationPko, () => {
   getProducts();
 });
+
+watchEffect(()=>{
+  if (store.getId !== null){
+    visibleRight.value = true
+  }
+})
 
 getProducts();
 findOperationRKO();

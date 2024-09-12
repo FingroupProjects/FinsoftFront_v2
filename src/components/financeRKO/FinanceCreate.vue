@@ -11,10 +11,12 @@ import FinanceOtherExpenses from "@/components/financeRKO/FinanceOtherExpenses.v
 import FinanceOtherIncomes from "@/components/financeRKO/FinanceOtherIncomes.vue";
 import {useFinanceStore} from "@/store/finance.js";
 import {useAxios} from "@/composable/useAxios.js";
+import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(['open-view', 'close-sidebar']);
 
 const store = useFinanceStore()
+const storeOnBased =  useClientSale()
 
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -52,6 +54,11 @@ async function fetchOperating() {
   }
 }
 
+function createOnBased(){
+  console.log('keldi!',storeOnBased.getId);
+}
+
+
 fetchOperating()
 
 function openModal() {
@@ -68,6 +75,11 @@ function closeFn() {
 function postMethod(id) {
   emit('open-view', id)
 }
+
+onMounted(()=>{
+  createOnBased()
+})
+
 </script>
 
 <template>

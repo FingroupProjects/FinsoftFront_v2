@@ -205,7 +205,6 @@ watch(selectedStorage, () => {
 });
 watch(selectedCounterparty, () => {
   if (selectedCounterparty.value) {
-
     getProducts();
   }
 });

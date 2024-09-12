@@ -6,7 +6,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import Dropdown from "primevue/dropdown";
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
+import { required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
@@ -14,7 +14,6 @@ import Dialog from "primevue/dialog";
 import EmployeesTable from "@/components/reportCard/EmployeesTable.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-
 const toast = useToast();
 
 const {
@@ -37,9 +36,7 @@ const createValues = reactive({
   month: "",
   organization: ""
 });
-
 const employees = ref([])
-
 const rules = reactive({
   datetime24h: {required},
   month: {required},
@@ -55,6 +52,7 @@ const v$ = useVuelidate(rules, createValues);
 
 async function saveFn() {
   const result = await v$.value.$validate();
+  console.log('fast',employees.value)
   openInfoModal.value = false
   if (result) {
     try {
@@ -87,12 +85,18 @@ async function saveFn() {
   }
 }
 
-watchEffect(function () {
-  if (hasOrganization === true) createValues.organization = {
-    name: organizationHas.name,
-    code: organizationHas.id
+function handleUpdatedEmployees(updatedEmployees) {
+  console.log('Updated employees from child:', updatedEmployees);
+
+  for (const updatedEmployee of updatedEmployees) {
+    const employee = employees.value.find(emp => emp.name === updatedEmployee.name);
+    if (employee) {
+      employee.fact_hours = updatedEmployee.fact_hours;
+    }
   }
-})
+  console.log('employees.value after update:', employees.value);
+}
+
 
 async function getEmployeeSalary() {
   try {
@@ -124,17 +128,18 @@ async function getEmployeeSalary() {
   }
 }
 
-onMounted(async () => {
-
-  await findOrganization(),
-  await findMonth()
-
-});
 
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
 }
+
+watchEffect(function () {
+  if (hasOrganization === true) createValues.organization = {
+    name: organizationHas.name,
+    code: organizationHas.id
+  }
+})
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
@@ -144,6 +149,10 @@ watch(createValues, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
+onMounted(async () => {
+  await findOrganization()
+  await findMonth()
+});
 
 </script>
 
@@ -222,7 +231,7 @@ watch(createValues, (newVal) => {
       </FloatLabel>
     </div>
   </div>
-  <employees-table :info-goods="employees"/>
+  <employees-table :info-goods="employees" @update-employees="handleUpdatedEmployees"/>
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>

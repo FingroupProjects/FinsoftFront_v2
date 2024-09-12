@@ -22,8 +22,9 @@ const toast = useToast();
 const props = defineProps({
   selectProducts: ''
 })
-
 const store = useClientSale()
+
+
 const {
   findCurrency,
   currency,
