@@ -83,15 +83,15 @@ export default [
                     },
                     {
                         label: 'Расход средств',
-                        route: '/'
+                        route: '/financeRKO'
                     },
                     {
                         label: 'Приход рас.сч',
-                        route: '/'
+                        route: '/bank'
                     },
                     {
                         label: 'Расход рас.сч',
-                        route: '/'
+                        route: '/bankRKO'
                     }
                 ]
             },

@@ -249,6 +249,23 @@ export const useStaticApi = () => {
       loadingOperationPko.value = false;
     }
   };
+
+  const findOperationRKO = async () => {
+    try {
+      loadingOperationPko.value = true;
+      const res = await useAxios(`/operationTypes?type=RKO`);
+      return (operationPkoList.value = res.result.map((el) => {
+        return {
+          name: el.title_ru,
+          code: el.id,
+        };
+      }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      loadingOperationPko.value = false;
+    }
+  };
   const findPriceType = async () => {
     try {
       loadPriceType.value = true;
@@ -382,6 +399,7 @@ export const useStaticApi = () => {
     schedules,
     months,
     loadingMonth,
+    findOperationRKO,
     findMonth
   };
 };
