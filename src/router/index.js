@@ -167,6 +167,16 @@ const routes = [
                 component: () => import('@/views/Finance.vue'),
             },
             {
+                path: '/financeRKO',
+                name: 'financeRKO',
+                component: () => import('@/views/FinanceRKO.vue'),
+            },
+            {
+                path: '/bank',
+                name: 'bank',
+                component: () => import('@/views/Bank.vue'),
+            },
+            {
                 path: '/for-sale',
                 name: 'for-sale',
                 component: () => import('@/views/ForSale.vue'),
