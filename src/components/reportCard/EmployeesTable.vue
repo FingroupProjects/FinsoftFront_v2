@@ -39,25 +39,41 @@ const userName = {
 };
 
 const getGood = async () => {
-
   const items = props.infoGoods;
-  console.log(items)
+
   employees.value = items.map((item) => ({
     employee_name: item.employee_name,
     standart_hours: item.standart_hours,
-    fact_hours: item.standart_hours
+    fact_hours: item.fact_hours,
+    salary: item.salary,
+    schedule_id: item.schedule_id
   }));
+  console.log('items',employees.value)
 };
 
+const onRowEditSave = (event) =>{
+  const {newData, index} = event;
+  employees.value[index].fact_hours = Number(newData.fact_hours);
+  console.log(  'logo', employees.value)
+  sendData()
+}
+
+function sendData(){
+  emit('update-employees', employees.value);
+}
+
 onMounted(function () {
-  console.log(props.infoGoods)
+  sendData()
+
+})
+
+watchEffect(()=>{
+  getGood();
 })
 watch(props.infoGoods, () => {
   console.log(props.infoGoods)
 });
-watchEffect(() => {
-  getGood();
-})
+
 </script>
 
 <template>
@@ -67,22 +83,20 @@ watchEffect(() => {
         :value="employees"
         scrollable
         scrollHeight="500px"
+        v-model:editingRows="editingRows"
+        @row-edit-save="onRowEditSave"
         class="mt-[21px]"
         editMode="row"
         tableStyle="min-width: 50rem"
     >
-      <Column field="employee_name" header="Наименование">
-        <template #editor="{ data, field }">
-        <input-text v-model="data[field]" fluid :model-value="data[field]"/>
-      </template>
-      </Column>
-      <Column field="standart_hours" header="Кол.во часов по стандарту">
+      <Column field="employee_name" header="Наименование"/>
+      <Column field="standart_hours" header="Кол.во часов по стандарту"/>
+      <Column field="fact_hours" header="Кол.во часов по факту">
         <template #editor="{ data, field }">
           <input-text v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid/>
         </template>
       </Column>
-
-      <Column field="fact_hours" header="Кол.во часов по факту"></Column>
+      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
     </DataTable>
   </div>
 

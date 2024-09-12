@@ -80,6 +80,16 @@ const createBasedOn = (item) => {
       store.getId = props.selectProducts
       router.push({name: 'movement'});
     }
+    if (item === 'moneyExpense') {
+      store.getId = props.selectProducts
+      router.push({name: 'financeRKO'});
+    }
+    if (item === 'rsExpense') {
+      store.getId = props.selectProducts
+      router.push({name: 'bankRKO'});
+    }
+
+
 
   }else{
     toast.add({

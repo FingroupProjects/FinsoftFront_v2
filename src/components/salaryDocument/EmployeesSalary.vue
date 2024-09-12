@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watchEffect} from "vue";
+import {onMounted, ref, watchEffect, watch} from "vue";
 import Dropdown from "primevue/dropdown";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -43,18 +43,29 @@ const getIdProducts = async (inputValue) => {
 };
 
 const onRowEditSave = (event) => {
-  const {newData, index} = event;
+  const { newData, index } = event;
   const oldData = datas.value[index];
 
-  console.log(oldData)
-  products.value.splice(index, 1, newData);
+  const takesFromSalary = Number(newData.takes_from_salary) || 0;
+  const anotherPayments = Number(newData.another_payments) || 0;
 
-  postProducts.value.splice(index, 1, {
-    salary: newData.salary
-  });
+  newData.payed_salary = (Number(oldData.payed_salary) || 0) + anotherPayments - takesFromSalary;
+
+  console.log('Updated payed_salary:', newData.payed_salary);
+  newData.takes_from_salary = takesFromSalary;
+  newData.another_payments = anotherPayments;
+  newData.payed_salary = Number(newData.payed_salary);
+  datas.value.splice(index, 1, newData);
+  postProducts.value = datas.value;
+  sendData()
 };
-const getGood = async () => {
 
+function sendData(){
+  emit('postGoods', postProducts.value);
+}
+
+
+const getGood = async () => {
   const items = props.employees;
   datas.value = items.map((item) => ({
     employee_id: item.employee_id,
@@ -63,13 +74,14 @@ const getGood = async () => {
     fact_hours: item.fact_hours,
     oklad: item.salary,
     salary: item.salary,
-    worked_hours: item.standart_hours,
-    another_payments: 0,
-    takes_from_salary: 0,
-    payed_salary: item.salary
+    worked_hours: item.worked_hours,
+    another_payments: item.another_payments,
+    takes_from_salary: item.takes_from_salary,
+    payed_salary: item.payed_salary
   }));
-  console.log(datas.value)
+  console.log('getter',props.employees)
 };
+
 watchEffect(() => {
   getGood();
 })
@@ -95,26 +107,10 @@ onMounted(async () => {
         editMode="row"
         tableStyle="min-width: 50rem"
     >
-      <Column field="employee_name" header="Наименование">
-        <template #editor="{ data, field }">
-          <input-text v-model="data[field]" fluid :model-value="data[field]"/>
-        </template>
-      </Column>
-      <Column field="oklad" header="Оклад">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" :model-value="data[field]" fluid class="w-[10%]"/>
-        </template>
-      </Column>
-      <Column field="worked_hours" header="Рабочие часы">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
-        </template>
-      </Column>
-      <Column field="salary" header="Зарплата">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" :model-value="data[field]" fluid class="w-[10%]"/>
-        </template>
-      </Column>
+      <Column field="employee_name" header="Наименование"/>
+      <Column field="oklad" header="Оклад"/>
+      <Column field="worked_hours" header="Рабочие часы"/>
+      <Column field="salary" header="Зарплата"/>
       <Column field="another_payments" header="Другие оплаты">
         <template #editor="{ data, field }">
           <InputText v-model="data[field]" :model-value="data[field]" fluid class="w-[10%]"/>
@@ -125,11 +121,7 @@ onMounted(async () => {
           <InputText v-model="data[field]" :model-value="data[field]" fluid class="w-[10%]"/>
         </template>
       </Column>
-      <Column field="payed_salary" header="Зарплата к оплате">
-        <template #editor="{ data, field }">
-          <InputText v-model="data[field]" :model-value="data[field]" fluid class="w-[10%]"/>
-        </template>
-      </Column>
+      <Column field="payed_salary" header="Зарплата к оплате"/>
       <Column
           :rowEditor="true"
           style="width: 10%; min-width: 8rem;"

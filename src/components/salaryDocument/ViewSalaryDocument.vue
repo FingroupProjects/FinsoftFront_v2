@@ -13,7 +13,7 @@ import {usePurchaseStore} from "@/store/pruchase.js";
 import Dropdown from "primevue/dropdown";
 import {required} from "@vuelidate/validators";
 import FinInput from "@/components/ui/Inputs.vue";
-import EmployeesTable from "@/components/reportCard/EmployeesTable.vue";
+import EmployeesSalary from "@/components/salaryDocument/EmployeesSalary.vue"
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -76,27 +76,39 @@ const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 const getView = async () => {
   const item = props.data;
-  createValues.organization = item.organization;
-  employees.value = item.employees.map((item) => ({
-    employee_id: item.employee.id,
-    employee_name: item.employee.name,
-    standart_hours: item.standart_hours,
-    fact_hours: item.fact_hours,
-    schedule_id: item.schedule_id,
-    salary: item.salary
-  }))
-  createValues.doc_number = item.doc_number;
-  createValues.month = item.month;
-  createValues.date = item.date;
+  console.log('item in view', item);
 
-  console.log(item);
+  createValues.organization = item.organization || {};
+  createValues.doc_number = item.doc_number || '';
+  createValues.month = item.month || {};
+  createValues.date = item.date || '';
+
+  if (Array.isArray(item.employees)) {
+    employees.value = item.employees.map(emp => ({
+      employee_id: emp.employee_id || '',
+      employee_name: emp.employee?.name || '',
+      worked_hours: emp.worked_hours || 0,
+      another_payments: emp.another_payments || 0,
+      payed_salary: emp.payed_salary || 0,
+      takes_from_salary: emp.takes_from_salary || 0,
+      schedule_id: emp.schedule_id || '',
+      salary: emp.salary || 0
+    }));
+  } else {
+    employees.value = [];
+  }
+
+  console.log('employees data:', employees.value);
 };
 
 
 const updateView = async () => {
   const result = await v$.value.$validate();
+
   openInfoModal.value = false
   changeValue.value = false
+
+  console.log("updateView", employees.value);
   if (result) {
     loaderSave.value = true
     try {
@@ -106,7 +118,6 @@ const updateView = async () => {
         date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
         comment: createValues.comment,
         data: employees.value
-
       };
 
       const res = await useAxios(`/reportCard/${props.productId}`, {
@@ -151,6 +162,7 @@ onMounted(function () {
   getView()
   findOrganization()
   findMonth()
+  console.log('get', employees.value)
 
 })
 
@@ -228,7 +240,7 @@ onMounted(function () {
         </FloatLabel>
       </div>
     </div>
-    <employees-table :info-goods="employees"/>
+    <employees-salary :employees="employees"/>
     <div class="text-[20px] font-[600] absolute bottom-[40px]">
       Автор: {{ userName.name }}
     </div>

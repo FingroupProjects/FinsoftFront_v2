@@ -114,6 +114,7 @@ const onRowClick = (event) => {
   createOpenModal.value = true
   dataInfo.value = product
   selectedProductId.value = product.id
+  console.log('post',product)
 };
 
 async function getProducts(filters = {}) {
@@ -133,6 +134,7 @@ async function getProducts(filters = {}) {
     const res = await useAxios(`/salaryDocument`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
+    console.log('result', res.result)
     return products.value;
 
   } catch (e) {
@@ -179,7 +181,7 @@ const getSeverity = (status) => {
 
 function closeFn(result) {
   dataInfo.value = result
-  console.log(dataInfo.value)
+  console.log('after saving',dataInfo.value)
   createOpenModal.value = true
   getProducts();
 }
@@ -445,7 +447,7 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-salary-document :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
+      <view-salary-document :product-id="dataInfo?.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                      :openModalClose="openInfoModal"/>
       <CreateSalaryDocument v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
