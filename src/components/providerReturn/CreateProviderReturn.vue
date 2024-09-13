@@ -13,11 +13,15 @@ import Toast from "primevue/toast";
 import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
+import {useClientSale} from "@/store/clientSale.js";
+import formatNumber from "@/constants/formatNumber.js";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
+
+const store = useClientSale()
 const {
   findCurrency,
   currency,
@@ -35,11 +39,11 @@ const {
 
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
-const productsInfo = ref();
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
+const getOnBasedValues = ref([])
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
@@ -60,6 +64,12 @@ const rules = reactive({
 const userName = {
   name: localStorage.getItem("user_name"),
 };
+const productsInfo = ref({
+  postProducts: [],
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
@@ -84,6 +94,25 @@ async function getAgreement() {
   }
 }
 
+function getBasedOn(){
+  console.log('getter', store.getId)
+  getOnBasedValues.value = store.getId
+  console.log('getter', getOnBasedValues.value)
+  if (store.getId !== null){
+    for (const onBasedValue of getOnBasedValues.value) {
+      createValues.selectedOrganization = onBasedValue.organization
+      createValues.selectedStorage = onBasedValue.storage
+      createValues.selectedCounterparty = onBasedValue.counterparty
+      createValues.selectedAgreement = onBasedValue.counterpartyAgreement
+      createValues.selectCurrency = onBasedValue.currency
+      createValues.comments = onBasedValue.comment
+      console.log('lok', createValues.selectedAgreement)
+    }
+    console.log('org', createValues.selectedAgreement)
+  }
+}
+
+
 async function saveFn() {
   const result = await v$.value.$validate();
   openInfoModal.value = false
@@ -93,11 +122,11 @@ async function saveFn() {
         method: "POST",
         data: {
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
-          organization_id: createValues.selectedOrganization.code,
-          counterparty_id: createValues.selectedCounterparty.code,
-          counterparty_agreement_id: createValues.selectedAgreement.code,
-          storage_id: createValues.selectedStorage.code,
-          currency_id: createValues.selectCurrency.code,
+          organization_id: createValues.selectedOrganization.code || createValues.selectedOrganization.id,
+          counterparty_id: createValues.selectedCounterparty.code ||createValues.selectedCounterparty.id,
+          counterparty_agreement_id: createValues.selectedAgreement.code || createValues.selectedAgreement.id,
+          storage_id: createValues.selectedStorage.code || createValues.selectedStorage.id,
+          currency_id: createValues.selectCurrency.code || createValues.selectCurrency.id,
           comment: createValues.comments,
           goods: productsInfo.value.postProducts,
         },
@@ -109,6 +138,7 @@ async function saveFn() {
         life: 3000,
       });
       emit("closeDialog", res.result);
+      store.getId = null
     } catch (e) {
       console.log(e);
       toast.add({
@@ -130,16 +160,22 @@ onMounted(async () => {
     await Promise.all([
       findOrganization(),
       findCounterparty(),
-      findStorage()
+      findStorage(),
+
     ]);
   } catch (error) {
     console.error('Error:', error);
   }
 });
 
+onMounted(() =>{
+  getBasedOn()
+})
+
 async function infoModalClose() {
   if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
   else emit('close-sidebar')
+  store.getId = null
 }
 
 watch(createValues, (newVal) => {
@@ -159,9 +195,8 @@ watchEffect(() => {
       name: createValues.selectedCounterparty.agreement[0].name,
       code: createValues.selectedCounterparty.agreement[0].id,
     };
-  } else {
-    createValues.selectedAgreement = null;
   }
+
   if (hasOrganization === true) createValues.selectedOrganization = {
     name: organizationHas.name,
     code: organizationHas.id
@@ -183,7 +218,6 @@ watch(createValues, (newValue) => {
     <div class="header">
       <div>
         <div class="header-title">Создание возврата товаров</div>
-
       </div>
       <div class="flex gap-[16px]">
         <fin-button
@@ -227,7 +261,11 @@ watch(createValues, (newValue) => {
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedOrganization?.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
@@ -238,7 +276,11 @@ watch(createValues, (newValue) => {
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedCounterparty?.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
@@ -251,7 +293,9 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
         >
-          <template #value>{{ createValues.selectedAgreement?.name }}</template>
+          <template #value>
+            {{ createValues.selectedAgreement?.name }}
+          </template>
         </Dropdown>
         <label for="dd-city">Договор</label>
       </FloatLabel>
@@ -263,7 +307,11 @@ watch(createValues, (newValue) => {
             :options="storage"
             optionLabel="name"
             class="w-full"
-        />
+        >
+          <template #value>
+            {{createValues.selectedStorage?.name}}
+          </template>
+        </Dropdown>
         <label for="dd-city">Склад</label>
       </FloatLabel>
 
@@ -292,9 +340,41 @@ watch(createValues, (newValue) => {
     </div>
   </div>
   <CreateProduct @postGoods="getProducts"/>
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
+
+  <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+    <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+        Автор: {{ userName.name }}
+      </div>
+      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+
+          </div>
+          Итого:
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Кол-во
+          </div>
+          {{ formatNumber(productsInfo.getAllProduct) }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Товаров
+          </div>
+          {{ productsInfo.goods?.length }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Сумма
+          </div>
+          {{ formatNumber(productsInfo.getAllSum) }}
+        </div>
+      </div>
+    </div>
   </div>
+
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"

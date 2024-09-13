@@ -17,6 +17,7 @@ import ProviderOrderTable from "@/components/providerOrder/ProviderOrderTable.vu
 import {useProviderOrder} from "@/store/providerOrder.js";
 import {usePurchaseStore} from "@/store/pruchase.js";
 import Dropdown from "primevue/dropdown";
+import formatNumber from "@/constants/formatNumber.js";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const props = defineProps({
@@ -57,7 +58,12 @@ const viewDocument = ref({
   orderStatus:''
 });
 const store = useProviderOrder()
-
+const infoGoods = ref({
+  editModalOpen: false,
+  getAllSum: 0,
+  getAllProduct: [],
+  goods: []
+});
 const v$ = useVuelidate();
 
 const {
@@ -97,7 +103,8 @@ async function getAgreement() {
 
 const getView = async () => {
   const item = props.data
-  console.log('item', item)
+  console.log('info', infoGoods.value)
+
   if (item.active) {
     approved.value = true;
     status.value = 'Проведен';
@@ -201,18 +208,10 @@ function getProducts(products) {
   productsInfo.value = products;
 }
 
-onMounted(async () => {
-  try {
-    await Promise.all([
-      getView(),
-      findOrganization(),
-      findCounterparty(),
-      findStorage()
-    ]);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-});
+async function saveFnDialog() {
+  //await updateView()
+  emit('close-sidebar')
+}
 
 
 function infoModalClose() {
@@ -220,8 +219,9 @@ function infoModalClose() {
   else emit('close-sidebar')
 }
 
-function changeModal() {
-  changeValue.value = true
+function changeModal(data) {
+  infoGoods.value = data
+  console.log('info goods',infoGoods.value)
 }
 
 watchEffect(() => {
@@ -268,10 +268,20 @@ watch(productsInfo, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-async function saveFnDialog() {
-  //await updateView()
-  emit('close-sidebar')
-}
+onMounted(async () => {
+  try {
+    await Promise.all([
+      getView(),
+      findOrganization(),
+      findCounterparty(),
+      findStorage()
+    ]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
+
+
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
@@ -441,10 +451,40 @@ async function saveFnDialog() {
         </fin-button>
       </div>
     </div>
-    <provider-order-table :info-goods="props.data" @post-goods="getProducts" @editModal="changeModal"/>
+    <provider-order-table :info-goods="props.data"  @editModal="changeModal"/>
 
-    <div class="text-[20px] font-[600] absolute bottom-[40px]">
-      Автор: {{ userName.name }}
+    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+      <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+        <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+          Автор: {{ userName.name }}
+        </div>
+        <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+
+            </div>
+            Итого:
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Кол-во
+            </div>
+            {{ formatNumber(infoGoods.getAllProduct) }}
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Товаров
+            </div>
+            {{ infoGoods.goods?.length }}
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Сумма
+            </div>
+            {{ formatNumber(infoGoods.getAllSum) }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

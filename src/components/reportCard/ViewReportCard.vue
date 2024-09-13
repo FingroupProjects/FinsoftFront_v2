@@ -81,7 +81,7 @@ const getView = async () => {
     employee_id: item.employee.id,
     employee_name: item.employee.name,
     standart_hours: item.standart_hours,
-    fact_hours: item.fact_hours,
+    fact_hours: item.fast_hours,
     schedule_id: item.schedule_id,
     salary: item.salary
   }))
@@ -89,7 +89,8 @@ const getView = async () => {
   createValues.month = item.month;
   createValues.date = item.date;
 
-  console.log(item);
+  console.log('employee ',employees.value);
+  console.log('item ',item);
 };
 
 
