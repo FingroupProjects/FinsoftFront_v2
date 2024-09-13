@@ -5,6 +5,7 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
@@ -32,7 +33,7 @@ const {
   loadingCounterparty,
   loadingOrganization,
 } = useStaticApi();
-
+const isOpen = ref(false)
 const agreementList = ref([]);
 const loadingAgreement = ref(false);
 const isCurrencyFetched = ref(false);
@@ -136,6 +137,15 @@ async function saveFn() {
 }
 
 
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
+
+
 
 function getProducts(products) {
   productsInfo.value = products;
@@ -225,7 +235,7 @@ watch(createValues, (newValue) => {
         <DatePicker
             showIcon
             v-model="createValues.datetime24h"
-            :class="{ 'p-invalid': v$.datetime24h.$error }"
+            :class="[{ 'p-invalid': v$.datetime24h.$error }]"
             showTime
             hourFormat="24"
             dateFormat="dd.mm.yy,"
@@ -238,14 +248,15 @@ watch(createValues, (newValue) => {
       </FloatLabel>
 
       <FloatLabel class="col-span-4" v-if="!hasOrganization">
-        <Dropdown
+        <Select
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
-        />
+
+          />
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
@@ -256,6 +267,8 @@ watch(createValues, (newValue) => {
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
+            editable
+            @keyup="searchCounterparty"
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
@@ -293,7 +306,7 @@ watch(createValues, (newValue) => {
             :loading="loading"
             :options="currency"
             optionLabel="name"
-            class="w-full"
+            class="w-full p-select-open"
             style="background-color: #ffffff !important;"
             disabled
         >

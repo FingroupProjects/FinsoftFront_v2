@@ -8,6 +8,7 @@ import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
 import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import CreatePurchase from "@/components/purchase/CreatePurchase.vue";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
@@ -110,7 +111,7 @@ const getProducts = async (filters = {}) => {
     sort: sortDesc.value
   };
 
-  loader.value = true;
+  loader.value = true
 
   try {
     const res = await useAxios(`/document/provider/purchase`, { params });
@@ -121,6 +122,7 @@ const getProducts = async (filters = {}) => {
   } finally {
     loader.value = false;
   }
+
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -135,6 +137,17 @@ const clearFilter  = (filters) => {
   visibleFilter.value = false;
   getProducts()
 }
+
+const searchCounterparty = async (inputValue) => {
+  console.log('conter', counterparty.value)
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+    agreement: el.agreement,
+  }));
+  console.log('counterparty!', counterparty.value)
+};
 
 
 function getProductMethods() {
@@ -248,7 +261,7 @@ onMounted(async () => {
           :options="storage"
           class="w-full col-span-2"
       />
-      <Dropdown
+      <Select
           v-model="selectedCounterparty"
           :loading="loadingCounterparty"
           @click="findCounterparty"
@@ -256,6 +269,8 @@ onMounted(async () => {
           optionLabel="name"
           placeholder="Поставщик"
           class="w-full col-span-2"
+          editable
+          @keyup="searchCounterparty"
       />
       <div class="flex gap-4 col-span-2">
         <fin-button

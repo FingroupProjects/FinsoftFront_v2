@@ -159,11 +159,11 @@ onMounted(async () => {
       <fin-input v-model="price" :model-value="formatInputAmount(price)" placeholder="Цена"/>
       <fin-input v-model="sum" :model-value="formatInputAmount(sum)" placeholder="Сумма" type="number"/>
       <fin-button
-          icon="pi pi-save"
+          icon="pi pi-plus"
           @click="addFn"
           label="Добавить"
           severity="success"
-          class="p-button-lg"
+          class="p-button-lg p-select-open"
       />
     </div>
   </div>
