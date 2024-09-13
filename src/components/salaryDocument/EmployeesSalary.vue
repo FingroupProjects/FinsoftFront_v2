@@ -49,7 +49,7 @@ const onRowEditSave = (event) => {
   const takesFromSalary = Number(newData.takes_from_salary) || 0;
   const anotherPayments = Number(newData.another_payments) || 0;
 
-  newData.payed_salary = (Number(oldData.payed_salary) || 0) + anotherPayments - takesFromSalary;
+  newData.payed_salary = (Number(oldData.salary) || 0) + Number(anotherPayments) - Number(takesFromSalary);
 
   console.log('Updated payed_salary:', newData.payed_salary);
   newData.takes_from_salary = takesFromSalary;

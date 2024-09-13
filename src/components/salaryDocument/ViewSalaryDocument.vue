@@ -82,17 +82,20 @@ const getView = async () => {
   createValues.doc_number = item.doc_number || '';
   createValues.month = item.month || {};
   createValues.date = item.date || '';
+  createValues.id = item.employees.id
 
   if (Array.isArray(item.employees)) {
     employees.value = item.employees.map(emp => ({
-      employee_id: emp.employee_id || '',
+      employee_id: emp.id || '',
+      id:emp.employee.id || '',
       employee_name: emp.employee?.name || '',
       worked_hours: emp.worked_hours || 0,
       another_payments: emp.another_payments || 0,
       payed_salary: emp.payed_salary || 0,
       takes_from_salary: emp.takes_from_salary || 0,
       schedule_id: emp.schedule_id || '',
-      salary: emp.salary || 0
+      salary: emp.salary || 0,
+      oklad:emp.oklad || 0
     }));
   } else {
     employees.value = [];
@@ -104,10 +107,8 @@ const getView = async () => {
 
 const updateView = async () => {
   const result = await v$.value.$validate();
-
   openInfoModal.value = false
   changeValue.value = false
-
   console.log("updateView", employees.value);
   if (result) {
     loaderSave.value = true
@@ -117,10 +118,20 @@ const updateView = async () => {
         month_id: createValues.month?.id || createValues.month?.code,
         date: moment(createValues.datetime24h).format("YYYY-MM-DD "),
         comment: createValues.comment,
-        data: employees.value
+        data: employees.value.map(employee => ({
+          employee_id: employee.id,
+          employee_name: employee.employee_name,
+          worked_hours: employee.worked_hours,
+          another_payments: employee.another_payments,
+          payed_salary: employee.payed_salary,
+          takes_from_salary: employee.takes_from_salary,
+          schedule_id: employee.schedule_id,
+          salary: employee.salary,
+          oklad: employee.oklad
+        }))
       };
 
-      const res = await useAxios(`/reportCard/${props.productId}`, {
+      const res = await useAxios(`/salaryDocument/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
@@ -134,7 +145,6 @@ const updateView = async () => {
     }
   }
 };
-
 
 function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
@@ -240,7 +250,7 @@ onMounted(function () {
         </FloatLabel>
       </div>
     </div>
-    <employees-salary :employees="employees"/>
+    <employees-salary :employees="employees" />
     <div class="text-[20px] font-[600] absolute bottom-[40px]">
       Автор: {{ userName.name }}
     </div>
