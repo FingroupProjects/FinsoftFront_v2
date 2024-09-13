@@ -14,16 +14,16 @@ import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import FinanceCreate from "@/components/finance/FinanceCreate.vue";
-import MethodsFinance from "@/components/finance/MethodsFinance.vue";
-import FinanceViewTabs from "@/components/finance/FinanceView/FinanceViewTabs.vue";
-import FinanceFilter from "@/components/finance/FinanceFilter.vue";
+import MethodsFinance from "@/components/bankRKO/MethodsBank.vue";
+import FinanceFilter from "@/components/bankRKO/BankFilter.vue";
+import BankViewTabs from "@/components/bankRKO/BankView/BankViewTabs.vue";
+import BankCreate from "@/components/bankRKO/BankCreate.vue";
 
 const {
   loadingUser,
   findUsers,
   userList,
-  findOperationPko,
+  findOperationRKO,
   operationPkoList,
   loadingOperationPko
 } = useStaticApi();
@@ -75,7 +75,6 @@ const onRowClick = (event) => {
   visibleRight.value = true;
   createOpenModal.value = true
   selectedProductInfo.value = product
-
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -89,14 +88,14 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    author_id: selectUser.value?.code,
+    selectUser: selectUser.value?.code,
     operation_type_id: selectOperationPko.value?.code,
     page: first.value + 1,
     ...filters,
     sort: sortDesc.value
   };
 
-  const res = await useAxios(`/cash-store/pko`, {params});
+  const res = await useAxios(`/checking-account/RKO`, {params});
 
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   products.value = res.result.data;
@@ -162,12 +161,12 @@ watch(selectOperationPko, () => {
 });
 
 getProducts();
-findOperationPko();
+findOperationRKO()
 findUsers()
 </script>
 
 <template>
-  <header-purchase header-title="Приход средств"/>
+  <header-purchase header-title="Рас рас.чет"/>
 
   <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
     <IconField class="col-span-6">
@@ -394,12 +393,12 @@ findUsers()
         :dismissable="false"
     >
 
-      <FinanceViewTabs v-if="createOpenModal"
+      <BankViewTabs v-if="createOpenModal"
                        :operation-list="operationPkoList"
                        :allDate="selectedProductInfo"
                        :operation-type-id="selectedProductInfo.id"
                        @close-sidebar="visibleRight = false"/>
-      <FinanceCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
+      <BankCreate v-else @close-sidebar="visibleRight = false" @open-view="closeFn"/>
 
     </Sidebar>
   </div>

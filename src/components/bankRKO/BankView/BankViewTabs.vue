@@ -84,10 +84,10 @@ const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 async function getAgreement() {
-  if (financeDate.value.operationType?.id === 1 ||
-      financeDate.value.operationType?.id === 4 ||
-      financeDate.value.operationType?.id === 5 ||
-      financeDate.value.operationType?.id === 6) {
+  if (financeDate.value.operationType?.id === 10 ||
+      financeDate.value.operationType?.id === 13 ||
+      financeDate.value.operationType?.id === 14 ||
+      financeDate.value.operationType?.id === 15) {
     try {
       loadingAgreement.value = true;
       const res = await useAxios(
@@ -113,13 +113,13 @@ async function getAgreement() {
 }
 
 async function saveFn() {
-  if (financeDate.value.operationType?.id === 2) urlsView.value = '/checking-account/withdrawal/'
-  if (financeDate.value.operationType?.id === 3) urlsView.value = '/checking-account/another-cash-register/'
-  if (financeDate.value.operationType?.id === 4) urlsView.value = '/checking-account/investment/'
-  if (financeDate.value.operationType?.id === 5) urlsView.value = '/checking-account/credit-receive/'
-  if (financeDate.value.operationType?.id === 6) urlsView.value = '/checking-account/provider-refund/'
-  if (financeDate.value.operationType?.id === 7) urlsView.value = '/checking-account/other-expenses/'
-  if (financeDate.value.operationType?.id === 8) urlsView.value = '/checking-account/other-incomes/'
+  if (financeDate.value.operationType?.id === 11) urlsView.value = '/checking-account/withdrawal/'
+  if (financeDate.value.operationType?.id === 12) urlsView.value = '/checking-account/another-cash-register/'
+  if (financeDate.value.operationType?.id === 13) urlsView.value = '/checking-account/investment/'
+  if (financeDate.value.operationType?.id === 14) urlsView.value = '/checking-account/credit-receive/'
+  if (financeDate.value.operationType?.id === 15) urlsView.value = '/checking-account/provider-refund/'
+  if (financeDate.value.operationType?.id === 16) urlsView.value = '/checking-account/other-expenses/'
+  if (financeDate.value.operationType?.id === 17) urlsView.value = '/checking-account/other-incomes/'
   openInfoModal.value = false
   changeValue.value = false
 
@@ -374,10 +374,10 @@ watch(financeDate, (newVal) => {
         <label for="dd-city">Организация</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 1 ||
-                                           financeDate.operationType?.id === 4 ||
-                                           financeDate.operationType?.id === 5 ||
-                                           financeDate.operationType?.id === 6">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 10 ||
+                                           financeDate.operationType?.id === 13 ||
+                                           financeDate.operationType?.id === 14 ||
+                                           financeDate.operationType?.id === 15">
         <Dropdown
             v-model="financeDate.selectedCounterparty"
             @click="findCounterparty"
@@ -393,10 +393,10 @@ watch(financeDate, (newVal) => {
         <label for="dd-city">Контрагент</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 1 ||
-                                           financeDate.operationType?.id === 4 ||
-                                           financeDate.operationType?.id === 5 ||
-                                           financeDate.operationType?.id === 6">
+      <FloatLabel class="col-span-12" v-if="financeDate.operationType?.id === 10 ||
+                                           financeDate.operationType?.id === 13 ||
+                                           financeDate.operationType?.id === 14 ||
+                                           financeDate.operationType?.id === 15">
         <Dropdown
             v-model="selectAgreement"
 
@@ -411,7 +411,7 @@ watch(financeDate, (newVal) => {
         </Dropdown>
         <label for="dd-city">Договор</label>
       </FloatLabel>
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 2">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 11">
         <Dropdown
             v-model="financeDate.organizationBillId"
             @click="findOrganizationBill"
@@ -426,7 +426,7 @@ watch(financeDate, (newVal) => {
         </Dropdown>
         <label for="dd-city">Банковский счет</label>
       </FloatLabel>
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 3">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 12">
         <Dropdown
             v-model="financeDate.senderCashRegisterId"
             @click="findCashRegister"
@@ -441,7 +441,7 @@ watch(financeDate, (newVal) => {
         </Dropdown>
         <label for="dd-city">Касса отправителя</label>
       </FloatLabel>
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 7">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 16">
         <Dropdown
             v-model="financeDate.employeeId"
             @click="findEmployee"
@@ -456,7 +456,7 @@ watch(financeDate, (newVal) => {
         </Dropdown>
         <label for="dd-city">Сотрудник</label>
       </FloatLabel>
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 8">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 17">
         <Dropdown
             v-model="financeDate.balanceArticleId"
             @click="findBalance"
@@ -472,7 +472,7 @@ watch(financeDate, (newVal) => {
         <label for="dd-city">Статья дохода</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 9">
+      <FloatLabel class="col-span-6" v-if="financeDate.operationType?.id === 18">
         <Dropdown
             v-model="financeDate.balanceArticleId"
             @click="findBalance"
