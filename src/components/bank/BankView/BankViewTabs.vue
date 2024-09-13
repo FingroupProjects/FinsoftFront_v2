@@ -143,7 +143,6 @@ async function saveFn() {
         balance_article: financeDate.value.balanceArticleId?.code || financeDate.value.balanceArticleId,
       },
     });
-
     toast.add({
       severity: "success",
       summary: "Success Message",
