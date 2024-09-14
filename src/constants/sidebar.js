@@ -214,15 +214,15 @@ export default [
                 datas: [
                     {
                         label: 'Товар',
-                        route: '/'
+                        route: '/planningGoods'
                     },
                     {
                         label: 'Магазины',
-                        route: '/'
+                        route: '/planningShops'
                     },
                     {
                         label: 'Склады',
-                        route: '/'
+                        route: '/planningStorages'
                     }
                 ]
             }

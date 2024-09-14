@@ -25,8 +25,8 @@
   height: 3%;
   background: rgb(128, 128, 128);
   position: absolute;
-  left: 55%;
-  top: 50%;
+  left: 45%;
+  top: 40%;
   opacity: 0;
   border-radius: 50px;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);

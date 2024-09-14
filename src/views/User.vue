@@ -179,8 +179,8 @@ getProducts();
 
 <template>
   <header-purchase header-title="Пользователи"/>
-  <Loader v-if="loader"/>
-  <div v-else>
+
+  <div >
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
         <InputIcon class="pi pi-search"/>
@@ -226,140 +226,143 @@ getProducts();
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsUser @get-product="getProductMethods" :select-products="selectedProduct"
-                           v-if="!(!selectedProduct || !selectedProduct.length)"/>
+      <Loader v-if="loader"/>
+      <div v-else>
+        <MethodsUser @get-product="getProductMethods" :select-products="selectedProduct"
+                             v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
-      <DataTable
-          scrollable
-          scrollHeight="660px"
-          v-model:selection="selectedProduct"
-          :value="products"
-          dataKey="id"
-          tableStyle="min-width:100%"
-          :metaKeySelection="metaKey"
-          @row-click="onRowClick"
-      >
-        <Column selectionMode="multiple"></Column>
-        <Column field="name" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Наименование <i
+        <DataTable
+            scrollable
+            scrollHeight="660px"
+            v-model:selection="selectedProduct"
+            :value="products"
+            dataKey="id"
+            tableStyle="min-width:100%"
+            :metaKeySelection="metaKey"
+            @row-click="onRowClick"
+        >
+          <Column selectionMode="multiple"></Column>
+          <Column field="name" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('name',index)">
+                Наименование <i
 
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
 
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.name }}
-          </template>
-        </Column>
-        <Column field="name" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Логин <i
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data.name }}
+            </template>
+          </Column>
+          <Column field="name" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('name',index)">
+                Логин <i
 
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
 
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.login }}
-          </template>
-        </Column>
-        <Column field="name" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Логин <i
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data.login }}
+            </template>
+          </Column>
+          <Column field="name" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('name',index)">
+                Логин <i
 
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
 
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.email }}
-          </template>
-        </Column>
-        <Column field="date" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('date',index)">
-              Дата добавления <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
-          </template>
-        </Column>
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data.email }}
+            </template>
+          </Column>
+          <Column field="date" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('date',index)">
+                Дата добавления <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              {{ moment(new Date(slotProps.data.created_at)).format(" D.MM.YYYY h:mm") }}
+            </template>
+          </Column>
 
-        <Column field="address" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('address',index)">
-              Организация <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data.organization?.name }}
-          </template>
-        </Column>
-        <Column field="status" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('deleted_at',index)">
-              Статус <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="">
-          </template>
-          <template #body="slotProps">
-            <Tag
-                :value="getSeverity(slotProps.data?.deleted_at).name"
-                :severity="getSeverity(slotProps.data?.deleted_at).status"
-            />
-          </template>
-        </Column>
+          <Column field="address" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('address',index)">
+                Организация <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data.organization?.name }}
+            </template>
+          </Column>
+          <Column field="status" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('deleted_at',index)">
+                Статус <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="">
+            </template>
+            <template #body="slotProps">
+              <Tag
+                  :value="getSeverity(slotProps.data?.deleted_at).name"
+                  :severity="getSeverity(slotProps.data?.deleted_at).status"
+              />
+            </template>
+          </Column>
 
-      </DataTable>
+        </DataTable>
+      </div>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
         <Dropdown

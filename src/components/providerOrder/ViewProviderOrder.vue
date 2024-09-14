@@ -204,6 +204,14 @@ const openDocumentPrint = (productId) => {
   window.open(url, '_blank');
 };
 
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
+
 function getProducts(products) {
   productsInfo.value = products;
 }
@@ -373,8 +381,13 @@ onMounted(async () => {
         </FloatLabel>
 
         <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" option-label="name">
+          <Select v-model="viewDocument.counterpartyName"
+                  class="w-full"
+                  :options="counterparty"
+                  option-label="name"
+                  editable
+                  @keyup="searchCounterparty"
+          >
             <template #value>
               {{ viewDocument.counterpartyName?.name }}
             </template>

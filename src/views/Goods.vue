@@ -170,8 +170,7 @@ getProducts();
 
 <template>
   <header-purchase header-title="Товары"/>
-  <Loader v-if="loading"/>
-  <div v-else>
+  <div>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
         <InputIcon class="pi pi-search"/>
@@ -217,119 +216,122 @@ getProducts();
       </div>
     </div>
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsGoods @get-product="getProductMethods" :select-products="selectedProduct"
-                    v-if="!(!selectedProduct || !selectedProduct.length)"/>
-      <DataTable
-          scrollable
-          scrollHeight="660px"
-          v-model:selection="selectedProduct"
-          :value="products"
-          dataKey="id"
-          tableStyle="min-width:100%"
-          :metaKeySelection="metaKey"
-          @row-click="onRowClick"
-      >
-        <Column selectionMode="multiple"></Column>
-        <Column field="code" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('id',index)">
-              № <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
-          </template>
-        </Column>
-        <Column field="category" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Наименование <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            <div class="flex items-center gap-[10px]">
-              <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0"
-                   class="w-[32px] h-[32px] object-cover rounded-[8px]">
-              <img v-else :src="imgURL+ slotProps?.data?.images[0]?.image" alt=""
-                   class="w-[32px] h-[32px] object-cover rounded-[8px]">
-              {{ slotProps.data?.name }}
-            </div>
-          </template>
-        </Column>
-        <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('vendor_code',index)">
-              Артикул <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data?.vendor_code }}
-          </template>
-        </Column>
-        <Column field="price" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('goodGroup.name',index)">
-              Категория <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="{index}">
-          </template>
-          <template #body="slotProps">
-            {{ slotProps.data?.goodGroup?.name }}
-          </template>
-        </Column>
-        <Column field="status" :sortable="true" header="">
-          <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('active',index)">
-              Статус <i
-                :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
-            ></i>
-            </div>
-          </template>
-          <template #sorticon="">
-          </template>
-          <template #body="slotProps">
-            <Tag
-                :value="getSeverity(slotProps.data?.deleted_at).name"
-                :severity="getSeverity(slotProps.data?.deleted_at).status"
-            />
-          </template>
-        </Column>
-      </DataTable>
+      <Loader v-if="loading"/>
+      <div v-else>
+        <MethodsGoods @get-product="getProductMethods" :select-products="selectedProduct"
+                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
+        <DataTable
+            scrollable
+            scrollHeight="660px"
+            v-model:selection="selectedProduct"
+            :value="products"
+            dataKey="id"
+            tableStyle="min-width:100%"
+            :metaKeySelection="metaKey"
+            @row-click="onRowClick"
+        >
+          <Column selectionMode="multiple"></Column>
+          <Column field="code" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('id',index)">
+                № <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">{{ slotProps.data?.id }}</span>
+            </template>
+          </Column>
+          <Column field="category" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('name',index)">
+                Наименование <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              <div class="flex items-center gap-[10px]">
+                <img src="@/assets/img/exampleImg.svg" alt="" v-if="slotProps?.data?.images.length===0"
+                     class="w-[32px] h-[32px] object-cover rounded-[8px]">
+                <img v-else :src="imgURL+ slotProps?.data?.images[0]?.image" alt=""
+                     class="w-[32px] h-[32px] object-cover rounded-[8px]">
+                {{ slotProps.data?.name }}
+              </div>
+            </template>
+          </Column>
+          <Column field="image" v-if="!hasOrganization" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('vendor_code',index)">
+                Артикул <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data?.vendor_code }}
+            </template>
+          </Column>
+          <Column field="price" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('goodGroup.name',index)">
+                Категория <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="{index}">
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data?.goodGroup?.name }}
+            </template>
+          </Column>
+          <Column field="status" :sortable="true" header="">
+            <template #header="{index}">
+              <div class="w-full h-full" @click="sortData('active',index)">
+                Статус <i
+                  :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+              ></i>
+              </div>
+            </template>
+            <template #sorticon="">
+            </template>
+            <template #body="slotProps">
+              <Tag
+                  :value="getSeverity(slotProps.data?.deleted_at).name"
+                  :severity="getSeverity(slotProps.data?.deleted_at).status"
+              />
+            </template>
+          </Column>
+        </DataTable>
+      </div>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
         <Dropdown

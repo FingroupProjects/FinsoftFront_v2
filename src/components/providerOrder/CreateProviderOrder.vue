@@ -94,6 +94,14 @@ async function getAgreement() {
   }
 }
 
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
+
 async function saveFn() {
   const result = await v$.value.$validate();
   openInfoModal.value = false
@@ -250,6 +258,8 @@ watch(createValues, (newValue) => {
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
+            editable
+            @keyup="searchCounterparty"
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
