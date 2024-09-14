@@ -190,13 +190,29 @@ const routes = [
             {
                 path: '/schedule',
                 name: 'schedule',
-                component: () => import('@/views/WorkSchedule.vue')
+                component: () => import('@/views/Schedule.vue')
             },
             {
                 path: '/salaryDocument',
                 name: 'salaryDocument',
                 component: () => import('@/views/staff/SalaryDocument.vue')
             },
+            {
+                path: '/planningGoods',
+                name: 'planningGoods',
+                component: () => import('@/views/planning/PlanningGoods.vue')
+            },
+            {
+                path: '/planningShops',
+                name: 'planningShops',
+                component: () => import('@/views/planning/PlanningShops.vue')
+            },
+            {
+                path: '/planningStorages',
+                name: 'planningStorages',
+                component: () => import('@/views/planning/PlanningStorages.vue')
+            },
+
         ]
     },
     {

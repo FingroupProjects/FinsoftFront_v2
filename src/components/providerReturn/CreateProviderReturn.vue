@@ -150,6 +150,13 @@ async function saveFn() {
     }
   }
 }
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
 
 function getProducts(products) {
   productsInfo.value = products;
@@ -276,6 +283,8 @@ watch(createValues, (newValue) => {
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
+            editable
+            @keyup="searchCounterparty"
         >
           <template #value>
             {{createValues.selectedCounterparty?.name}}

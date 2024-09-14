@@ -216,6 +216,14 @@ onMounted(async () => {
   }
 });
 
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
+
 
 function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
@@ -366,8 +374,13 @@ async function saveFnDialog() {
         </FloatLabel>
 
         <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" option-label="name">
+          <Select v-model="viewDocument.counterpartyName"
+                  class="w-full"
+                  :options="counterparty"
+                  option-label="name"
+                  editable
+                  @keyup="searchCounterparty"
+          >
             <template #value>
               {{ viewDocument.counterpartyName?.name }}
             </template>

@@ -16,6 +16,7 @@ import DatePicker from "primevue/datepicker";
 import Dialog from "primevue/dialog";
 import {usePurchaseStore} from "@/store/pruchase.js";
 import formatNumber from '../../constants/formatNumber.js'
+import Dropdown from "primevue/dropdown";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
 const store = usePurchaseStore()
@@ -204,6 +205,13 @@ function infoModalClose() {
   else  emit('close-sidebar')
 }
 
+const searchCounterparty = async (inputValue) => {
+  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
+  counterparty.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
 
 const changeModal = (data) => {
   infoGoods.value = data;
@@ -362,8 +370,13 @@ onMounted(async () => {
         </FloatLabel>
 
         <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName" class="w-full"
-                  :options="counterparty" option-label="name">
+          <Select v-model="viewDocument.counterpartyName"
+                  class="w-full"
+                  :options="counterparty"
+                  option-label="name"
+                  editable
+                  @keyup="searchCounterparty"
+            >
             <template #value>
               {{ viewDocument.counterpartyName?.name }}
             </template>
