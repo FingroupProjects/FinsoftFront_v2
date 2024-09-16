@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch, watchEffect} from "vue";
+import {reactive, ref, watch, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -49,9 +49,16 @@ const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
-
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-
+const savedFilterValues = reactive({
+  startDate: '',
+  endDate: '',
+  organization_id: '',
+  currency_id: '',
+  author_id: '',
+  deleted: '',
+  active: ''
+});
 const pageCounts = ref([
   {
     count: 5,
@@ -88,7 +95,16 @@ const onRowClick = (event) => {
 
 const handleFiltersUpdate = (filters) => {
   getProducts(filters);
-  visibleFilter.value = false
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+}
+
+const clearFilter  = (filters) => {
+  selectedStorage.value = null;
+  selectedCounterparty.value = null;
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+  getProducts()
 }
 
 async function getProducts(filters = {}) {
@@ -484,7 +500,7 @@ getProducts();
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
+    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Sidebar>
   <Toast/>
 

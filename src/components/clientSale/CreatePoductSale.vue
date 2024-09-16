@@ -9,6 +9,8 @@ import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
 import formatNumber from '@/constants/formatNumber.js';
 import {useClientSale} from "@/store/clientSale.js";
+import Sidebar from "primevue/sidebar";
+import Installment from "@/components/clientSale/Installment.vue";
 
 const emit = defineEmits(["postGoods"]);
 
@@ -25,6 +27,7 @@ const getAllProduct = ref(0);
 const productsId = ref([]);
 const editingRows = ref([]);
 const newProduct = ref();
+const visibleInstallment = ref(false);
 const getOnBasedValues = ref()
 
 const validateProduct = (product) => {
@@ -141,6 +144,14 @@ onMounted(async () => {
 <template>
   <div class="flex items-center mt-[30px] gap-[21px]">
     <div class="header-title">Товары</div>
+    <fin-button
+        icon="pi pi-angle-right"
+        @click="visibleInstallment = true"
+        label="В рассрочку"
+        severity="warning"
+        class="p-button-lg ml-auto justify-end"
+        style="height: 31px !important; font-weight: bold !important;"
+    />
   </div>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-6 h-[47px]">
@@ -230,14 +241,14 @@ onMounted(async () => {
                   slotProps.data.products !== null &&
                   slotProps.data.products !== undefined
                 "
-          class="flex items-center gap-[10px]"
+              class="flex items-center gap-[10px]"
           >
             <img :src="slotProps.data?.img " class="w-[32px] h-[32px] rounded-[8px] object-cover" />
                 {{ slotProps.data.products }}
               </span>
         </template>
       </Column>
-        <Column field="coleVo" header="Кол-во">
+      <Column field="coleVo" header="Кол-во">
         <template #editor="{ data, field }">
           <InputText v-model="data[field]" :model-value="formatInputAmount(data[field])" fluid class="w-[10%]"/>
         </template>
@@ -263,8 +274,16 @@ onMounted(async () => {
       >
       </Column>
     </DataTable>
-  </div>
 
+  </div>
+  <Sidebar
+      v-model:visible="visibleInstallment"
+      :show-close-icon="false"
+      position="right"
+      class="drawer-movement"
+  >
+    <Installment/>
+  </Sidebar>
 </template>
 <style lang="scss">
 .table-create {
@@ -309,7 +328,13 @@ onMounted(async () => {
     background-color: #3935E7;
     height: 3px !important;
   }
+
 }
+.drawer-movement {
+  width: 850px !important;
+  border-top-left-radius: 30px;
+}
+
 
 </style>
 

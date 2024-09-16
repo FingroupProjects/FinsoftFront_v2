@@ -113,7 +113,7 @@ const getView = async () => {
   viewDocument.value = {
     organizationName: item.organization,
     author: item.author,
-    counterpartyName: item.counterparty,
+    counterpartyName: item.counterparty.name,
     counterpartyAgreementName: item.counterpartyAgreement,
     storageName: item.storage,
     date: new Date(item.date),
