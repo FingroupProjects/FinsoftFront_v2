@@ -129,7 +129,7 @@ watch(createValues, (newVal) => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Прием на работу</div>
+        <div class="header-title">Увольнение</div>
 
       </div>
       <div class="flex gap-[16px]">

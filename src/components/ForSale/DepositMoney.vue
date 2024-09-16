@@ -156,7 +156,7 @@ const adjustedSaleSum = computed(() => {
 
 async function payMethodsFn() {
   const data = {
-    "date":moment().format('YYYY-DD-MM hh:mm:ss'),
+    "date":moment().format('YYYY-MM-DD hh:mm:ss'),
     "discount_id": props.discountId,
     "certificate_id": idComplex.value,
     "cards": cardList.value,

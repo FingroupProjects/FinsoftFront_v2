@@ -129,7 +129,7 @@ watchEffect(() => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание банковских счетов организаций</div>
+        <div class="header-title">Создание Кассы</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
 
         </div>
@@ -186,13 +186,11 @@ watchEffect(() => {
         <Dropdown
             v-model="createValues.selectCurrency"
             :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            @click="findCurrency(createValues.selectedAgreement)"
             :loading="loading"
             :options="currency"
             optionLabel="name"
             class="w-full"
             style="background-color: #ffffff !important;"
-            disabled
         >
           <template #value>
             {{ createValues.selectCurrency?.name }}

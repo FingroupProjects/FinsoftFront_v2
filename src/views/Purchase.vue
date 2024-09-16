@@ -139,14 +139,12 @@ const clearFilter  = (filters) => {
 }
 
 const searchCounterparty = async (inputValue) => {
-  console.log('conter', counterparty.value)
   const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
   counterparty.value = res.result.data.map((el) => ({
     name: el.name,
     code: el.id,
     agreement: el.agreement,
   }));
-  console.log('counterparty!', counterparty.value)
 };
 
 
@@ -217,7 +215,8 @@ watch(selectedStorage, () => {
   }
 });
 watch(selectedCounterparty, () => {
-  if (selectedCounterparty.value) {
+
+  if (selectedCounterparty.value && typeof selectedCounterparty.value === 'object') {
     getProducts();
   }
 });
@@ -262,7 +261,6 @@ onMounted(async () => {
       <Select
           v-model="selectedCounterparty"
           :loading="loadingCounterparty"
-          @click="findCounterparty"
           :options="counterparty"
           optionLabel="name"
           placeholder="Поставщик"

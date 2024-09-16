@@ -182,7 +182,6 @@ onMounted(function () {
             :options="currency"
             optionLabel="name"
             class="w-full"
-            disabled style="background-color: #fff !important;"
         >
           <template #value>
             {{ viewValues.currency?.name }}
