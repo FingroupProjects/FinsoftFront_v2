@@ -94,7 +94,7 @@ async function getProducts(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    currency_id: selectedOrganization.value?.code,
+    organization_id: selectedOrganization.value?.code,
     deleted_at: selectedStatus.value?.code,
     page: first.value,
     ...filters,

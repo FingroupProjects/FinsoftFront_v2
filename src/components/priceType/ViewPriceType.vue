@@ -110,7 +110,7 @@ onMounted(function (){
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Просмотр кассы</div>
+        <div class="header-title">Просмотр типа цен</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
           №{{ id }}
         </div>
@@ -144,7 +144,6 @@ onMounted(function (){
             :options="currency"
             optionLabel="name"
             class="w-full"
-            disabled style="background-color: #fff !important;"
         >
           <template #value>
             {{ viewValues.currency?.name }}

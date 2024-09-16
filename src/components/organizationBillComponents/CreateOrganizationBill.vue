@@ -176,7 +176,6 @@ onMounted(function (){
             v-model="createValues.selectedOrganization"
             :options="organization"
             :class="{ 'p-invalid': v$.selectedOrganization.$error }"
-            @click="findOrganization"
             :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
@@ -184,22 +183,15 @@ onMounted(function (){
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <fin-input v-model="createValues.bill_number" class="col-span-4" :error="v$.bill_number.$error" placeholder="Номер счета"/>
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-4" v-if="!hasOrganization">
         <Dropdown
             v-model="createValues.selectCurrency"
-            :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            @click="findCurrency(createValues.selectedAgreement)"
-            :loading="loading"
             :options="currency"
+            :class="{ 'p-invalid': v$.selectCurrency.$error }"
+            :loading="loadingOrganization"
             optionLabel="name"
             class="w-full"
-            style="background-color: #ffffff !important;"
-            disabled
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
+        />
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">

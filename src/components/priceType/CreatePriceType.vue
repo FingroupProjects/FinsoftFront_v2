@@ -134,7 +134,6 @@ watch(createValues, (newVal) => {
             optionLabel="name"
             class="w-full"
             style="background-color: #ffffff !important;"
-            disabled
         >
           <template #value>
             {{ createValues.selectCurrency?.name }}

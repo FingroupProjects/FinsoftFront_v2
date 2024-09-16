@@ -22,6 +22,7 @@ import CreateOrganizationBill from "@/components/organizationBillComponents/Crea
 import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
 import ViewOrganization from "@/components/organizationComponents/ViewOrganization.vue";
 import CreateOrganization from "@/components/organizationComponents/CreateOrganization.vue";
+import MethodsOrganization from "@/components/organizationComponents/MethodsOrganization.vue";
 
 const {
   findCurrency,
@@ -218,7 +219,7 @@ getProducts();
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
       <Loader v-if="loader"/>
       <div v-else>
-        <MethodsOrganizationBill @get-product="getProductMethods" :select-products="selectedProduct"
+        <MethodsOrganization @get-product="getProductMethods" :select-products="selectedProduct"
                              v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
         <DataTable
