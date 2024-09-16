@@ -29,9 +29,9 @@ function sidebarClose() {
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
-          <a href="#" class="flex ms-0.5  mt-[16px]">
-            <img @click="sidebarClose" src="@/assets/img/LogoSham.png" class="w-[25px] h-[25px] " alt=""/>
-            <div  class="mt-1.5  pi pi-angle-right" style="margin-left: 2px; color: #3935E7;" @click="sidebarClose"></div>
+          <a href="#" class="flex ms-0.5  mt-[15px]">
+            <img @click="sidebarClose" src="@/assets/img/LogoSham.png" class="w-[28px] h-[28px] " alt=""/>
+            <div  class="mt-2  pi pi-angle-right" style="margin-left: 2px; color: #3935E7;" @click="sidebarClose"></div>
           </a>
         </div>
       </div>

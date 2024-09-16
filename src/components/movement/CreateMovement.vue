@@ -15,6 +15,7 @@ import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
 import CreateMovementProduct from "@/components/movement/CreateMovementProduct.vue";
 import {useClientSale} from "@/store/clientSale.js";
+import formatNumber from "@/constants/formatNumber.js";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const store = useClientSale()
@@ -29,7 +30,6 @@ const {
   loadingOrganization,
 } = useStaticApi();
 
-const productsInfo = ref();
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
@@ -45,6 +45,11 @@ const rules = reactive({
   selectedOrganization: {required},
   selectedSenderStorage: {required},
   selectedRecipientStorage: {required},
+});
+const productsInfo = ref({
+  postProducts: [],
+  getAllProduct: [],
+  goods: []
 });
 const userName = {
   name: localStorage.getItem("user_name"),
@@ -236,8 +241,33 @@ onMounted(() =>{
     </div>
   </div>
   <CreateMovementProduct @postGoods="getProducts"/>
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
+  <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+    <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+        Автор: {{ userName.name }}
+      </div>
+      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+
+          </div>
+          Итого:
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Кол-во
+          </div>
+          {{ formatNumber(productsInfo.getAllProduct) }}
+        </div>
+        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+            Товаров
+          </div>
+          {{ productsInfo.goods?.length }}
+        </div>
+
+      </div>
+    </div>
   </div>
   <Dialog
       v-model:visible="openInfoModal"

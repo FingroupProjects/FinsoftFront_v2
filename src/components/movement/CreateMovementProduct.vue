@@ -59,7 +59,7 @@ const addFn = async () => {
     getAllProduct.value += Number(product.coleVo);
     addInput.value = false;
 
-    emit("postGoods", postProducts.value);
+    emit("postGoods", {postProducts:postProducts.value,getAllProduct: getAllProduct?.value, goods: products?.value });
   }
 
   clearInputValues();
@@ -100,8 +100,7 @@ const getOnBased = () =>{
       }
     }
   }
-  console.log('post', postProducts.value)
-  emit("postGoods", postProducts.value);
+  emit("postGoods", {postProducts:postProducts.value,getAllProduct: getAllProduct?.value, goods: products?.value });
 }
 
 
@@ -253,32 +252,7 @@ onMounted(async () => {
       </Column>
     </DataTable>
   </div>
-  <div
-      class="rounded-[10px] flex justify-between items-center p-[18px] mt-[16px] bg-[#F6F6F6]"
-  >
-    <div class="text-[#141C30] font-semibold text-[20px] leading-[20px]">
-      Итого:
-    </div>
-    <div class="flex gap-[49px]">
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div
-            class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
-        >
-          Кол-во
-        </div>
-        {{ formatNumber(getAllProduct) }}
-      </div>
-      <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-        <div
-            class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]"
-        >
-          Товаров
-        </div>
-        {{ products.length }}
-      </div>
 
-    </div>
-  </div>
 </template>
 <style lang="scss">
 .table-create {

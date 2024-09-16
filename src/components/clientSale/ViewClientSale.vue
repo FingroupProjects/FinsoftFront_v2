@@ -425,6 +425,7 @@ async function saveFnDialog() {
         </fin-button>
       </div>
     </div>
+
     <client-table :info-goods="props.data" @editModal="changeModal"/>
 
     <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
@@ -468,7 +469,7 @@ async function saveFnDialog() {
       v-model:visible="visibleMovement"
       :show-close-icon="false"
       position="right"
-      class="drower-movement"
+      class="drawer-movement"
   >
     <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
   </Sidebar>
@@ -476,7 +477,7 @@ async function saveFnDialog() {
       v-model:visible="visibleHistory"
       :show-close-icon="false"
       position="right"
-      class="drower-movement"
+      class="drawer-movement"
   >
     <history-purchase :productId="productId"/>
   </Sidebar>
@@ -612,7 +613,7 @@ async function saveFnDialog() {
   }
 }
 
-.drower-movement {
+.drawer-movement {
   width: 850px !important;
   border-top-left-radius: 30px;
 }

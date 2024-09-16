@@ -7,12 +7,11 @@ import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '@/constants/formatNumber.js';
 import {useClientSale} from "@/store/clientSale.js";
 import Sidebar from "primevue/sidebar";
 import Installment from "@/components/clientSale/Installment.vue";
 
-const emit = defineEmits(["postGoods"]);
+const emit = defineEmits(['postGoods', 'editModal'])
 
 const store = useClientSale()
 const selectedProducts = ref();
