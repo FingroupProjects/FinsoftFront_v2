@@ -29,9 +29,9 @@ function sidebarClose() {
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start rtl:justify-end">
-          <a href="#" class="flex ms-2  mt-[10px]">
-            <img width="36" src="@/assets/img/Logo.svg" class="w-[30px] h-[24px]" alt=""/>
-            <div @click="sidebarClose" class="open-close-sidebar pi pi-chevron-right" style="margin-left: 15px"></div>
+          <a href="#" class="flex ms-0.5  mt-[10px]">
+            <img @click="sidebarClose" src="@/assets/img/LogoSham.png" class="w-[25px] h-[25px] " alt=""/>
+            <div  class="mt-1.5  pi pi-angle-right" style="margin-left: 2px; color: #3935E7;" @click="sidebarClose"></div>
           </a>
         </div>
       </div>
@@ -39,11 +39,13 @@ function sidebarClose() {
   </nav>
   <aside id="logo-sidebar"
          style="border-top-right-radius: 30px"
-         class="fixed top-0 left-0 z-40 w-[100px] h-screen pt-[66px]
+         class="fixed top-0 left-0 z-40 w-[60px] h-screen pt-[55px]
          sidebar-animation-two
          transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
          aria-label="Sidebar">
-    <div class="h-full  overflow-auto bg-white dark:bg-gray-800 font-[Manrope]">
+    <div class="h-full  overflow-auto bg-white dark:bg-gray-800 font-[Manrope] -ml-7 ">
+
+
       <PanelMenu :model="sidebar" class="w-full">
         <template #item="{ item, index }">
           <div>
@@ -51,7 +53,7 @@ function sidebarClose() {
               <router-link
                   :to="item.route ? item.route : ''"
                   class="flex items-center justify-center cursor-pointer w-[100px] text-surface-700 font-[600] dark:text-[#ffffff]
-                    hover:text-[#ffffff] text-[#141C30] h-[42px]"
+                    hover:text-[#ffffff] text-[#141C30] h-[42px] "
                   :class="{ 'active-item': $route.path === item.route }"
                   @click="toggleOpen(item.label)"
               >

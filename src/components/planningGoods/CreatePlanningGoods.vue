@@ -117,6 +117,7 @@ function onGroupSelect(groups) {
 }
 
 const getGoodByGroups = async () => {
+  console.log('id',params.value.groupIds)
     const res = await useAxios(`/good/goods-by-group-ids/`, {
       params: { ids: params.value.groupIds }
     });

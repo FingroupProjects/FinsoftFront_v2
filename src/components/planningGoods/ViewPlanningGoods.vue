@@ -82,12 +82,7 @@ function onGroupSelect(groups) {
 }
 
 const getGoodByGroups = async () => {
-  const res = await useAxios(`/good/goods-by-group-ids/`, {
-    params: { ids: params.value.groupIds }
-  });
-  getGoodsData.value = res.result
-  visibleAddGoods.value = !visibleAddGoods.value
-  console.log('result!', getGoodsData.value)
+  visibleAddGoods.value = true
 }
 
 const getGoods = async () =>{
@@ -99,66 +94,63 @@ const addToArray = () =>{
   getGoodsData.value.push(selectedGoods.value)
 }
 
-const handleInput = (monthId, goodId, event) =>{
-  const value = event.target.value;
-  console.log('month', monthId)
-  goods.value.push({
-    good_id:goodId,
-    month_id: monthId,
-    quantity: value,
-  })
-}
+const handleInput = (monthId, goodId, event) => {
+  const value = Number(event.target.value);
+  const monthIdNumber = Number(monthId);
+  const existingEntryIndex = goods.value.findIndex(
+      (item) => item.good_id === goodId && item.month_id === monthIdNumber
+  );
+  if (existingEntryIndex !== -1) {
+    goods.value[existingEntryIndex].quantity = value;
+  } else {
+    goods.value.push({
+      good_id: goodId,
+      month_id: monthIdNumber,
+      quantity: value,
+    });
+  }
+  console.log('Updated goods:', goods.value);
+};
 
-const getPlanning = async () =>{
-  const res = await useAxios(`/plan/goods/${props.idPlanning}`)
-  const result = res.result
+
+const getPlanning = async () => {
+  const res = await useAxios(`/plan/goods/${props.idPlanning}`);
+  const result = res.result;
+  console.log('res', result)
   createValues.selectedOrganization = {
     code: result.organization.id,
     name: result.organization.name
   };
-  createValues.year = result.year
-
-  const goodsMap = new Map();
-
+  createValues.year = result.year;
+  const goodsMap = new Map()
   result.goods.forEach(item => {
     const goodId = item.good.id;
     const monthId = item.month.id;
-
     if (!goodsMap.has(goodId)) {
       goodsMap.set(goodId, {
-        id: item.id,
+        id: item.good.id,
         name: item.good.name,
         months: {}
       });
-
       for (let i = 1; i <= 12; i++) {
         goodsMap.get(goodId).months[i] = null;
       }
     }
-
-    const goodItem = goodsMap.get(goodId);
-    quantityPlanning.value = item.quantity || null;
+    goodsMap.get(goodId).months[monthId] = item.quantity || 0;
   });
-  getGoodsData.value = Array.from(goodsMap.values()).map(item => {
-    const months = {};
-    Object.keys(item.months).forEach(monthId => {
-      months[monthId] = item.months[monthId] || 0;
-    });
-    return {
-      ...item,
-      months
-    };
-  });
+  getGoodsData.value = Array.from(goodsMap.values());
 
-  console.log('result!', result)
-}
+  console.log('goodsData:', getGoodsData.value);
+};
+
 
 
 async function saveFn() {
-  console.log('org', createValues.selectedOrganization)
+  console.log('goods get', getGoodsData.value)
+  console.log('goods', goods.value)
   try {
-    const res = await useAxios(`/plan/goods`, {
-      method: "POST",
+    const res = await useAxios(`/plan/goods/${props.idPlanning}`, {
+      method: "PATCH",
       data: {
         organization_id: createValues.selectedOrganization.code,
         year: createValues.year,
@@ -277,7 +269,7 @@ onMounted(()=>{
     </div>
     <div>
       <table class="w-full mt-6">
-        <thead class="bg-gray-200 gap-4 text-center text-black ">
+        <thead class="bg-gray-200 gap-4 text-center text-black">
         <tr>
           <th class="border-2 border-gray-300 w-[150px]">Товар</th>
           <th v-for="(month, index) in months" :key="index" class="border-2 border-gray-300">
@@ -286,19 +278,20 @@ onMounted(()=>{
         </tr>
         </thead>
         <tbody>
-        <tr class="text-center" v-for="{ id: goodId, name: goodName } in getGoodsData" :key="goodId">
+        <tr class="text-center" v-for="{ id: goodId, name: goodName, months } in getGoodsData" :key="goodId">
           <td class="fz-14 border-2">{{ goodName }}</td>
           <td v-for="(monthName, monthId) in months" :key="monthId">
             <fin-input
                 class="h-full"
                 placeholder=""
-                v-model="quantityPlanning"
-                @input="handleInput(monthId, goodId, $event)"
+                v-model="months[monthId]"
+            @input="handleInput(monthId, goodId, $event)"
             />
           </td>
         </tr>
         </tbody>
       </table>
+
       <FloatLabel v-if="visibleAddGoods" class="mt-4">
         <Select
             v-model="selectedGoods"
@@ -306,6 +299,7 @@ onMounted(()=>{
             optionLabel="name"
             class="w-[200px]"
             @update:modelValue="addToArray"
+            @blur="visibleAddGoods = false"
         />
         <label for="dd-city">Товары</label>
       </FloatLabel>

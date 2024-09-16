@@ -115,7 +115,7 @@ const getView = async () => {
   viewDocument.value = {
     organizationName: item.organization,
     author: item.author,
-    counterpartyName: item.counterparty,
+    counterpartyName: item.counterparty.name,
     counterpartyAgreementName: item.counterpartyAgreement,
     storageName: item.storage,
     date: new Date(item.date),
@@ -125,6 +125,8 @@ const getView = async () => {
     comment: item.comment,
     statusName: item.orderStatus
   };
+
+  console.log('counterparty', viewDocument.value);
 };
 
 const updateView = async () => {
@@ -389,11 +391,12 @@ onMounted(async () => {
                   @keyup="searchCounterparty"
           >
             <template #value>
-              {{ viewDocument.counterpartyName?.name }}
+              {{ viewDocument.counterpartyName ? viewDocument.counterpartyName.name : '' }}
             </template>
           </Select>
           <label for="dd-city">Поставщик</label>
         </FloatLabel>
+
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"
                   :options="agreementList" @click="getAgreement" option-label="name">

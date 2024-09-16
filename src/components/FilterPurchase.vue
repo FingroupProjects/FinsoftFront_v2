@@ -5,6 +5,9 @@ import FloatLabel from "primevue/floatlabel";
 import { onMounted, reactive, ref, watch, defineEmits, defineProps  } from "vue";
 import { useAxios } from "@/composable/useAxios.js";
 
+const emit = defineEmits(['updateFilters', 'clearFilter']);
+const props = defineProps(['savedFilters']);
+
 const userNames = ref([]);
 const currency = ref([]);
 const organization = ref([]);
@@ -30,7 +33,6 @@ const filterValues = reactive({
   active: ''
 });
 
-
 function formatDateTime(date) {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, '0');
@@ -43,41 +45,9 @@ function formatDateTime(date) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-
-watch(rawDateFirst, (newValue) => {
-  if (newValue) {
-    try {
-      const formattedDateTime = formatDateTime(newValue);
-      filterValues.startDate = formattedDateTime;
-    } catch (error) {
-      console.error('Error formatting date and time:', error);
-      filterValues.startDate = '';
-    }
-  } else {
-    filterValues.startDate = '';
-  }
-});
-
-watch(rawDateSecond, (newValue) => {
-  if (newValue) {
-    try {
-      const formattedDateTime = formatDateTime(newValue);
-      filterValues.endDate = formattedDateTime;
-    } catch (error) {
-      console.error('Error formatting date and time:', error);
-      filterValues.endDate = '';
-    }
-  } else {
-    filterValues.endDate = '';
-  }
-});
-
-const emit = defineEmits(['updateFilters', 'clearFilter']);
-const props = defineProps(['savedFilters']);
 const applyFilters = () => {
   emit('updateFilters', filterValues);
 };
-
 
 const clearFilters = () => {
   Object.keys(filterValues).forEach(key => filterValues[key] = '');
@@ -116,6 +86,33 @@ const getOrganization = async () =>{
   }
 }
 
+watch(rawDateFirst, (newValue) => {
+  if (newValue) {
+    try {
+      const formattedDateTime = formatDateTime(newValue);
+      filterValues.startDate = formattedDateTime;
+    } catch (error) {
+      console.error('Error formatting date and time:', error);
+      filterValues.startDate = '';
+    }
+  } else {
+    filterValues.startDate = '';
+  }
+});
+
+watch(rawDateSecond, (newValue) => {
+  if (newValue) {
+    try {
+      const formattedDateTime = formatDateTime(newValue);
+      filterValues.endDate = formattedDateTime;
+    } catch (error) {
+      console.error('Error formatting date and time:', error);
+      filterValues.endDate = '';
+    }
+  } else {
+    filterValues.endDate = '';
+  }
+});
 
 onMounted(() => {
   getUsers();
