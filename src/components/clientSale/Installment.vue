@@ -94,10 +94,10 @@ const columns = [
 
     <div class="flex flex-col mt-8 border-4 w-[770px] h-[530px]">
       <div class="header flex gap-4">
-        <div class="header-title w-[200px] ml-8 mt-8">
+        <div class="header-title w-1/2 ml-8 mt-8">
           Срок кредитования и график погашения
         </div>
-        <div class="w-1/2 mt-8 -ml-5">
+        <div class="w-1/2 mt-8 -ml-[100px]">
           <FloatLabel class="w-[200px]">
             <Select
                 v-model="selectedTerm"
@@ -111,11 +111,54 @@ const columns = [
         </div>
       </div>
 
-      <!-- DataTable Section -->
-      <div class="flex items-end">
+      <!-- Table Section -->
+      <div class=" flex items-end mt-3">
+        <table class="w-full">
 
+          <tbody>
+          <tr class="flex justify-between w-full">
+            <!-- Column 1: DatePicker -->
+            <td class="w-1/3 px-2">
+              <FloatLabel>
+                <DatePicker
+                    showIcon
+                    showTime
+                    hourFormat="24"
+                    dateFormat="dd.mm.yy,"
+                    fluid
+                    hideOnDateTimeSelect
+                    iconDisplay="input"
+                    class="w-full"
+                />
+                <label for="dd-city">Дата</label>
+              </FloatLabel>
+            </td>
+
+            <!-- Column 2: Select -->
+            <td class="w-1/3 px-2">
+                  robots.txt.js
+                  v-model="selectedTerm"
+                  :options="loanTermOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="w-full"
+              />
+            </td>
+
+            <!-- Column 3: Input -->
+            <td class="w-1/3 px-2">
+              <fin-input
+                  placeholder="Сумма погашения"
+                  class="w-full"
+              />
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+
 
 
 
