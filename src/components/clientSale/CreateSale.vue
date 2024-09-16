@@ -3,7 +3,7 @@ import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
-import CreateProduct from "@/components/CreateProduct.vue";
+import CreateProduct from "@/components/clientSale/CreatePoductSale.vue";
 import Dropdown from "primevue/dropdown";
 import Select from "primevue/select"
 import moment from "moment";
