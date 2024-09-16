@@ -95,7 +95,7 @@ async function getProducts(filters = {}) {
     perPage: first.value,
     search: search.value,
     organization_id: selectedOrganization.value?.code,
-    deleted_at: selectedStatus.value?.code,
+    deleted: selectedStatus.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
