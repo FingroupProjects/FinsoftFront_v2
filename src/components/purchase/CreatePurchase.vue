@@ -242,7 +242,7 @@ watch(createValues, (newValue) => {
             fluid
             hideOnDateTimeSelect
             iconDisplay="input"
-            class="w-full"
+            class="w-full "
         />
         <label for="dd-city">Дата</label>
       </FloatLabel>
@@ -423,6 +423,8 @@ watch(createValues, (newValue) => {
       top: 15px !important;
     }
   }
+
+
 
   .p-button-secondary {
     color: $primary-color !important;

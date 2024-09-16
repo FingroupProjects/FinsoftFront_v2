@@ -1,14 +1,14 @@
 <script setup>
 import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/select";
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import DatePicker from "primevue/datepicker";
 
 const loanTerm = [3, 6, 12];
 const selectedTerm = ref()
-
+const dateValues = ref(Array(selectedTerm.value).fill(null));
 const loanTermOptions = loanTerm.map(term => ({
-  label: `${term} месяцев `,
+  label: `${term} months `,
   value: term
 }));
 
@@ -16,14 +16,9 @@ function selectGoods() {
   console.log('select',selectedTerm.value)
 }
 
-const products = ref();
-const columns = [
-  { field: 'code', header: 'Code' },
-  { field: 'name', header: 'Name' },
-  { field: 'category', header: 'Category' },
-  { field: 'quantity', header: 'Quantity' }
-];
-
+watch(selectedTerm, (newVal) => {
+  dateValues.value = Array(newVal).fill(null);
+});
 
 </script>
 
@@ -94,10 +89,10 @@ const columns = [
 
     <div class="flex flex-col mt-8 border-4 w-[770px] h-[530px]">
       <div class="header flex gap-4">
-        <div class="header-title w-[200px] ml-8 mt-8">
+        <div class="header-title w-[210px] ml-8 mt-8 leading-8" style="line-height: 1.4 !important;">
           Срок кредитования и график погашения
         </div>
-        <div class="w-1/2 mt-8 -ml-5">
+        <div class="w-1/2 mt-8">
           <FloatLabel class="w-[200px]">
             <Select
                 v-model="selectedTerm"
@@ -110,15 +105,48 @@ const columns = [
           </FloatLabel>
         </div>
       </div>
+      <div class="flex-grow mt-3 overflow-auto max-h-[450px]">
+        <table class="w-full">
+          <tbody>
+          <tr v-for="(i, index) in selectedTerm" :key="index" class="flex justify-between w-full mt-1">
+            <td class="mx-4 mt-2 bg-gray-300 rounded-2xl w-[35px] h-[35px] text-blue-700 font-bold">
+               <p v-if="i > 9" class="ml-[6px] pt-1">{{ i }}</p>
+              <p v-if="i <= 9" class="ml-[10px] pt-1">{{ i }}</p>
+            </td>
+            <td class="w-1/3 px-2 mb-6 ">
+              <FloatLabel>
+                <DatePicker
+                    showIcon
+                    showTime
+                    v-model="dateValues[index]"
+                    hourFormat="24"
+                    dateFormat="dd.mm.yy"
+                    fluid
+                    hideOnDateTimeSelect
+                    iconDisplay="input"
+                    class="w-full h-[45px] date-picker-rounded"
 
-      <!-- DataTable Section -->
-      <div class="flex items-end">
-
+                />
+                <label for="dd-city">Дата</label>
+              </FloatLabel>
+            </td>
+            <td class="w-1/3 px-2">
+              <Select
+                  option-value="value"
+                  class="w-full h-[45px]"
+              />
+            </td>
+            <td class="w-1/3 px-2">
+              <fin-input
+                  placeholder="Сумма погашения"
+                  class="w-full h-[45px]"
+              />
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
-
-
 
 
   </div>
@@ -126,5 +154,6 @@ const columns = [
 </template>
 
 <style scoped lang="scss">
+
 
 </style>
