@@ -47,6 +47,8 @@ const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
+const inInstallment = ref(false)
+const dataInstallment = ref()
 const getOnBasedValues = ref([])
 const createValues = reactive({
   datetime24h: new Date,
@@ -61,7 +63,8 @@ const productsInfo = ref({
   postProducts: [],
   getAllSum: 0,
   getAllProduct: [],
-  goods: []
+  goods: [],
+  dataInstallment:''
 });
 const rules = reactive({
   datetime24h: {required},
@@ -112,7 +115,6 @@ function getBasedOn (){
   }
 }
 
-
 async function saveFn() {
   const result = await v$.value.$validate();
   const products = Array.isArray(productsInfo.value.postProducts) ? productsInfo.value.postProducts : [];
@@ -135,6 +137,16 @@ async function saveFn() {
           currency_id: createValues.selectCurrency.id || createValues.selectCurrency.code,
           comment: createValues.comments,
           goods: goodsToSend,
+          in_installment: inInstallment.value,
+          prepayment_sum: dataInstallment.value.prepayment_sum,
+          credit_term: dataInstallment.value.credit_term,
+          guarantor_id: dataInstallment.value.guarantor_id,
+          application_amount: dataInstallment.value.application_amount,
+          monthly_payment: dataInstallment.value.monthly_payment,
+          credit_sum: dataInstallment.value.credit_sum,
+          payment_from_bonus: dataInstallment.value.payment_from_bonus,
+          denomination: dataInstallment.value.denomination,
+          certificate_id: dataInstallment.value.certificate_id.id,
         },
       });
       toast.add({
@@ -159,10 +171,14 @@ async function saveFn() {
 
 function getProducts(products) {
   productsInfo.value = products;
+  dataInstallment.value = productsInfo.value.dataInstallment
+  if (productsInfo.value.dataInstallment !== undefined) {
+    inInstallment.value = true
+  }
 }
 
 const changeModal = (data) => {
-  infoGoods.value = data;
+  productsInfo.value = data;
 };
 
 async function infoModalClose() {

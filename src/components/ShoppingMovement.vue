@@ -24,15 +24,13 @@ const props = defineProps({
 const getBalance = async () => {
   try {
     const res = await useAxios(`document-report/balance/${props.productId}`);
-
     const items = res.result.data;
-
     if (items && items.length > 0) {
       const balances = items.map(item => ({
         date: item.date,
-        creditArticle: item.creditArticle?.name,
-        debitArticle: item.debitArticle?.name,
-        sum: item.sum ?? 0
+        creditArticle: item.bill.name,
+        debitArticle: item.movement_type,
+          sum: item.sum ?? 0
       }));
       balance.value = balances;
       console.log('balances', balance.value);
@@ -113,8 +111,8 @@ onMounted(() => {
           <div class="movement-card card w-[770px] -ml-4">
             <DataTable :value="balance">
               <Column field="date" header="Дата"></Column>
-              <Column field="creditArticle" header="Кредит"></Column>
-              <Column field="debitArticle" header="Дебет"></Column>
+              <Column field="creditArticle" header="Счёт"></Column>
+              <Column field="debitArticle" header="Тип движения"></Column>
               <Column field="sum" header="Сумма"></Column>
             </DataTable>
           </div>
