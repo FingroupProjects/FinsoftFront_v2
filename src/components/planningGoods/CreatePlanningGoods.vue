@@ -16,43 +16,7 @@ const {
   loadingOrganization,
 } = useStaticApi();
 const getResponseData = ref()
-const weeks = reactive([
-  {
-    week_num: 0,
-    week: 'пн',
-    hour: 0
-  },
-  {
-    week_num: 1,
-    week: 'вт',
-    hour: 0
-  },
-  {
-    week_num: 2,
-    week: 'ср',
-    hour: 0
-  },
-  {
-    week_num: 3,
-    week: 'чт',
-    hour: 0
-  },
-  {
-    week_num: 4,
-    week: 'пт',
-    hour: 0
-  },
-  {
-    week_num: 5,
-    week: 'сб',
-    hour: 0
-  },
-  {
-    week_num: 6,
-    week: 'вс',
-    hour: 0
-  }
-]);
+
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 

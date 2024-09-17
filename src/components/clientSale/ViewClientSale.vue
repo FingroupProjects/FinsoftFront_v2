@@ -428,31 +428,97 @@ async function saveFnDialog() {
 
     <client-table :info-goods="props.data" @editModal="changeModal"/>
 
-    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
-      <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
-        <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
-          Автор: {{ userName.name }}
+<!--    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">-->
+<!--      <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">-->
+<!--        <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">-->
+<!--          Автор: {{ userName.name }}-->
+<!--        </div>-->
+<!--        <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">-->
+<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+
+<!--            </div>-->
+<!--            Итого:-->
+<!--          </div>-->
+<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--              Кол-во-->
+<!--            </div>-->
+<!--            {{ formatNumber(infoGoods.getAllProduct) }}-->
+<!--          </div>-->
+<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--              Товаров-->
+<!--            </div>-->
+<!--            {{ infoGoods.goods?.length }}-->
+<!--          </div>-->
+<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
+<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
+<!--              Сумма-->
+<!--            </div>-->
+<!--            {{ formatNumber(infoGoods.getAllSum) }}-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+
+    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg ">
+      <div class="rounded-[10px] h-[125px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F2F2F2] ">
+        <div class="text-[#141C30] font-semibold text-[16px] leading-[20px] mb-[8px] ml-10 mt-6">
+          Продажа в рассрочку:
+          <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
+            Срок кредита
+          </div>
+          <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
+            Ежемес.платеж
+          </div>
         </div>
+        <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-8">
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-6">
+            6 мес
+          </div>
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-4">
+            4365
+          </div>
+        </div>
+        <div class="text-[#141C30] font-semibold text-[16px] leading-[20px] mb-[8px] ml-10 mt-8">
+          <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-7">
+            Сумма кредита
+          </div>
+          <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
+            Сумма заявки
+          </div>
+        </div>
+        <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-8">
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-6">
+            28 180
+          </div>
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-4">
+            28 180
+          </div>
+        </div>
+
         <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
           <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
 
-            </div>
-            Итого:
           </div>
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold -mt-[10px]">
+            <div class="text-[17px] text-[#000000] leading-[13px] font-semibold mb-[18px]">
+              Итого:
+            </div>
             <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
               Кол-во
             </div>
             {{ formatNumber(infoGoods.getAllProduct) }}
           </div>
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold mt-[20px]">
             <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
               Товаров
             </div>
             {{ infoGoods.goods?.length }}
           </div>
-          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold mt-[20px]">
             <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
               Сумма
             </div>

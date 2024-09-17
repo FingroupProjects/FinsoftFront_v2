@@ -13,6 +13,7 @@ import Installment from "@/components/clientSale/Installment.vue";
 
 const emit = defineEmits(['postGoods', 'editModal'])
 
+const dataInstallment = ref('')
 const store = useClientSale()
 const selectedProducts = ref();
 const addInput = ref(false);
@@ -61,12 +62,10 @@ const getOnBased = () =>{
           good_id: item.good.id,
           price: lastProduct.price,
         });
-        emit("postGoods", {postProducts:postProducts.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: products?.value });
-        console.log('called', postProducts.value)
+        sendData()
       }
     }
   }
-
 }
 
 const addFn = async () => {
@@ -89,10 +88,28 @@ const addFn = async () => {
     getAllProduct.value += Number(product.coleVo);
     addInput.value = false;
 
-    emit("postGoods", {postProducts:postProducts.value, getAllSum: getAllSum.value,getAllProduct: getAllProduct?.value, goods: products?.value });
+    sendData()
   }
 
   clearInputValues();
+};
+
+const sendData = () => {
+  console.log('Emitting data:', {
+    postProducts: postProducts.value,
+    getAllSum: getAllSum.value,
+    getAllProduct: getAllProduct?.value,
+    goods: products?.value,
+    dataInstallment: dataInstallment.value
+  });
+
+  emit('postGoods', {
+    postProducts: postProducts.value,
+    getAllSum: getAllSum.value,
+    getAllProduct: getAllProduct?.value,
+    goods: products?.value,
+    dataInstallment: dataInstallment.value
+  });
 };
 
 const confirmDeleteProduct = (index) => {
@@ -111,6 +128,17 @@ const getIdProducts = async (inputValue) => {
     img: el.images[0]?.image ? imgURL + el.images[0].image : new URL('@/assets/img/exampleImg.svg',import.meta.url)
   }));
 };
+
+const getDataInstallment = (data) => {
+  dataInstallment.value = data;
+  sendData()
+  console.log('getting', dataInstallment.value);
+};
+
+async function closeFnVl() {
+  visibleInstallment.value = false
+}
+
 
 const onRowEditSave = (event) => {
   const {newData, index} = event;
@@ -137,6 +165,7 @@ watchEffect(() => {
 onMounted(async () => {
   await getIdProducts();
   await getOnBased();
+
 });
 </script>
 
@@ -281,7 +310,7 @@ onMounted(async () => {
       position="right"
       class="drawer-movement"
   >
-    <Installment/>
+    <Installment :allSum="getAllSum" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
   </Sidebar>
 </template>
 <style lang="scss">
