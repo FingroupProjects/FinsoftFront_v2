@@ -17,23 +17,23 @@ const {
 } = useStaticApi();
 
 const props = defineProps({
-  idPlanning: ""
-})
+  idPlanning: Number,
+  data: {
+    type: [Object, Number],
+    default: () => ({}),
+  },
+});
+
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const toast = useToast();
 
-const quantityPlanning = ref()
 const selectedValues = ref([])
 const params = ref([])
 const selectedGoods = ref()
 const goodGroups = ref([]);
 const getGoodsData = ref([])
 const getGoodsList = ref([])
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
-const productsInfo = ref();
 const visibleAddGoods = ref(false)
-const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
@@ -60,9 +60,7 @@ const createValues = reactive({
   selectedOrganization:"",
   year: "",
 });
-const rules = reactive({
-  name: {required},
-});
+
 const userName = {
   name: localStorage.getItem("user_name"),
 };
@@ -77,6 +75,7 @@ const getGoodsGroup = async (filters = {}) =>{
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   goodGroups.value = res.result.data
 }
+
 function onGroupSelect(groups) {
   params.value.groupIds = groups.map(group => group.id);
 }
@@ -91,6 +90,7 @@ const getGoods = async () =>{
 }
 
 const addToArray = () =>{
+  console.log('logger', getGoodsData.value)
   getGoodsData.value.push(selectedGoods.value)
 }
 
@@ -116,7 +116,6 @@ const handleInput = (monthId, goodId, event) => {
 const getPlanning = async () => {
   const res = await useAxios(`/plan/goods/${props.idPlanning}`);
   const result = res.result;
-  console.log('res', result)
   createValues.selectedOrganization = {
     code: result.organization.id,
     name: result.organization.name
@@ -142,8 +141,6 @@ const getPlanning = async () => {
 
   console.log('goodsData:', getGoodsData.value);
 };
-
-
 
 async function saveFn() {
   console.log('goods get', getGoodsData.value)
@@ -291,7 +288,6 @@ onMounted(()=>{
         </tr>
         </tbody>
       </table>
-
       <FloatLabel v-if="visibleAddGoods" class="mt-4">
         <Select
             v-model="selectedGoods"
@@ -299,14 +295,11 @@ onMounted(()=>{
             optionLabel="name"
             class="w-[200px]"
             @update:modelValue="addToArray"
-            @blur="visibleAddGoods = false"
         />
         <label for="dd-city">Товары</label>
       </FloatLabel>
     </div>
-
   </div>
-
 
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}

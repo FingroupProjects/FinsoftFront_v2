@@ -12,9 +12,15 @@ import Sidebar from "primevue/sidebar";
 import Installment from "@/components/clientSale/Installment.vue";
 
 const emit = defineEmits(['postGoods', 'editModal'])
+const props = defineProps({
+  productDate: {
+    required: true
+  }
+})
 
 const dataInstallment = ref('')
 const store = useClientSale()
+const sendSumDate = ref([])
 const selectedProducts = ref();
 const addInput = ref(false);
 const products = ref([]);
@@ -73,24 +79,22 @@ const addFn = async () => {
     coleVo: coleVo.value,
     price: price.value,
     sum: sum.value,
-    good_id: selectedProducts.value.code,
-    products: selectedProducts.value.products,
-    img: selectedProducts.value.img
+    good_id: selectedProducts.value?.code || selectedProducts.value?.id,
+    products: selectedProducts.value?.products,
+    img: selectedProducts.value?.img
   };
   if (validateProduct(product)) {
     products.value.push(product);
     postProducts.value.push({
       amount: product.coleVo,
-      good_id: selectedProducts.value.code,
+      good_id: selectedProducts.value?.code,
       price: product.price,
     });
     getAllSum.value += Number(product.sum);
     getAllProduct.value += Number(product.coleVo);
     addInput.value = false;
-
     sendData()
   }
-
   clearInputValues();
 };
 
@@ -139,6 +143,12 @@ async function closeFnVl() {
   visibleInstallment.value = false
 }
 
+function dataToInstallment() {
+  visibleInstallment.value = true
+  sendSumDate.value.push(getAllSum.value)
+  sendSumDate.value.push(props.productDate)
+}
+
 
 const onRowEditSave = (event) => {
   const {newData, index} = event;
@@ -164,7 +174,7 @@ watchEffect(() => {
 
 onMounted(async () => {
   await getIdProducts();
-  await getOnBased();
+   getOnBased();
 
 });
 </script>
@@ -174,7 +184,7 @@ onMounted(async () => {
     <div class="header-title">Товары</div>
     <fin-button
         icon="pi pi-angle-right"
-        @click="visibleInstallment = true"
+        @click="dataToInstallment()"
         label="В рассрочку"
         severity="warning"
         class="p-button-lg ml-auto justify-end"
@@ -310,7 +320,7 @@ onMounted(async () => {
       position="right"
       class="drawer-movement"
   >
-    <Installment :allSum="getAllSum" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
+    <Installment :allSum="sendSumDate" :products="dataInstallment" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
   </Sidebar>
 </template>
 <style lang="scss">

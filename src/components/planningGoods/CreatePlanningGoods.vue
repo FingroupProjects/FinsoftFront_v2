@@ -96,6 +96,7 @@ const getGoods = async () =>{
 }
 
 const addToArray = () =>{
+  console.log('selected', getGoodsData.value)
   getGoodsData.value.push(selectedGoods.value)
 }
 

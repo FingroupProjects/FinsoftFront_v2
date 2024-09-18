@@ -98,7 +98,7 @@ async function getAgreement() {
 
 const getView = async () => {
   const item = props.data
-
+  console.log('data', item)
   if (item.active) {
     approved.value = true;
     status.value = 'Проведен';
@@ -116,7 +116,8 @@ const getView = async () => {
     postDate: item.date,
     currencyName: item.currency,
     doc_number: item.doc_number,
-    comment: item.comment
+    comment: item.comment,
+    installment: item.installment
   };
 };
 
@@ -428,58 +429,55 @@ async function saveFnDialog() {
 
     <client-table :info-goods="props.data" @editModal="changeModal"/>
 
-<!--    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">-->
-<!--      <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">-->
-<!--        <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">-->
-<!--          Автор: {{ userName.name }}-->
-<!--        </div>-->
-<!--        <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">-->
-<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
-<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
-
-<!--            </div>-->
-<!--            Итого:-->
-<!--          </div>-->
-<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
-<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
-<!--              Кол-во-->
-<!--            </div>-->
-<!--            {{ formatNumber(infoGoods.getAllProduct) }}-->
-<!--          </div>-->
-<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
-<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
-<!--              Товаров-->
-<!--            </div>-->
-<!--            {{ infoGoods.goods?.length }}-->
-<!--          </div>-->
-<!--          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">-->
-<!--            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">-->
-<!--              Сумма-->
-<!--            </div>-->
-<!--            {{ formatNumber(infoGoods.getAllSum) }}-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div v-if="viewDocument.installment === null" class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
+      <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
+        <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
+          Автор: {{ userName.name }}
+        </div>
+        <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            Итого:
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Кол-во
+            </div>
+            {{ formatNumber(infoGoods.getAllProduct) }}
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Товаров
+            </div>
+            {{ infoGoods.goods?.length }}
+          </div>
+          <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
+            <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
+              Сумма
+            </div>
+            {{ formatNumber(infoGoods.getAllSum) }}
+          </div>
+        </div>
+      </div>
+    </div>
 
 
-    <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg ">
+    <div v-if="viewDocument.installment !== null" class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg ">
       <div class="rounded-[10px] h-[125px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F2F2F2] ">
         <div class="text-[#141C30] font-semibold text-[16px] leading-[20px] mb-[8px] ml-10 mt-6">
           Продажа в рассрочку:
           <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
             Срок кредита
           </div>
-          <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
-            Ежемес.платеж
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-4">
+            Автор:
           </div>
         </div>
         <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-8">
-          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-6">
-            6 мес
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-6 -ml-[70px]">
+            {{viewDocument.installment?.credit_term}} мес
           </div>
-          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-4">
-            4365
+          <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[5px] mt-4 -ml-[170px]">
+            {{ userName.name }}
           </div>
         </div>
         <div class="text-[#141C30] font-semibold text-[16px] leading-[20px] mb-[8px] ml-10 mt-8">
@@ -487,15 +485,15 @@ async function saveFnDialog() {
             Сумма кредита
           </div>
           <div class="text-[15px] text-[#808BA0] leading-[13px] font-semibold mb-[8px] mt-5">
-            Сумма заявки
+            Ежемес.платеж
           </div>
         </div>
         <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-8">
           <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-6">
-            28 180
+            {{viewDocument.installment?.credit_sum}}
           </div>
           <div class="text-[#141C30] font-semibold text-[18px] leading-[20px] mb-[8px] mt-4">
-            28 180
+            {{viewDocument.installment?.monthly_payment}}
           </div>
         </div>
 
