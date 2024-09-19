@@ -113,7 +113,7 @@ const getView = async () => {
   viewDocument.value = {
     organizationName: item.organization,
     author: item.author,
-    counterpartyName: item.counterparty.name,
+    counterpartyName: item.counterparty,
     counterpartyAgreementName: item.counterpartyAgreement,
     storageName: item.storage,
     date: new Date(item.date),
@@ -369,19 +369,19 @@ onMounted(async () => {
           <label for="dd-city">Организация</label>
         </FloatLabel>
 
-        <FloatLabel class="col-span-4">
-          <Select v-model="viewDocument.counterpartyName"
-                  class="w-full"
-                  :options="counterparty"
-                  option-label="name"
-                  editable
-                  @keyup="searchCounterparty"
-            >
+        <FloatLabel class="col-span-4" >
+          <Select
+              v-model="viewDocument.counterpartyName"
+              class="w-full"
+              :options="counterparty"
+              option-label="name"
+              @click="findCounterparty"
+          >
             <template #value>
               {{ viewDocument.counterpartyName?.name }}
             </template>
           </Select>
-          <label for="dd-city">Поставщик</label>
+          <label for="dd-city">Организация</label>
         </FloatLabel>
         <FloatLabel class="col-span-4">
           <Select v-model="viewDocument.counterpartyAgreementName" class="w-full"

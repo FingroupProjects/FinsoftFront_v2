@@ -8,14 +8,12 @@ import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 
 const props = defineProps({
-  allSum: 0,
-  products: ''
+  product: ''
 });
 const emit = defineEmits(["sendData"]);
 
 const bonusData = ref()
 const isAdded = ref(false)
-const baseBonusPayment = props.allSum[0];
 const bonus_payment = ref(0);
 const loanTerm = [3, 6, 12];
 const selectedTerm = ref(3);
@@ -119,6 +117,27 @@ const formatDate = (date) => {
   }
 };
 
+const getInstallment = () => {
+
+  const product = props.product;
+
+  dataInstallment.value = {
+    guarantor_id: product.guarantor.id || '',
+    prepayment_sum: product.prepayment_sum || '',
+    payment_from_bonus: product.payment_from_bonus || '',
+    certificate_id: product.certificate?.id || '',
+    application_amount: product.application_amount || '',
+    monthly_payment: product.monthly_payment || '',
+    credit_term: product.credit_term || '',
+    denomination: product.denomination || '',
+    credit_sum: parseFloat(product.credit_sum) || 0,
+    data: {
+      date: product.certificate?.date || '',
+      sum: parseFloat(product.certificate?.sum) || 0
+    }
+  };
+};
+
 const sendData = async () => {
   try {
     const installmentData = dateValues.value.map((date, index) => ({
@@ -140,68 +159,25 @@ const sendData = async () => {
   }
 };
 
-const validateInput = (field) => {
-  const formatInput = (value) => {
-    if (typeof value === 'string') {
-      return value.replace(',', '.'); // Format comma to dot
-    }
-    return value;
-  };
-  let inputValue
-  const limitInput = (inputValue) => {
-    if (inputValue >= bonus_payment.value) {
-      return bonus_payment.value;
-    } else {
-      return Math.min(inputValue, bonus_payment.value);
-    }
-  };
-  if (field === 'payment_from_bonus') {
-    isAdded.value = true
-    inputValue = formatInput(dataInstallment.value.payment_from_bonus);
-    inputValue = Number(inputValue);
-    if (isNaN(inputValue)) {
-      dataInstallment.value.payment_from_bonus = '';
-      return;
-    }
-    dataInstallment.value.payment_from_bonus = limitInput(inputValue).toString();
-  }
-  if (field === 'certificate_id.sum') {
-    if (typeof dataInstallment.value.certificate_id !== 'object' || dataInstallment.value.certificate_id === null) {
-      dataInstallment.value.certificate_id = { sum: '' };
-    }
-    inputValue = formatInput(dataInstallment.value.certificate_id.sum);
-    inputValue = Number(inputValue);
-
-    if (isNaN(inputValue)) {
-      dataInstallment.value.certificate_id.sum = '';
-      return;
-    }
-    dataInstallment.value.certificate_id.sum = limitInput(inputValue).toString();
-
-  }
-
-};
 async function infoModalClose() {
   emit('close-sidebar');
 }
 
 watchEffect( () => {
-
-    bonus_payment.value = baseBonusPayment;
-    const keys = Object.keys(percents.value).map(Number);
-    if (keys.includes(selectedTerm.value)) {
-      const percent = percents.value[selectedTerm.value];
-      const percentageAmount = (bonus_payment.value * percent) / 100;
-      bonus_payment.value += percentageAmount;
-      percentForShow.value = percent;
-    }
-    bonus_payment.value -= dataInstallment.value.payment_from_bonus;
-    if (dataInstallment.value.certificate_id?.sum) {
-      bonus_payment.value -= dataInstallment.value.certificate_id.sum;
-    }
-    bonus_payment.value = parseFloat(bonus_payment.value.toFixed(2));
-    calculateInstallments();
-    isAdded.value = true
+  const keys = Object.keys(percents.value).map(Number);
+  if (keys.includes(selectedTerm.value)) {
+    const percent = percents.value[selectedTerm.value];
+    const percentageAmount = (bonus_payment.value * percent) / 100;
+    bonus_payment.value += percentageAmount;
+    percentForShow.value = percent;
+  }
+  bonus_payment.value -= dataInstallment.value.payment_from_bonus;
+  if (dataInstallment.value.certificate_id?.sum) {
+    bonus_payment.value -= dataInstallment.value.certificate_id.sum;
+  }
+  bonus_payment.value = parseFloat(bonus_payment.value.toFixed(2));
+  calculateInstallments();
+  console.log('props', props.product)
 
 });
 
@@ -213,24 +189,13 @@ watch(dateValues, () => {
   updateWeekDays();
 }, { deep: true });
 
-
 onMounted(() => {
+  getInstallment()
   getGuarantor();
   getCertificate();
   calculateInstallments();
-
-  const baseDate = new Date(props.allSum[1]);
-  dateValues.value = Array.from({ length: selectedTerm.value }, (_, i) => {
-    const newDate = new Date(baseDate);
-    newDate.setMonth(newDate.getMonth() + i);
-    return newDate;
-  });
 });
 
-onMounted(() => {
-  getGuarantor();
-  getCertificate();
-});
 </script>
 
 <template>
@@ -313,9 +278,9 @@ onMounted(() => {
       </div>
     </div>
     <div class="flex  mt-2">
-      <div class="font-bold">Итого: {{ props.allSum[0]}}</div>
+      <div class="font-bold">Итого: {{ }}</div>
       <div class="font-bold text-green-700 ml-10">Итого бонус: {{ bonus_payment}}</div>
-<!--      <div class="font-bold text-green-700 ml-10">Процент: {{ percentForShow}}%</div>-->
+      <!--      <div class="font-bold text-green-700 ml-10">Процент: {{ percentForShow}}%</div>-->
     </div>
 
     <div class="flex flex-col mt-8 border-[3px] rounded-2xl w-[770px] h-[580px] ml-5">
