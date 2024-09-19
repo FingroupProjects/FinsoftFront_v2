@@ -17,6 +17,7 @@ import Dialog from "primevue/dialog";
 import {useProviderOrder} from "@/store/providerOrder.js";
 import {useClientSale} from "@/store/clientSale.js";
 import ClientTable from "@/components/clientSale/ClientTable.vue";
+import viewInstallment from "@/components/clientSale/ViewInstallment.vue"
 import formatNumber from "@/constants/formatNumber.js";
 
 const emit = defineEmits(['close-sidebar', 'editSave']);
@@ -36,6 +37,7 @@ const productsInfo = ref();
 const toast = useToast();
 const visibleMovement = ref(false);
 const visibleHistory = ref(false);
+const visibleInstallment = ref(false)
 const approved = ref(false);
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
@@ -119,6 +121,7 @@ const getView = async () => {
     comment: item.comment,
     installment: item.installment
   };
+  console.log('install', viewDocument.value)
 };
 
 const updateView = async () => {
@@ -416,6 +419,10 @@ async function saveFnDialog() {
       </div>
       <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
         <div class="header-title">Товары</div>
+        <fin-button @click="visibleInstallment = true"  class=" icon-installment" severity="success">
+          <i class="pi pi-angle-right"></i>
+          <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">Рассрочка</span>
+        </fin-button>
         <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
           <i class="pi pi-history mb-[1px] "></i>
           <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
@@ -528,7 +535,6 @@ async function saveFnDialog() {
 
   </div>
 
-
   <Sidebar
       v-model:visible="visibleMovement"
       :show-close-icon="false"
@@ -544,6 +550,15 @@ async function saveFnDialog() {
       class="drawer-movement"
   >
     <history-purchase :productId="productId"/>
+  </Sidebar>
+
+  <Sidebar
+      v-model:visible="visibleInstallment"
+      :show-close-icon="false"
+      position="right"
+      class="drawer-movement"
+  >
+    <view-installment :product="viewDocument.installment"/>
   </Sidebar>
   <Dialog
       v-model:visible="openInfoModal"
@@ -608,11 +623,18 @@ async function saveFnDialog() {
 }
 
 .icon-history {
-  margin-left: 780px !important;
   background-color: white !important;
   color: #3935E7 !important;
   border: 1px solid #DCDFE3 !important;
   width: 160px !important;
+  height: 31px !important;
+}
+.icon-installment {
+  margin-left: 640px !important;
+  background-color: white !important;
+  color: #3935E7 !important;
+  border: 1px solid #DCDFE3 !important;
+  width: 200px !important;
   height: 31px !important;
 }
 

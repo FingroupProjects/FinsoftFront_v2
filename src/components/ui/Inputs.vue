@@ -19,7 +19,7 @@
           class="block px-2.5 pb-5 w-full border text-secondary
           bg-transparent rounded-[10px] border-1 border-border appearance-none  focus:outline-none focus:ring-0 focus:border-primary peer "
           placeholder=" "
-          @focus="$emit('focus')"
+          @focus="emit('focus')"
           @input="moneyMask"
       />
 
@@ -124,7 +124,7 @@
     disabled: Boolean
   })
 
-  const emit = defineEmits(['clean'])
+  const emit = defineEmits(['clean', 'focus'])
   const show = ref(props.showValue)
   const type = ref(props.type)
   const input = ref()

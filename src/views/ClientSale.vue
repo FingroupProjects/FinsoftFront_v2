@@ -124,6 +124,7 @@ async function getProducts(filters = {}) {
 
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
+    console.log('product', products.value )
     return products.value;
   } catch (e) {
     console.log(e)
