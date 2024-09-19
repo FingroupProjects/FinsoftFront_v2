@@ -126,6 +126,18 @@ async function saveFn() {
   openInfoModal.value = false
   if (result) {
     try {
+      const installmentData = inInstallment.value ? {
+        prepayment_sum: dataInstallment.value.prepayment_sum,
+        credit_term: dataInstallment.value.credit_term,
+        guarantor_id: dataInstallment.value.guarantor_id,
+        application_amount: dataInstallment.value.application_amount,
+        monthly_payment: dataInstallment.value.monthly_payment,
+        credit_sum: dataInstallment.value.credit_sum,
+        payment_from_bonus: dataInstallment.value.payment_from_bonus,
+        denomination: dataInstallment.value.denomination,
+        certificate_id: dataInstallment.value.certificate_id?.id,
+        installmentData: dataInstallment.value.installmentData,
+      } : {};
       const res = await useAxios(`/document/client/purchase`, {
         method: "POST",
         data: {
@@ -138,15 +150,7 @@ async function saveFn() {
           comment: createValues.comments,
           goods: goodsToSend,
           in_installment: inInstallment.value,
-          prepayment_sum: dataInstallment.value.prepayment_sum,
-          credit_term: dataInstallment.value.credit_term,
-          guarantor_id: dataInstallment.value.guarantor_id,
-          application_amount: dataInstallment.value.application_amount,
-          monthly_payment: dataInstallment.value.monthly_payment,
-          credit_sum: dataInstallment.value.credit_sum,
-          payment_from_bonus: dataInstallment.value.payment_from_bonus,
-          denomination: dataInstallment.value.denomination,
-          certificate_id: dataInstallment.value.certificate_id.id,
+          ...installmentData,
         },
       });
       toast.add({
@@ -162,7 +166,7 @@ async function saveFn() {
       toast.add({
         severity: "error",
         summary: "Error Message",
-        detail: e.response.data.message,
+        detail: e.response?.data.message,
         life: 3000,
       });
     }
@@ -172,8 +176,12 @@ async function saveFn() {
 function getProducts(products) {
   productsInfo.value = products;
   dataInstallment.value = productsInfo.value.dataInstallment
-  if (productsInfo.value.dataInstallment !== undefined) {
+  console.log('login',productsInfo.value.dataInstallment)
+  if (productsInfo.value.dataInstallment !== '' ) {
     inInstallment.value = true
+    console.log('install', inInstallment.value)
+  }else{
+    inInstallment.value = false
   }
 }
 
@@ -367,7 +375,7 @@ onMounted(()=>{
     </div>
   </div>
 
-  <CreateProduct @postGoods="getProducts" @editModal="changeModal"/>
+  <CreateProduct :productDate="createValues.datetime24h" @postGoods="getProducts" @editModal="changeModal"/>
 
   <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
     <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">

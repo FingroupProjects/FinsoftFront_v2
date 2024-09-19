@@ -1,5 +1,5 @@
 \<script setup>
-import {ref, watch} from "vue";
+import {ref, watch, onMounted} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
@@ -77,9 +77,9 @@ const selectPage = ref({
 const onRowClick = (event) => {
   const product = event.data;
   visibleRight.value = true;
-  createOpenModal.value = true
-  dataInfo.value = product.id
-  selectedProductId.value = product.id
+  createOpenModal.value = true;
+  dataInfo.value = product;
+  selectedProductId.value = product.id;
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -104,6 +104,7 @@ async function getPlans(filters = {}) {
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     return products.value;
+
   } catch (e) {
     console.log(e)
   } finally {
@@ -164,16 +165,25 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch(selectedCurrency, () => {
+const debounceSearch = ref(null);
+watch(search, () => {
+  clearTimeout(debounceSearch.value);
+  debounceSearch.value = setTimeout(() => {
+    getPlans();
+  }, 500);
+});
+watch([selectedCurrency, selectedStatus, search], () => {
+  first.value = 0;
   getPlans();
 });
 
-watch(selectedStatus, () => {
+watch([selectedCurrency, selectedStatus], () => {
   getPlans();
 });
 
-closeFn()
-getPlans();
+onMounted(() => {
+  getPlans();
+});
 </script>
 
 <template>
@@ -234,7 +244,7 @@ getPlans();
         <Column field="name" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('name',index)">
-              Наименование <i
+              Год <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -248,7 +258,7 @@ getPlans();
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.name }}
+            {{ slotProps.data.year }}
           </template>
         </Column>
         <Column field="director" :sortable="true" header="">
@@ -331,8 +341,12 @@ getPlans();
         :dismissable="false"
     >
 
-      <view-planning-goods :id-planning="dataInfo" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
-                    :openModalClose="openInfoModal"/>
+      <view-planning-goods
+          v-if="createOpenModal"
+          :id-planning="dataInfo.id"
+          :data="dataInfo"
+          @close-sidebar="closeFnVl"
+      />
       <create-planning-goods v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Sidebar>
   </div>
