@@ -84,7 +84,7 @@ const getGoodByGroups = async () => {
     });
   getGoodsData.value = res.result
   visibleAddGoods.value = !visibleAddGoods.value
-  console.log('push', createValues.selectedOrganization)
+  console.log('push', res.result)
 }
 
 const getGoods = async () =>{
@@ -134,7 +134,6 @@ async function saveFn() {
         life: 3000,
       });
     }
-
 }
 
 async function infoModalClose() {
