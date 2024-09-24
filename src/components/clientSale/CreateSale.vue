@@ -25,7 +25,6 @@ const props = defineProps({
 })
 const store = useClientSale()
 
-
 const {
   findCurrency,
   currency,
@@ -101,7 +100,6 @@ async function getAgreement() {
   }
 }
 
-
 function getBasedOn (){
   getOnBasedValues.value = store.getId
   if (store.getId !== null){
@@ -169,6 +167,7 @@ async function saveFn() {
         detail: e.response?.data.message,
         life: 3000,
       });
+
     }
   }
 }
@@ -228,7 +227,6 @@ watch(createValues, (newValue) => {
     isCurrencyFetched.value = true;
   }
 });
-
 onMounted(async () => {
   try {
     await Promise.all([
@@ -241,7 +239,6 @@ onMounted(async () => {
     console.error('Error:', error);
   }
 });
-
 onMounted(()=>{
   getBasedOn()
 })
@@ -374,9 +371,7 @@ onMounted(()=>{
       </FloatLabel>
     </div>
   </div>
-
   <CreateProduct :productDate="createValues.datetime24h" @postGoods="getProducts" @editModal="changeModal"/>
-
   <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
     <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
       <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">

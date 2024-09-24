@@ -89,28 +89,41 @@ const getGoods = async () =>{
   getGoodsList.value = res.result.data
 }
 
-const addToArray = () =>{
-  console.log('logger', getGoodsData.value)
-  getGoodsData.value.push(selectedGoods.value)
-}
+const addToArray = () => {
+  const createEmptyMonths = () => {
+    const months = {};
+    for (let i = 1; i <= 12; i++) {
+      months[i] = null;
+    }
+    return months;
+  };
+  const transformedGoods = {
+    id: selectedGoods.value.id,
+    name: selectedGoods.value.name,
+    months: createEmptyMonths()
+  };
+  getGoodsData.value.push(transformedGoods);
+  console.log('Updated Goods Data:', getGoodsData.value);
+};
+
 
 const handleInput = (monthId, goodId, event) => {
-  const value = Number(event.target.value);
-  const monthIdNumber = Number(monthId);
-  const existingEntryIndex = goods.value.findIndex(
-      (item) => item.good_id === goodId && item.month_id === monthIdNumber
-  );
-  if (existingEntryIndex !== -1) {
-    goods.value[existingEntryIndex].quantity = value;
+  const value = parseInt(event.target.value);
+  const index = getGoodsData.value.findIndex(item => item.id === goodId);
+  console.log(getGoodsData.value)
+  if (index !== -1) {
+    if (monthId in getGoodsData.value[index].months) {
+      getGoodsData.value[index].months[monthId] = value;
+      console.log(`Updated goods with id ${goodId} for month ${monthId}:`, getGoodsData.value[index]);
+    } else {
+      console.error(`MonthId ${monthId} not found in the months object for goodId ${goodId}`);
+    }
   } else {
-    goods.value.push({
-      good_id: goodId,
-      month_id: monthIdNumber,
-      quantity: value,
-    });
+    console.error(`Item with id ${goodId} not found in goods.value`);
   }
-  console.log('Updated goods:', goods.value);
+  console.log('Updated goods:', getGoodsData.value);
 };
+
 
 
 const getPlanning = async () => {
@@ -139,11 +152,9 @@ const getPlanning = async () => {
   });
   getGoodsData.value = Array.from(goodsMap.values());
 
-  console.log('goodsData:', getGoodsData.value);
 };
 
 async function saveFn() {
-  console.log('goods get', getGoodsData.value)
   console.log('goods', goods.value)
   try {
     const res = await useAxios(`/plan/goods/${props.idPlanning}`, {
@@ -151,9 +162,20 @@ async function saveFn() {
       data: {
         organization_id: createValues.selectedOrganization.code,
         year: createValues.year,
-        goods: goods.value
+        goods: getGoodsData.value.map(item => {
+          const goods = [];
+          Object.keys(item.months).forEach(monthId => {
+            goods.push({
+              good_id: item.id,
+              month_id: parseInt(monthId),
+              quantity: item.months[monthId],
+            });
+          });
+          return goods;
+        }).flat()
       }
     });
+    console.log('1', getGoodsData.value)
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -170,9 +192,7 @@ async function saveFn() {
       life: 3000,
     });
   }
-
 }
-
 
 watchEffect(() => {
   if (hasOrganization === true) createValues.selectedOrganization = {
@@ -366,8 +386,6 @@ onMounted(()=>{
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
 
   .p-datatable-table-container::-webkit-scrollbar {

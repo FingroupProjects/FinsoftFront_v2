@@ -1,11 +1,12 @@
 <script setup>
 import {onMounted, ref, watch, watchEffect} from 'vue';
-import Select from "primevue/dropdown";
+import Select from "primevue/select";
 import PurchasingTable from "@/components/purchase/PurchasingTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
 import Sidebar from "primevue/sidebar";
+import Drawer from "primevue/drawer";
 import ShoppingMovement from "@/components/ShoppingMovement.vue";
 import HistoryPurchase from "@/components/HistoryPurchase.vue";
 import {useVuelidate} from "@vuelidate/core";
@@ -32,13 +33,17 @@ const props = defineProps({
   data: Object
 });
 
+const dataInstallment = ref('')
 const status = ref('');
 const productsInfo = ref();
 const toast = useToast();
+const installment = ref(false)
 const visibleMovement = ref(false);
 const visibleHistory = ref(false);
 const visibleInstallment = ref(false)
 const approved = ref(false);
+const errorValue = ref()
+const visibleError = ref(false)
 const isOpen = ref(false);
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
@@ -124,6 +129,14 @@ const getView = async () => {
   console.log('install', viewDocument.value)
 };
 
+const getDataInstallment = (data) => {
+  dataInstallment.value = data;
+  if (dataInstallment.value) {
+    installment.value = true
+  }
+  console.log('getting', dataInstallment.value);
+};
+
 const updateView = async () => {
   const result = await v$.value.$validate();
   openInfoModal.value = false
@@ -140,19 +153,19 @@ const updateView = async () => {
         currency_id: viewDocument.value.currencyName?.id || viewDocument.value.currencyName?.code,
         counterparty_agreement_id: viewDocument.value.counterpartyAgreementName?.id || viewDocument.value.counterpartyAgreementName?.code,
         comment: viewDocument.value.comment,
-        goods: store.postGoods
+        goods: store.postGoods,
+        installment: dataInstallment.value
       };
 
       const res = await useAxios(`/document/update/${props.productId}`, {
         method: 'PATCH',
         data: data
       });
-      if (approved.value === true)
         toast.add({severity: 'success', summary: 'Обновлено!', detail: 'Документ успешно обновлен!', life: 1500});
-
     } catch (e) {
       console.error(e);
       toast.add({severity: 'error', summary: 'Ошибка!', detail: 'Не удалось обновить документ!', life: 1500});
+
     } finally {
       loaderSave.value = false
       store.postGoods = [];
@@ -175,6 +188,12 @@ const approve = async () => {
   } catch (e) {
     console.error(e)
     toast.add({severity: 'error', summary: 'Ошибка', detail: 'Не удалось одобрить документ!', life: 1500});
+    if (e.response && e.response.status === 400) {
+      const errors = e.response.data.errors;
+      errorValue.value = errors
+      console.log('kor',errorValue)
+      visibleError.value = true
+    }
   }
 }
 
@@ -217,6 +236,10 @@ onMounted(async () => {
   }
 });
 
+async function saveFnDialog() {
+  //await updateView()
+  emit('close-sidebar')
+}
 
 function infoModalClose() {
   if (changeValue.value) openInfoModal.value = true
@@ -226,6 +249,10 @@ function infoModalClose() {
 const changeModal = (data) => {
   infoGoods.value = data;
 };
+
+async function closeFnVl() {
+  visibleInstallment.value = false
+}
 
 watchEffect(() => {
 
@@ -271,10 +298,7 @@ watch(productsInfo, (newVal) => {
   initialValue.value = newVal;
 }, {deep: true});
 
-async function saveFnDialog() {
-  //await updateView()
-  emit('close-sidebar')
-}
+
 </script>
 <template>
   <button class="w-[24px] h-[30px] bg-[#fff] rounded-close-btn" @click="infoModalClose"><i
@@ -418,12 +442,12 @@ async function saveFnDialog() {
               class="mt-0.5 ml-1 pi pi-angle-down"></i></button>
       </div>
       <div class="flex items-center mt-[30px] mb-[20px] gap-[21px]">
-        <div class="header-title">Товары</div>
-        <fin-button @click="visibleInstallment = true"  class=" icon-installment" severity="success">
+          <div class="header-title">Товары</div>
+        <fin-button v-if="viewDocument.installment !== null" @click="visibleInstallment = true"  class=" icon-installment" severity="success">
           <i class="pi pi-angle-right"></i>
           <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">Рассрочка</span>
         </fin-button>
-        <fin-button @click="visibleHistory = true" class="icon-history" severity="success">
+        <fin-button @click="visibleHistory = true" class="icon-history" severity="success" :class="{'ml-[740px]' : viewDocument.installment === null }">
           <i class="pi pi-history mb-[1px] "></i>
           <span class="mt-0.5" style="font-weight: bold; margin-bottom: 3px; font-size: 15px;">История</span>
         </fin-button>
@@ -535,31 +559,58 @@ async function saveFnDialog() {
 
   </div>
 
-  <Sidebar
+  <Drawer
+      v-model:visible="visibleError"
+      :show-close-icon="false"
+      position="right"
+      class="filters-purchase"
+  >
+    <div class="text-2xl">Нехватка товаров!</div>
+    <div class="bg-blue-100 rounded-2xl mt-4 h-[100px] flex flex-col">
+      <div class="p-4 flex-grow">
+        <div v-for="(error, index) in errorValue" :key="index">
+          <div class="ml-4 text-lg font-semibold"> {{ error.good }} - {{ error.amount }} </div>
+        </div>
+      </div>
+
+
+    </div>
+    <div class="p-2 pt-10">
+      <fin-button
+          icon="pi pi-times"
+          @click="visibleError = false"
+          label="Ок"
+          severity="success"
+          class="p-button-lg w-full"
+      />
+    </div>
+  </Drawer>
+
+  <Drawer
       v-model:visible="visibleMovement"
       :show-close-icon="false"
       position="right"
       class="drawer-movement"
   >
     <shopping-movement :productId="productId" :number-agreement="viewDocument.doc_number"/>
-  </Sidebar>
-  <Sidebar
+  </Drawer>
+  <Drawer
       v-model:visible="visibleHistory"
       :show-close-icon="false"
       position="right"
       class="drawer-movement"
   >
     <history-purchase :productId="productId"/>
-  </Sidebar>
+  </Drawer>
 
-  <Sidebar
+  <Drawer
       v-model:visible="visibleInstallment"
       :show-close-icon="false"
       position="right"
       class="drawer-movement"
   >
-    <view-installment :product="viewDocument.installment"/>
-  </Sidebar>
+    <view-installment @send-data="getDataInstallment" :product="viewDocument.installment" @close-sidebar="closeFnVl"/>
+  </Drawer>
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
@@ -628,6 +679,9 @@ async function saveFnDialog() {
   border: 1px solid #DCDFE3 !important;
   width: 160px !important;
   height: 31px !important;
+}
+.buttons{
+  margin-left: 640px !important;
 }
 .icon-installment {
   margin-left: 640px !important;

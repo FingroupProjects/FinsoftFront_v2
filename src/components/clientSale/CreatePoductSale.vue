@@ -147,6 +147,7 @@ function dataToInstallment() {
   visibleInstallment.value = true
   sendSumDate.value.push(getAllSum.value)
   sendSumDate.value.push(props.productDate)
+  console.log('delete',sendSumDate)
 }
 
 
@@ -319,6 +320,7 @@ onMounted(async () => {
       :show-close-icon="false"
       position="right"
       class="drawer-movement"
+      :dismissable="false"
   >
     <Installment :allSum="sendSumDate" :products="dataInstallment" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
   </Sidebar>
