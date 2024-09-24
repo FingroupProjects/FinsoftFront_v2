@@ -260,20 +260,19 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedCounterparty"
-            :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
             :options="counterparty"
+            :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
             :loading="loadingCounterparty"
             optionLabel="name"
             class="w-full"
-            editable
-            @keyup="searchCounterparty"
+
         />
         <label for="dd-city">Поставщик</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedAgreement"
             :class="{ 'p-invalid': v$.selectedAgreement.$error }"
             @click="getAgreement"
@@ -283,11 +282,11 @@ watch(createValues, (newValue) => {
             class="w-full"
         >
           <template #value>{{ createValues.selectedAgreement?.name }}</template>
-        </Dropdown>
+        </Select>
         <label for="dd-city">Договор</label>
       </FloatLabel>
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectedStorage"
             :class="{ 'p-invalid': v$.selectedStorage.$error }"
             :loading="loadingStorage"
@@ -299,7 +298,7 @@ watch(createValues, (newValue) => {
       </FloatLabel>
 
       <FloatLabel class="col-span-4">
-        <Dropdown
+        <Select
             v-model="createValues.selectCurrency"
             :class="{ 'p-invalid': v$.selectCurrency.$error }"
             @click="findCurrency(createValues.selectedAgreement)"
@@ -313,7 +312,7 @@ watch(createValues, (newValue) => {
           <template #value>
             {{ createValues.selectCurrency?.name }}
           </template>
-        </Dropdown>
+        </Select>
         <label for="dd-city">Валюта</label>
       </FloatLabel>
       <FloatLabel class="col-span-12 mt-[10px]">

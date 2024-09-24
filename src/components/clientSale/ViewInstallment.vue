@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch, onMounted, watchEffect } from 'vue';
+import { ref, reactive, onMounted, watch, watchEffect, computed } from 'vue';
 import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/select";
 import DatePicker from "primevue/datepicker";
@@ -12,13 +12,13 @@ const props = defineProps({
 });
 const emit = defineEmits(["sendData"]);
 
-const bonusData = ref()
-const isAdded = ref(false)
-const bonus_payment = ref(0);
+const maxSum = ref()
+const baseBonusPayment = ref();
+const monthlyPay = ref(0);
 const loanTerm = [3, 6, 12];
 const selectedTerm = ref(3);
 const guarantor = ref();
-const percentForShow = ref(0);
+const installmentData = ref()
 const percents = ref({
   3: 10,
   6: 15,
@@ -28,12 +28,12 @@ const certificate = ref();
 const dataInstallment = ref({
   guarantor_id: '',
   prepayment_sum: '',
-  payment_from_bonus: '',
+  payment_from_bonus: 0,
   certificate_id: '',
   application_amount: '',
   monthly_payment: '',
   credit_term: '',
-  denomination: '',
+  denomination: 0,
   credit_sum: 0,
   data: {
     date: '',
@@ -52,6 +52,7 @@ const rules = reactive({
   denomination: { required },
   credit_sum: { required },
 });
+
 const weeks = reactive([
   { week_num: 1, week: 'Понедельник' },
   { week_num: 2, week: 'Вторник' },
@@ -68,35 +69,22 @@ const loanTermOptions = loanTerm.map(term => ({
   label: `${term}`,
   value: term
 }));
-const v$ = useVuelidate(rules, dataInstallment.value);
 
 const calculateInstallments = () => {
-  if (selectedTerm.value && bonus_payment.value) {
-    const installmentAmount = bonus_payment.value / selectedTerm.value;
-    dataAmount.value = Array(selectedTerm.value).fill(installmentAmount.toFixed(2));
+  if (selectedTerm.value) {
+    const installmentAmount = dataInstallment.value.credit_sum / selectedTerm.value;
+    if (installmentData !== undefined && installmentData.value) {
+      installmentData.value.forEach((installmentDatum, index) => {
+        if (index < selectedTerm.value) {
+          installmentDatum.sum = installmentAmount.toFixed(2);
+          monthlyPay.value = installmentDatum.sum
+        }
+      });
+    }
   }
 };
 
-const getWeekNumber = (date) => {
-  if (!date) return null;
-  const weekDaysMap = {
-    0: 7,
-    1: 1,
-    2: 2,
-    3: 3,
-    4: 4,
-    5: 5,
-    6: 6
-  };
-  return weekDaysMap[date.getDay()];
-};
-
-const updateWeekDays = () => {
-  weekDays.value = dateValues.value.map(date => {
-    const weekDay = getWeekNumber(date);
-    return weekDay === 7 ? 1 : weekDay;
-  });
-};
+const v$ = useVuelidate(rules, dataInstallment.value);
 
 const getGuarantor = async () => {
   const res = await useAxios(`/guarantor`);
@@ -106,6 +94,7 @@ const getGuarantor = async () => {
 const getCertificate = async () => {
   const res = await useAxios(`/certificate`);
   certificate.value = res.result.data;
+
 };
 
 const formatDate = (date) => {
@@ -117,83 +106,121 @@ const formatDate = (date) => {
   }
 };
 
-const getInstallment = () => {
-
-  const product = props.product;
-
+const getInstallment = async () => {
+  const product = await props.product;
   dataInstallment.value = {
-    guarantor_id: product.guarantor.id || '',
+    guarantor_id: product.guarantor?.id || '',
     prepayment_sum: product.prepayment_sum || '',
     payment_from_bonus: product.payment_from_bonus || '',
-    certificate_id: product.certificate?.id || '',
+    certificate_id: product.certificate || '',
     application_amount: product.application_amount || '',
     monthly_payment: product.monthly_payment || '',
     credit_term: product.credit_term || '',
     denomination: product.denomination || '',
-    credit_sum: parseFloat(product.credit_sum) || 0,
-    data: {
-      date: product.certificate?.date || '',
-      sum: parseFloat(product.certificate?.sum) || 0
-    }
+    credit_sum: product.credit_sum || '',
   };
+  maxSum.value = product.credit_sum
+  baseBonusPayment.value = parseFloat(product.credit_sum) || 0;
+  selectedTerm.value = product.credit_term || 0;
+  installmentData.value = product.installmentData
 };
 
-const sendData = async () => {
-  try {
-    const installmentData = dateValues.value.map((date, index) => ({
-      date: formatDate(date),
-      sum: parseFloat(dataAmount.value[index]).toFixed(2),
-      weekDay: weekDays.value[index]
-    }));
-    dataInstallment.value.installmentData = installmentData;
-    dataInstallment.value.monthly_payment = parseFloat(dataAmount.value[0]);
-    dataInstallment.value.credit_sum = bonus_payment.value;
-    dataInstallment.value.application_amount = selectedTerm.value;
-    dataInstallment.value.denomination = dataInstallment.value.certificate_id.sum;
-    dataInstallment.value.credit_term = selectedTerm.value;
-    console.log('Send data', dataInstallment.value);
-    emit('send-data', dataInstallment.value);
-    await infoModalClose();
-  } catch (error) {
-    console.log(error);
+const sendData = () =>{
+  dataInstallment.value.installmentData = installmentData.value;
+  dataInstallment.value.credit_term = selectedTerm.value;
+  if (monthlyPay.value !== 0){
+    dataInstallment.value.monthly_payment = monthlyPay.value
   }
-};
+  console.log('send',dataInstallment.value)
+  emit('send-data', dataInstallment.value);
+  infoModalClose()
+}
+
 
 async function infoModalClose() {
   emit('close-sidebar');
 }
 
-watchEffect( () => {
-  const keys = Object.keys(percents.value).map(Number);
-  if (keys.includes(selectedTerm.value)) {
-    const percent = percents.value[selectedTerm.value];
-    const percentageAmount = (bonus_payment.value * percent) / 100;
-    bonus_payment.value += percentageAmount;
-    percentForShow.value = percent;
+const updateDateValues = (newVal) => {
+  let baseDate = installmentData.value ? new Date(installmentData.value) : new Date();
+  if (isNaN(baseDate)) {
+    baseDate = new Date();
   }
-  bonus_payment.value -= dataInstallment.value.payment_from_bonus;
-  if (dataInstallment.value.certificate_id?.sum) {
-    bonus_payment.value -= dataInstallment.value.certificate_id.sum;
-  }
-  bonus_payment.value = parseFloat(bonus_payment.value.toFixed(2));
-  calculateInstallments();
-  console.log('props', props.product)
+  baseDate.setMonth(baseDate.getMonth() + 1);
+  baseDate.setDate(baseDate.getDate() + 1);
 
+  installmentData.value = Array.from({ length: newVal }, (_, i) => {
+    const newDate = new Date(baseDate);
+    newDate.setMonth(baseDate.getMonth() + i);
+    if (newDate.getDay() === 0) {
+      newDate.setDate(newDate.getDate() + 1);
+    }
+    if (isNaN(newDate)) {
+      return null;
+    }
+
+    return {
+      id: i + 1,
+      date: newDate.toISOString().split('T')[0],
+      weekDay: newDate.getDay(),
+      sum: (Math.random() * 1000).toFixed(2),
+    };
+
+  }).filter(installment => installment !== null);
+  calculateInstallments()
+};
+
+const validateInput = (field) => {
+  const formatInput = (value) => {
+    if (typeof value === 'string') {
+      return value.replace(',', '.');
+    }
+    return value.toString();
+  };
+  let inputValue;
+  if (field === 'payment_from_bonus') {
+    inputValue = formatInput(dataInstallment.value.payment_from_bonus);
+    inputValue = Number(inputValue);
+
+    if (isNaN(inputValue)) {
+      dataInstallment.value.payment_from_bonus = '';
+      return;
+    }
+    inputValue = Math.min(inputValue, maxSum.value);
+    dataInstallment.value.payment_from_bonus = inputValue.toFixed(2).replace(/(\.0+|(?<=[0-9])0+)$/, '');
+  }
+  if (field === 'denomination') {
+    inputValue = formatInput(dataInstallment.value.denomination);
+    inputValue = Number(inputValue);
+
+    if (isNaN(inputValue)) {
+      dataInstallment.value.denomination= '';
+      return;
+    }
+    inputValue = Math.min(inputValue, dataInstallment.value.credit_sum);
+    dataInstallment.value.denomination = inputValue.toFixed(2).replace(/(\.0+|(?<=[0-9])0+)$/, '');
+  }
+};
+
+watchEffect(() => {
+  dataInstallment.value.credit_sum = baseBonusPayment.value
+      - dataInstallment.value.payment_from_bonus
+      - dataInstallment.value.denomination;
 });
+
+watch(selectedTerm, () => {
+  updateDateValues();
+  console.log(dateValues.value)
+}, { deep: true });
 
 watch(selectedTerm, (newVal) => {
-  weekDays.value = Array(newVal).fill(null);
-  dataAmount.value = Array(newVal).fill(null);
+  updateDateValues(newVal);
 });
-watch(dateValues, () => {
-  updateWeekDays();
-}, { deep: true });
 
 onMounted(() => {
   getInstallment()
   getGuarantor();
   getCertificate();
-  calculateInstallments();
 });
 
 </script>
@@ -206,8 +233,8 @@ onMounted(() => {
       </div>
       <div class="flex gap-[16px]">
         <fin-button
-            icon="pi pi-save"
             @click="sendData"
+            icon="pi pi-save"
             label="Сохранить"
             severity="success"
             class="p-button-lg"
@@ -268,21 +295,19 @@ onMounted(() => {
           <fin-input
               placeholder="Номинал"
               class="w-full"
-              v-model="dataInstallment.certificate_id.sum"
+              v-model="dataInstallment.denomination"
               :disabled="!dataInstallment.certificate_id"
               :class="{ 'p-invalid': v$.certificate_id.$error }"
               type="number"
-              @input="validateInput('certificate_id.sum')"
+              @input="validateInput('denomination')"
           />
         </div>
       </div>
     </div>
     <div class="flex  mt-2">
       <div class="font-bold">Итого: {{ }}</div>
-      <div class="font-bold text-green-700 ml-10">Итого бонус: {{ bonus_payment}}</div>
-      <!--      <div class="font-bold text-green-700 ml-10">Процент: {{ percentForShow}}%</div>-->
+      <div class="font-bold text-green-700 ml-10">Итого бонус: {{ dataInstallment.credit_sum}}</div>
     </div>
-
     <div class="flex flex-col mt-8 border-[3px] rounded-2xl w-[770px] h-[580px] ml-5">
       <div class="header flex gap-4">
         <div class="header-title w-[210px] ml-8 mt-8 leading-8" style="line-height: 1.4 !important;">
@@ -305,45 +330,46 @@ onMounted(() => {
         <table class="w-full">
           <tbody>
           <tr
-              v-for="(i, index) in selectedTerm"
-              :key="index"
+              v-for="(term, index) in installmentData"
+              :key="term.id"
               class="flex justify-between w-full mt-1"
           >
             <td class="mx-4 mt-2 bg-gray-300 rounded-2xl w-[35px] h-[35px] text-blue-700 font-bold">
-              <p v-if="i > 9" class="ml-[6px] pt-1">{{ i }}</p>
-              <p v-if="i <= 9" class="ml-[10px] pt-1">{{ i }}</p>
+              <p v-if="index > 9" class="ml-[6px] pt-1">{{ index + 1 }}</p>
+              <p v-if="index <= 9" class="ml-[10px] pt-1">{{ index + 1}}</p>
             </td>
+
             <td class="w-1/3 px-2 mb-6">
               <FloatLabel>
                 <DatePicker
                     showIcon
-                    v-model="dateValues[index]"
+                    v-model="term.date"
                     dateFormat="yy-mm-dd"
                     fluid
                     hideOnDateTimeSelect
                     iconDisplay="input"
                     class="w-full h-[45px] date-picker-rounded"
-
                 />
                 <label for="dd-city">Дата</label>
               </FloatLabel>
             </td>
+
             <td class="w-1/3 px-2">
               <FloatLabel>
                 <Select
-                    v-model="weekDays[index]"
+                    v-model="term.weekDay"
                     :options="weeks"
                     optionLabel="week"
                     option-value="week_num"
                     class="w-full h-[45px]"
-
                 />
                 <label for="dd-city">День недели</label>
               </FloatLabel>
             </td>
+
             <td class="w-1/3 px-2">
               <fin-input
-                  v-model="dataAmount[index]"
+                  v-model="term.sum"
                   placeholder="Сумма погашения"
                   class="w-full h-[45px]"
                   disabled
@@ -356,10 +382,6 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
 <style scoped lang="scss">
 
-.p-invalid {
-  border: 1px solid #f2376f !important;
-}
 </style>

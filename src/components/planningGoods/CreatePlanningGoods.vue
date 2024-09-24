@@ -15,11 +15,8 @@ const {
   findOrganization,
   loadingOrganization,
 } = useStaticApi();
-const getResponseData = ref()
-
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
-
 const toast = useToast();
 
 const selectedValues = ref([])
@@ -57,7 +54,7 @@ const pagination = ref({
 });
 const createValues = reactive({
   selectedOrganization:"",
-  year: "",
+  year: 2024,
 });
 const rules = reactive({
   name: {required},
@@ -96,8 +93,8 @@ const getGoods = async () =>{
 }
 
 const addToArray = () =>{
-  console.log('selected', getGoodsData.value)
   getGoodsData.value.push(selectedGoods.value)
+  console.log('selected', getGoodsData.value)
 }
 
 const handleInput = (monthId, goodId, event) =>{
@@ -111,7 +108,7 @@ const handleInput = (monthId, goodId, event) =>{
 
 
 async function saveFn() {
-  console.log('org', createValues.selectedOrganization)
+  console.log('org', goods.value)
     try {
       const res = await useAxios(`/plan/goods`, {
         method: "POST",
@@ -211,7 +208,7 @@ onMounted(()=>{
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <fin-input placeholder="Год" v-model="createValues.year"  />
-      <FloatLabel v-if="!hasOrganization">
+      <FloatLabel>
         <MultiSelect
             filter
             v-model="selectedValues"

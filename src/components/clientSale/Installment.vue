@@ -4,21 +4,22 @@ import FloatLabel from "primevue/floatlabel";
 import Select from "primevue/select";
 import DatePicker from "primevue/datepicker";
 import { useAxios } from "@/composable/useAxios.js";
-import { required } from "@vuelidate/validators";
+import { required, helpers  } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
+import {useClientSale} from "@/store/clientSale.js";
 
 const props = defineProps({
   allSum: 0,
   products: ''
 });
 const emit = defineEmits(["sendData"]);
-
-const bonusData = ref()
-const isAdded = ref(false)
+const store = useClientSale()
+const maxSum = ref()
+const denomination = ref()
 const baseBonusPayment = props.allSum[0];
 const bonus_payment = ref(0);
 const loanTerm = [3, 6, 12];
-const selectedTerm = ref(3);
+const selectedTerm = ref(0);
 const guarantor = ref();
 const percentForShow = ref(0);
 const percents = ref({
@@ -46,7 +47,13 @@ const dataInstallment = ref({
 const rules = reactive({
   guarantor_id: { required },
   prepayment_sum: { required },
-  payment_from_bonus: { required },
+  payment_from_bonus: {
+    required,
+    maxValue: helpers.withMessage(
+        'Оплата от бонуса не может превышать доступные бонусы',
+        (value) => value <= bonus_payment.value
+    ),
+  },
   certificate_id: { required },
   application_amount: { required },
   monthly_payment: { required },
@@ -76,6 +83,7 @@ const calculateInstallments = () => {
   if (selectedTerm.value && bonus_payment.value) {
     const installmentAmount = bonus_payment.value / selectedTerm.value;
     dataAmount.value = Array(selectedTerm.value).fill(installmentAmount.toFixed(2));
+    console.log('1', dataAmount.value)
   }
 };
 
@@ -108,6 +116,7 @@ const getGuarantor = async () => {
 const getCertificate = async () => {
   const res = await useAxios(`/certificate`);
   certificate.value = res.result.data;
+  console.log('certifocate', certificate.value)
 };
 
 const formatDate = (date) => {
@@ -128,96 +137,127 @@ const sendData = async () => {
     }));
     dataInstallment.value.installmentData = installmentData;
     dataInstallment.value.monthly_payment = parseFloat(dataAmount.value[0]);
-    dataInstallment.value.credit_sum = bonus_payment.value;
+    dataInstallment.value.credit_sum = parseFloat(bonus_payment.value);
     dataInstallment.value.application_amount = selectedTerm.value;
-    dataInstallment.value.denomination = dataInstallment.value.certificate_id.sum;
+    dataInstallment.value.denomination = denomination.value;
     dataInstallment.value.credit_term = selectedTerm.value;
     console.log('Send data', dataInstallment.value);
     emit('send-data', dataInstallment.value);
+    store.installment = null
     await infoModalClose();
   } catch (error) {
     console.log(error);
   }
 };
 
+const updateDateValues = (newVal) => {
+  const baseDate = new Date(props.allSum[1]);
+  baseDate.setMonth(baseDate.getMonth() + 1);
+  if (baseDate.getDay() === 0) {
+    baseDate.setDate(baseDate.getDate() + 1);
+  }
+
+  dateValues.value = Array.from({ length: newVal }, (_, i) => {
+    const newDate = new Date(baseDate);
+    newDate.setMonth(baseDate.getMonth() + i);
+    if (newDate.getDay() === 0) {
+      newDate.setDate(newDate.getDate() + 1);
+    }
+    return newDate;
+  });
+  calculateInstallments();
+};
+
+const infoModalClose = async () => {
+  emit('close-sidebar');
+  store.installment = dataInstallment.value
+};
+
+
 const validateInput = (field) => {
   const formatInput = (value) => {
     if (typeof value === 'string') {
-      return value.replace(',', '.'); // Format comma to dot
+      return value.replace(',', '.');
     }
-    return value;
+    return value.toString();
   };
-  let inputValue
-  const limitInput = (inputValue) => {
-    if (inputValue >= bonus_payment.value) {
-      return bonus_payment.value;
-    } else {
-      return Math.min(inputValue, bonus_payment.value);
-    }
-  };
+  let inputValue;
   if (field === 'payment_from_bonus') {
-    isAdded.value = true
     inputValue = formatInput(dataInstallment.value.payment_from_bonus);
     inputValue = Number(inputValue);
+
     if (isNaN(inputValue)) {
       dataInstallment.value.payment_from_bonus = '';
       return;
     }
-    dataInstallment.value.payment_from_bonus = limitInput(inputValue).toString();
-  }
-  if (field === 'certificate_id.sum') {
-    if (typeof dataInstallment.value.certificate_id !== 'object' || dataInstallment.value.certificate_id === null) {
-      dataInstallment.value.certificate_id = { sum: '' };
-    }
-    inputValue = formatInput(dataInstallment.value.certificate_id.sum);
+    inputValue = Math.min(inputValue, maxSum.value);
+    dataInstallment.value.payment_from_bonus = inputValue.toFixed(2).replace(/(\.0+|(?<=[0-9])0+)$/, '');
+  } else if (field === 'denomination') {
+    inputValue = formatInput(denomination.value);
     inputValue = Number(inputValue);
 
     if (isNaN(inputValue)) {
-      dataInstallment.value.certificate_id.sum = '';
+      denomination.value = '';
       return;
     }
-    dataInstallment.value.certificate_id.sum = limitInput(inputValue).toString();
-
+    inputValue = Math.min(inputValue, dataInstallment.value.certificate_id?.sum, maxSum.value, bonus_payment.value);
+    denomination.value = inputValue.toFixed(2).replace(/(\.0+|(?<=[0-9])0+)$/, '');
+    console.log('1', denomination.value);
   }
-
 };
-async function infoModalClose() {
-  emit('close-sidebar');
-}
 
-watchEffect( () => {
+watchEffect(() => {
+  bonus_payment.value = typeof baseBonusPayment === 'number' ? baseBonusPayment : 0;
 
-    bonus_payment.value = baseBonusPayment;
-    const keys = Object.keys(percents.value).map(Number);
-    if (keys.includes(selectedTerm.value)) {
-      const percent = percents.value[selectedTerm.value];
+  const keys = Object.keys(percents.value).map(Number);
+  if (keys.includes(selectedTerm.value)) {
+    const percent = percents.value[selectedTerm.value];
+    if (typeof percent === 'number' && !isNaN(percent)) {
       const percentageAmount = (bonus_payment.value * percent) / 100;
       bonus_payment.value += percentageAmount;
       percentForShow.value = percent;
     }
-    bonus_payment.value -= dataInstallment.value.payment_from_bonus;
-    if (dataInstallment.value.certificate_id?.sum) {
-      bonus_payment.value -= dataInstallment.value.certificate_id.sum;
-    }
-    bonus_payment.value = parseFloat(bonus_payment.value.toFixed(2));
-    calculateInstallments();
-    isAdded.value = true
-
+  }
+  const paymentFromBonus = Number(dataInstallment.value.payment_from_bonus);
+  if (!isNaN(paymentFromBonus)) {
+    bonus_payment.value -= paymentFromBonus;
+  }
+  const denominationValue = Number(denomination.value);
+  if (!isNaN(denominationValue)) {
+    bonus_payment.value -= denominationValue;
+  }
+  bonus_payment.value = parseFloat(bonus_payment.value.toFixed(2));
+  calculateInstallments();
 });
+
 
 watch(selectedTerm, (newVal) => {
   weekDays.value = Array(newVal).fill(null);
   dataAmount.value = Array(newVal).fill(null);
+
+  const percent = percents.value[selectedTerm.value];
+  maxSum.value = props.allSum[0]
+  const sumPercent = (props.allSum[0] * percent) / 100;
+  if (isNaN(maxSum.value)) {
+    maxSum.value = 0;
+  }
+  maxSum.value = Number(maxSum.value) + Number(sumPercent);
 });
+
 watch(dateValues, () => {
   updateWeekDays();
+  console.log(dateValues)
 }, { deep: true });
 
+watch(selectedTerm, (newVal) => {
+  updateDateValues(newVal);
+});
 
 onMounted(() => {
   getGuarantor();
   getCertificate();
   calculateInstallments();
+  updateDateValues(selectedTerm.value);
 
   const baseDate = new Date(props.allSum[1]);
   dateValues.value = Array.from({ length: selectedTerm.value }, (_, i) => {
@@ -225,11 +265,7 @@ onMounted(() => {
     newDate.setMonth(newDate.getMonth() + i);
     return newDate;
   });
-});
-
-onMounted(() => {
-  getGuarantor();
-  getCertificate();
+  dataInstallment.value = store.installment
 });
 </script>
 
@@ -303,21 +339,19 @@ onMounted(() => {
           <fin-input
               placeholder="Номинал"
               class="w-full"
-              v-model="dataInstallment.certificate_id.sum"
+              v-model="denomination"
               :disabled="!dataInstallment.certificate_id"
               :class="{ 'p-invalid': v$.certificate_id.$error }"
               type="number"
-              @input="validateInput('certificate_id.sum')"
+              @input="validateInput('denomination')"
           />
         </div>
       </div>
     </div>
     <div class="flex  mt-2">
       <div class="font-bold">Итого: {{ props.allSum[0]}}</div>
-      <div class="font-bold text-green-700 ml-10">Итого бонус: {{ bonus_payment}}</div>
-<!--      <div class="font-bold text-green-700 ml-10">Процент: {{ percentForShow}}%</div>-->
+      <div class="font-bold text-green-700 ml-10">Итого бонус: {{ bonus_payment }}</div>
     </div>
-
     <div class="flex flex-col mt-8 border-[3px] rounded-2xl w-[770px] h-[580px] ml-5">
       <div class="header flex gap-4">
         <div class="header-title w-[210px] ml-8 mt-8 leading-8" style="line-height: 1.4 !important;">
@@ -339,11 +373,7 @@ onMounted(() => {
       <div class="flex-grow mt-3 overflow-auto max-h-[450px]">
         <table class="w-full">
           <tbody>
-          <tr
-              v-for="(i, index) in selectedTerm"
-              :key="index"
-              class="flex justify-between w-full mt-1"
-          >
+          <tr v-for="(i, index) in selectedTerm" :key="index" class="flex justify-between w-full mt-1">
             <td class="mx-4 mt-2 bg-gray-300 rounded-2xl w-[35px] h-[35px] text-blue-700 font-bold">
               <p v-if="i > 9" class="ml-[6px] pt-1">{{ i }}</p>
               <p v-if="i <= 9" class="ml-[10px] pt-1">{{ i }}</p>
@@ -358,9 +388,9 @@ onMounted(() => {
                     hideOnDateTimeSelect
                     iconDisplay="input"
                     class="w-full h-[45px] date-picker-rounded"
-
                 />
                 <label for="dd-city">Дата</label>
+
               </FloatLabel>
             </td>
             <td class="w-1/3 px-2">
@@ -371,7 +401,6 @@ onMounted(() => {
                     optionLabel="week"
                     option-value="week_num"
                     class="w-full h-[45px]"
-
                 />
                 <label for="dd-city">День недели</label>
               </FloatLabel>
@@ -387,6 +416,7 @@ onMounted(() => {
           </tr>
           </tbody>
         </table>
+
       </div>
     </div>
   </div>
