@@ -5,10 +5,8 @@ import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
 import Select from "primevue/select"
 import Tag from "primevue/tag";
-import Sidebar from "primevue/sidebar";
 import Drawer from "primevue/drawer";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';

@@ -39,18 +39,18 @@ const initialValue = ref(null);
 const isModal = ref(false)
 const goods = ref([])
 const months = {
-  1: "Январь",   // January
-  2: "Февраль",  // February
-  3: "Март",     // March
-  4: "Апрель",   // April
-  5: "Май",      // May
-  6: "Июнь",     // June
-  7: "Июль",     // July
-  8: "Август",   // August
-  9: "Сентябрь", // September
-  10: "Октябрь", // October
-  11: "Ноябрь",  // November
-  12: "Декабрь"  // December
+  1: "Январь",
+  2: "Февраль",
+  3: "Март",
+  4: "Апрель",
+  5: "Май",
+  6: "Июнь",
+  7: "Июль",
+  8: "Август",
+  9: "Сентябрь",
+  10: "Октябрь",
+  11: "Ноябрь",
+  12: "Декабрь"
 };
 const pagination = ref({
   perPage: 0,
@@ -74,6 +74,7 @@ const getGoodsGroup = async (filters = {}) =>{
   const res = await useAxios(`/good-group`)
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   goodGroups.value = res.result.data
+
 }
 
 function onGroupSelect(groups) {
@@ -81,8 +82,42 @@ function onGroupSelect(groups) {
 }
 
 const getGoodByGroups = async () => {
-  visibleAddGoods.value = true
-}
+  try {
+    const res = await useAxios(`/good/goods-by-group-ids/`, {
+      params: { ids: params.value.groupIds }
+    });
+    const newGoods = res.result.filter(item =>
+        !getGoodsData.value.some(existingItem => existingItem.id === item.id)
+    );
+    if (newGoods.length === 0) {
+      toast.add({
+        severity: "warn",
+        summary: "Предупреждение!",
+        detail: "Товар уже существует!",
+        life: 3000,
+      });
+    } else {
+      const generateEmptyMonths = () => {
+        const months = {};
+        for (let i = 1; i <= 12; i++) {
+          months[i] = null;
+        }
+        return months;
+      };
+      const goodsWithMonths = newGoods.map(item => ({
+        ...item,
+        months: generateEmptyMonths()
+      }));
+      getGoodsData.value.push(...goodsWithMonths);
+      console.log('push', goodsWithMonths);
+    }
+
+  } catch (error) {
+    console.error("Error fetching goods by group IDs:", error);
+  }
+  visibleAddGoods.value = !visibleAddGoods.value;
+};
+
 
 const getGoods = async () =>{
   const res = await useAxios(`/good`);
@@ -97,15 +132,25 @@ const addToArray = () => {
     }
     return months;
   };
-  const transformedGoods = {
-    id: selectedGoods.value.id,
-    name: selectedGoods.value.name,
-    months: createEmptyMonths()
-  };
-  getGoodsData.value.push(transformedGoods);
-  console.log('Updated Goods Data:', getGoodsData.value);
+  const exists = getGoodsData.value.some(item => item.id === selectedGoods.value.id);
+  if (!exists) {
+    const transformedGoods = {
+      id: selectedGoods.value.id,
+      name: selectedGoods.value.name,
+      months: createEmptyMonths()
+    }
+    getGoodsData.value.push(transformedGoods);
+    console.log('Updated Goods Data:', getGoodsData.value);
+  } else {
+    toast.add({
+      severity: "warn",
+      summary: "Предупреждение!",
+      detail: "Товар уже существует!",
+      life: 3000,
+    });
+    console.log('Item already exists in getGoodsData:', selectedGoods.value.id);
+  }
 };
-
 
 const handleInput = (monthId, goodId, event) => {
   const value = parseInt(event.target.value);
@@ -114,17 +159,13 @@ const handleInput = (monthId, goodId, event) => {
   if (index !== -1) {
     if (monthId in getGoodsData.value[index].months) {
       getGoodsData.value[index].months[monthId] = value;
-      console.log(`Updated goods with id ${goodId} for month ${monthId}:`, getGoodsData.value[index]);
     } else {
       console.error(`MonthId ${monthId} not found in the months object for goodId ${goodId}`);
     }
   } else {
     console.error(`Item with id ${goodId} not found in goods.value`);
   }
-  console.log('Updated goods:', getGoodsData.value);
 };
-
-
 
 const getPlanning = async () => {
   const res = await useAxios(`/plan/goods/${props.idPlanning}`);
@@ -151,7 +192,7 @@ const getPlanning = async () => {
     goodsMap.get(goodId).months[monthId] = item.quantity || 0;
   });
   getGoodsData.value = Array.from(goodsMap.values());
-
+  console.log('let',res.result)
 };
 
 async function saveFn() {
@@ -165,10 +206,11 @@ async function saveFn() {
         goods: getGoodsData.value.map(item => {
           const goods = [];
           Object.keys(item.months).forEach(monthId => {
+            const quantity = item.months[monthId] === null ? 0 : item.months[monthId];
             goods.push({
               good_id: item.id,
               month_id: parseInt(monthId),
-              quantity: item.months[monthId],
+              quantity: quantity,
             });
           });
           return goods;

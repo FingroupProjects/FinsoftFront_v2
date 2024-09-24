@@ -5,7 +5,6 @@ import PurchasingTable from "@/components/purchase/PurchasingTable.vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useToast} from "primevue/usetoast";
-import Sidebar from "primevue/sidebar";
 import Drawer from "primevue/drawer";
 import ShoppingMovement from "@/components/ShoppingMovement.vue";
 import HistoryPurchase from "@/components/HistoryPurchase.vue";
