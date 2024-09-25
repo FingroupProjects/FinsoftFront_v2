@@ -68,13 +68,10 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
-
 const getGoodsGroup = async (filters = {}) =>{
-
   const res = await useAxios(`/good-group`)
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   goodGroups.value = res.result.data
-
 }
 
 function onGroupSelect(groups) {
@@ -111,7 +108,6 @@ const getGoodByGroups = async () => {
       getGoodsData.value.push(...goodsWithMonths);
       console.log('push', goodsWithMonths);
     }
-
   } catch (error) {
     console.error("Error fetching goods by group IDs:", error);
   }
@@ -155,7 +151,6 @@ const addToArray = () => {
 const handleInput = (monthId, goodId, event) => {
   const value = parseInt(event.target.value);
   const index = getGoodsData.value.findIndex(item => item.id === goodId);
-  console.log(getGoodsData.value)
   if (index !== -1) {
     if (monthId in getGoodsData.value[index].months) {
       getGoodsData.value[index].months[monthId] = value;
@@ -270,7 +265,7 @@ onMounted(()=>{
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Просмотр должности</div>
+        <div class="header-title">Просмотр план товаров</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
         </div>
       </div>

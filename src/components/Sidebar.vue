@@ -133,7 +133,7 @@ onMounted(() => {
                       :class="{ 'active-item': $route.path === item.route }"
                       @click="toggleOpen(item.label)"
                   >
-                    <span class="opened item-size" :class="item.icon"></span>
+                    <span class="opened item-size " :class="item.icon"></span>
                     <span class="ml-2 opened sub-title">{{ item.label }}</span>
                     <span v-if="item.items && isOpen && dataOpened === item.label" class="ml-auto mr-[20px]">
                   <i class="some-color" :class="'pi pi-chevron-down'"></i>

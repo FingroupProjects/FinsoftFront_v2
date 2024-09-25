@@ -12,11 +12,10 @@ import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import ViewPlanningShops from "@/components/planningShops/ViewPlanningShops.vue";
-import CreatePlanningShops from "@/components/planningShops/СreatePlanningShops.vue"
-import MethodsPlanning from "@/components/planningShops/MethodsPlanningShops.vue";
+import ViewPlanningOperationTypes from "@/components/planningOperationTypes/ViewPlanningOperationTypes.vue"
+import MethodsPlanning from "@/components/planningOperationTypes/MethodsPlaningOperationTypes.vue";
 import Tag from "primevue/tag";
-
+import CreatePlanningOperationTypes from "@/components/planningOperationTypes/CreatePlanningOperationTypes.vue";
 
 const visibleRight = ref(false);
 const products = ref([]);
@@ -97,7 +96,7 @@ async function getPlans(filters = {}) {
     sort: sortDesc.value
   };
   try {
-    const res = await useAxios(`/plan/storages`, {params});
+    const res = await useAxios(`/plan/operation-types`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
     console.log('plans',res.result.data)
@@ -122,7 +121,6 @@ const getSeverity = (status) => {
     };
   }
 };
-
 
 function getProductMethods() {
   selectedProduct.value = null
@@ -169,8 +167,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header-purchase header-title="Планирование Магазины"/>
-
+  <header-purchase header-title="Планирование Сотрудники"/>
   <div >
     <div class="grid grid-cols-8 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
@@ -182,7 +179,6 @@ onMounted(() => {
             placeholder="Поиск"
         />
       </IconField>
-
       <div class="flex gap-4 col-span-2">
         <fin-button
             @click="visibleFilter = true"
@@ -200,7 +196,6 @@ onMounted(() => {
         />
       </div>
     </div>
-
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
       <methods-planning @get-product="getProductMethods" :select-products="selectedProduct"
                         v-if="!(!selectedProduct || !selectedProduct.length)"/>
@@ -277,7 +272,6 @@ onMounted(() => {
             />
           </template>
         </Column>
-
       </DataTable>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
@@ -303,8 +297,6 @@ onMounted(() => {
       </div>
     </div>
   </div>
-
-
   <div class="create-purchase-sidebar">
     <Drawer
         v-model:visible="visibleRight"
@@ -313,17 +305,15 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-
-      <view-planning-shops
+      <view-planning-operation-types
           v-if="createOpenModal"
           :id-planning="dataInfo.id"
           :data="dataInfo"
           @close-sidebar="closeFnVl"
       />
-      <create-planning-shops v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <create-planning-operation-types v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Drawer>
   </div>
-
   <Drawer
       v-model:visible="visibleFilter"
       :show-close-icon="false"

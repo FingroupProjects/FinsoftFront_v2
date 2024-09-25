@@ -1,52 +1,36 @@
 \<script setup>
-import {ref, watch, onMounted} from "vue";
+import {ref, watch, onMounted, reactive} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
-import Tag from "primevue/tag";
-import Sidebar from "primevue/sidebar";
-import FilterPurchase from "@/components/FilterPurchase.vue";
+import Select from "primevue/select";
+import Drawer from "primevue/drawer"
+import FilterPlanning from "@/components/planningGoods/FilterPlanning.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
-import moment from "moment";
-import {useStaticApi} from "@/composable/useStaticApi.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import Loader from "@/components/ui/Loader.vue";
-import MethodsOrganizationBill from "@/components/organizationBillComponents/MethodsOrganizationBill.vue";
-import ViewOrganization from "@/components/organizationComponents/ViewOrganization.vue";
-import CreateOrganization from "@/components/organizationComponents/CreateOrganization.vue";
 import ViewPlanningGoods from "@/components/planningGoods/ViewPlanningGoods.vue";
 import CreatePlanningGoods from "@/components/planningGoods/CreatePlanningGoods.vue";
-import MethodsStorage from "@/components/storageComponents/MethodsStorage.vue";
+import MethodsPlanning from "@/components/planningGoods/MethodsPlanning.vue";
+import Tag from "primevue/tag";
 
-const {
-  findCurrency,
-  currency,
-  loading
-} = useStaticApi();
 
 const visibleRight = ref(false);
 const products = ref([]);
-const selectedCurrency = ref(null);
 const selectedProduct = ref();
 const selectedProductId = ref()
 const search = ref('')
-const selectedCounterparty = ref();
 const first = ref(0)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
-const openInfoModal = ref(false);
-const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
 
-const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const selectedStatus = ref();
 const pageCounts = ref([
   {
@@ -73,6 +57,12 @@ const pagination = ref({
 const selectPage = ref({
   count: 20,
 });
+const savedFilterValues = reactive({
+  startDate: '',
+  endDate: '',
+  organization_id: '',
+  year: ''
+});
 
 const onRowClick = (event) => {
   const product = event.data;
@@ -84,7 +74,15 @@ const onRowClick = (event) => {
 
 const handleFiltersUpdate = (filters) => {
   getPlans(filters);
+  Object.assign(savedFilterValues, filters);
+  console.log(filters);
   visibleFilter.value = false
+}
+
+const clearFilter  = (filters) => {
+  Object.assign(savedFilterValues, filters);
+  visibleFilter.value = false;
+  getPlans()
 }
 
 async function getPlans(filters = {}) {
@@ -93,7 +91,6 @@ async function getPlans(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    currency_id: selectedCurrency.value?.code,
     deleted: selectedStatus.value?.code,
     page: first.value,
     ...filters,
@@ -103,8 +100,8 @@ async function getPlans(filters = {}) {
     const res = await useAxios(`/plan/goods`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
+    console.log('plans',res.result.data)
     return products.value;
-
   } catch (e) {
     console.log(e)
   } finally {
@@ -112,13 +109,8 @@ async function getPlans(filters = {}) {
   }
 }
 
-function getProductMethods() {
-  selectedProduct.value = null
-  getPlans()
-}
-
 const getSeverity = (status) => {
-  if (status == null) {
+  if (status === null) {
     return {
       status: "success",
       name: "Активный",
@@ -130,16 +122,13 @@ const getSeverity = (status) => {
     };
   }
 };
-const statusList = ref([
-  {
-    name: 'Активный',
-    code: 0
-  },
-  {
-    name: 'Не активный',
-    code: 1
-  },
-])
+
+
+function getProductMethods() {
+  selectedProduct.value = null
+  getPlans()
+}
+
 function closeFn(result) {
   dataInfo.value = result
   console.log('data info',dataInfo.value)
@@ -172,17 +161,10 @@ watch(search, () => {
     getPlans();
   }, 500);
 });
-watch([selectedCurrency, selectedStatus, search], () => {
-  first.value = 0;
-  getPlans();
-});
-
-watch([selectedCurrency, selectedStatus], () => {
-  getPlans();
-});
 
 onMounted(() => {
   getPlans();
+  getSeverity()
 });
 </script>
 
@@ -190,7 +172,7 @@ onMounted(() => {
   <header-purchase header-title="Планирование Товары"/>
 
   <div >
-    <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
+    <div class="grid grid-cols-8 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
         <InputIcon class="pi pi-search"/>
         <InputText
@@ -201,13 +183,6 @@ onMounted(() => {
         />
       </IconField>
 
-      <Dropdown
-          v-model="selectedStatus"
-          :options="statusList"
-          optionLabel="name"
-          placeholder="Статус"
-          class="w-full col-span-4"
-      />
       <div class="flex gap-4 col-span-2">
         <fin-button
             @click="visibleFilter = true"
@@ -227,7 +202,7 @@ onMounted(() => {
     </div>
 
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <MethodsStorage @get-product="getProductMethods" :select-products="selectedProduct"
+      <methods-planning @get-product="getProductMethods" :select-products="selectedProduct"
                       v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
@@ -281,21 +256,19 @@ onMounted(() => {
             {{ slotProps.data.organization.name }}
           </template>
         </Column>
-
-
         <Column field="status" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('deleted_at',index)">
+            <div class="w-full h-full" @click="sortData('active',index)">
               Статус <i
                 :class="{
-            'pi pi-arrow-down': openUp[index],
-            'pi pi-arrow-up': !openUp[index],
-            'text-[#808BA0] text-[5px]': true
-          }"
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
             ></i>
             </div>
           </template>
-          <template #sorticon="">
+          <template #sorticon="{index}">
           </template>
           <template #body="slotProps">
             <Tag
@@ -308,7 +281,7 @@ onMounted(() => {
       </DataTable>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
-        <Dropdown
+        <Select
             v-model="selectPage"
             @update:model-value="getPlans"
             :options="pageCounts"
@@ -317,7 +290,7 @@ onMounted(() => {
           <template #option="slotProps">
             {{ slotProps.option.count }}
           </template>
-        </Dropdown>
+        </Select>
         <Paginator
             :rows="1"
             :totalRecords="Number(pagination.totalPages)"
@@ -333,7 +306,7 @@ onMounted(() => {
 
 
   <div class="create-purchase-sidebar">
-    <Sidebar
+    <Drawer
         v-model:visible="visibleRight"
         :show-close-icon="false"
         position="right"
@@ -348,17 +321,17 @@ onMounted(() => {
           @close-sidebar="closeFnVl"
       />
       <create-planning-goods v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
-    </Sidebar>
+    </Drawer>
   </div>
 
-  <Sidebar
+  <Drawer
       v-model:visible="visibleFilter"
       :show-close-icon="false"
       position="right"
       class="filters-purchase"
   >
-    <filter-purchase @updateFilters="handleFiltersUpdate"/>
-  </Sidebar>
+    <filter-planning :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+  </Drawer>
   <Toast/>
 
 </template>

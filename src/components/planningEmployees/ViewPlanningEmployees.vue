@@ -2,12 +2,9 @@
 import {onMounted, reactive, ref, watch, watchEffect} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useVuelidate} from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Dialog from "primevue/dialog";
 import Select from "primevue/select"
-import MultiSelect from "primevue/multiselect";
 import FloatLabel from "primevue/floatlabel";
 
 const {
@@ -16,37 +13,36 @@ const {
   loadingOrganization,
 } = useStaticApi();
 
+const props = defineProps({
+  idPlanning: Number,
+  data: {
+    type: [Object, Number],
+    default: () => ({}),
+  },
+});
+
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const toast = useToast();
 
-const selectedValues = ref([])
-const params = ref([])
-const selectedGoods = ref()
-const goodGroups = ref([]);
-const getGoodsData = ref([])
-const getGoodsList = ref([])
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
-const productsInfo = ref();
-const visibleAddGoods = ref(false)
-const isCurrencyFetched = ref(false);
+const getEmployeesData = ref([])
+const getEmployeesList = ref([])
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
-const goods = ref([])
+const employees = ref([])
 const months = {
-  1: "Январь",   // January
-  2: "Февраль",  // February
-  3: "Март",     // March
-  4: "Апрель",   // April
-  5: "Май",      // May
-  6: "Июнь",     // June
-  7: "Июль",     // July
-  8: "Август",   // August
-  9: "Сентябрь", // September
-  10: "Октябрь", // October
-  11: "Ноябрь",  // November
-  12: "Декабрь"  // December
+  1: "Январь",
+  2: "Февраль",
+  3: "Март",
+  4: "Апрель",
+  5: "Май",
+  6: "Июнь",
+  7: "Июль",
+  8: "Август",
+  9: "Сентябрь",
+  10: "Октябрь",
+  11: "Ноябрь",
+  12: "Декабрь"
 };
 const pagination = ref({
   perPage: 0,
@@ -54,11 +50,9 @@ const pagination = ref({
 });
 const createValues = reactive({
   selectedOrganization:"",
-  year: 2024,
+  year: "",
 });
-const rules = reactive({
-  name: {required},
-});
+
 const userName = {
   name: localStorage.getItem("user_name"),
 };
@@ -66,79 +60,108 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
+const handleInput = (monthId, employeeId, event) => {
+  const value = parseInt(event.target.value);
+  const index = getEmployeesData.value.findIndex(item => item.id === employeeId);
+  if (index !== -1) {
+    if (monthId in getEmployeesData.value[index].months) {
+      getEmployeesData.value[index].months[monthId] = value;
+    } else {
+      console.error(`MonthId ${monthId} not found in the months object for employeeId ${employeeId}`);
+    }
+  } else {
+    console.error(`Item with id ${employeeId} not found in employees.value`);
+  }
+};
 
-const getGoodsGroup = async (filters = {}) =>{
-
-  const res = await useAxios(`/good-group`)
-  pagination.value.totalPages = Number(res.result.pagination.total_pages);
-  goodGroups.value = res.result.data
-}
-function onGroupSelect(groups) {
-  params.value.groupIds = groups.map(group => group.id);
-}
-
-const getGoodByGroups = async () => {
-  console.log('id',params.value.groupIds)
-    const res = await useAxios(`/good/goods-by-group-ids/`, {
-      params: { ids: params.value.groupIds }
-    });
-  getGoodsData.value = res.result
-  visibleAddGoods.value = !visibleAddGoods.value
-  console.log('push', res.result)
+const getEmployees = async () =>{
+  const res = await useAxios(`/employee`);
+  getEmployeesList.value = res.result.data
 }
 
-const getGoods = async () =>{
-  const res = await useAxios(`/good`);
-  getGoodsList.value = res.result.data
-}
+const createEmptyMonths = () => {
+  const months = {};
+  for (let i = 1; i <= 12; i++) {
+    months[i] = null;
+  }
+  return months;
+};
 
-const addToArray = () =>{
-  getGoodsData.value.push(selectedGoods.value)
-  console.log('selected', getGoodsData.value)
-}
-
-const handleInput = (monthId, goodId, event) =>{
-  const value = event.target.value;
-  goods.value.push({
-    good_id:goodId,
-    month_id: monthId,
-    quantity: value,
-  })
-}
-
-
-async function saveFn() {
-  console.log('org', goods.value)
-    try {
-      const res = await useAxios(`/plan/goods`, {
-        method: "POST",
-        data: {
-          organization_id: createValues.selectedOrganization.code,
-          year: createValues.year,
-          goods: goods.value
-        }
-      });
-      toast.add({
-        severity: "success",
-        summary: "Success Message",
-        detail: "Message Content",
-        life: 3000,
-      });
-      emit("closeDialog", res.result);
-    } catch (e) {
-      console.log(e);
-      toast.add({
-        severity: "error",
-        summary: "Error Message",
-        detail: e.response.data.message,
-        life: 3000,
+const getPlanning = async () => {
+  const res = await useAxios(`/plan/employees/${props.idPlanning}`);
+  const result = res.result;
+  createValues.selectedOrganization = {
+    code: result.organization.id,
+    name: result.organization.name
+  };
+  createValues.year = result.year;
+  const employeesMap = new Map();
+  result.employees.forEach(item => {
+    const employeeId = item.employee.id;
+    const monthId = item.month.id;
+    if (!employeesMap.has(employeeId)) {
+      employeesMap.set(employeeId, {
+        id: item.employee.id,
+        name: item.employee.name,
+        months: createEmptyMonths(),
       });
     }
-}
-
-async function infoModalClose() {
-  if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
-  else emit('close-sidebar')
+    employeesMap.get(employeeId).months[monthId] = item.sum || 0;
+  });
+  await getEmployees();
+  getEmployeesData.value = Array.from(employeesMap.values());
+  for (const employeeListElement of getEmployeesList.value) {
+    const existingEmployee = getEmployeesData.value.find(
+        employee => employee.id === employeeListElement.id
+    );
+    if (!existingEmployee) {
+      getEmployeesData.value.push({
+        id: employeeListElement.id,
+        name: employeeListElement.name,
+        months: createEmptyMonths(),
+      });
+    }
+  }
+  console.log(getEmployeesData.value)
+};
+async function saveFn() {
+  console.log('employees', employees.value)
+  try {
+    const res = await useAxios(`/plan/employees/${props.idPlanning}`, {
+      method: "PATCH",
+      data: {
+        organization_id: createValues.selectedOrganization.code,
+        year: createValues.year,
+        employees: getEmployeesData.value.map(item => {
+          const employees = [];
+          Object.keys(item.months).forEach(monthId => {
+            const quantity = item.months[monthId] === null ? 0 : item.months[monthId];
+            employees.push({
+              employee_id: item.id,
+              month_id: parseInt(monthId),
+              sum: quantity,
+            });
+          });
+          return employees;
+        }).flat()
+      }
+    });
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    emit("closeDialog", res.result);
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e.response.data.message,
+      life: 3000,
+    });
+  }
 }
 
 watchEffect(() => {
@@ -165,8 +188,8 @@ onMounted(async () => {
 });
 
 onMounted(()=>{
-  getGoodsGroup()
-  getGoods()
+  getEmployees()
+  getPlanning()
 })
 </script>
 
@@ -174,7 +197,7 @@ onMounted(()=>{
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание план товаров</div>
+        <div class="header-title">Просмотр план сотрудников</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
         </div>
       </div>
@@ -188,7 +211,7 @@ onMounted(()=>{
         />
         <fin-button
             icon="pi pi-times"
-            @click="infoModalClose"
+            @click="emit('close-sidebar')"
             label="Отменить"
             severity="warning"
             class="p-button-lg"
@@ -197,38 +220,24 @@ onMounted(()=>{
     </div>
     <div class="flex gap-4 mt-[30px]">
       <FloatLabel v-if="!hasOrganization">
-      <Select
-          v-model="createValues.selectedOrganization"
-          :options="organization"
-          :loading="loadingOrganization"
-          optionLabel="name"
-          class="w-[200px]"
-      />
+        <Select
+            v-model="createValues.selectedOrganization"
+            :options="organization"
+            :loading="loadingOrganization"
+            optionLabel="name"
+            class="w-[200px]"
+        >
+          <template #value>
+            {{createValues.selectedOrganization.name}}
+          </template>
+        </Select>
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <fin-input placeholder="Год" v-model="createValues.year"  />
-      <FloatLabel>
-        <MultiSelect
-            filter
-            v-model="selectedValues"
-            :maxSelectedLabels="3" class="w-full md:w-80"
-            :options="goodGroups"
-            optionLabel="name"
-            @update:modelValue="onGroupSelect"
-        />
-      <label for="dd-city">Товары</label>
-      </FloatLabel>
-      <fin-button
-          icon="pi pi-plus"
-          label="Добавить"
-          @click="getGoodByGroups"
-          severity="success"
-          class="p-button-lg"
-      />
     </div>
-    <div>
-      <table class="w-full mt-6">
-        <thead class="bg-gray-200 gap-4 text-center text-black ">
+    <div class="h-4">
+      <table class="w-full mt-6 mb-10">
+        <thead class="bg-gray-200 gap-4 text-center text-black">
         <tr>
           <th class="border-2 border-gray-300 w-[150px]">Товар</th>
           <th v-for="(month, index) in months" :key="index" class="border-2 border-gray-300">
@@ -237,35 +246,27 @@ onMounted(()=>{
         </tr>
         </thead>
         <tbody>
-        <tr class="text-center" v-for="{ id: goodId, name: goodName } in getGoodsData" :key="goodId">
-          <td class="fz-14 border-2">{{ goodName }}</td>
+        <tr class="text-center" v-for="{ id: employeeId, name: employeeName, months } in getEmployeesData" :key="employeeId">
+          <td class="fz-14 border-2">{{ employeeName }}</td>
           <td v-for="(monthName, monthId) in months" :key="monthId">
             <fin-input
                 class="h-full"
                 placeholder=""
-                @input="handleInput(monthId, goodId, $event)"
+                v-model="months[monthId]"
+                @input="handleInput(monthId, employeeId, $event)"
             />
           </td>
         </tr>
         </tbody>
       </table>
-      <FloatLabel v-if="visibleAddGoods" class="mt-4">
-        <Select
-            v-model="selectedGoods"
-            :options="getGoodsList"
-            optionLabel="name"
-            class="w-[200px]"
-            @update:modelValue="addToArray"
-        />
-        <label for="dd-city">Товары</label>
-      </FloatLabel>
     </div>
-
   </div>
 
+  <div class="text-[20px] font-[600] w-full absolute bottom-[40px] bg-white">
+    <div class="pt-3">
+      Автор: {{ userName.name }}
+    </div>
 
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
   </div>
   <Dialog
       v-model:visible="openInfoModal"
@@ -329,8 +330,6 @@ onMounted(()=>{
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
 
   .p-datatable-table-container::-webkit-scrollbar {

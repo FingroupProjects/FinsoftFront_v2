@@ -2,12 +2,9 @@
 import {onMounted, reactive, ref, watch, watchEffect} from "vue";
 import {useAxios} from "@/composable/useAxios.js";
 import {useStaticApi} from "@/composable/useStaticApi.js";
-import {useVuelidate} from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import Dialog from "primevue/dialog";
 import Select from "primevue/select"
-import MultiSelect from "primevue/multiselect";
 import FloatLabel from "primevue/floatlabel";
 
 const {
@@ -16,37 +13,38 @@ const {
   loadingOrganization,
 } = useStaticApi();
 
+const props = defineProps({
+  idPlanning: Number,
+  data: {
+    type: [Object, Number],
+    default: () => ({}),
+  },
+});
+
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const toast = useToast();
 
-const selectedValues = ref([])
-const params = ref([])
-const selectedGoods = ref()
-const goodGroups = ref([]);
-const getGoodsData = ref([])
-const getGoodsList = ref([])
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
-const productsInfo = ref();
-const visibleAddGoods = ref(false)
-const isCurrencyFetched = ref(false);
+const getOperationTypesData = ref([])
+const getOperationTyperRko= ref([])
+const getOperationTyperPko= ref([])
+const getOperationTypesList = ref([])
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
-const goods = ref([])
+const operationTypes = ref([])
 const months = {
-  1: "Январь",   // January
-  2: "Февраль",  // February
-  3: "Март",     // March
-  4: "Апрель",   // April
-  5: "Май",      // May
-  6: "Июнь",     // June
-  7: "Июль",     // July
-  8: "Август",   // August
-  9: "Сентябрь", // September
-  10: "Октябрь", // October
-  11: "Ноябрь",  // November
-  12: "Декабрь"  // December
+  1: "Январь",
+  2: "Февраль",
+  3: "Март",
+  4: "Апрель",
+  5: "Май",
+  6: "Июнь",
+  7: "Июль",
+  8: "Август",
+  9: "Сентябрь",
+  10: "Октябрь",
+  11: "Ноябрь",
+  12: "Декабрь"
 };
 const pagination = ref({
   perPage: 0,
@@ -54,11 +52,9 @@ const pagination = ref({
 });
 const createValues = reactive({
   selectedOrganization:"",
-  year: 2024,
+  year: "",
 });
-const rules = reactive({
-  name: {required},
-});
+
 const userName = {
   name: localStorage.getItem("user_name"),
 };
@@ -66,79 +62,116 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
+const handleInput = (monthId, operationTypeId, event) => {
+  const value = parseInt(event.target.value);
+  const index = getOperationTypesData.value.findIndex(item => item.id === operationTypeId);
+  if (index !== -1) {
+    if (monthId in getOperationTypesData.value[index].months) {
+      getOperationTypesData.value[index].months[monthId] = value;
+    } else {
+      console.error(`MonthId ${monthId} not found in the months object for operationTypeId ${operationTypeId}`);
+    }
+  } else {
+    console.error(`Item with id ${operationTypeId} not found in operationTypes.value`);
+  }
+};
 
-const getGoodsGroup = async (filters = {}) =>{
-
-  const res = await useAxios(`/good-group`)
-  pagination.value.totalPages = Number(res.result.pagination.total_pages);
-  goodGroups.value = res.result.data
+const getOperationTypesRko = async () =>{
+  const res = await useAxios(`/operationTypes?type=RKO`);
+  getOperationTyperRko.value = res.result
 }
-function onGroupSelect(groups) {
-  params.value.groupIds = groups.map(group => group.id);
-}
-
-const getGoodByGroups = async () => {
-  console.log('id',params.value.groupIds)
-    const res = await useAxios(`/good/goods-by-group-ids/`, {
-      params: { ids: params.value.groupIds }
-    });
-  getGoodsData.value = res.result
-  visibleAddGoods.value = !visibleAddGoods.value
-  console.log('push', res.result)
-}
-
-const getGoods = async () =>{
-  const res = await useAxios(`/good`);
-  getGoodsList.value = res.result.data
+const getOperationTypesPko = async () =>{
+  const res = await useAxios(`/operationTypes?type=PKO`);
+  getOperationTyperPko.value = res.result
 }
 
-const addToArray = () =>{
-  getGoodsData.value.push(selectedGoods.value)
-  console.log('selected', getGoodsData.value)
-}
+const getAllOperationTypes = async () => {
+  await Promise.all([getOperationTypesRko(), getOperationTypesPko()]);
+  getOperationTypesList.value = [...getOperationTyperRko.value, ...getOperationTyperPko.value];
+};
 
-const handleInput = (monthId, goodId, event) =>{
-  const value = event.target.value;
-  goods.value.push({
-    good_id:goodId,
-    month_id: monthId,
-    quantity: value,
-  })
-}
+const createEmptyMonths = () => {
+  const months = {};
+  for (let i = 1; i <= 12; i++) {
+    months[i] = null;
+  }
+  return months;
+};
 
-
-async function saveFn() {
-  console.log('org', goods.value)
-    try {
-      const res = await useAxios(`/plan/goods`, {
-        method: "POST",
-        data: {
-          organization_id: createValues.selectedOrganization.code,
-          year: createValues.year,
-          goods: goods.value
-        }
-      });
-      toast.add({
-        severity: "success",
-        summary: "Success Message",
-        detail: "Message Content",
-        life: 3000,
-      });
-      emit("closeDialog", res.result);
-    } catch (e) {
-      console.log(e);
-      toast.add({
-        severity: "error",
-        summary: "Error Message",
-        detail: e.response.data.message,
-        life: 3000,
+const getPlanning = async () => {
+  const res = await useAxios(`/plan/operation-types/${props.idPlanning}`);
+  const result = res.result;
+  createValues.selectedOrganization = {
+    code: result.organization.id,
+    name: result.organization.name
+  };
+  createValues.year = result.year;
+  const operationTypeMap = new Map();
+  result.operationTypes.forEach(item => {
+    const operationTypeId = item.operationType.id;
+    const monthId = item.month.id;
+    if (!operationTypeMap.has(operationTypeId)) {
+      operationTypeMap.set(operationTypeId, {
+        id: item.operationType.id,
+        name: item.operationType.name,
+        months: createEmptyMonths(),
       });
     }
-}
-
-async function infoModalClose() {
-  if (isModal.value || productsInfo.value?.length > 0) openInfoModal.value = true
-  else emit('close-sidebar')
+    operationTypeMap.get(operationTypeId).months[monthId] = item.sum || 0;
+  });
+  await getAllOperationTypes();
+  getOperationTypesData.value = Array.from(operationTypeMap.values());
+  for (const operationTypeListElement of getOperationTypesList.value) {
+    const existingOperationType = getOperationTypesData.value.find(
+        operationType => operationType.id === operationTypeListElement.id
+    );
+    if (!existingOperationType) {
+      getOperationTypesData.value.push({
+        id: operationTypeListElement.id,
+        name: operationTypeListElement.title_ru,
+        months: createEmptyMonths(),
+      });
+    }
+  }
+};
+async function saveFn() {
+  console.log('operationTypes', operationTypes.value)
+  try {
+    const res = await useAxios(`/plan/operation-types/${props.idPlanning}`, {
+      method: "PATCH",
+      data: {
+        organization_id: createValues.selectedOrganization.code,
+        year: createValues.year,
+        operationTypes: getOperationTypesData.value.map(item => {
+          const operationTypes = [];
+          Object.keys(item.months).forEach(monthId => {
+            const quantity = item.months[monthId] === null ? 0 : item.months[monthId];
+            operationTypes.push({
+              operation_type_id: item.id,
+              month_id: parseInt(monthId),
+              sum: quantity,
+            });
+          });
+          return operationTypes;
+        }).flat()
+      }
+    });
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    emit("closeDialog", res.result);
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e.response.data.message,
+      life: 3000,
+    });
+  }
 }
 
 watchEffect(() => {
@@ -165,8 +198,8 @@ onMounted(async () => {
 });
 
 onMounted(()=>{
-  getGoodsGroup()
-  getGoods()
+  getAllOperationTypes()
+  getPlanning()
 })
 </script>
 
@@ -174,7 +207,7 @@ onMounted(()=>{
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание план товаров</div>
+        <div class="header-title">Просмотр план тип операции</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
         </div>
       </div>
@@ -188,7 +221,7 @@ onMounted(()=>{
         />
         <fin-button
             icon="pi pi-times"
-            @click="infoModalClose"
+            @click="emit('close-sidebar')"
             label="Отменить"
             severity="warning"
             class="p-button-lg"
@@ -197,38 +230,24 @@ onMounted(()=>{
     </div>
     <div class="flex gap-4 mt-[30px]">
       <FloatLabel v-if="!hasOrganization">
-      <Select
-          v-model="createValues.selectedOrganization"
-          :options="organization"
-          :loading="loadingOrganization"
-          optionLabel="name"
-          class="w-[200px]"
-      />
+        <Select
+            v-model="createValues.selectedOrganization"
+            :options="organization"
+            :loading="loadingOrganization"
+            optionLabel="name"
+            class="w-[200px]"
+        >
+          <template #value>
+            {{createValues.selectedOrganization.name}}
+          </template>
+        </Select>
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <fin-input placeholder="Год" v-model="createValues.year"  />
-      <FloatLabel>
-        <MultiSelect
-            filter
-            v-model="selectedValues"
-            :maxSelectedLabels="3" class="w-full md:w-80"
-            :options="goodGroups"
-            optionLabel="name"
-            @update:modelValue="onGroupSelect"
-        />
-      <label for="dd-city">Товары</label>
-      </FloatLabel>
-      <fin-button
-          icon="pi pi-plus"
-          label="Добавить"
-          @click="getGoodByGroups"
-          severity="success"
-          class="p-button-lg"
-      />
     </div>
-    <div>
-      <table class="w-full mt-6">
-        <thead class="bg-gray-200 gap-4 text-center text-black ">
+    <div class="h-4">
+      <table class="w-full mt-6 mb-10">
+        <thead class="bg-gray-200 gap-4 text-center text-black">
         <tr>
           <th class="border-2 border-gray-300 w-[150px]">Товар</th>
           <th v-for="(month, index) in months" :key="index" class="border-2 border-gray-300">
@@ -237,35 +256,27 @@ onMounted(()=>{
         </tr>
         </thead>
         <tbody>
-        <tr class="text-center" v-for="{ id: goodId, name: goodName } in getGoodsData" :key="goodId">
-          <td class="fz-14 border-2">{{ goodName }}</td>
+        <tr class="text-center" v-for="{ id: operationTypeId, name: operationTypeName, months } in getOperationTypesData" :key="operationTypeId">
+          <td class="fz-14 border-2">{{ operationTypeName }}</td>
           <td v-for="(monthName, monthId) in months" :key="monthId">
             <fin-input
                 class="h-full"
                 placeholder=""
-                @input="handleInput(monthId, goodId, $event)"
+                v-model="months[monthId]"
+                @input="handleInput(monthId, operationTypeId, $event)"
             />
           </td>
         </tr>
         </tbody>
       </table>
-      <FloatLabel v-if="visibleAddGoods" class="mt-4">
-        <Select
-            v-model="selectedGoods"
-            :options="getGoodsList"
-            optionLabel="name"
-            class="w-[200px]"
-            @update:modelValue="addToArray"
-        />
-        <label for="dd-city">Товары</label>
-      </FloatLabel>
     </div>
-
   </div>
 
+  <div class="text-[20px] font-[600] w-full absolute bottom-[40px] bg-white">
+    <div class="pt-3">
+      Автор: {{ userName.name }}
+    </div>
 
-  <div class="text-[20px] font-[600] absolute bottom-[40px]">
-    Автор: {{ userName.name }}
   </div>
   <Dialog
       v-model:visible="openInfoModal"
@@ -329,8 +340,6 @@ onMounted(()=>{
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
 
   .p-datatable-table-container::-webkit-scrollbar {
