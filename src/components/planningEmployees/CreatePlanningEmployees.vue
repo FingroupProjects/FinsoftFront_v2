@@ -19,21 +19,12 @@ const {
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 const toast = useToast();
 
-const selectedValues = ref([])
-const params = ref([])
-const selectedGoods = ref()
-const goodGroups = ref([]);
-const getGoodsData = ref([])
-const getGoodsList = ref([])
-const agreementList = ref([]);
-const loadingAgreement = ref(false);
+const getEmployeesList = ref([])
 const productsInfo = ref();
-const visibleAddGoods = ref(false)
-const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
 const isModal = ref(false)
-const goods = ref([])
+const employees = ref([])
 const months = {
   1: "Январь",   // January
   2: "Февраль",  // February
@@ -67,73 +58,48 @@ const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
 
-const getGoodsGroup = async (filters = {}) =>{
 
-  const res = await useAxios(`/good-group`)
-  pagination.value.totalPages = Number(res.result.pagination.total_pages);
-  goodGroups.value = res.result.data
-}
-function onGroupSelect(groups) {
-  params.value.groupIds = groups.map(group => group.id);
-}
-
-const getGoodByGroups = async () => {
-  console.log('id',params.value.groupIds)
-    const res = await useAxios(`/good/goods-by-group-ids/`, {
-      params: { ids: params.value.groupIds }
-    });
-  getGoodsData.value = res.result
-  visibleAddGoods.value = !visibleAddGoods.value
-  console.log('push', res.result)
-}
-
-const getGoods = async () =>{
-  const res = await useAxios(`/good`);
-  getGoodsList.value = res.result.data
-}
-
-const addToArray = () =>{
-  getGoodsData.value.push(selectedGoods.value)
-  console.log('selected', getGoodsData.value)
+const getEmployees = async () =>{
+  const res = await useAxios(`/employee`);
+  getEmployeesList.value = res.result.data
 }
 
 const handleInput = (monthId, goodId, event) =>{
   const value = event.target.value;
-  goods.value.push({
-    good_id:goodId,
+  employees.value.push({
+    employee_id:goodId,
     month_id: monthId,
-    quantity: value,
+    sum: value,
   })
 }
 
-
 async function saveFn() {
-  console.log('org', goods.value)
-    try {
-      const res = await useAxios(`/plan/goods`, {
-        method: "POST",
-        data: {
-          organization_id: createValues.selectedOrganization.code,
-          year: createValues.year,
-          goods: goods.value
-        }
-      });
-      toast.add({
-        severity: "success",
-        summary: "Success Message",
-        detail: "Message Content",
-        life: 3000,
-      });
-      emit("closeDialog", res.result);
-    } catch (e) {
-      console.log(e);
-      toast.add({
-        severity: "error",
-        summary: "Error Message",
-        detail: e.response.data.message,
-        life: 3000,
-      });
-    }
+  console.log('org', employees.value)
+  try {
+    const res = await useAxios(`/plan/employees`, {
+      method: "POST",
+      data: {
+        organization_id: createValues.selectedOrganization.code,
+        year: createValues.year,
+        employees: employees.value
+      }
+    });
+    toast.add({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Message Content",
+      life: 3000,
+    });
+    emit("closeDialog", res.result);
+  } catch (e) {
+    console.log(e);
+    toast.add({
+      severity: "error",
+      summary: "Error Message",
+      detail: e.response.data.message,
+      life: 3000,
+    });
+  }
 }
 
 async function infoModalClose() {
@@ -165,8 +131,7 @@ onMounted(async () => {
 });
 
 onMounted(()=>{
-  getGoodsGroup()
-  getGoods()
+  getEmployees()
 })
 </script>
 
@@ -174,7 +139,7 @@ onMounted(()=>{
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание план товаров</div>
+        <div class="header-title">Создание план сотрудников</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
         </div>
       </div>
@@ -197,34 +162,16 @@ onMounted(()=>{
     </div>
     <div class="flex gap-4 mt-[30px]">
       <FloatLabel v-if="!hasOrganization">
-      <Select
-          v-model="createValues.selectedOrganization"
-          :options="organization"
-          :loading="loadingOrganization"
-          optionLabel="name"
-          class="w-[200px]"
-      />
+        <Select
+            v-model="createValues.selectedOrganization"
+            :options="organization"
+            :loading="loadingOrganization"
+            optionLabel="name"
+            class="w-[200px]"
+        />
         <label for="dd-city">Организация</label>
       </FloatLabel>
       <fin-input placeholder="Год" v-model="createValues.year"  />
-      <FloatLabel>
-        <MultiSelect
-            filter
-            v-model="selectedValues"
-            :maxSelectedLabels="3" class="w-full md:w-80"
-            :options="goodGroups"
-            optionLabel="name"
-            @update:modelValue="onGroupSelect"
-        />
-      <label for="dd-city">Товары</label>
-      </FloatLabel>
-      <fin-button
-          icon="pi pi-plus"
-          label="Добавить"
-          @click="getGoodByGroups"
-          severity="success"
-          class="p-button-lg"
-      />
     </div>
     <div>
       <table class="w-full mt-6">
@@ -237,33 +184,20 @@ onMounted(()=>{
         </tr>
         </thead>
         <tbody>
-        <tr class="text-center" v-for="{ id: goodId, name: goodName } in getGoodsData" :key="goodId">
-          <td class="fz-14 border-2">{{ goodName }}</td>
+        <tr class="text-center" v-for="{ id: employeeId, name: employeeName } in getEmployeesList" :key="employeeId">
+          <td class="fz-14 border-2">{{ employeeName }}</td>
           <td v-for="(monthName, monthId) in months" :key="monthId">
             <fin-input
                 class="h-full"
                 placeholder=""
-                @input="handleInput(monthId, goodId, $event)"
+                @input="handleInput(monthId, employeeId, $event)"
             />
           </td>
         </tr>
         </tbody>
       </table>
-      <FloatLabel v-if="visibleAddGoods" class="mt-4">
-        <Select
-            v-model="selectedGoods"
-            :options="getGoodsList"
-            optionLabel="name"
-            class="w-[200px]"
-            @update:modelValue="addToArray"
-        />
-        <label for="dd-city">Товары</label>
-      </FloatLabel>
     </div>
-
   </div>
-
-
   <div class="text-[20px] font-[600] absolute bottom-[40px]">
     Автор: {{ userName.name }}
   </div>

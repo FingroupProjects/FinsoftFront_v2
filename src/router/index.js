@@ -208,9 +208,19 @@ const routes = [
                 component: () => import('@/views/planning/PlanningShops.vue')
             },
             {
-                path: '/planningStorages',
-                name: 'planningStorages',
-                component: () => import('@/views/planning/PlanningStorages.vue')
+                path: '/planningEmployees',
+                name: 'planningEmployees',
+                component: () => import('@/views/planning/PlanningEmployees.vue')
+            },
+            {
+                path: '/planningOperationTypes',
+                name: 'planningOperationTypes',
+                component: () => import('@/views/planning/PlanningOperationTypes.vue')
+            },
+            {
+                path: '/discountContract',
+                name: 'discountContract',
+                component: () => import('@/views/DiscountContract.vue')
             },
 
         ]

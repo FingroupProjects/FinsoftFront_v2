@@ -199,6 +199,7 @@ const validateInput = (field) => {
     }
     inputValue = Math.min(inputValue, maxSum.value);
     dataInstallment.value.payment_from_bonus = inputValue.toFixed(2).replace(/(\.0+|(?<=[0-9])0+)$/, '');
+
   } else if (field === 'denomination') {
     inputValue = formatInput(denomination.value);
     if (isNaN(inputValue)) {
@@ -212,7 +213,6 @@ const validateInput = (field) => {
 
   watchEffect(() => {
     bonus_payment.value = typeof baseBonusPayment === 'number' ? baseBonusPayment : 0;
-
     const keys = Object.keys(percents.value).map(Number);
     if (keys.includes(selectedTerm.value)) {
       const percent = percents.value[selectedTerm.value];
@@ -226,6 +226,7 @@ const validateInput = (field) => {
     if (!isNaN(paymentFromBonus)) {
       bonus_payment.value -= paymentFromBonus;
     }
+
     const denominationValue = Number(denomination.value);
 
     if (!isNaN(denominationValue)) {

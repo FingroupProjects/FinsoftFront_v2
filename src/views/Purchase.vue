@@ -7,6 +7,7 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
 import Sidebar from "primevue/sidebar";
+import Drawer from "primevue/drawer"
 import Dropdown from "primevue/dropdown";
 import Select from "primevue/select";
 import CreatePurchase from "@/components/purchase/CreatePurchase.vue";
@@ -30,7 +31,6 @@ const {
   counterparty,
   loadingCounterparty,
 } = useStaticApi();
-
 const visibleRight = ref(false);
 const products = ref([]);
 const selectedStorage = ref(null);
@@ -56,10 +56,7 @@ const savedFilterValues = reactive({
   deleted: '',
   active: ''
 });
-
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-
-
 const pageCounts = ref([
   {
     count: 5,
@@ -77,15 +74,11 @@ const pageCounts = ref([
     count: 20,
   },
 ]);
-
-
 const openUp = ref(Array(products.value?.length).fill(false));
-
 const pagination = ref({
   perPage: 0,
   totalPages: 0,
 });
-
 const selectPage = ref({
   count: 20,
 });
@@ -129,6 +122,7 @@ const handleFiltersUpdate = (filters) => {
   getProducts(filters);
   Object.assign(savedFilterValues, filters);
   visibleFilter.value = false;
+
 }
 const clearFilter  = (filters) => {
   selectedStorage.value = null;
@@ -500,7 +494,7 @@ onMounted(async () => {
 
 
   <div class="create-purchase-sidebar">
-    <Sidebar
+    <Drawer
         v-model:visible="visibleRight"
         :show-close-icon="false"
         position="right"
@@ -510,7 +504,7 @@ onMounted(async () => {
       <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo"
                      :openModalClose="openInfoModal"/>
       <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
-    </Sidebar>
+    </Drawer>
   </div>
 
   <Sidebar
