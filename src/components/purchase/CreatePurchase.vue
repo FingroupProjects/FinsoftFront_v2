@@ -4,7 +4,6 @@ import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
 import CreateProduct from "@/components/CreateProduct.vue";
-import Dropdown from "primevue/dropdown";
 import Select from "primevue/select";
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
@@ -122,7 +121,7 @@ async function saveFn() {
         detail: "Message Content",
         life: 3000,
       });
-
+      console.log('emit', res.result)
       emit("closeDialog", res.result);
     } catch (e) {
       console.log(e);
@@ -135,17 +134,6 @@ async function saveFn() {
     }
   }
 }
-
-
-const searchCounterparty = async (inputValue) => {
-  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
-  counterparty.value = res.result.data.map((el) => ({
-    name: el.name,
-    code: el.id,
-  }));
-};
-
-
 
 function getProducts(products) {
   productsInfo.value = products;
@@ -171,7 +159,6 @@ async function infoModalClose() {
 
 watch(createValues, (newVal) => {
   if (initialValue.value !== null) {
-    // This will only execute after the initial value is set
     isModal.value = true;
   }
   initialValue.value = newVal;
@@ -421,6 +408,7 @@ watch(createValues, (newValue) => {
     &-input-icon-container {
       top: 15px !important;
     }
+
   }
 
 
@@ -468,4 +456,5 @@ watch(createValues, (newValue) => {
     }
   }
 }
+
 </style>

@@ -103,7 +103,7 @@ const getProducts = async (filters = {}) => {
     ...filters,
     sort: sortDesc.value
   };
-
+  console.log('params',params)
   loader.value = true
 
   try {

@@ -222,6 +222,21 @@ const routes = [
                 name: 'discountContract',
                 component: () => import('@/views/DiscountContract.vue')
             },
+            {
+                path: '/discountGoods',
+                name: 'discountGoods',
+                component: () => import('@/views/DiscountGoods.vue')
+            },
+            {
+                path: '/profile',
+                name: 'profile',
+                component: () => import('@/views/Profile.vue')
+            },
+            {
+                path: '/setting',
+                name: 'setting',
+                component: () => import('@/views/Setting.vue')
+            },
 
         ]
     },
