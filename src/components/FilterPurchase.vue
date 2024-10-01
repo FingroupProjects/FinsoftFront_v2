@@ -125,8 +125,6 @@ onMounted(() => {
   if (props.savedFilters.endDate)
     rawDateSecond.value = new Date(props.savedFilters.endDate);
 });
-
-
 </script>
 
 <template>
@@ -143,6 +141,7 @@ onMounted(() => {
           hideOnDateTimeSelect
           iconDisplay="input"
           class="w-[466px]"
+
       />
       <label for="dd-city">От</label>
     </FloatLabel>

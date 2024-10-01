@@ -339,8 +339,8 @@ export default [
                         route: '/discountContract'
                     },
                     {
-                        label: 'Должности',
-                        route: '/'
+                        label: 'Скидки на товар',
+                        route: '/discountGoods'
                     },
                     {
                         label: 'Прием на работу',
@@ -361,7 +361,7 @@ export default [
                 datas:[
                     {
                         label: 'Настройка',
-                        route: '/'
+                        route: '/setting'
                     },
                     {
                         label: 'Ввод начальных графика',

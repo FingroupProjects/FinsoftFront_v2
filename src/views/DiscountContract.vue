@@ -7,15 +7,16 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import Drawer from "primevue/drawer"
-import FilterPlanning from "@/components/planningGoods/FilterPlanning.vue";
+import FilterDiscountContract from "@/components/discountContract/FilterDiscountContract.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import ViewPlanningEmployees from "@/components/planningEmployees/ViewPlanningEmployees.vue"
 import CreateDiscountContract from "@/components/discountContract/CreateDiscountContract.vue"
-import MethodsPlanning from "@/components/planningEmployees/MethodsPlanningEmployees.vue";
+import MethodsDiscountContract from "@/components/discountContract/MethodsDiscountContract.vue";
+import ViewDiscountContract from "@/components/discountContract/ViewDiscountContract.vue";
 import Tag from "primevue/tag";
+
 
 const visibleRight = ref(false);
 const products = ref([]);
@@ -29,7 +30,7 @@ const createOpenModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
-
+const getContracts = ref()
 const selectedStatus = ref();
 const pageCounts = ref([
   {
@@ -49,18 +50,16 @@ const pageCounts = ref([
   },
 ]);
 const openUp = ref(Array(products.value?.length).fill(false));
-const pagination = ref({
-  perPage: 0,
-  totalPages: 0,
-});
+const pagination = ref({});
 const selectPage = ref({
   count: 20,
 });
 const savedFilterValues = reactive({
   startDate: '',
   endDate: '',
-  organization_id: '',
-  year: ''
+  agreement: '',
+  type: '',
+  status:''
 });
 
 const onRowClick = (event) => {
@@ -69,6 +68,7 @@ const onRowClick = (event) => {
   createOpenModal.value = true;
   dataInfo.value = product;
   selectedProductId.value = product.id;
+  console.log('data info',dataInfo.value)
 };
 
 const handleFiltersUpdate = (filters) => {
@@ -76,6 +76,8 @@ const handleFiltersUpdate = (filters) => {
   Object.assign(savedFilterValues, filters);
   console.log(filters);
   visibleFilter.value = false
+  getSeverity(filters.status)
+  console.log('filter',filters)
 }
 
 const clearFilter  = (filters) => {
@@ -90,17 +92,16 @@ async function getPlans(filters = {}) {
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    deleted: selectedStatus.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
   };
+  console.log('params',params)
   try {
-    const res = await useAxios(`/plan/employees`, {params});
-    pagination.value.totalPages = Number(res.result.pagination.total_pages);
-    products.value = res.result.data;
-    console.log('plans',res.result.data)
-    return products.value;
+    const res = await useAxios(`/sale/agreement`, {params} );
+    getContracts.value = res.result.data
+    pagination.value = res.result.pagination
+    console.log('result',res.result)
   } catch (e) {
     console.log(e)
   } finally {
@@ -109,7 +110,7 @@ async function getPlans(filters = {}) {
 }
 
 const getSeverity = (status) => {
-  if (status === null) {
+  if (status === null ) {
     return {
       status: "success",
       name: "Активный",
@@ -162,12 +163,11 @@ watch(search, () => {
 
 onMounted(() => {
   getPlans();
-  getSeverity()
 });
 </script>
 
 <template>
-  <header-purchase header-title="Планирование Сотрудники"/>
+  <header-purchase header-title="Скидки на контракты"/>
   <div >
     <div class="grid grid-cols-8 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
@@ -197,24 +197,24 @@ onMounted(() => {
       </div>
     </div>
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <methods-planning @get-product="getProductMethods" :select-products="selectedProduct"
+      <methods-discount-contract @get-product="getProductMethods" :select-products="selectedProduct"
                         v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
       <DataTable
           scrollable
           scrollHeight="660px"
           v-model:selection="selectedProduct"
-          :value="products"
+          :value="getContracts"
           dataKey="id"
           tableStyle="min-width:100%"
           :metaKeySelection="metaKey"
           @row-click="onRowClick"
       >
         <Column selectionMode="multiple"></Column>
-        <Column field="name" :sortable="true" header="">
+        <Column field="type" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('name',index)">
-              Год <i
+            <div class="w-full h-full" @click="sortData('type',index)">
+              Тип <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -228,13 +228,13 @@ onMounted(() => {
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.year }}
+            {{ slotProps.data.type }}
           </template>
         </Column>
-        <Column field="director" :sortable="true" header="">
+        <Column field="title" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('organization.name',index)">
-              Организация <i
+            <div class="w-full h-full" @click="sortData('title',index)">
+              Наименование <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -248,7 +248,27 @@ onMounted(() => {
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.organization.name }}
+            {{ slotProps.data.title }}
+          </template>
+        </Column>
+        <Column field="percent" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('percent',index)">
+              Процент <i
+
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.percent }} %
           </template>
         </Column>
         <Column field="status" :sortable="true" header="">
@@ -287,7 +307,7 @@ onMounted(() => {
         </Select>
         <Paginator
             :rows="1"
-            :totalRecords="Number(pagination.totalPages)"
+            :totalRecords="Number(pagination.total_pages)"
             v-model:first="first"
             @page="getPlans"
             :rowsPerPageOptions="[10, 20, 30]"
@@ -305,9 +325,9 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-      <view-planning-employees
+      <view-discount-contract
           v-if="createOpenModal"
-          :id-planning="dataInfo.id"
+          :id-sale="dataInfo.id"
           :data="dataInfo"
           @close-sidebar="closeFnVl"
       />
@@ -320,7 +340,7 @@ onMounted(() => {
       position="right"
       class="filters-purchase"
   >
-    <filter-planning :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+    <filter-discount-contract :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Drawer>
   <Toast/>
 
