@@ -5,9 +5,9 @@ import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select"
 import Tag from "primevue/tag";
-import Sidebar from "primevue/sidebar";
+import Drawer from "primevue/drawer";
 import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
@@ -41,7 +41,9 @@ const selectedProductId = ref()
 const search = ref('')
 const selectedCounterparty = ref();
 const first = ref(0)
+const errorValue = ref()
 const visibleFilter = ref(false)
+const visibleError = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
 const openInfoModal = ref(false);
@@ -90,6 +92,7 @@ const onRowClick = (event) => {
   visibleRight.value = true;
   createOpenModal.value = true
   dataInfo.value = product
+  console.log('1', dataInfo.value)
   selectedProductId.value = product.id
 };
 
@@ -131,6 +134,11 @@ async function getProducts(filters = {}) {
   } finally {
     loader.value = false
   }
+}
+function errorResponse (error){
+  visibleError.value = true
+  errorValue.value = error.data.errors
+  console.log('error', errorValue.value)
 }
 
 function getProductMethods() {
@@ -189,12 +197,12 @@ async function closeFnVl() {
   visibleRight.value = false
 }
 
-watch (store.getId, (newVal) =>{
-  if (newVal !== null){
-    visibleRight.value = true
+watch(() => store.getId, (newVal) => {
+  if (newVal !== null) {
+    visibleRight.value = true;
   }
-  console.log(newVal)
-}, {deep:true})
+  console.log(newVal);
+}, { deep: true });
 
 watchEffect(()=>{
   if (store.getId !== null){
@@ -227,7 +235,7 @@ getProducts();
             placeholder="Поиск"
         />
       </IconField>
-      <Dropdown
+      <Select
           v-model="selectedStorage"
           optionLabel="name"
           placeholder="Склад"
@@ -236,7 +244,7 @@ getProducts();
           :options="storage"
           class="w-full col-span-2"
       />
-      <Dropdown
+      <Select
           v-model="selectedCounterparty"
           :loading="loadingCounterparty"
           @click="findCounterparty"
@@ -268,7 +276,7 @@ getProducts();
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
       <Loader v-if="loader"/>
       <div v-else>
-          <MethodsClientSale @get-product="getProductMethods" :select-products="selectedProduct"
+          <MethodsClientSale @errorResponse="errorResponse" @get-product="getProductMethods" :select-products="selectedProduct"
                                 v-if="!(!selectedProduct || !selectedProduct.length)"/>
 
           <DataTable
@@ -456,7 +464,7 @@ getProducts();
       </div>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
-        <Dropdown
+        <Select
             v-model="selectPage"
             @update:model-value="getProducts"
             :options="pageCounts"
@@ -465,7 +473,7 @@ getProducts();
           <template #option="slotProps">
             {{ slotProps.option.count }}
           </template>
-        </Dropdown>
+        </Select>
         <Paginator
             :rows="1"
             :totalRecords="Number(pagination.totalPages)"
@@ -481,7 +489,7 @@ getProducts();
 
 
   <div class="create-purchase-sidebar">
-    <Sidebar
+    <Drawer
         v-model:visible="visibleRight"
         :show-close-icon="false"
         position="right"
@@ -492,17 +500,43 @@ getProducts();
       <view-client-sale :product-id="dataInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :data="dataInfo"
                            :openModalClose="openInfoModal"/>
       <CreateSale v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
-    </Sidebar>
+    </Drawer>
   </div>
 
-  <Sidebar
+  <Drawer
       v-model:visible="visibleFilter"
       :show-close-icon="false"
       position="right"
       class="filters-purchase"
   >
     <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
-  </Sidebar>
+  </Drawer>
+
+  <Drawer
+      v-model:visible="visibleError"
+      :show-close-icon="false"
+      position="right"
+      class="filters-purchase"
+  >
+    <div class="text-2xl">Нехватка товаров!</div>
+    <div class="bg-blue-100 rounded-2xl mt-4 h-[100px] flex flex-col">
+      <div class="p-4 flex-grow">
+        <div v-for="(error, index) in errorValue" :key="index">
+          <div class="ml-4 text-lg font-semibold"> {{ error.good }} - {{ error.amount }} </div>
+        </div>
+      </div>
+
+
+    </div>
+    <div class="p-2 pt-10">
+      <fin-button
+          @click="visibleError = false"
+          label="ОК"
+          severity="success"
+          class="p-button-lg w-full"
+      />
+    </div>
+  </Drawer>
   <Toast/>
 
 </template>

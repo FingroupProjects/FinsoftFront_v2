@@ -7,16 +7,15 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import Drawer from "primevue/drawer"
-import FilterPlanning from "@/components/planningGoods/FilterPlanning.vue";
+import FilterDiscountGoods from "@/components/discountGoods/FilterDiscountGoods.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import Toast from "primevue/toast";
 import HeaderPurchase from "@/components/HeaderPurchase.vue";
-import ViewPlanningGoods from "@/components/planningGoods/ViewPlanningGoods.vue";
-import CreatePlanningGoods from "@/components/planningGoods/CreatePlanningGoods.vue";
-import MethodsPlanning from "@/components/planningGoods/MethodsPlanning.vue";
+import CreateDiscountGoods from "@/components/discountGoods/CreateDiscountGoods.vue";
+import MethodsDiscountGoods from "@/components/discountGoods/MethodsDiscountGoods.vue";
 import Tag from "primevue/tag";
-
+import ViewDiscountGood from "@/components/discountGoods/ViewDiscountGood.vue";
 
 const visibleRight = ref(false);
 const products = ref([]);
@@ -30,7 +29,7 @@ const createOpenModal = ref(false);
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dataInfo = ref(null)
-
+const getGoods = ref()
 const selectedStatus = ref();
 const pageCounts = ref([
   {
@@ -60,8 +59,8 @@ const selectPage = ref({
 const savedFilterValues = reactive({
   startDate: '',
   endDate: '',
-  organization_id: '',
-  year: ''
+  good: '',
+  percent: ''
 });
 
 const onRowClick = (event) => {
@@ -69,6 +68,7 @@ const onRowClick = (event) => {
   visibleRight.value = true;
   createOpenModal.value = true;
   dataInfo.value = product;
+  console.log('data', dataInfo.value)
   selectedProductId.value = product.id;
 };
 
@@ -85,23 +85,21 @@ const clearFilter  = (filters) => {
   getPlans()
 }
 
-async function getPlans(filters = {}) {
+const getPlans = async (filters = {}) => {
   const params = {
     itemsPerPage: selectPage.value.count,
     orderBy: orderBy.value,
     perPage: first.value,
     search: search.value,
-    deleted: selectedStatus.value?.code,
     page: first.value,
     ...filters,
     sort: sortDesc.value
   };
+
   try {
-    const res = await useAxios(`/plan/goods`, {params});
+    const res = await useAxios(`/sale/good`, { params });
+    getGoods.value = res.result.data
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
-    products.value = res.result.data;
-    console.log('plans',res.result.data)
-    return products.value;
   } catch (e) {
     console.log(e)
   } finally {
@@ -122,7 +120,6 @@ const getSeverity = (status) => {
     };
   }
 };
-
 
 function getProductMethods() {
   selectedProduct.value = null
@@ -169,8 +166,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header-purchase header-title="Планирование Товары"/>
-
+  <header-purchase header-title="Скидки на товары"/>
   <div >
     <div class="grid grid-cols-8 gap-[16px] purchase-filter relative bottom-[43px]">
       <IconField class="col-span-6">
@@ -182,7 +178,6 @@ onMounted(() => {
             placeholder="Поиск"
         />
       </IconField>
-
       <div class="flex gap-4 col-span-2">
         <fin-button
             @click="visibleFilter = true"
@@ -200,25 +195,45 @@ onMounted(() => {
         />
       </div>
     </div>
-
     <div class="card mt-4 bg-white h-[75vh] overflow-auto relative bottom-[43px]">
-      <methods-planning @get-product="getProductMethods" :select-products="selectedProduct"
-                      v-if="!(!selectedProduct || !selectedProduct.length)"/>
+      <methods-discount-goods @get-product="getProductMethods" :select-products="selectedProduct"
+                        v-if="!(!selectedProduct || !selectedProduct.length)"/>
+
       <DataTable
           scrollable
           scrollHeight="660px"
           v-model:selection="selectedProduct"
-          :value="products"
+          :value="getGoods"
           dataKey="id"
           tableStyle="min-width:100%"
           :metaKeySelection="metaKey"
           @row-click="onRowClick"
       >
         <Column selectionMode="multiple"></Column>
+        <Column field="type" :sortable="true" header="">
+          <template #header="{index}">
+            <div class="w-full h-full" @click="sortData('type',index)">
+              Тип <i
+
+                :class="{
+            'pi pi-arrow-down': openUp[index],
+            'pi pi-arrow-up': !openUp[index],
+            'text-[#808BA0] text-[5px]': true
+          }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.type }}
+          </template>
+        </Column>
         <Column field="name" :sortable="true" header="">
           <template #header="{index}">
             <div class="w-full h-full" @click="sortData('name',index)">
-              Год <i
+              Наименование <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -232,13 +247,13 @@ onMounted(() => {
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.year }}
+            {{ slotProps.data.name }}
           </template>
         </Column>
-        <Column field="director" :sortable="true" header="">
+        <Column field="percent" :sortable="true" header="">
           <template #header="{index}">
-            <div class="w-full h-full" @click="sortData('organization.name',index)">
-              Организация <i
+            <div class="w-full h-full" @click="sortData('percent',index)">
+              Процент <i
 
                 :class="{
             'pi pi-arrow-down': openUp[index],
@@ -252,7 +267,7 @@ onMounted(() => {
 
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.organization.name }}
+            {{ slotProps.data.percent }} %
           </template>
         </Column>
         <Column field="status" :sortable="true" header="">
@@ -276,7 +291,6 @@ onMounted(() => {
             />
           </template>
         </Column>
-
       </DataTable>
       <div class="paginator-dropdown bg-white sticky left-0 top-[100%]">
         <span class="paginator-text"> Элементов на странице: </span>
@@ -302,8 +316,6 @@ onMounted(() => {
       </div>
     </div>
   </div>
-
-
   <div class="create-purchase-sidebar">
     <Drawer
         v-model:visible="visibleRight"
@@ -312,24 +324,22 @@ onMounted(() => {
         class="create-purchase"
         :dismissable="false"
     >
-
-      <view-planning-goods
+      <view-discount-good
           v-if="createOpenModal"
-          :id-planning="dataInfo.id"
+          :id-sale="dataInfo.id"
           :data="dataInfo"
           @close-sidebar="closeFnVl"
       />
-      <create-planning-goods v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
+      <create-discount-goods v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
     </Drawer>
   </div>
-
   <Drawer
       v-model:visible="visibleFilter"
       :show-close-icon="false"
       position="right"
       class="filters-purchase"
   >
-    <filter-planning :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
+    <filter-discount-goods :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter" />
   </Drawer>
   <Toast/>
 

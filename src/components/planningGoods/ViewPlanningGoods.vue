@@ -39,18 +39,18 @@ const initialValue = ref(null);
 const isModal = ref(false)
 const goods = ref([])
 const months = {
-  1: "Январь",   // January
-  2: "Февраль",  // February
-  3: "Март",     // March
-  4: "Апрель",   // April
-  5: "Май",      // May
-  6: "Июнь",     // June
-  7: "Июль",     // July
-  8: "Август",   // August
-  9: "Сентябрь", // September
-  10: "Октябрь", // October
-  11: "Ноябрь",  // November
-  12: "Декабрь"  // December
+  1: "Январь",
+  2: "Февраль",
+  3: "Март",
+  4: "Апрель",
+  5: "Май",
+  6: "Июнь",
+  7: "Июль",
+  8: "Август",
+  9: "Сентябрь",
+  10: "Октябрь",
+  11: "Ноябрь",
+  12: "Декабрь"
 };
 const pagination = ref({
   perPage: 0,
@@ -68,9 +68,7 @@ const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 
-
 const getGoodsGroup = async (filters = {}) =>{
-
   const res = await useAxios(`/good-group`)
   pagination.value.totalPages = Number(res.result.pagination.total_pages);
   goodGroups.value = res.result.data
@@ -81,37 +79,88 @@ function onGroupSelect(groups) {
 }
 
 const getGoodByGroups = async () => {
-  visibleAddGoods.value = true
-}
+  try {
+    const res = await useAxios(`/good/goods-by-group-ids/`, {
+      params: { ids: params.value.groupIds }
+    });
+    const newGoods = res.result.filter(item =>
+        !getGoodsData.value.some(existingItem => existingItem.id === item.id)
+    );
+    if (newGoods.length === 0) {
+      toast.add({
+        severity: "warn",
+        summary: "Предупреждение!",
+        detail: "Товар уже существует!",
+        life: 3000,
+      });
+    } else {
+      const generateEmptyMonths = () => {
+        const months = {};
+        for (let i = 1; i <= 12; i++) {
+          months[i] = null;
+        }
+        return months;
+      };
+      const goodsWithMonths = newGoods.map(item => ({
+        ...item,
+        months: generateEmptyMonths()
+      }));
+      getGoodsData.value.push(...goodsWithMonths);
+      console.log('push', goodsWithMonths);
+    }
+  } catch (error) {
+    console.error("Error fetching goods by group IDs:", error);
+  }
+  visibleAddGoods.value = !visibleAddGoods.value;
+};
+
 
 const getGoods = async () =>{
   const res = await useAxios(`/good`);
   getGoodsList.value = res.result.data
 }
 
-const addToArray = () =>{
-  console.log('logger', getGoodsData.value)
-  getGoodsData.value.push(selectedGoods.value)
-}
-
-const handleInput = (monthId, goodId, event) => {
-  const value = Number(event.target.value);
-  const monthIdNumber = Number(monthId);
-  const existingEntryIndex = goods.value.findIndex(
-      (item) => item.good_id === goodId && item.month_id === monthIdNumber
-  );
-  if (existingEntryIndex !== -1) {
-    goods.value[existingEntryIndex].quantity = value;
+const addToArray = () => {
+  const createEmptyMonths = () => {
+    const months = {};
+    for (let i = 1; i <= 12; i++) {
+      months[i] = null;
+    }
+    return months;
+  };
+  const exists = getGoodsData.value.some(item => item.id === selectedGoods.value.id);
+  if (!exists) {
+    const transformedGoods = {
+      id: selectedGoods.value.id,
+      name: selectedGoods.value.name,
+      months: createEmptyMonths()
+    }
+    getGoodsData.value.push(transformedGoods);
+    console.log('Updated Goods Data:', getGoodsData.value);
   } else {
-    goods.value.push({
-      good_id: goodId,
-      month_id: monthIdNumber,
-      quantity: value,
+    toast.add({
+      severity: "warn",
+      summary: "Предупреждение!",
+      detail: "Товар уже существует!",
+      life: 3000,
     });
+    console.log('Item already exists in getGoodsData:', selectedGoods.value.id);
   }
-  console.log('Updated goods:', goods.value);
 };
 
+const handleInput = (monthId, goodId, event) => {
+  const value = parseInt(event.target.value);
+  const index = getGoodsData.value.findIndex(item => item.id === goodId);
+  if (index !== -1) {
+    if (monthId in getGoodsData.value[index].months) {
+      getGoodsData.value[index].months[monthId] = value;
+    } else {
+      console.error(`MonthId ${monthId} not found in the months object for goodId ${goodId}`);
+    }
+  } else {
+    console.error(`Item with id ${goodId} not found in goods.value`);
+  }
+};
 
 const getPlanning = async () => {
   const res = await useAxios(`/plan/goods/${props.idPlanning}`);
@@ -138,12 +187,10 @@ const getPlanning = async () => {
     goodsMap.get(goodId).months[monthId] = item.quantity || 0;
   });
   getGoodsData.value = Array.from(goodsMap.values());
-
-  console.log('goodsData:', getGoodsData.value);
+  console.log('let',res.result)
 };
 
 async function saveFn() {
-  console.log('goods get', getGoodsData.value)
   console.log('goods', goods.value)
   try {
     const res = await useAxios(`/plan/goods/${props.idPlanning}`, {
@@ -151,9 +198,21 @@ async function saveFn() {
       data: {
         organization_id: createValues.selectedOrganization.code,
         year: createValues.year,
-        goods: goods.value
+        goods: getGoodsData.value.map(item => {
+          const goods = [];
+          Object.keys(item.months).forEach(monthId => {
+            const quantity = item.months[monthId] === null ? 0 : item.months[monthId];
+            goods.push({
+              good_id: item.id,
+              month_id: parseInt(monthId),
+              quantity: quantity,
+            });
+          });
+          return goods;
+        }).flat()
       }
     });
+    console.log('1', getGoodsData.value)
     toast.add({
       severity: "success",
       summary: "Success Message",
@@ -170,9 +229,7 @@ async function saveFn() {
       life: 3000,
     });
   }
-
 }
-
 
 watchEffect(() => {
   if (hasOrganization === true) createValues.selectedOrganization = {
@@ -208,7 +265,7 @@ onMounted(()=>{
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Просмотр должности</div>
+        <div class="header-title">Просмотр план товаров</div>
         <div class="header-text text-[#808BA0] font-semibold text-[16px]">
         </div>
       </div>
@@ -366,8 +423,6 @@ onMounted(()=>{
     &-input-icon-container {
       top: 15px !important;
     }
-
-
   }
 
   .p-datatable-table-container::-webkit-scrollbar {

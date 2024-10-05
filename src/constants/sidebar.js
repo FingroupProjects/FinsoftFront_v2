@@ -221,8 +221,12 @@ export default [
                         route: '/planningShops'
                     },
                     {
-                        label: 'Склады',
-                        route: '/planningStorages'
+                        label: 'Сотрудники',
+                        route: '/planningEmployees'
+                    },
+                    {
+                        label: 'Тип операции',
+                        route: '/planningOperationTypes'
                     }
                 ]
             }
@@ -331,12 +335,12 @@ export default [
                 title:'Документы',
                 data:[
                     {
-                        label: 'Сотрудники',
-                        route: '/'
+                        label: 'Скидки на договор',
+                        route: '/discountContract'
                     },
                     {
-                        label: 'Должности',
-                        route: '/'
+                        label: 'Скидки на товар',
+                        route: '/discountGoods'
                     },
                     {
                         label: 'Прием на работу',
@@ -344,40 +348,8 @@ export default [
                     },
                 ]
             },
-            {
-                title:'Отчёт',
-                data:[
-                    {
-                        label: 'Сотрудники1',
-                        route: '/'
-                    },
-                    {
-                        label: 'Должности',
-                        route: '/'
-                    },
-                    {
-                        label: 'Прием на работу',
-                        route: '/'
-                    },
-                ]
-            },
-            {
-                title:'Справочник',
-                data:[
-                    {
-                        label: 'Сотрудники2',
-                        route: '/'
-                    },
-                    {
-                        label: 'Должности',
-                        route: '/'
-                    },
-                    {
-                        label: 'Прием на работу',
-                        route: '/'
-                    },
-                ]
-            }
+
+
 
         ]
     },
@@ -389,7 +361,7 @@ export default [
                 datas:[
                     {
                         label: 'Настройка',
-                        route: '/'
+                        route: '/setting'
                     },
                     {
                         label: 'Ввод начальных графика',

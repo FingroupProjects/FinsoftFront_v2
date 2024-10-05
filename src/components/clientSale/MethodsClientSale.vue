@@ -19,7 +19,6 @@ const deleteProductsDialog = ref(false);
 const copyProductsDialog = ref(false);
 const conductDialog = ref(false)
 const createBasedOnDialog = ref(false);
-
 const selectProduct = (product) => {
   const hasActive = props.selectProducts.some(p => p.active);
   console.log(hasActive)
@@ -75,8 +74,8 @@ const deleteProduct = async () => {
         ids: id.value,
       },
     });
-    emit('getProduct'); // Trigger an event to refresh product data
-    deleteProductsDialog.value = false; // Close the delete dialog
+    emit('getProduct');
+    deleteProductsDialog.value = false;
     toast.add({
       severity: "success",
       summary: "Success",
@@ -87,7 +86,7 @@ const deleteProduct = async () => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: error.message || 'An error occurred during deletion.', // Provide more detailed error message if available
+      detail: error.message || 'An error occurred during deletion.',
       life: 3000,
     });
   }
@@ -151,17 +150,16 @@ async function conductMethod(){
 
     toast.add({
       severity: "success",
-      summary: "Success Message",
-      detail: '',
+      summary: "Проведен!",
+      detail: 'Документ успешно проведен!',
       life: 3000,
     });
   } catch (e) {
-    toast.add({
-      severity: "error",
-      summary: "Error Message",
-      detail: e,
-      life: 3000,
-    });
+    console.log(e)
+    if (e.response && e.response.status === 400) {
+      conductDialog.value = false
+      emit('errorResponse', e.response);
+    }
   }
 }
 

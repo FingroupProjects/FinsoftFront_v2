@@ -77,9 +77,9 @@ async function fetchOrders(event) {
       <img src="@/assets/img/AuthImg.svg" alt="">
     </div>
     <div class="col-span-6 flex flex-col justify-center items-center w-full">
-      <img src="@/assets/img/FullLogo.png" alt="" class="relative bottom-[138px] object-cover">
+      <img src="@/assets/img/Logo/FullLogo.png" alt="" class="relative bottom-[200px] w-[250px] object-cover">
       <div>
-        <div class="text-[16px] leading-[16px] text-center font-semibold">Вход</div>
+        <div class="text-[16px] leading-[16px] text-center font-semibold -mt-[170px]">Вход</div>
         <fin-input  :error="v$.login.$error" v-model="data.login" class="w-[360px] mt-[50px]" placeholder="Логин"></fin-input>
         <fin-input :error="v$.password.$error"  v-model="data.password" class="w-[360px] mt-[26px]" placeholder="Пароль" :type="`password`" :show-value="true"></fin-input>
         <fin-button severity="success" class="w-[360px] mt-[26px]" label="Войти" @click="fetchOrders()"/>

@@ -18,6 +18,7 @@ const props = defineProps({
   }
 })
 
+const buttonInstallment = ref(false)
 const dataInstallment = ref('')
 const store = useClientSale()
 const sendSumDate = ref([])
@@ -83,6 +84,12 @@ const addFn = async () => {
     products: selectedProducts.value?.products,
     img: selectedProducts.value?.img
   };
+  const hasProductInfo = product.coleVo !== '' && product.price !== '' && product.good_id !== undefined;
+  if (hasProductInfo) {
+    buttonInstallment.value = true;
+    console.log('Valid product:', product);
+  }
+
   if (validateProduct(product)) {
     products.value.push(product);
     postProducts.value.push({
@@ -93,10 +100,12 @@ const addFn = async () => {
     getAllSum.value += Number(product.sum);
     getAllProduct.value += Number(product.coleVo);
     addInput.value = false;
-    sendData()
+    sendData();
   }
+
   clearInputValues();
 };
+
 
 const sendData = () => {
   console.log('Emitting data:', {
@@ -143,27 +152,22 @@ async function closeFnVl() {
   visibleInstallment.value = false
 }
 
-function dataToInstallment() {
+async function dataToInstallment () {
   visibleInstallment.value = true
-  sendSumDate.value.push(getAllSum.value)
-  sendSumDate.value.push(props.productDate)
+  console.log('delete',sendSumDate)
 }
 
 
 const onRowEditSave = (event) => {
   const {newData, index} = event;
   const oldProduct = products.value[index];
-
   newData.sum = Number((newData.price * newData.coleVo).toFixed(2));
-
   products.value.splice(index, 1, newData);
-
   postProducts.value.splice(index, 1, {
     amount: newData.coleVo,
     good_id: newData.products.code || oldProduct.good_id,
     price: newData.price,
   });
-
   getAllSum.value = getAllSum.value - Number(oldProduct.sum) + Number(newData.sum);
   getAllProduct.value = getAllProduct.value - Number(oldProduct.coleVo) + Number(newData.coleVo);
 };
@@ -182,14 +186,17 @@ onMounted(async () => {
 <template>
   <div class="flex items-center mt-[30px] gap-[21px]">
     <div class="header-title">Товары</div>
-    <fin-button
-        icon="pi pi-angle-right"
-        @click="dataToInstallment()"
-        label="В рассрочку"
-        severity="warning"
-        class="p-button-lg ml-auto justify-end"
-        style="height: 31px !important; font-weight: bold !important;"
-    />
+    <div class="ml-auto justify-end" v-if="buttonInstallment">
+      <fin-button
+          icon="pi pi-angle-right"
+          @click="dataToInstallment()"
+          label="В рассрочку"
+          severity="warning"
+          class="p-button-lg "
+          style="height: 31px !important; font-weight: bold !important;"
+      />
+    </div>
+
   </div>
   <div class="filter-form grid grid-cols-12 gap-[16px] pt-[21px] pb-[21px] mt-[21px]">
     <FloatLabel class="col-span-6 h-[47px]">
@@ -314,14 +321,15 @@ onMounted(async () => {
     </DataTable>
 
   </div>
-  <Sidebar
-      v-model:visible="visibleInstallment"
-      :show-close-icon="false"
-      position="right"
-      class="drawer-movement"
-  >
-    <Installment :allSum="sendSumDate" :products="dataInstallment" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
-  </Sidebar>
+    <Sidebar
+        v-model:visible="visibleInstallment"
+        :show-close-icon="false"
+        position="right"
+        class="drawer-movement"
+        :dismissable="false"
+    >
+      <Installment :allSum="getAllSum" :date="props.productDate" :products="dataInstallment" @send-data="getDataInstallment" @close-sidebar="closeFnVl" />
+    </Sidebar>
 </template>
 <style lang="scss">
 .table-create {

@@ -1,6 +1,6 @@
 <script setup>
 import DatePicker from "primevue/datepicker";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import FloatLabel from "primevue/floatlabel";
 import { onMounted, reactive, ref, watch, defineEmits, defineProps  } from "vue";
 import { useAxios } from "@/composable/useAxios.js";
@@ -9,28 +9,14 @@ const emit = defineEmits(['updateFilters', 'clearFilter']);
 const props = defineProps(['savedFilters']);
 
 const userNames = ref([]);
-const currency = ref([]);
 const organization = ref([]);
-const deleted = ref([
-  { label: 'Да', value: 1},
-  { label: 'Нет', value: 0 },
-]);
-
-const status = ref([
-  { label: 'Проведен', value: 1 },
-  { label: 'Не проведен', value: 0 },
-]);
-
 const rawDateFirst = ref(null);
 const rawDateSecond = ref(null);
 const filterValues = reactive({
   startDate: '',
   endDate: '',
   organization_id: '',
-  currency_id: '',
-  author_id: '',
-  deleted: '',
-  active: ''
+  year: ''
 });
 
 function formatDateTime(date) {
@@ -62,17 +48,7 @@ const getUsers = async () => {
     console.error('Error fetching users:', error);
   }
 };
-const getCurrency = async () =>{
-  try {
-    const res = await useAxios(`/currency`)
-    const items = res.result.data;
-    currency.value = items.map(user => ({
-      id: user.id,
-      name: user.name,
-    }));
-  }catch (e){
-  }
-}
+
 
 const getOrganization = async () =>{
   try {
@@ -116,7 +92,6 @@ watch(rawDateSecond, (newValue) => {
 
 onMounted(() => {
   getUsers();
-  getCurrency();
   getOrganization();
   console.log('logg',filterValues)
   Object.assign(filterValues, props.savedFilters);
@@ -141,7 +116,6 @@ onMounted(() => {
           hideOnDateTimeSelect
           iconDisplay="input"
           class="w-[466px]"
-
       />
       <label for="dd-city">От</label>
     </FloatLabel>
@@ -159,42 +133,17 @@ onMounted(() => {
       />
       <label for="dd-city">До</label>
     </FloatLabel>
-    <Dropdown class="mt-[22px] w-[466px] font-semibold"
-        v-model="filterValues.organization_id"
-        placeholder="Организация"
-        :options="organization"
-        option-label="name"
-        option-value="id"
+    <Select class="mt-[22px] w-[466px] font-semibold"
+              v-model="filterValues.organization_id"
+              placeholder="Организация"
+              :options="organization"
+              option-label="name"
+              option-value="id"
     />
-    <div class="flex mt-[22px] gap-4">
-      <Dropdown class="w-[225px] font-semibold" placeholder="Статус"
-                v-model="filterValues.active"
-                :options="status"
-                option-label="label"
-                option-value="value"
-      />
-      <Dropdown class="w-[225px] font-semibold" placeholder="Удален"
-                v-model="filterValues.deleted"
-                :options="deleted"
-                option-label="label"
-                option-value="value"
-      />
-    </div>
-    <div class="flex mt-[22px] gap-4">
-      <Dropdown class="w-[225px] font-semibold" placeholder="Автор"
-                v-model="filterValues.author_id"
-                :options="userNames"
-                option-label="label"
-                option-value="value"
-      />
-      <Dropdown class="w-[225px] font-semibold"
-                v-model="filterValues.currency_id"
-                placeholder="Валюта"
-                :options="currency"
-                option-label="name"
-                option-value="id"
-      />
-    </div>
+    <fin-input v-model="filterValues.year" class="mt-[22px] w-[466px] font-semibold" placeholder="Год" />
+
+
+
     <div class="flex mt-[22px] gap-4">
       <fin-button @click="applyFilters()" icon="pi pi-save"  label="Применить" severity="success" class="p-button-lg w-[225px]"/>
       <fin-button @click="clearFilters()"  icon="pi pi-times"  label="Сбросить" severity="secondary" class="p-button-lg w-[225px]"/>
