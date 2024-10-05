@@ -237,6 +237,16 @@ const routes = [
                 name: 'setting',
                 component: () => import('@/views/Setting.vue')
             },
+            {
+                path: '/price-settings',
+                name: 'priceSettings',
+                component: () => import('@/views/priceSettings.vue')
+            },
+            {
+                path: '/price-list',
+                name: 'price-list',
+                component: () => import('@/components/priceSetting/ListPrice.vue')
+            },
 
         ]
     },

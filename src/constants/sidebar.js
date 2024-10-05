@@ -264,7 +264,7 @@ export default [
                     },
                     {
                         label: 'АБС анализ',
-                        route: '/'
+                        route: '/price-settings'
                     },
                 ]
             }
