@@ -10,6 +10,7 @@ import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useRouter} from "vue-router";
 import Sidebar from "primevue/sidebar";
 import CreateProduct from "@/components/priceSetting/CreateProduct.vue";
+import CardGoods from "@/components/priceSetting/CardGoods.vue";
 
 const {
   statusList,
@@ -114,8 +115,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex gap-3">
-    <div class="bg-white mt-5 w-[32%] h-[80vh] overflow-auto rounded-[10px]">
+  <div class="flex gap-3 mt-5">
+    <div class="bg-white w-[32%] shadow-list h-[80vh] overflow-auto rounded-[10px]">
       <div>
         <DataTable
             scrollable
@@ -201,11 +202,11 @@ onMounted(async () => {
         />
       </div>
     </div>
-    <div class="add-product mt-5">
+    <CardGoods/>
+    <div class="add-product">
       <fin-button icon="pi pi-plus" severity="success"></fin-button>
     </div>
   </div>
-
   <Sidebar
       v-model:visible="createModal"
       :show-close-icon="false"
@@ -215,10 +216,12 @@ onMounted(async () => {
   >
     <CreateProduct @close-sidebar="createModal = false"/>
   </Sidebar>
-
 </template>
 
 <style scoped lang="scss">
+.shadow-list{
+  box-shadow:10px 10px 10px 10px #0000000F;
+}
 .add-product {
   border: 2px dashed #B7C7E8;
   border-radius: 10px;
