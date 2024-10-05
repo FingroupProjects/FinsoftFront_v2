@@ -212,6 +212,16 @@ const routes = [
                 name: 'planningStorages',
                 component: () => import('@/views/planning/PlanningStorages.vue')
             },
+            {
+                path: '/price-settings',
+                name: 'priceSettings',
+                component: () => import('@/views/priceSettings.vue')
+            },
+            {
+                path: '/price-list',
+                name: 'price-list',
+                component: () => import('@/components/priceSetting/ListPrice.vue')
+            },
 
         ]
     },

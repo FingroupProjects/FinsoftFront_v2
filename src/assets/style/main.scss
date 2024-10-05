@@ -5,12 +5,15 @@
 @import "@/assets/style/components/button";
 @import "@/assets/style/components/chackbox";
 @import "@/assets/style/components/floatLabel";
+@import "components/pagination";
+@import "components/datePicker";
+@import "components/tag";
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 * {
   font-family: Manrope, sans-serif;
-
 }
+
 body{
   background: #ECF1FB;
 }
@@ -20,4 +23,11 @@ body{
   box-shadow: none !important;
   height: 46px;
   align-items: center;
+}
+.p-select:not(.p-disabled).p-focus {
+  border-color: #3935E7 !important;
+}
+.create-purchase {
+  width: 1154px !important;
+  border-top-left-radius: 30px;
 }

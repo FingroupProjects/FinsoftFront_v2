@@ -7,7 +7,6 @@ import {useAxios} from "@/composable/useAxios.js";
 import FloatLabel from "primevue/floatlabel";
 import InputText from "primevue/inputtext";
 import formatInputAmount from "@/constants/formatInput.js";
-import formatNumber from '@/constants/formatNumber.js';
 import {useClientSale} from "@/store/clientSale.js";
 
 const emit = defineEmits(["postGoods"]);
@@ -232,7 +231,7 @@ onMounted(async () => {
                 "
           class="flex items-center gap-[10px]"
           >
-            <img :src="slotProps.data?.img " class="w-[32px] h-[32px] rounded-[8px] object-cover" />
+            <img :src="slotProps.data?.img " class="w-[32px] h-[32px] rounded-[8px] object-cover" alt="" />
                 {{ slotProps.data.products }}
               </span>
         </template>

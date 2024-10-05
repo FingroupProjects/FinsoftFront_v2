@@ -1,35 +1,28 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch, reactive} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
-import Sidebar from "primevue/sidebar";
 import Dropdown from "primevue/dropdown";
-import Select from "primevue/select";
-import CreatePurchase from "@/components/purchase/CreatePurchase.vue";
-import FilterPurchase from "@/components/FilterPurchase.vue";
 import Paginator from 'primevue/paginator';
 import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
-import Toast from "primevue/toast";
-import ViewPurchase from "@/components/purchase/ViewPurchase.vue";
 import MethodsPurchase from "@/components/purchase/MethodsPurchase.vue";
 import HeaderPurchase from "@/components/HeaderPurchase.vue"
 import Loader from "@/components/ui/Loader.vue";
-import {reactive} from "vue";
+import {useRouter} from "vue-router";
 
 const {
-  findStorage,
-  storage,
-  loadingStorage,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
+  findStatus,
+  statusList,
+  loadingStatus,
 } = useStaticApi();
+
+const router = useRouter();
 
 const visibleRight = ref(false);
 const products = ref([]);
@@ -46,7 +39,8 @@ const openInfoModal = ref(false);
 const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
-const dateInfo = ref(null)
+const dateInfo = ref(null);
+const headerPurchaseRef = ref(null);
 const savedFilterValues = reactive({
   startDate: '',
   endDate: '',
@@ -114,7 +108,7 @@ const getProducts = async (filters = {}) => {
   loader.value = true
 
   try {
-    const res = await useAxios(`/document/provider/purchase`, {params});
+    const res = await useAxios(`/price-set-up`, {params});
     pagination.value.totalPages = Number(res.result.pagination.total_pages);
     products.value = res.result.data;
   } catch (e) {
@@ -125,35 +119,10 @@ const getProducts = async (filters = {}) => {
 
 };
 
-const handleFiltersUpdate = (filters) => {
-  getProducts(filters);
-  Object.assign(savedFilterValues, filters);
-  visibleFilter.value = false;
-}
-const clearFilter = (filters) => {
-  selectedStorage.value = null;
-  selectedCounterparty.value = null;
-  Object.assign(savedFilterValues, filters);
-  visibleFilter.value = false;
-  getProducts()
-}
-
-const searchCounterparty = async (inputValue) => {
-  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
-  counterparty.value = res.result.data.map((el) => ({
-    name: el.name,
-    code: el.id,
-    agreement: el.agreement,
-  }));
-};
-
-
 function getProductMethods() {
   selectedProduct.value = null
   getProducts()
-
   callGetDashBoardData()
-
 }
 
 const getSeverity = (status, deleted) => {
@@ -183,15 +152,8 @@ const getSeverity = (status, deleted) => {
   }
 };
 
-function closeFn(result) {
-  dateInfo.value = result
-  createOpenModal.value = true
-  getProducts();
-}
-
 function createOpen() {
-  visibleRight.value = true
-  createOpenModal.value = false
+  router.push('/price-list')
 }
 
 const sortData = (field, index) => {
@@ -202,27 +164,6 @@ const sortData = (field, index) => {
   getProducts()
 };
 
-async function closeFnVl() {
-  await getProducts();
-  visibleRight.value = false
-  callGetDashBoardData()
-}
-
-
-watch(selectedStorage, () => {
-  if (selectedStorage.value) {
-    getProducts();
-  }
-});
-watch(selectedCounterparty, () => {
-
-  if (selectedCounterparty.value && typeof selectedCounterparty.value === 'object') {
-    getProducts();
-  }
-});
-
-const headerPurchaseRef = ref(null);
-
 function callGetDashBoardData() {
   if (headerPurchaseRef.value && headerPurchaseRef.value.getDashBoardData) {
     headerPurchaseRef.value.getDashBoardData();
@@ -230,6 +171,12 @@ function callGetDashBoardData() {
     console.error('getDashBoardData method is not defined or ref is not resolved');
   }
 }
+
+watch(selectedCounterparty, () => {
+  if (selectedCounterparty.value && typeof selectedCounterparty.value === 'object') {
+    getProducts();
+  }
+});
 
 onMounted(async () => {
   await getProducts()
@@ -240,7 +187,7 @@ onMounted(async () => {
   <header-purchase ref="headerPurchaseRef" header-title="Покупка товаров"/>
   <div>
     <div class="grid grid-cols-12 gap-[16px] purchase-filter relative bottom-[43px]">
-      <IconField class="col-span-6">
+      <IconField class="col-span-8">
         <InputIcon class="pi pi-search"/>
         <InputText
             class="w-full"
@@ -252,30 +199,13 @@ onMounted(async () => {
       <Dropdown
           v-model="selectedStorage"
           optionLabel="name"
-          placeholder="Склад"
-          @click="findStorage"
-          :loading="loadingStorage"
-          :options="storage"
+          placeholder="Статус"
+          @click="findStatus"
+          :loading="loadingStatus"
+          :options="findStatus"
           class="w-full col-span-2"
-      />
-      <Select
-          v-model="selectedCounterparty"
-          :loading="loadingCounterparty"
-          :options="counterparty"
-          optionLabel="name"
-          placeholder="Поставщик"
-          class="w-full col-span-2"
-          editable
-          @keyup="searchCounterparty"
       />
       <div class="flex gap-4 col-span-2">
-        <fin-button
-            @click="visibleFilter = true"
-            severity="primary"
-            class="w-[46px]"
-        >
-          <img src="@/assets/img/menu.svg" alt=""/>
-        </fin-button>
         <fin-button
             @click="createOpen"
             severity="success"
@@ -285,7 +215,6 @@ onMounted(async () => {
         />
       </div>
     </div>
-
     <div class="bg-white mt-4 h-[75vh] overflow-auto relative bottom-[43px]">
       <Loader v-if="loader"/>
       <div v-else>
@@ -497,29 +426,8 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-
-  <Sidebar
-      v-model:visible="visibleRight"
-      :show-close-icon="false"
-      position="right"
-      class="create-purchase"
-      :dismissable="false"
-  >
-    <view-purchase :product-id="dateInfo.id" v-if="createOpenModal" @close-sidebar="closeFnVl" :date="dateInfo"
-                   :openModalClose="openInfoModal"/>
-    <CreatePurchase v-else @close-sidebar="visibleRight = false" @close-dialog="closeFn"/>
-  </Sidebar>
-  <Sidebar
-      v-model:visible="visibleFilter"
-      :show-close-icon="false"
-      position="right"
-      class="filters-purchase"
-  >
-    <filter-purchase :savedFilters="savedFilterValues" @updateFilters="handleFiltersUpdate" @clearFilter="clearFilter"/>
-  </Sidebar>
-  <Toast/>
-
 </template>
+
 <style lang="scss">
 .purchase-filter {
   .p-inputtext {
@@ -549,68 +457,6 @@ onMounted(async () => {
     font-family: Manrope, sans-serif;
   }
 }
-
-.create-purchase {
-  width: 1154px !important;
-  border-top-left-radius: 30px;
-}
-
-.filters-purchase {
-  width: 546px !important;
-  border-top-left-radius: 30px;
-}
-
-.p-datatable-column-title {
-  color: #808ba0;
-  font-family: Manrope, sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 15px;
-}
-
-.p-datatable-table {
-  border-radius: 10px;
-}
-
-.p-tag-label {
-  font-size: 13px;
-  line-height: 13px;
-  font-weight: 600;
-  font-family: Manrope, sans-serif;
-}
-
-.p-tag-success {
-  background: #cbf7d2 !important;
-  padding: 8px 12px 8px 12px !important;
-  color: #17a825;
-}
-
-.p-tag-warn {
-  background: #ffe9c9 !important;
-  padding: 8px 12px 8px 12px !important;
-  color: #c1790c;
-}
-
-.p-datatable-tbody > tr > td {
-  color: #141c30;
-  font-weight: 500;
-  font-family: Manrope, sans-serif;
-  font-size: 15px;
-  line-height: 15px;
-}
-
-.p-datatable-header-cell:nth-child(1) {
-  border-top-left-radius: 10px !important;
-}
-
-.p-datatable-header-cell:nth-child(10) {
-  border-top-right-radius: 10px !important;
-}
-
-.p-paginator {
-  justify-content: end !important;
-}
-
 .p-select:not(.p-disabled).p-focus {
   border-color: #3935E7 !important;
 }

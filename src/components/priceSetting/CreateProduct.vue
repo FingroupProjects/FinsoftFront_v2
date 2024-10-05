@@ -3,7 +3,6 @@ import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
-import CreateProduct from "@/components/CreateProduct.vue";
 import Dropdown from "primevue/dropdown";
 import Select from "primevue/select";
 import moment from "moment";
@@ -11,51 +10,42 @@ import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
-import Textarea from 'primevue/textarea';
 import Dialog from "primevue/dialog";
-import formatNumber from "@/constants/formatNumber.js";
+import FinInput from "@/components/ui/Inputs.vue";
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
 const toast = useToast();
 
 const {
-  findCurrency,
-  currency,
-  loading,
-  findStorage,
-  storage,
-  loadingStorage,
   findOrganization,
   organization,
-  findCounterparty,
-  counterparty,
-  loadingCounterparty,
   loadingOrganization,
 } = useStaticApi();
+
 const isOpen = ref(false)
 const agreementList = ref([]);
-const loadingAgreement = ref(false);
+const loadingPriceType = ref(false);
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
-const isModal = ref(false)
+const isModal = ref(false);
+const priceTypeList = ref([]);
+const goodGroupList = ref([]);
 const createValues = reactive({
   datetime24h: new Date,
   selectCurrency: "",
-  selectedStorage: "",
-  selectedAgreement: "",
+  selectedPriceType: "",
   comments: "",
   selectedOrganization: "",
-  selectedCounterparty: "",
+  selectedGoodGroup: "",
 });
 const rules = reactive({
   datetime24h: {required},
   selectCurrency: {required},
-  selectedStorage: {required},
   selectedOrganization: {required},
-  selectedCounterparty: {required},
-  selectedAgreement: {required},
+  selectedGoodGroup: {required},
+  selectedPriceType: {required},
 });
 const productsInfo = ref({
   postProducts: [],
@@ -63,32 +53,11 @@ const productsInfo = ref({
   getAllProduct: [],
   goods: []
 });
-const userName = {
-  name: localStorage.getItem("user_name"),
-};
+
 const organizationJson = localStorage.getItem('organization');
 const organizationHas = JSON.parse(organizationJson);
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
 const v$ = useVuelidate(rules, createValues);
-
-async function getAgreement() {
-  try {
-    loadingAgreement.value = true;
-    const res = await useAxios(
-        `/cpAgreement/getAgreementByCounterpartyId/${createValues.selectedCounterparty.code}`
-    );
-    return (agreementList.value = res.result.data.map((el) => {
-      return {
-        name: el.name,
-        code: el.id,
-      };
-    }));
-  } catch (e) {
-    console.log(e);
-  } finally {
-    loadingAgreement.value = false;
-  }
-}
 
 async function saveFn() {
   const result = await v$.value.$validate();
@@ -136,28 +105,26 @@ async function saveFn() {
   }
 }
 
-
-const searchCounterparty = async (inputValue) => {
-  const res = await useAxios(`counterparty?search=${inputValue?.srcElement.value}`);
-  counterparty.value = res.result.data.map((el) => ({
+const getPriceType = async () => {
+  const res = await useAxios(`/priceType`);
+  priceTypeList.value = res.result.data.map((el) => ({
     name: el.name,
     code: el.id,
   }));
 };
-
-
-
-function getProducts(products) {
-  productsInfo.value = products;
-  console.log('product info', productsInfo.value)
-}
-
+const getGoodGroup = async () => {
+  const res = await useAxios(`/good-group`);
+  goodGroupList.value = res.result.data.map((el) => ({
+    name: el.name,
+    code: el.id,
+  }));
+};
 onMounted(async () => {
   try {
     await Promise.all([
       findOrganization(),
-      findCounterparty(),
-      findStorage()
+      getPriceType(),
+      getGoodGroup()
     ]);
   } catch (error) {
     console.error('Error:', error);
@@ -178,30 +145,9 @@ watch(createValues, (newVal) => {
 }, {deep: true});
 
 watchEffect(() => {
-  if (
-      createValues.selectedCounterparty &&
-      createValues.selectedCounterparty.agreement &&
-      createValues.selectedCounterparty.agreement.length > 0
-  ) {
-    createValues.selectedAgreement = {
-      name: createValues.selectedCounterparty.agreement[0].name,
-      code: createValues.selectedCounterparty.agreement[0].id,
-    };
-  } else {
-    createValues.selectedAgreement = null;
-  }
   if (hasOrganization === true) createValues.selectedOrganization = {
     name: organizationHas.name,
     code: organizationHas.id
-  }
-  if (storage.value.length === 1) createValues.selectedStorage = storage.value[0]
-});
-watch(createValues, (newValue) => {
-  if (newValue.selectedAgreement && !isCurrencyFetched.value) {
-    findCurrency(newValue.selectedAgreement).then(() => {
-      createValues.selectCurrency = currency.value[0];
-    });
-    isCurrencyFetched.value = true;
   }
 });
 </script>
@@ -230,7 +176,7 @@ watch(createValues, (newValue) => {
       </div>
     </div>
     <div class="form grid grid-cols-12 gap-[16px] mt-[30px]">
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-6">
         <DatePicker
             showIcon
             v-model="createValues.datetime24h"
@@ -246,7 +192,7 @@ watch(createValues, (newValue) => {
         <label for="dd-city">Дата</label>
       </FloatLabel>
 
-      <FloatLabel class="col-span-4" v-if="!hasOrganization">
+      <FloatLabel class="col-span-6" v-if="!hasOrganization">
         <Select
             v-model="createValues.selectedOrganization"
             :options="organization"
@@ -255,107 +201,35 @@ watch(createValues, (newValue) => {
             optionLabel="name"
             class="w-full"
 
-          />
+        />
         <label for="dd-city">Организация</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-6">
         <Dropdown
-            v-model="createValues.selectedCounterparty"
-            :class="{ 'p-invalid': v$.selectedCounterparty.$error }"
-            :options="counterparty"
-            :loading="loadingCounterparty"
+            v-model="createValues.selectedGoodGroup"
+            :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
+            :options="goodGroupList"
             optionLabel="name"
             class="w-full"
             editable
-            @keyup="searchCounterparty"
         />
-        <label for="dd-city">Поставщик</label>
+        <label for="dd-city">Категории товаров</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
+      <FloatLabel class="col-span-6">
         <Dropdown
-            v-model="createValues.selectedAgreement"
-            :class="{ 'p-invalid': v$.selectedAgreement.$error }"
-            @click="getAgreement"
-            :loading="loadingAgreement"
-            :options="agreementList"
+            v-model="createValues.selectedPriceType"
+            :class="{ 'p-invalid': v$.selectedPriceType.$error }"
+            :loading="loadingPriceType"
+            :options="priceTypeList"
             optionLabel="name"
             class="w-full"
         >
-          <template #value>{{ createValues.selectedAgreement?.name }}</template>
+          <template #value>{{ createValues.selectedPriceType?.name }}</template>
         </Dropdown>
-        <label for="dd-city">Договор</label>
+        <label for="dd-city">Виды цен</label>
       </FloatLabel>
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectedStorage"
-            :class="{ 'p-invalid': v$.selectedStorage.$error }"
-            :loading="loadingStorage"
-            :options="storage"
-            optionLabel="name"
-            class="w-full"
-        />
-        <label for="dd-city">Склад</label>
-      </FloatLabel>
-
-      <FloatLabel class="col-span-4">
-        <Dropdown
-            v-model="createValues.selectCurrency"
-            :class="{ 'p-invalid': v$.selectCurrency.$error }"
-            @click="findCurrency(createValues.selectedAgreement)"
-            :loading="loading"
-            :options="currency"
-            optionLabel="name"
-            class="w-full p-select-open"
-            style="background-color: #ffffff !important;"
-            disabled
-        >
-          <template #value>
-            {{ createValues.selectCurrency?.name }}
-          </template>
-        </Dropdown>
-        <label for="dd-city">Валюта</label>
-      </FloatLabel>
-      <FloatLabel class="col-span-12 mt-[10px]">
-        <Textarea v-model="createValues.comments" class="w-full" style="min-height: 20px" rows="2" cols="20"/>
-        <label for="dd-city">Комментарий</label>
-      </FloatLabel>
-    </div>
-  </div>
-  <CreateProduct @postGoods="getProducts"/>
-
-  <!--ИТОГ-->
-
-  <div class="summary-container fixed bottom-0 left-0 w-full bg-white shadow-lg">
-    <div class="rounded-[10px] p-drawer-footer flex justify-between items-center p-[18px] bg-[#F6F6F6]">
-      <div class="text-[#141C30] font-semibold text-[19px] leading-[20px]">
-        Автор: {{ userName.name }}
-      </div>
-      <div class="flex gap-[49px]" style="border-left: 1px dashed gray; padding-left: 20px">
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-
-          </div>
-          Итого:
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Кол-во
-          </div>
-          {{ formatNumber(productsInfo.getAllProduct) }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Товаров
-          </div>
-          {{ productsInfo.goods?.length }}
-        </div>
-        <div class="text-[22px] text-[#141C30] leading-[22px] font-semibold">
-          <div class="text-[13px] text-[#808BA0] leading-[13px] font-semibold mb-[8px]">
-            Сумма
-          </div>
-          {{ formatNumber(productsInfo.getAllSum) }}
-        </div>
-      </div>
+      <fin-input class="col-span-6" placeholder="Изменить на X Cумма"></fin-input>
+      <fin-input class="col-span-6" placeholder="Изменить на X %"></fin-input>
     </div>
   </div>
   <Dialog

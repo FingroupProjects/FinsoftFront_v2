@@ -1,0 +1,40 @@
+.p-datatable-tbody > tr > td {
+  color: #141c30;
+  font-weight: 500;
+  font-family: Manrope, sans-serif;
+  font-size: 15px;
+  line-height: 15px;
+}
+
+.p-datatable-header-cell:nth-child(1) {
+  border-top-left-radius: 10px !important;
+}
+
+.p-datatable-header-cell:nth-child(10) {
+  border-top-right-radius: 10px !important;
+}
+
+.p-datatable-column-title {
+  color: #808ba0 !important;
+  font-family: Manrope, sans-serif;
+  font-weight: 600 !important;
+  font-size: 15px;
+  line-height: 15px;
+}
+
+.p-datatable-table {
+  border-radius: 10px !important;
+}
+.price-list-date-picker{
+  .p-inputtext{
+   border-radius: 10px !important;
+    border: none;
+  }
+  .p-datepicker-input-icon-container{
+     top: 40% !important;
+  }
+  .p-inputtext::placeholder{
+    font-weight: 600 !important;
+    color: #141C30 !important;
+  }
+}
