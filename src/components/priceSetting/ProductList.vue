@@ -8,8 +8,7 @@ import {useAxios} from "@/composable/useAxios.js";
 import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useRouter} from "vue-router";
-import Sidebar from "primevue/sidebar";
-import CreateProduct from "@/components/priceSetting/CreateProduct.vue";
+
 import CardGoods from "@/components/priceSetting/CardGoods.vue";
 
 const {
@@ -170,7 +169,7 @@ onMounted(async () => {
           <Column>
             <template #header>
               <fin-button
-                  @click="createModal = true"
+
                   severity="success"
                   icon="pi pi-plus"
                   label="Товар"
@@ -207,15 +206,7 @@ onMounted(async () => {
       <fin-button icon="pi pi-plus" severity="success"></fin-button>
     </div>
   </div>
-  <Sidebar
-      v-model:visible="createModal"
-      :show-close-icon="false"
-      position="right"
-      class="create-purchase"
-      :dismissable="false"
-  >
-    <CreateProduct @close-sidebar="createModal = false"/>
-  </Sidebar>
+
 </template>
 
 <style scoped lang="scss">

@@ -1,6 +1,10 @@
 <script setup>
 import DatePicker from "primevue/datepicker";
 import ProductList from "@/components/priceSetting/ProductList.vue";
+import CreateProduct from "@/components/priceSetting/CreateProduct.vue";
+import Sidebar from "primevue/sidebar";
+import {ref} from "vue";
+const createModal = ref(false);
 </script>
 
 <template>
@@ -25,6 +29,7 @@ import ProductList from "@/components/priceSetting/ProductList.vue";
               placeholder="Дата"
           />
         <fin-button
+            @click="createModal = true"
             severity="success"
             icon="pi pi-pencil"
             class="p-button-lg"
@@ -33,6 +38,15 @@ import ProductList from "@/components/priceSetting/ProductList.vue";
       </div>
     </div>
     <ProductList/>
+    <Sidebar
+        v-model:visible="createModal"
+        :show-close-icon="false"
+        position="right"
+        class="create-purchase"
+        :dismissable="false"
+    >
+      <CreateProduct @close-sidebar="createModal = false"/>
+    </Sidebar>
   </div>
 </template>
 
