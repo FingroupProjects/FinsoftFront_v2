@@ -31,6 +31,8 @@ const initialValue = ref(null);
 const isModal = ref(false);
 const priceTypeList = ref([]);
 const goodGroupList = ref([]);
+const changeByPercentActive = ref(false);
+const changeBySumActive = ref(false);
 const createValues = reactive({
   datetime24h: new Date,
   selectedPriceType: "",
@@ -45,8 +47,7 @@ const rules = reactive({
   selectedOrganization: {required},
   selectedGoodGroup: {required},
   selectedPriceType: {required},
-  changeBySum: {required},
-  changeByPercent: {required}
+
 });
 const productsInfo = ref({
   postProducts: [],
@@ -146,6 +147,11 @@ watchEffect(() => {
     code: organizationHas.id
   }
 });
+
+watchEffect(() => {
+  changeByPercentActive.value = !!createValues.changeBySum;
+  changeBySumActive.value = !!createValues.changeByPercent;
+})
 </script>
 
 <template>
@@ -219,10 +225,12 @@ watchEffect(() => {
             class="w-full"/>
         <label for="dd-city">Виды цен</label>
       </FloatLabel>
-      <fin-input v-model="createValues.changeBySum" :error="v$.changeBySum.$error " class="col-span-6"
-                 placeholder="Изменить на X Cумма"></fin-input>
-      <fin-input v-model="createValues.changeByPercent" :error="v$.changeByPercent.$error " class="col-span-6"
-                 placeholder="Изменить на X %"></fin-input>
+      <fin-input :disabled="changeBySumActive"
+                 v-model="createValues.changeBySum"
+                 class="col-span-6" placeholder="Изменить на X Cумма"/>
+      <fin-input :disabled="changeByPercentActive"
+                 v-model="createValues.changeByPercent" class="col-span-6"
+                 placeholder="Изменить на X %"/>
     </div>
   </div>
   <Dialog
