@@ -240,55 +240,54 @@ const routes = [
             {
                 path: '/price-settings',
                 name: 'priceSettings',
-                component: () => import('@/views/priceSettings.vue')
+                component: () => import('@/views/PriceSettings.vue')
             },
             {
                 path: '/price-list',
                 name: 'price-list',
                 component: () => import('@/components/priceSetting/ListPrice.vue')
             },
-
         ]
     },
     {
-        path: '/documents/:productId', // Updated to include a route parameter
+        path: '/documents/:productId',
         name: 'DocumentPrint',
         component: DocumentPrint,
         meta: {
             requiresAuth: true,
             layout: 'main'
         },
-        props: true // Allows passing route params as props to the component
+        props: true
     },
     {
-        path: '/return/:productId', // Updated to include a route parameter
+        path: '/return/:productId',
         name: 'ReturnPrint',
         component: ReturnPrint,
         meta: {
             requiresAuth: true,
             layout: 'main'
         },
-        props: true // Allows passing route params as props to the component
+        props: true
     },
     {
-        path: '/order/:productId', // Updated to include a route parameter
+        path: '/order/:productId',
         name: 'OrderPrint',
         component: OrderPrint,
         meta: {
             requiresAuth: true,
             layout: 'main'
         },
-        props: true // Allows passing route params as props to the component
+        props: true
     },
     {
-        path: '/finance/:productId', // Updated to include a route parameter
+        path: '/finance/:productId',
         name: 'FinancePrint',
         component: FinancePrint,
         meta: {
             requiresAuth: true,
             layout: 'main'
         },
-        props: true // Allows passing route params as props to the component
+        props: true
     },
 
 ]
@@ -297,6 +296,7 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes,
 })
+
 router.beforeEach((to, from, next) => {
 
     const { cookies } = useCookies()
@@ -304,7 +304,6 @@ router.beforeEach((to, from, next) => {
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/')
-        // next()
     } else {
         next()
     }

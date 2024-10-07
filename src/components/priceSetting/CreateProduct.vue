@@ -3,7 +3,6 @@ import {reactive, ref, watchEffect, watch, onMounted} from "vue";
 import DatePicker from "primevue/datepicker";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useAxios} from "@/composable/useAxios.js";
-import Dropdown from "primevue/dropdown";
 import Select from "primevue/select";
 import moment from "moment";
 import {useVuelidate} from "@vuelidate/core";
@@ -12,6 +11,7 @@ import {useToast} from "primevue/usetoast";
 import FloatLabel from "primevue/floatlabel";
 import Dialog from "primevue/dialog";
 import FinInput from "@/components/ui/Inputs.vue";
+import MultiSelect from 'primevue/multiselect';
 
 const emit = defineEmits(["closeDialog", 'close-sidebar']);
 
@@ -25,7 +25,6 @@ const {
 
 const isOpen = ref(false)
 const agreementList = ref([]);
-const loadingPriceType = ref(false);
 const isCurrencyFetched = ref(false);
 const openInfoModal = ref(false);
 const initialValue = ref(null);
@@ -34,18 +33,20 @@ const priceTypeList = ref([]);
 const goodGroupList = ref([]);
 const createValues = reactive({
   datetime24h: new Date,
-  selectCurrency: "",
   selectedPriceType: "",
-  comments: "",
+  changeBySum: "",
   selectedOrganization: "",
-  selectedGoodGroup: "",
+  changeByPercent: "",
+  selectedGoodGroup: ""
+
 });
 const rules = reactive({
   datetime24h: {required},
-  selectCurrency: {required},
   selectedOrganization: {required},
   selectedGoodGroup: {required},
   selectedPriceType: {required},
+  changeBySum: {required},
+  changeByPercent: {required}
 });
 const productsInfo = ref({
   postProducts: [],
@@ -63,25 +64,20 @@ async function saveFn() {
   const result = await v$.value.$validate();
   openInfoModal.value = false;
 
+  const idGoodGroup = createValues.selectedGoodGroup.map(el => el.code);
+  const idPriceType = createValues.selectedPriceType.map(el => el.code);
+
   if (result) {
     try {
-      const products = Array.isArray(productsInfo.value.postProducts) ? productsInfo.value.postProducts : [];
-      const goodsToSend = products.map(product => ({
-        good_id: product.good_id,
-        amount: product.amount,
-        price: product.price
-      }));
-      const res = await useAxios(`/document/provider/purchase`, {
-        method: "POST",
-        data: {
+      const res = await useAxios(`/price-set-up/settings`, {
+        method: "GET",
+        params: {
+          "goodGroupIds": idGoodGroup,
+          "priceTypeIds": idPriceType,
+          "changeBySum": createValues.changeBySum,
+          "changeByPercent": createValues.changeByPercent,
           date: moment(createValues.datetime24h).format("YYYY-MM-DD HH:mm:ss"),
           organization_id: createValues.selectedOrganization.code,
-          counterparty_id: createValues.selectedCounterparty.code,
-          counterparty_agreement_id: createValues.selectedAgreement.code,
-          storage_id: createValues.selectedStorage.code,
-          currency_id: createValues.selectCurrency.code,
-          comment: createValues.comments,
-          goods: goodsToSend,
         },
       });
 
@@ -156,13 +152,13 @@ watchEffect(() => {
   <div class="create-purchases">
     <div class="header">
       <div>
-        <div class="header-title">Создание закупки</div>
+        <div class="header-title">Настройка</div>
       </div>
       <div class="flex gap-[16px]">
         <fin-button
             icon="pi pi-save"
             @click="saveFn"
-            label="Сохранить"
+            label="Настройка"
             severity="success"
             class="p-button-lg"
         />
@@ -204,38 +200,36 @@ watchEffect(() => {
         />
         <label for="dd-city">Организация</label>
       </FloatLabel>
+
       <FloatLabel class="col-span-6">
-        <Dropdown
+        <MultiSelect
             v-model="createValues.selectedGoodGroup"
             :class="{ 'p-invalid': v$.selectedGoodGroup.$error }"
             :options="goodGroupList"
             optionLabel="name"
-            class="w-full"
-            editable
-        />
+            class="w-full"/>
         <label for="dd-city">Категории товаров</label>
       </FloatLabel>
       <FloatLabel class="col-span-6">
-        <Dropdown
+        <MultiSelect
             v-model="createValues.selectedPriceType"
             :class="{ 'p-invalid': v$.selectedPriceType.$error }"
-            :loading="loadingPriceType"
             :options="priceTypeList"
             optionLabel="name"
-            class="w-full"
-        >
-          <template #value>{{ createValues.selectedPriceType?.name }}</template>
-        </Dropdown>
+            class="w-full"/>
         <label for="dd-city">Виды цен</label>
       </FloatLabel>
-      <fin-input class="col-span-6" placeholder="Изменить на X Cумма"></fin-input>
-      <fin-input class="col-span-6" placeholder="Изменить на X %"></fin-input>
+      <fin-input v-model="createValues.changeBySum" :error="v$.changeBySum.$error " class="col-span-6"
+                 placeholder="Изменить на X Cумма"></fin-input>
+      <fin-input v-model="createValues.changeByPercent" :error="v$.changeByPercent.$error " class="col-span-6"
+                 placeholder="Изменить на X %"></fin-input>
     </div>
   </div>
   <Dialog
       v-model:visible="openInfoModal"
       :style="{ width: '424px' }"
       :modal="true"
+      :closable="false"
   >
     <div class="font-semibold text-[20px] leading-6 text-center w-[80%] m-auto text-[#141C30]">
       Хотите сохранить измения?
