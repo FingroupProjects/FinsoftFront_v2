@@ -1,26 +1,29 @@
 <script setup>
-import {onMounted, ref, reactive} from "vue";
+import {ref, reactive} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import Dropdown from "primevue/dropdown";
-import Paginator from 'primevue/paginator';
-import {useAxios} from "@/composable/useAxios.js";
-import moment from "moment";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useRouter} from "vue-router";
-
 import CardGoods from "@/components/priceSetting/CardGoods.vue";
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
+const props = defineProps({
+  products: {
+    type: Array,
+    default: () => []
+  }
+})
 const {
   statusList,
 } = useStaticApi();
 
 const router = useRouter();
 
+const modules = ref([]);
 const selectedProduct = ref();
 const createModal = ref(false);
-const products = ref([]);
-const first = ref(0)
 const visibleFilter = ref(false)
 const metaKey = ref(true);
 const createOpenModal = ref(false);
@@ -29,6 +32,7 @@ const loader = ref(true)
 const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dateInfo = ref(null);
+const priceList = ref([]);
 const savedFilterValues = reactive({
   startDate: '',
   endDate: '',
@@ -40,35 +44,8 @@ const savedFilterValues = reactive({
 });
 
 const hasOrganization = JSON.parse(localStorage.getItem('hasOneOrganization'));
-const pageCounts = ref([
-  {
-    count: 5,
-  },
 
-  {
-    count: 10,
-  },
-
-  {
-    count: 15,
-  },
-
-  {
-    count: 20,
-  },
-]);
-
-
-const openUp = ref(Array(products.value?.length).fill(false));
-
-const pagination = ref({
-  perPage: 0,
-  totalPages: 0,
-});
-
-const selectPage = ref({
-  count: 20,
-});
+const openUp = ref(Array(props.products.value?.length).fill(false));
 
 const onRowClick = (event) => {
   const product = event.data;
@@ -77,132 +54,91 @@ const onRowClick = (event) => {
   dateInfo.value = product
 };
 
-const getProducts = async (filters = {}) => {
-  const params = {
-    itemsPerPage: selectPage.value.count,
-    orderBy: orderBy.value,
-    perPage: first.value,
-    page: first.value,
-    ...filters,
-    sort: sortDesc.value
-  };
-
-  loader.value = true
-
-  try {
-    const res = await useAxios(`/price-set-up`, {params});
-    pagination.value.totalPages = Number(res.result.pagination.total_pages);
-    products.value = res.result.data;
-  } catch (e) {
-    console.log(e);
-  } finally {
-    loader.value = false;
-  }
+const sortData = (field) => {
+  console.log(priceList.value);
+  priceList.value = props.products.goods?.find(item => item.id === field);
 };
-
-const sortData = (field, index) => {
-  orderBy.value = field
-  openUp.value[index] = !openUp.value[index]
-  if (sortDesc.value === 'asc') sortDesc.value = 'desc'
-  else sortDesc.value = 'asc'
-  getProducts()
-};
-
-onMounted(async () => {
-  await getProducts()
-})
 </script>
 
 <template>
-  <div class="flex gap-3 mt-5">
-    <div class="bg-white w-[32%] shadow-list h-[80vh] overflow-auto rounded-[10px]">
-      <div>
-        <DataTable
-            scrollable
-            scrollHeight="660px"
-            v-model:selection="selectedProduct"
-            :value="products"
-            dataKey="id"
-            tableStyle="max-width:100%"
-            :metaKeySelection="metaKey"
-            @row-click="onRowClick"
-        >
-          <Column selectionMode="multiple"></Column>
-          <Column field="code" :sortable="true">
-            <template #header="{index}">
-              <div class="w-full h-full" @click="sortData('id',index)">
-                № <i
-                  :class="{
+  <div class="flex gap-3 mt-5 overflow-auto w-[1600px] div_big">
+    <div class="bg-white w-[32%] shadow-list h-[80vh] rounded-[10px] fixed z-10">
+      <DataTable
+          scrollable
+          scrollHeight="660px"
+          v-model:selection="selectedProduct"
+          :value="props.products.goods"
+          dataKey="id"
+          tableStyle="max-width:100%"
+          :metaKeySelection="metaKey"
+          @row-click="onRowClick"
+      >
+        <Column selectionMode="multiple"></Column>
+        <Column field="id" :sortable="true">
+          <template #header="{index}">
+            <div class="w-full h-full">
+              № <i
+                :class="{
               'pi pi-arrow-down': openUp[index],
               'pi pi-arrow-up': !openUp[index],
               'text-[#808BA0] text-[5px]': true
             }"
-              ></i>
-              </div>
-            </template>
-            <template #sorticon="{index}">
-            </template>
-            <template #body="slotProps">
-            <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
-              {{ slotProps.data?.doc_number }}
-            </span>
-            </template>
-          </Column>
-          <Column field="name" :sortable="true">
-            <template #header="{index}">
-              <div class="w-full h-full" @click="sortData('date',index)">
-                Товары <i
-                  :class="{
-              'pi pi-arrow-down': openUp[index],
-              'pi pi-arrow-up': !openUp[index],
-              'text-[#808BA0] text-[5px]': true
-            }"
-              ></i>
-              </div>
-            </template>
-            <template #sorticon="{index}">
-            </template>
-            <template #body="slotProps">
-              {{ moment(new Date(slotProps.data.date)).format(" D.MM.YYYY h:mm") }}
-            </template>
-          </Column>
-          <Column>
-            <template #header>
-              <fin-button
-
-                  severity="success"
-                  icon="pi pi-plus"
-                  label="Товар"
-              />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-      <div class="paginator-dropdown pagination-price-list  bg-white sticky top-[100%]">
-        <span class="paginator-text"> Элементов на странице: </span>
-        <Dropdown
-            v-model="selectPage"
-            @update:model-value="getProducts"
-            :options="pageCounts"
-        >
-          <template #value="slotProps">{{ slotProps.value.count }}</template>
-          <template #option="slotProps">
-            {{ slotProps.option.count }}
+            ></i>
+            </div>
           </template>
-        </Dropdown>
-        <Paginator
-            :rows="1"
-            :totalRecords="Number(pagination.totalPages)"
-            v-model:first="first"
-            @page="getProducts"
-            :rowsPerPageOptions="[10, 20, 30]"
-            template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-            currentPageReportTemplate="{first} / {totalRecords}"
-        />
-      </div>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            <span @click="sortData(slotProps.data?.id)"
+                  class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
+              {{ slotProps.data?.id }}
+            </span>
+          </template>
+        </Column>
+        <Column field="name" :sortable="true">
+          <template #header="{index}">
+            <div class="w-full h-full">
+              Товары <i
+                :class="{
+              'pi pi-arrow-down': openUp[index],
+              'pi pi-arrow-up': !openUp[index],
+              'text-[#808BA0] text-[5px]': true
+            }"
+            ></i>
+            </div>
+          </template>
+          <template #sorticon="{index}">
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.name }}
+          </template>
+        </Column>
+        <Column>
+          <template #header>
+            <fin-button
+                severity="success"
+                icon="pi pi-plus"
+                label="Товар"
+            />
+          </template>
+        </Column>
+      </DataTable>
     </div>
-    <CardGoods/>
-    <div class="add-product">
+    <swiper
+        :slidesPerView="4"
+        :spaceBetween="12"
+        :pagination="{
+      clickable: true,
+    }"
+        :modules="modules"
+        class="mySwiper w-[60%] relative left-[350px]"
+    >
+      <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id" >
+        <CardGoods class="w-full" :info-list="item"/>
+      </swiper-slide>
+    </swiper>
+
+    <div class="add-product relative z-10">
       <fin-button icon="pi pi-plus" severity="success"></fin-button>
     </div>
   </div>
@@ -210,14 +146,38 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-.shadow-list{
-  box-shadow:10px 10px 10px 10px #0000000F;
+
+.shadow-list {
+  box-shadow: 10px 10px 10px 10px #0000000F;
 }
+
+.div_big::-webkit-scrollbar {
+  width: 15px;
+  height: 13px;
+  transition: 1s all linear;
+}
+
+/* Track */
+.div_big:hover::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.1);
+  border-radius: 10px;
+}
+
+/* Handle */
+.div_big:hover::-webkit-scrollbar-thumb {
+  background: #007aff;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.div_big::-webkit-scrollbar-thumb:hover {
+  background: #0951a4;
+}
+
 .add-product {
   border: 2px dashed #B7C7E8;
   border-radius: 10px;
   height: 80vh;
   padding: 15px;
 }
-
 </style>

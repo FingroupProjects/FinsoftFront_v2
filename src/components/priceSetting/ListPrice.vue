@@ -4,7 +4,14 @@ import ProductList from "@/components/priceSetting/ProductList.vue";
 import CreateProduct from "@/components/priceSetting/CreateProduct.vue";
 import Sidebar from "primevue/sidebar";
 import {ref} from "vue";
+
 const createModal = ref(false);
+const infoList = ref([]);
+
+const getInfo = (info) =>{
+  infoList.value = info;
+  createModal.value = false;
+}
 </script>
 
 <template>
@@ -37,7 +44,7 @@ const createModal = ref(false);
         />
       </div>
     </div>
-    <ProductList/>
+    <ProductList :products="infoList"/>
     <Sidebar
         v-model:visible="createModal"
         :show-close-icon="false"
@@ -45,7 +52,7 @@ const createModal = ref(false);
         class="create-purchase"
         :dismissable="false"
     >
-      <CreateProduct @close-sidebar="createModal = false"/>
+      <CreateProduct @close-dialog="getInfo"/>
     </Sidebar>
   </div>
 </template>
