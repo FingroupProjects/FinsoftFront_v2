@@ -1,10 +1,13 @@
 <script setup>
 import {ref,computed} from 'vue'
-const inputValue = ref(null);
-const threshold = 74404;
+const props = defineProps({
+  infoList:Object
+
+})
+const inputValue = Number(props.infoList.newPrice);
 
 const isInputGreater = computed(() => {
-  return inputValue.value > threshold;
+  return inputValue.value > Number(props.infoList.oldPrice);
 });
 
 </script>
@@ -16,7 +19,7 @@ const isInputGreater = computed(() => {
            src="https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x4.jpg"
            alt="">
       <div class="text-[600] text-[16px] leading-[16px] text-[#000]">
-        Пяторочка
+        {{ props.infoList.priceType }}
         <div class="text-container">
           ул. Гагарина, 87, Узловая
         </div>
@@ -27,10 +30,10 @@ const isInputGreater = computed(() => {
     </div>
     <div class="content mt-[14px] flex gap-5 items-center">
       <div class="text-[15px] font-medium leading-[15px] text-[#141C30]">
-        74,404
+        {{ props.infoList.oldPrice || 0 }}
       </div>
       <div class="relative">
-        <input  v-model="inputValue" type="number" class="input-new" placeholder="Новая">
+        <input v-model="inputValue" type="number" class="input-new" placeholder="Новая">
         <img v-if="isInputGreater" class="absolute top-[10px] right-[10px]" src="@/assets/img/arrowSuccess.svg" alt="">
         <img v-else class="absolute top-[10px] right-[10px]" src="@/assets/img/arrowDanger.svg" alt="">
       </div>
