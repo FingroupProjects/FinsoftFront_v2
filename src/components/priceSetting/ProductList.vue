@@ -1,11 +1,11 @@
 <script setup>
-import {ref, reactive} from "vue";
+import {ref, reactive, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {useStaticApi} from "@/composable/useStaticApi.js";
 import {useRouter} from "vue-router";
 import CardGoods from "@/components/priceSetting/CardGoods.vue";
-import { Swiper, SwiperSlide } from 'swiper/vue';
+import {Swiper, SwiperSlide} from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
@@ -55,13 +55,19 @@ const onRowClick = (event) => {
 };
 
 const sortData = (field) => {
-  console.log(priceList.value);
   priceList.value = props.products.goods?.find(item => item.id === field);
 };
+watchEffect(() => {
+  if (props.products.goods?.length > 0) {
+    props.products.goods.forEach((item) => {
+      sortData(item.id);
+    })
+  }
+})
 </script>
 
 <template>
-  <div class="flex gap-3 mt-5 overflow-auto w-[1600px] div_big">
+  <div class="flex gap-3 mt-5 overflow-auto">
     <div class="bg-white w-[32%] shadow-list h-[80vh] rounded-[10px] fixed z-10">
       <DataTable
           scrollable
@@ -74,40 +80,24 @@ const sortData = (field) => {
           @row-click="onRowClick"
       >
         <Column selectionMode="multiple"></Column>
-        <Column field="id" :sortable="true">
+        <Column field="id">
           <template #header="{index}">
             <div class="w-full h-full">
-              № <i
-                :class="{
-              'pi pi-arrow-down': openUp[index],
-              'pi pi-arrow-up': !openUp[index],
-              'text-[#808BA0] text-[5px]': true
-            }"
-            ></i>
+              №
             </div>
           </template>
-          <template #sorticon="{index}">
-          </template>
           <template #body="slotProps">
-            <span @click="sortData(slotProps.data?.id)"
-                  class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
+
+            <span class="text-ellipsis block w-[90px] whitespace-nowrap overflow-hidden">
               {{ slotProps.data?.id }}
             </span>
           </template>
         </Column>
-        <Column field="name" :sortable="true">
+        <Column field="name">
           <template #header="{index}">
             <div class="w-full h-full">
-              Товары <i
-                :class="{
-              'pi pi-arrow-down': openUp[index],
-              'pi pi-arrow-up': !openUp[index],
-              'text-[#808BA0] text-[5px]': true
-            }"
-            ></i>
+              Товары
             </div>
-          </template>
-          <template #sorticon="{index}">
           </template>
           <template #body="slotProps">
             {{ slotProps.data.name }}
@@ -128,48 +118,42 @@ const sortData = (field) => {
         :slidesPerView="4"
         :spaceBetween="12"
         :pagination="{
-      clickable: true,
-    }"
+        clickable: true,
+      }"
         :modules="modules"
-        class="mySwiper w-[60%] relative left-[350px]"
+        class="w-[60%] relative left-[280px] overflow-y-scroll"
     >
-      <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id" >
-        <CardGoods class="w-full" :info-list="item"/>
+      <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id">
+        <CardGoods class="w-full" :info-list="item" :price-list="priceList.prices"/>
       </swiper-slide>
     </swiper>
-
-    <div class="add-product relative z-10">
+    <div class="add-product absolute z-[1000] right-[15px]">
       <fin-button icon="pi pi-plus" severity="success"></fin-button>
     </div>
   </div>
-
 </template>
 
-<style scoped lang="scss">
-
+<style scoped lang="scss">+
 .shadow-list {
   box-shadow: 10px 10px 10px 10px #0000000F;
 }
 
 .div_big::-webkit-scrollbar {
-  width: 15px;
-  height: 13px;
+  width: 3px;
+  height: 3px;
   transition: 1s all linear;
 }
 
-/* Track */
 .div_big:hover::-webkit-scrollbar-track {
   box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.1);
   border-radius: 10px;
 }
 
-/* Handle */
 .div_big:hover::-webkit-scrollbar-thumb {
   background: #007aff;
   border-radius: 10px;
 }
 
-/* Handle on hover */
 .div_big::-webkit-scrollbar-thumb:hover {
   background: #0951a4;
 }

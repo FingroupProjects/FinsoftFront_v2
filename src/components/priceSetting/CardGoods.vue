@@ -1,7 +1,8 @@
 <script setup>
-import {ref,computed} from 'vue'
+import { computed} from 'vue'
 const props = defineProps({
-  infoList:Object
+  infoList: Object,
+  priceList: Array,
 
 })
 const inputValue = Number(props.infoList.newPrice);
@@ -13,7 +14,7 @@ const isInputGreater = computed(() => {
 </script>
 
 <template>
-  <div class="rounded-[10px] bg-[#fff] px-4 py-3 h-[80vh] w-[17%]">
+  <div class="rounded-[10px] bg-[#fff] px-4 py-3 h-[80vh] w-[17%] overflow-y-scroll div_big">
     <div class="header flex gap-[13px]">
       <img class="w-[32px] h-[32px] rounded-[10px] border-2 object-cover"
            src="https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x4.jpg"
@@ -24,13 +25,28 @@ const isInputGreater = computed(() => {
           ул. Гагарина, 87, Узловая
         </div>
       </div>
-      <button class="text-[14px] relative bottom-[10px]">
-        <img src="@/assets/img/trashIcon.svg" class="w-[16px] h-[16px]" alt="">
+      <button class="relative bottom-[10px]">
+        <img src="@/assets/img/trashIcon.svg" class="w-[26px] h-[26px]" alt="">
       </button>
     </div>
-    <div class="content mt-[14px] flex gap-5 items-center">
+    <div class="flex p-3 justify-between fixed z-10 bg-white w-[22%] bottom-0" style="border-top:1px solid #DCDFE3">
+      <div class="text-[#141C30] font-semibold text-[15px] leading-[15px]">
+        120 434,30
+        <div class="text-[#808BA0] font-semibold text-[11px] leading-[11px] text-center">
+          Старая
+        </div>
+      </div>
+      <div class="text-[#17A825] font-semibold text-[15px] leading-[15px]">
+        120 434,30
+        <div class="text-[#808BA0] font-semibold text-[11px] leading-[11px] text-center">
+          Новая
+        </div>
+      </div>
+    </div>
+    <div v-for="item in props.priceList" :key="item.id"
+         class="content mt-[14px] flex gap-5 items-center overflow-y-scroll">
       <div class="text-[15px] font-medium leading-[15px] text-[#141C30]">
-        {{ props.infoList.oldPrice || 0 }}
+        {{ item.oldPrice || 0 }}
       </div>
       <div class="relative">
         <input v-model="inputValue" type="number" class="input-new" placeholder="Новая">
