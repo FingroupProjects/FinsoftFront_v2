@@ -121,7 +121,7 @@ watchEffect(() => {
         clickable: true,
       }"
         :modules="modules"
-        class="w-[60%] relative left-[280px] overflow-y-scroll"
+        class="w-[56%] relative left-[280px] overflow-y-scroll"
     >
       <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id">
         <CardGoods class="w-full" :info-list="item" :price-list="priceList.prices"/>

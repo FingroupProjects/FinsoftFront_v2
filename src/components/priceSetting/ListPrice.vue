@@ -18,10 +18,7 @@ const getInfo = (info) =>{
   <div>
     <div class="flex justify-between">
       <div class="font-semibold text-[20px] leading-[20px] tex-[#141C30]">
-        Прайс-лист ООО “ДелоВкуса”
-        <div class="text-[15px] leading-[15px] text-[#808BA0] mt-[14px]">
-          Последняя редакция: 11.07.2024 12:11:00
-        </div>
+        Установка цен
       </div>
       <div class="flex gap-5 price-list-date-picker">
           <DatePicker
