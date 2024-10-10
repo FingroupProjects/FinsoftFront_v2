@@ -1,23 +1,26 @@
 <script setup>
-import {computed, watchEffect, ref} from 'vue'
-import formatPrice from '@/constants/formatNumber.js'
+import {computed, watchEffect, ref} from 'vue';
+import formatPrice from '@/constants/formatNumber.js';
 const props = defineProps({
   infoList: Object,
   priceList: Array,
 
-})
-const inputValue = Number(props.infoList.newPrice);
-const allOldPrice = ref(0);
-const newAllPrice = ref(null);
-const isInputGreater = computed(() => {
-  return inputValue.value > Number(props.infoList.oldPrice);
 });
+
+const inputValues = ref(Array(props.priceList.length).fill(Number(props.infoList.newPrice)));
+const allOldPrice = ref(0);
+const newAllPrice = ref(0);
+
+const isInputGreater = (index) => {
+  return inputValues.value[index] > Number(props.infoList.oldPrice);
+};
+
 watchEffect(() => {
-  allOldPrice.value = props.priceList.reduce((total, item) => {
+  allOldPrice.value = props.priceList[0].reduce((total, item) => {
     return total + Number(item.oldPrice);
   }, 0);
-  newAllPrice.value = props.priceList.reduce((total, item) => {
-    return total + Number(item.newPrice); // Ensure item.newPrice exists
+  newAllPrice.value = props.priceList.reduce((total, item, index) => {
+    return total +  Number(inputValues.value[index]);
   }, 0);
 });
 </script>
@@ -25,13 +28,10 @@ watchEffect(() => {
 <template>
   <div class="rounded-[10px] bg-[#fff] px-4 py-3 h-[80vh] w-[17%] overflow-y-scroll div_big">
     <div class="header flex gap-[13px] items-center">
-      <img class="w-[32px] h-[32px] rounded-[10px] border-2 object-cover"
-           src="https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x4.jpg"
-           alt="">
       <div class="text-[600] text-[16px] leading-[16px] text-[#000]">
         {{ props.infoList.priceType }}
       </div>
-      <button class="">
+      <button>
         <img src="@/assets/img/trashIcon.svg" class="w-[16px] h-[16px]" alt="">
       </button>
     </div>
@@ -43,19 +43,19 @@ watchEffect(() => {
         </div>
       </div>
       <div class="text-[#17A825] font-semibold text-[15px] leading-[15px]">
-        {{ formatPrice(newAllPrice)  }}
+        {{ formatPrice(newAllPrice) }}
         <div class="text-[#808BA0] font-semibold text-[11px] leading-[11px] text-center">
           Новая
         </div>
       </div>
     </div>
-    <div v-for="item in props.priceList" :key="item.id"
+    <div v-for="(item,index) in props.priceList" :key="index"
          class="content mt-[14px] flex gap-5 items-center overflow-y-scroll">
       <div class="text-[15px] font-medium leading-[15px] text-[#141C30]">
         {{ item.oldPrice || 0 }}
       </div>
       <div class="relative">
-        <input v-model="inputValue" type="number" class="input-new" placeholder="Новая">
+        <input v-model="inputValues[index]" type="number" class="input-new" placeholder="Новая">
         <img v-if="isInputGreater" class="absolute top-[10px] right-[10px]" src="@/assets/img/arrowSuccess.svg" alt="">
         <img v-else class="absolute top-[10px] right-[10px]" src="@/assets/img/arrowDanger.svg" alt="">
       </div>

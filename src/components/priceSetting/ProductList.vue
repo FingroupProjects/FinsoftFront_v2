@@ -62,13 +62,14 @@ const sortData = (field) => {
     return item.prices
   })
 };
+
 watchEffect(() => {
   if (props.products.goods?.length > 0) {
     props.products.goods.forEach((item) => {
       sortData(item.id);
     })
   }
-})
+});
 </script>
 
 <template>
@@ -138,7 +139,7 @@ watchEffect(() => {
   </div>
 </template>
 
-<style scoped lang="scss">+
+<style scoped lang="scss">
 .shadow-list {
   box-shadow: 10px 10px 10px 10px #0000000F;
 }
