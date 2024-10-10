@@ -33,6 +33,8 @@ const sortDesc = ref('asc');
 const orderBy = ref('id');
 const dateInfo = ref(null);
 const priceList = ref([]);
+const priceTypeList = ref([]);
+
 const savedFilterValues = reactive({
   startDate: '',
   endDate: '',
@@ -56,6 +58,9 @@ const onRowClick = (event) => {
 
 const sortData = (field) => {
   priceList.value = props.products.goods?.find(item => item.id === field);
+  priceTypeList.value = props.products.goods?.map(item=>{
+    return item.prices
+  })
 };
 watchEffect(() => {
   if (props.products.goods?.length > 0) {
@@ -124,7 +129,7 @@ watchEffect(() => {
         class="w-[56%] relative left-[280px] overflow-y-scroll"
     >
       <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id">
-        <CardGoods class="w-full" :info-list="item" :price-list="priceList.prices"/>
+        <CardGoods class="w-full" :info-list="item" :price-list="priceTypeList"/>
       </swiper-slide>
     </swiper>
     <div class="add-product absolute z-[1000] right-[15px]">
