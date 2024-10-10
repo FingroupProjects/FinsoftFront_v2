@@ -164,7 +164,7 @@ watchEffect(() => {
         <fin-button
             icon="pi pi-save"
             @click="saveFn"
-            label="Настройка"
+            label="Отправить"
             severity="success"
             class="p-button-lg"
         />

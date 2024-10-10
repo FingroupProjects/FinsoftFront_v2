@@ -1,43 +1,49 @@
 <script setup>
-import { computed} from 'vue'
+import {computed, watchEffect, ref} from 'vue'
+import formatPrice from '@/constants/formatNumber.js'
 const props = defineProps({
   infoList: Object,
   priceList: Array,
 
 })
 const inputValue = Number(props.infoList.newPrice);
-
+const allOldPrice = ref(0);
+const newAllPrice = ref(null);
 const isInputGreater = computed(() => {
   return inputValue.value > Number(props.infoList.oldPrice);
 });
-
+watchEffect(() => {
+  allOldPrice.value = props.priceList.reduce((total, item) => {
+    return total + Number(item.oldPrice);
+  }, 0);
+  newAllPrice.value = props.priceList.reduce((total, item) => {
+    return total + Number(item.newPrice); // Ensure item.newPrice exists
+  }, 0);
+});
 </script>
 
 <template>
   <div class="rounded-[10px] bg-[#fff] px-4 py-3 h-[80vh] w-[17%] overflow-y-scroll div_big">
-    <div class="header flex gap-[13px]">
+    <div class="header flex gap-[13px] items-center">
       <img class="w-[32px] h-[32px] rounded-[10px] border-2 object-cover"
            src="https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x4.jpg"
            alt="">
       <div class="text-[600] text-[16px] leading-[16px] text-[#000]">
         {{ props.infoList.priceType }}
-        <div class="text-container">
-          ул. Гагарина, 87, Узловая
-        </div>
       </div>
-      <button class="relative bottom-[10px]">
-        <img src="@/assets/img/trashIcon.svg" class="w-[26px] h-[26px]" alt="">
+      <button class="">
+        <img src="@/assets/img/trashIcon.svg" class="w-[16px] h-[16px]" alt="">
       </button>
     </div>
-    <div class="flex p-3 justify-between fixed z-10 bg-white w-[22%] bottom-0" style="border-top:1px solid #DCDFE3">
+    <div class="flex p-3 justify-between fixed z-10 bg-white w-[190px] bottom-0" style="border-top:1px solid #DCDFE3">
       <div class="text-[#141C30] font-semibold text-[15px] leading-[15px]">
-        120 434,30
+        {{ formatPrice(allOldPrice) }}
         <div class="text-[#808BA0] font-semibold text-[11px] leading-[11px] text-center">
           Старая
         </div>
       </div>
       <div class="text-[#17A825] font-semibold text-[15px] leading-[15px]">
-        120 434,30
+        {{ formatPrice(newAllPrice)  }}
         <div class="text-[#808BA0] font-semibold text-[11px] leading-[11px] text-center">
           Новая
         </div>
