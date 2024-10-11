@@ -8,7 +8,7 @@ import {ref} from "vue";
 const createModal = ref(false);
 const infoList = ref([]);
 
-const getInfo = (info) =>{
+const getInfo = (info) => {
   infoList.value = info;
   createModal.value = false;
 }
@@ -21,17 +21,17 @@ const getInfo = (info) =>{
         Установка цен
       </div>
       <div class="flex gap-5 price-list-date-picker">
-          <DatePicker
-              showIcon
-              showTime
-              hourFormat="24"
-              dateFormat="dd.mm.yy,"
-              fluid
-              hideOnDateTimeSelect
-              iconDisplay="input"
-              class="w-full"
-              placeholder="Дата"
-          />
+        <DatePicker
+            showIcon
+            showTime
+            hourFormat="24"
+            dateFormat="dd.mm.yy,"
+            fluid
+            hideOnDateTimeSelect
+            iconDisplay="input"
+            class="w-full"
+            placeholder="Дата"
+        />
         <fin-button
             @click="createModal = true"
             severity="success"
@@ -49,7 +49,7 @@ const getInfo = (info) =>{
         class="create-purchase"
         :dismissable="false"
     >
-      <CreateProduct @close-dialog="getInfo"/>
+      <CreateProduct @close-sidebar="createModal = false" @close-dialog="getInfo"/>
     </Sidebar>
   </div>
 </template>

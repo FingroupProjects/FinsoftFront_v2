@@ -1,4 +1,6 @@
 <script setup>
+
+
 import {ref, reactive, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -11,10 +13,10 @@ import 'swiper/css/pagination';
 
 const props = defineProps({
   products: {
-    type: Array,
-    default: () => []
+    type: Object
   }
-})
+});
+
 const {
   statusList,
 } = useStaticApi();
@@ -34,6 +36,7 @@ const orderBy = ref('id');
 const dateInfo = ref(null);
 const priceList = ref([]);
 const priceTypeList = ref([]);
+const scrollPosition = ref(0);
 
 const savedFilterValues = reactive({
   startDate: '',
@@ -58,11 +61,24 @@ const onRowClick = (event) => {
 
 const sortData = (field) => {
   priceList.value = props.products.goods?.find(item => item.id === field);
-  priceTypeList.value = props.products.goods?.map(item=>{
+  priceTypeList.value = props.products.goods?.map(item => {
     return item.prices
   })
 };
 
+function deleteColumn(index) {
+  if (priceList.value && priceList.value.prices) {
+    priceList.value.prices = [
+      ...priceList.value.prices.slice(0, index),
+      ...priceList.value.prices.slice(index + 1)
+    ];
+  }
+}
+
+const syncScroll = (event) => {
+  scrollPosition.value = event.target.scrollTop;
+
+};
 watchEffect(() => {
   if (props.products.goods?.length > 0) {
     props.products.goods.forEach((item) => {
@@ -73,19 +89,18 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex gap-3 mt-5 overflow-auto">
-    <div class="bg-white w-[32%] shadow-list h-[80vh] rounded-[10px] fixed z-10">
+  <div class="flex gap-3 mt-5">
+    <div @scroll="syncScroll" class="bg-white w-[32%] overflow-auto shadow-list h-[80vh] rounded-[10px] fixed z-10">
       <DataTable
-          scrollable
-          scrollHeight="660px"
           v-model:selection="selectedProduct"
           :value="props.products.goods"
           dataKey="id"
           tableStyle="max-width:100%"
           :metaKeySelection="metaKey"
           @row-click="onRowClick"
+
       >
-        <Column selectionMode="multiple"></Column>
+        <Column></Column>
         <Column field="id">
           <template #header="{index}">
             <div class="w-full h-full">
@@ -127,10 +142,14 @@ watchEffect(() => {
         clickable: true,
       }"
         :modules="modules"
+
         class="w-[56%] relative left-[280px] overflow-y-scroll"
     >
-      <swiper-slide v-for="item in priceList.prices" class="w-full" :key="item.id">
-        <CardGoods class="w-full" :info-list="item" :price-list="priceTypeList"/>
+      <swiper-slide v-for="(item,index) in priceList.prices" class="w-full" :key="item.id">
+        <CardGoods class="w-full" ref="cardGoods"
+                   :scroll-position="scrollPosition"
+                   @delete="deleteColumn" :price-type-id="index" :info-list="item"
+                   :price-list="priceTypeList"/>
       </swiper-slide>
     </swiper>
     <div class="add-product absolute z-[1000] right-[15px]">
