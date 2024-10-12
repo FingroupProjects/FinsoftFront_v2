@@ -1,6 +1,4 @@
 <script setup>
-
-
 import {ref, reactive, watchEffect} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -37,6 +35,7 @@ const dateInfo = ref(null);
 const priceList = ref([]);
 const priceTypeList = ref([]);
 const scrollPosition = ref(0);
+const scrollTop = ref(null);
 
 const savedFilterValues = reactive({
   startDate: '',
@@ -77,8 +76,12 @@ function deleteColumn(index) {
 
 const syncScroll = (event) => {
   scrollPosition.value = event.target.scrollTop;
-
 };
+
+function scrollFn(newPosition){
+  scrollTop.value.scrollTop = newPosition;
+}
+
 watchEffect(() => {
   if (props.products.goods?.length > 0) {
     props.products.goods.forEach((item) => {
@@ -90,7 +93,7 @@ watchEffect(() => {
 
 <template>
   <div class="flex gap-3 mt-5">
-    <div @scroll="syncScroll" class="bg-white w-[32%] overflow-auto shadow-list h-[80vh] rounded-[10px] fixed z-10">
+    <div @scroll="syncScroll" ref="scrollTop" class="bg-white w-[32%] overflow-auto shadow-list h-[80vh] rounded-[10px] fixed z-10">
       <DataTable
           v-model:selection="selectedProduct"
           :value="props.products.goods"
@@ -98,7 +101,6 @@ watchEffect(() => {
           tableStyle="max-width:100%"
           :metaKeySelection="metaKey"
           @row-click="onRowClick"
-
       >
         <Column></Column>
         <Column field="id">
@@ -148,6 +150,7 @@ watchEffect(() => {
       <swiper-slide v-for="(item,index) in priceList.prices" class="w-full" :key="item.id">
         <CardGoods class="w-full" ref="cardGoods"
                    :scroll-position="scrollPosition"
+                   @scroll-position="scrollFn"
                    @delete="deleteColumn" :price-type-id="index" :info-list="item"
                    :price-list="priceTypeList"/>
       </swiper-slide>
